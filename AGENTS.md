@@ -1,8 +1,8 @@
-# AGENTS — Plugin DAME (Dossier Administratif des Membres Échiquéens)
+# AGENTS — Plugin ROI (Ressources et Organisation pour l’Initiation aux échecs)
 
 ## Objectif
 
-Ce document décrit le ou les **agents** (IA / assistants) destinés à assister le développement, la revue et la maintenance du plugin WordPress **DAME** (Dossier Administratif des Membres Échiquéens).
+Ce document décrit le ou les **agents** (IA / assistants) destinés à assister le développement, la revue et la maintenance du plugin WordPress **ROI** (Ressources et Organisation pour l’Initiation).
 
 L'agent principal doit agir comme **expert en développement de plugins WordPress** — maîtrisant PHP, CSS et JavaScript — et faire respecter strictement les bonnes pratiques suivantes :
 
@@ -25,7 +25,7 @@ L'agent principal doit agir comme **expert en développement de plugins WordPres
 
 ## Rôles et responsabilités de l'agent
 
-1. **Conseiller en architecture** — proposer une organisation de fichiers et modules (classes, namespaces, prefix) adaptée à DAME.
+1. **Conseiller en architecture** — proposer une organisation de fichiers et modules (classes, namespaces, prefix) adaptée à ROI.
 2. **Générateur d'exemples de code** — fournir des extraits PHP/CSS/JS conformes aux conventions (avec commentaires et i18n) pour les tâches demandées.
 3. **Vérificateur de sécurité** — analyser les extraits fournis et proposer corrections (nonces, vérifications de capacité, échappements, sanitization).
 4. **Auditeur de compatibilité** — suggérer des adaptations pour supporter les versions WordPress récentes et tests unitaires / d'intégration.
@@ -45,13 +45,13 @@ L'agent doit répondre en **ton formel et professionnel** (conforme à votre pr�
 
 ### Prefix / Namespace
 
-- Préfixer toutes les fonctions, classes, hooks, options et meta keys par `dame_` ou `DAME\` pour les namespaces PHP.
-- Exemple de classe : `DAME\Core\Member_Manager`.
+- Préfixer toutes les fonctions, classes, hooks, options et meta keys par `roi_` ou `ROI\` pour les namespaces PHP.
+- Exemple de classe : `ROI\Core\Member_Manager`.
 
 ### Arborescence recommandée
 
 ```
-wp-content/plugins/dame/
+ROI/
 ├─ assets/
 │  ├─ css/
 │  ├─ js/
@@ -71,7 +71,7 @@ wp-content/plugins/dame/
 ├─ tests/
 ├─ README.md
 ├─ CHANGELOG.md
-└─ dame.php
+└─ ROI.php
 ```
 
 ---
@@ -81,7 +81,7 @@ wp-content/plugins/dame/
 ### PHP
 
 - Respecter les standards PSR-12 autant que possible ; utiliser types et retours typés lorsque possible (PHP 7.4+ / 8.x selon cible).
-- Prefixer les fonctions globales : `dame_get_member()`.
+- Prefixer les fonctions globales : `roi_get_member()`.
 - Classes dans des namespaces et autoload via Composer (si utilisé) ou autoloader propre.
 - Documenter chaque classe/méthode avec PHPDoc.
 
@@ -99,12 +99,12 @@ wp-content/plugins/dame/
 
 ## Internationalisation (i18n)
 
-- Charger le textdomain `dame` dans l'initialisation du plugin : `load_plugin_textdomain( 'dame', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );`.
+- Charger le textdomain `roi` dans l'initialisation du plugin : `load_plugin_textdomain( 'roi', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );`.
 - Toutes les chaînes PHP doivent utiliser `__()`, `_e()`, `esc_html__()`, `esc_attr__()` etc. Exemple :
 
 ```php
 // Exemple conforme
-_e( "Appliquer les modifications", 'dame' );
+_e( "Appliquer les modifications", 'roi' );
 ```
 
 - Les chaînes côté JS doivent utiliser `wp.i18n` et être exportées via `wp_set_script_translations()` ou `wp_localize_script()` suivant le cas.
@@ -118,12 +118,12 @@ _e( "Appliquer les modifications", 'dame' );
 
 ```php
 // Vérification côté serveur
-if ( ! isset( $_POST['dame_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['dame_nonce'] ), 'dame_action' ) ) {
+if ( ! isset( $_POST['roi_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['roi_nonce'] ), 'roi_action' ) ) {
     wp_die( -1 );
 }
 ```
 
-- **Capabilities** : vérifier les capacités avant toute modification (`current_user_can( 'manage_options' )` ou une capability spécifique `dame_manage_members`).
+- **Capabilities** : vérifier les capacités avant toute modification (`current_user_can( 'manage_options' )` ou une capability spécifique `roi_manage_members`).
 - **Sanitization & Validation** : utiliser `sanitize_text_field()`, `sanitize_email()`, `wp_kses_post()`, `intval()` etc selon le type de donnée ; valider les formats (email, date, numéro).
 - **Escaping** : échapper toute sortie avec `esc_html()`, `esc_attr()`, `esc_url()` selon le contexte.
 - **Prepared Queries** : si accès direct à la base, utiliser `$wpdb->prepare()`.
@@ -134,14 +134,14 @@ if ( ! isset( $_POST['dame_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['d
 ## Hooks et API WordPress
 
 - Favoriser les API natives : Settings API, REST API, WP\_List\_Table (ou alternatives), Metadata API, Shortcode API, Widgets API.
-- Déclarer des hooks publics (actions et filtres) documentés, par ex. `do_action( 'dame_after_member_save', $member_id );`.
-- Prévoir des filtres pour personnaliser les comportements : `apply_filters( 'dame_member_meta', $meta );`.
+- Déclarer des hooks publics (actions et filtres) documentés, par ex. `do_action( 'roi_after_member_save', $member_id );`.
+- Prévoir des filtres pour personnaliser les comportements : `apply_filters( 'roi_member_meta', $meta );`.
 
 ---
 
 ## REST API
 
-- Préfixer les routes : `wp-json/dame/v1/members`.
+- Préfixer les routes : `wp-json/roi/v1/members`.
 - Protéger les endpoints via `permission_callback` et nonces si nécessaires.
 - Utiliser des schémas et validation pour les paramètres d'entrée.
 
