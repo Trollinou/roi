@@ -51,7 +51,7 @@ L'agent doit répondre en **ton formel et professionnel** (conforme à votre pr�
 ### Arborescence recommandée
 
 ```
-ROI/
+roi/
 ├─ assets/
 │  ├─ css/
 │  ├─ js/
@@ -71,7 +71,7 @@ ROI/
 ├─ tests/
 ├─ README.md
 ├─ CHANGELOG.md
-└─ ROI.php
+└─ roi.php
 ```
 
 ---
@@ -201,5 +201,5 @@ if ( ! isset( $_POST['roi_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['ro
 
 ---
 
-*Document version : 1.0 — Généré pour le plugin DAME.*
+*Document version : 1.0 — Généré pour le plugin ROI.*
 
