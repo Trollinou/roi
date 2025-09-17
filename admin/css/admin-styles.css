@@ -1,0 +1,17 @@
+/**
+ * DAME Admin-specific styles
+ */
+
+/*
+ * Fix for Safari where the wp_editor can be covered by other elements.
+ * By giving the editor wrap a relative position and a z-index, we create
+ * a new stacking context and force it to the front.
+ */
+.post-type-dame_exercice .wp-editor-wrap {
+    position: relative;
+    z-index: 10;
+}
+
+.dame-reconciliation-table .dame-highlight-diff td {
+    background-color: #fffbe6; /* Light yellow */
+}
