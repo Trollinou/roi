@@ -80,7 +80,7 @@ roi/
 
 ### PHP
 
-- Respecter les standards PSR-12 autant que possible ; utiliser types et retours typés lorsque possible (PHP 7.4+ / 8.x selon cible).
+- Respecter les standards PSR-12 autant que possible ; utiliser types et retours typés lorsque possible (PHP 8.2).
 - Prefixer les fonctions globales : `roi_get_member()`.
 - Classes dans des namespaces et autoload via Composer (si utilisé) ou autoloader propre.
 - Documenter chaque classe/méthode avec PHPDoc.
