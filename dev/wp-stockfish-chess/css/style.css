@@ -1,0 +1,24 @@
+#wps-chess-container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+#game-info {
+    border-left: 1px solid #ccc;
+    padding-left: 20px;
+}
+
+#new-game-button {
+    margin-top: 10px;
+    padding: 10px 15px;
+    border: none;
+    background-color: #0073aa;
+    color: white;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+#new-game-button:hover {
+    background-color: #005177;
+}
