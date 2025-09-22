@@ -11,6 +11,27 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
+ * Renders the [roi_stockfish] shortcode.
+ *
+ * @return string The shortcode output.
+ */
+function roi_stockfish_chess_shortcode() {
+    // Le contenu HTML de notre jeu d'échecs
+    $content = '
+        <div id="wps-chess-container">
+            <div id="board" style="width: 400px; max-width: 100%;"></div>
+            <div id="game-info">
+                <p>Statut : <span id="status">En attente de votre coup...</span></p>
+                <button id="new-game-button">Nouvelle partie</button>
+            </div>
+        </div>
+    ';
+    return $content;
+}
+add_shortcode('roi_stockfish', 'roi_stockfish_chess_shortcode');
+
+
+/**
  * Renders the [roi_exercices] shortcode.
  *
  * @param array $atts Shortcode attributes.
