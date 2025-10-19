@@ -518,7 +518,7 @@ function roi_enqueue_admin_scripts( $hook ) {
     if ( ( 'post.php' === $hook || 'post-new.php' === $hook ) && isset( $post->post_type ) && 'roi_cours' === $post->post_type ) {
         wp_enqueue_script(
             'roi-course-builder',
-            plugin_dir_url( __FILE__ ) . 'js/course-builder.js',
+            plugin_dir_url( dirname( __DIR__ ) ) . 'assets/js/admin-script.js',
             array('jquery'),
             ROI_VERSION,
             true
@@ -549,7 +549,7 @@ function roi_enqueue_admin_scripts( $hook ) {
         // Enqueue admin styles for the z-index fix and reconciliation table
         wp_enqueue_style(
             'roi-admin-styles',
-            plugin_dir_url( __FILE__ ) . 'css/admin-styles.css',
+            plugin_dir_url( dirname( __DIR__ ) ) . 'assets/css/admin-style.css',
             array(),
             ROI_VERSION
         );

@@ -67,7 +67,7 @@ function roi_enqueue_single_exercice_scripts() {
     if ( is_singular( 'roi_exercice' ) ) {
         wp_enqueue_script(
             'roi-single-exercice',
-            plugin_dir_url( __FILE__ ) . '../public/js/single-exercice.js',
+            plugin_dir_url( __FILE__ ) . '../assets/js/single-exercice.js',
             array( 'jquery' ),
             ROI_VERSION,
             true

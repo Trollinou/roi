@@ -53,7 +53,7 @@ add_filter( 'the_content', 'roi_add_lesson_completion_button' );
  */
 function roi_enqueue_lesson_completion_scripts() {
     if ( is_singular( 'roi_lecon' ) ) {
-        wp_enqueue_script( 'roi-lesson-completion', plugin_dir_url( __FILE__ ) . '../public/js/lesson-completion.js', array( 'jquery' ), ROI_VERSION, true );
+        wp_enqueue_script( 'roi-lesson-completion', plugin_dir_url( __FILE__ ) . '../assets/js/lesson-completion.js', array( 'jquery' ), ROI_VERSION, true );
         wp_localize_script( 'roi-lesson-completion', 'roi_ajax', array(
             'ajax_url' => admin_url( 'admin-ajax.php' ),
             'nonce'    => wp_create_nonce( 'roi_complete_lesson_nonce' )
