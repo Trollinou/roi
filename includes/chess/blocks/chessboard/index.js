@@ -53,7 +53,7 @@ class SimpleFenEditor extends Component {
         if (!this.editorRef) return;
 
         try {
-            const ChessboardModule = await import(roiChessEditor.chessboardUrl);
+            const ChessboardModule = await import(/* webpackIgnore: true */ roiChessEditor.chessboardUrl);
             const { Chessboard, INPUT_EVENT_TYPE } = ChessboardModule;
 
             this.chessboard = new Chessboard(this.editorRef, {
