@@ -51,27 +51,46 @@ L'agent doit répondre en **ton formel et professionnel** (conforme à votre pr�
 ### Arborescence recommandée
 
 ```
-roi/
-├─ assets/
-│  ├─ css/
-│  ├─ js/
-│  └─ img/
-├─ includes/
-│  ├─ Core/
-│  │  ├─ Plugin.php
-│  │  ├─ Activator.php
-│  │  └─ Deactivator.php
-│  ├─ Admin/
-│  ├─ Public/
-│  ├─ REST/
-│  └─ Utils/
-├─ languages/
-├─ templates/
-├─ vendor/
-├─ tests/
-├─ README.md
-├─ CHANGELOG.md
-└─ roi.php
+/roi
+│
+├── roi.php
+├── uninstall.php
+│
+├── /assets                   # Ressources publiques (CSS, JS, images)
+│   ├── /css
+│   │   ├── admin-style.css   # Styles pour l'interface d'administration
+│   │   └── public-style.css  # Styles pour la partie publique du site
+│   ├── /js
+│   │   ├── admin-script.js   # Scripts pour l'administration
+│   │   └── public-script.js  # Scripts pour la partie publique
+│   └── /images
+│       └── icon.png
+│
+├── /includes                 # Fichiers PHP de base
+│   ├── class-plugin-admin.php
+│   ├── class-plugin-public.php
+│   └── functions.php
+│
+├── /admin                    # Fichiers de l'interface d'administration
+│   └── /views                # Vues ou templates pour les pages d'options
+│       └── settings-page.php
+│
+├── /public                   # Fichiers spécifiques à la partie publique
+│   └── /shortcodes           # Code pour les shortcodes
+│       └── display-data.php
+│
+├── /templates                # Fichiers de template 
+│   └── single-custom-post.php
+│
+├── /languages                # Fichiers de traduction (.pot, .po, .mo)
+│   └── mon-plugin.pot
+│
+└── /vendor                   # <--  LIBRAIRIES EXTERNES
+    ├── /external-library-1
+    │   └── ...
+    └── /autoload.php         # Fichier d'autoload pour Composer
+
+
 ```
 
 ---
