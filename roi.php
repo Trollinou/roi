@@ -55,6 +55,7 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/single-course-handler.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/roles.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/shortcodes.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/activation.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/chess/class-chess-engine.php';
 
 if ( is_admin() ) {
     require_once plugin_dir_path( __FILE__ ) . 'admin/menu.php';
@@ -70,3 +71,13 @@ function roi_load_textdomain() {
     load_plugin_textdomain( 'roi', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
 add_action( 'plugins_loaded', 'roi_load_textdomain' );
+
+/**
+ * Initialize Chess Engine
+ */
+add_action('init', function() {
+    Roi_Chess_Engine::get_instance(
+        plugin_dir_url(__FILE__),
+        plugin_dir_path(__FILE__)
+    );
+}, 5);
