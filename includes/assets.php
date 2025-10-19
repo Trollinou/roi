@@ -17,7 +17,7 @@ function roi_enqueue_public_assets() {
     // Enqueue the public-facing stylesheet.
     wp_enqueue_style(
         'roi-public-styles',
-        plugin_dir_url( __FILE__ ) . '../public/css/roi-public-styles.css',
+        plugin_dir_url( __FILE__ ) . '../assets/css/public-style.css',
         array(),
         ROI_VERSION
     );

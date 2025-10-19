@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @return string The shortcode output.
  */
 function roi_exercices_shortcode( $atts ) {
-    wp_enqueue_script( 'roi-exercices', plugin_dir_url( __FILE__ ) . '../public/js/exercices.js', array( 'jquery' ), ROI_VERSION, true );
+    wp_enqueue_script( 'roi-exercices', plugin_dir_url( __FILE__ ) . '../assets/js/exercices.js', array( 'jquery' ), ROI_VERSION, true );
     wp_localize_script( 'roi-exercices', 'roi_exercices_ajax', array(
         'ajax_url' => admin_url( 'admin-ajax.php' ),
         'nonce'    => wp_create_nonce( 'roi_exercice_nonce' )
