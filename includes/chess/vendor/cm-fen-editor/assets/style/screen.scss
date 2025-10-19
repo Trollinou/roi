@@ -1,0 +1,18 @@
+.cm-fen-editor {
+  button {
+    i {
+      pointer-events: none;
+    }
+  }
+  .buttons-figures {
+    button {
+      float: left;
+      margin-bottom: 0.4rem;
+      margin-right: 0.4rem;
+      padding: 0.35rem 0.8rem;
+    }
+  }
+}
+.max-width-xxl {
+    max-width: 1024px;
+}
