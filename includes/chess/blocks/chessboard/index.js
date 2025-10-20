@@ -13,7 +13,7 @@ class SimpleFenEditor extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            selectedPiece: 'wp',
+            selectedPiece: null,
             chessboardLoaded: false
         };
         this.editorRef = null;
@@ -73,7 +73,7 @@ class SimpleFenEditor extends Component {
                 assetsUrl: roiChessEditor.assetsUrl,
                 style: {
                     aspectRatio: 1,
-                    borderType: BORDER_TYPE[this.props.borderType],
+                    borderType: BORDER_TYPE[this.props.borderType.toUpperCase()],
                     pieces: { file: `pieces/${this.props.pieces}.svg` },
                     cssClass: this.props.cssClass,
                 }
@@ -171,33 +171,39 @@ class SimpleFenEditor extends Component {
 
     render() {
         const whitePieces = [
-            { code: 'wp', symbol: '♙', label: 'Pion blanc' },
-            { code: 'wn', symbol: '♘', label: 'Cavalier blanc' },
-            { code: 'wb', symbol: '♗', label: 'Fou blanc' },
-            { code: 'wr', symbol: '♖', label: 'Tour blanche' },
-            { code: 'wq', symbol: '♕', label: 'Dame blanche' },
-            { code: 'wk', symbol: '♔', label: 'Roi blanc' }
+            { code: 'wp', label: 'Pion blanc' },
+            { code: 'wn', label: 'Cavalier blanc' },
+            { code: 'wb', label: 'Fou blanc' },
+            { code: 'wr', label: 'Tour blanche' },
+            { code: 'wq', label: 'Dame blanche' },
+            { code: 'wk', label: 'Roi blanc' }
         ];
 
         const blackPieces = [
-            { code: 'bp', symbol: '♟', label: 'Pion noir' },
-            { code: 'bn', symbol: '♞', label: 'Cavalier noir' },
-            { code: 'bb', symbol: '♝', label: 'Fou noir' },
-            { code: 'br', symbol: '♜', label: 'Tour noire' },
-            { code: 'bq', symbol: '♛', label: 'Dame noire' },
-            { code: 'bk', symbol: '♚', label: 'Roi noir' }
+            { code: 'bp', label: 'Pion noir' },
+            { code: 'bn', label: 'Cavalier noir' },
+            { code: 'bb', label: 'Fou noir' },
+            { code: 'br', label: 'Tour noire' },
+            { code: 'bq', label: 'Dame noire' },
+            { code: 'bk', label: 'Roi noir' }
         ];
 
+        const pieceImageUrl = (pieceCode) => {
+            return `${roiChessEditor.assetsUrl}pieces/${this.props.pieces}/${pieceCode}.svg`;
+        };
+
         const pieceButtonStyle = {
-            fontSize: '36px',
-            padding: '8px 12px',
+            padding: '8px',
             minWidth: '50px',
             height: '50px',
             cursor: 'pointer',
             userSelect: 'none',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            backgroundSize: '80%',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
         };
 
         return (
@@ -219,13 +225,11 @@ class SimpleFenEditor extends Component {
                             key={piece.code}
                             className={`button ${this.state.selectedPiece === piece.code ? 'button-primary' : ''}`}
                             onClick={() => {
-                                this.setState({ selectedPiece: piece.code });
+                                this.setState({ selectedPiece: this.state.selectedPiece === piece.code ? null : piece.code });
                             }}
                             title={piece.label}
-                            style={pieceButtonStyle}
-                        >
-                            {piece.symbol}
-                        </button>
+                            style={{ ...pieceButtonStyle, backgroundImage: `url(${pieceImageUrl(piece.code)})` }}
+                        />
                     )}
                 </div>
 
@@ -254,13 +258,11 @@ class SimpleFenEditor extends Component {
                             key={piece.code}
                             className={`button ${this.state.selectedPiece === piece.code ? 'button-primary' : ''}`}
                             onClick={() => {
-                                this.setState({ selectedPiece: piece.code });
+                                this.setState({ selectedPiece: this.state.selectedPiece === piece.code ? null : piece.code });
                             }}
                             title={piece.label}
-                            style={pieceButtonStyle}
-                        >
-                            {piece.symbol}
-                        </button>
+                            style={{ ...pieceButtonStyle, backgroundImage: `url(${pieceImageUrl(piece.code)})` }}
+                        />
                     )}
                 </div>
 
