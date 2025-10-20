@@ -31,12 +31,20 @@ class SimpleFenEditor extends Component {
     }
 
     async componentDidUpdate(prevProps) {
-        if (this.chessboard && prevProps.fen !== this.props.fen && this.state.chessboardLoaded) {
-            try {
-                await this.chessboard.setPosition(this.props.fen, false);
-                this.addSquareClickHandlers();
-            } catch (e) {
-                console.warn('FEN invalide:', e);
+        if (this.chessboard && this.state.chessboardLoaded) {
+            if (prevProps.fen !== this.props.fen) {
+                try {
+                    await this.chessboard.setPosition(this.props.fen, false);
+                    this.addSquareClickHandlers();
+                } catch (e) {
+                    console.warn('FEN invalide:', e);
+                }
+            } else if (
+                prevProps.pieces !== this.props.pieces ||
+                prevProps.borderType !== this.props.borderType ||
+                prevProps.cssClass !== this.props.cssClass
+            ) {
+                await this.initChessboard();
             }
         }
     }
@@ -52,16 +60,22 @@ class SimpleFenEditor extends Component {
     async initChessboard() {
         if (!this.editorRef) return;
 
+        if (this.chessboard) {
+            this.chessboard.destroy();
+        }
+
         try {
             const ChessboardModule = await import(/* webpackIgnore: true */ roiChessEditor.chessboardUrl);
-            const { Chessboard, INPUT_EVENT_TYPE } = ChessboardModule;
+            const { Chessboard, INPUT_EVENT_TYPE, BORDER_TYPE } = ChessboardModule;
 
             this.chessboard = new Chessboard(this.editorRef, {
                 position: this.props.fen,
                 assetsUrl: roiChessEditor.assetsUrl,
                 style: {
                     aspectRatio: 1,
-                    pieces: { file: `pieces/${this.props.pieces}.svg` }
+                    borderType: BORDER_TYPE[this.props.borderType],
+                    pieces: { file: `pieces/${this.props.pieces}.svg` },
+                    cssClass: this.props.cssClass,
                 }
             });
 
@@ -397,6 +411,8 @@ registerBlockType(metadata.name, {
                     <SimpleFenEditor
                         fen={attributes.fen}
                         pieces={attributes.pieces}
+                        borderType={attributes.borderType}
+                        cssClass={attributes.cssClass}
                         onChange={(newFen) => setAttributes({ fen: newFen })}
                     />
 
