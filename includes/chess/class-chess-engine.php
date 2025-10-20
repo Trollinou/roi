@@ -137,6 +137,9 @@ class Roi_Chess_Engine {
             'engineLevel' => '10',
             'enableEngine' => 'true',
             'enableMoves' => 'true',
+            'borderType' => 'none',
+            'pieces' => 'standard',
+            'cssClass' => 'green',
         ), $atts, 'chess_board');
         
         $board_id = 'chessboard-' . uniqid();

@@ -26,6 +26,18 @@
         "enableMoves": {
             "type": "string",
             "default": "true"
+        },
+        "borderType": {
+            "type": "string",
+            "default": "none"
+        },
+        "pieces": {
+            "type": "string",
+            "default": "standard"
+        },
+        "cssClass": {
+            "type": "string",
+            "default": "green"
         }
     },
     "editorScript": "file:./chessboard-block.js",

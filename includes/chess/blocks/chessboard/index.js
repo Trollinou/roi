@@ -61,7 +61,7 @@ class SimpleFenEditor extends Component {
                 assetsUrl: roiChessEditor.assetsUrl,
                 style: {
                     aspectRatio: 1,
-                    pieces: { file: "pieces/standard.svg" }
+                    pieces: { file: `pieces/${this.props.pieces}.svg` }
                 }
             });
 
@@ -309,6 +309,39 @@ registerBlockType(metadata.name, {
                             help={__('Modifiable visuellement ci-dessous', 'roi')}
                         />
                     </PanelBody>
+                    <PanelBody title={__('Style de l\'échiquier', 'roi')}>
+                        <SelectControl
+                            label={__('Type de bordure', 'roi')}
+                            value={attributes.borderType}
+                            options={[
+                                { label: __('Aucune', 'roi'), value: 'none' },
+                                { label: __('Fine', 'roi'), value: 'thin' },
+                                { label: __('Cadre', 'roi'), value: 'frame' },
+                            ]}
+                            onChange={(value) => setAttributes({ borderType: value })}
+                        />
+                        <SelectControl
+                            label={__('Style des pièces', 'roi')}
+                            value={attributes.pieces}
+                            options={[
+                                { label: __('Standard', 'roi'), value: 'standard' },
+                                { label: __('Staunty', 'roi'), value: 'staunty' },
+                            ]}
+                            onChange={(value) => setAttributes({ pieces: value })}
+                        />
+                        <SelectControl
+                            label={__('Couleur de l\'échiquier', 'roi')}
+                            value={attributes.cssClass}
+                            options={[
+                                { label: __('Vert', 'roi'), value: 'green' },
+                                { label: __('Classique', 'roi'), value: 'chessboard-js' },
+                                { label: __('Club', 'roi'), value: 'chess-club' },
+                                { label: __('Bleu', 'roi'), value: 'blue' },
+                                { label: __('Noir et blanc', 'roi'), value: 'black-and-white' },
+                            ]}
+                            onChange={(value) => setAttributes({ cssClass: value })}
+                        />
+                    </PanelBody>
                     <PanelBody title={__('Mode de jeu', 'roi')}>
                         <ToggleControl
                             label={__('Activer le moteur Stockfish', 'roi')}
@@ -363,6 +396,7 @@ registerBlockType(metadata.name, {
 
                     <SimpleFenEditor
                         fen={attributes.fen}
+                        pieces={attributes.pieces}
                         onChange={(newFen) => setAttributes({ fen: newFen })}
                     />
 
