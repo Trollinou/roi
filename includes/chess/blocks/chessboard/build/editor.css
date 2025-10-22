@@ -30,6 +30,10 @@
     box-shadow: 0 0 5px rgba(0, 160, 210, 0.8) !important;
 }
 
-.elo-range-control .components-range-control__number {
-    display: none;
+.elo-range-control .components-base-control__field .components-range-control__number {
+    display: none !important;
+}
+
+.elo-range-control .components-base-control__label {
+    font-weight: 600;
 }

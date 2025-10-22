@@ -91,14 +91,13 @@ export default function Edit({ attributes, setAttributes }) {
 
                             <RangeControl
                                 className="elo-range-control"
-                                label={__('Niveau du moteur', 'roi')}
+                                label={`${__('Niveau du moteur', 'roi')} (ELO ${getEloLabel(parseInt(engineLevel))})`}
                                 value={parseInt(engineLevel)}
                                 onChange={(value) =>
                                     setAttributes({ engineLevel: value.toString() })
                                 }
                                 min={0}
                                 max={20}
-                                help={`${__('ELO approximatif', 'roi')} : ${getEloLabel(parseInt(engineLevel))}`}
                             />
                         </>
                     )}
