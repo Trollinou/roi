@@ -127,7 +127,7 @@ class Roi_Chess_Engine {
         $atts = shortcode_atts(array(
             'fen' => 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
             'orientation' => 'white',
-            'engineLevel' => '5',
+            'engineElo' => 1200,
             'enableEngine' => 'false',
             'enableMoves' => 'true',
             'borderType' => 'frame',

@@ -46,7 +46,7 @@ if ($is_editor) {
                     <span class="elo-label"><?php _e('ELO approximatif', 'roi'); ?> : </span>
                     <span class="level-value"></span>
                 </div>
-                <input type="range" class="chess-level-slider" min="0" max="20" value="<?php echo esc_attr($atts['engineLevel']); ?>" step="1">
+                <input type="range" class="chess-level-slider" min="1200" max="2800" value="<?php echo esc_attr($atts['engineElo']); ?>" step="100">
                 <div class="level-labels">
                     <span><?php _e('Débutant', 'roi'); ?></span>
                     <span><?php _e('Expert', 'roi'); ?></span>
@@ -62,7 +62,7 @@ if ($is_editor) {
          class="chess-board-wrapper"
          data-fen="<?php echo esc_attr($atts['fen']); ?>"
          data-orientation="<?php echo esc_attr($atts['orientation']); ?>"
-         data-engine-level="<?php echo esc_attr($atts['engineLevel']); ?>"
+         data-engine-elo="<?php echo esc_attr($atts['engineElo']); ?>"
          data-enable-engine="<?php echo ($enable_engine && !$is_editor) ? 'true' : 'false'; ?>"
          data-enable-moves="<?php echo $enable_moves ? 'true' : 'false'; ?>"
          data-border-type="<?php echo esc_attr($atts['borderType']); ?>"
