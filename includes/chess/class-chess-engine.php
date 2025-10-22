@@ -40,13 +40,6 @@ class Roi_Chess_Engine {
     public function enqueue_block_editor_assets() {
         $chess_url = $this->plugin_url . 'includes/chess/';
 
-        wp_enqueue_style(
-            'cm-chessboard-editor',
-            $chess_url . 'vendor/cm-chessboard/assets/chessboard.css',
-            array(),
-            ROI_VERSION
-        );
-
         wp_localize_script('roi-chessboard-editor-script', 'roiChessEditor', array(
 			'assetsUrl' => $chess_url . 'vendor/cm-chessboard/assets/',
 			'chessboardUrl' => $chess_url . 'vendor/cm-chessboard/src/Chessboard.js',
