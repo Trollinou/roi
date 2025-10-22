@@ -5,6 +5,17 @@ import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import metadata from './block.json';
 
+const getEloLabel = (level) => {
+    const eloMap = [
+        '100–400', '400–600', '600–800', '800–1000', '1000–1200',
+        '1200–1400', '1400–1600', '1600–1800', '1800–2000', '2000–2200',
+        '2200–2300', '2300–2400', '2400–2500', '2500–2600', '2600–2700',
+        '2700–2800', '2800–2900', '2900–3000', '3000–3100', '3100–3200',
+        '3200+'
+    ];
+    return eloMap[level] || level;
+};
+
 
 // ========================================
 // COMPOSANT PieceIcon
@@ -447,7 +458,8 @@ registerBlockType(metadata.name, {
                         />
                         {isEngineEnabled && (
                             <RangeControl
-                                label={__('Niveau', 'roi')}
+                                className="elo-range-control"
+                                label={`${__('Niveau', 'roi')} (ELO ${getEloLabel(parseInt(attributes.engineLevel))})`}
                                 value={parseInt(attributes.engineLevel)}
                                 onChange={(value) => setAttributes({ engineLevel: value.toString() })}
                                 min={0}
