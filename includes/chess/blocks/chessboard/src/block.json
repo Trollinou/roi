@@ -40,7 +40,7 @@
             "default": "green"
         }
     },
-    "editorScript": "file:./index.js",
+    "editorScript": "file:./chessboard-block.js",
     "editorStyle": [
         "file:./editor.css",
         "file:../../../vendor/cm-chessboard/assets/chessboard.css"

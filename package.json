@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "build": "cd includes/chess/blocks/chessboard && wp-scripts build",
-    "start": "cd includes/chess/blocks/chessboard && wp-scripts start"
+    "build": "wp-scripts build",
+    "start": "wp-scripts start"
   },
   "devDependencies": {
     "@wordpress/scripts": "^30.26.0",
