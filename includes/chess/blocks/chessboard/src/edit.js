@@ -126,6 +126,7 @@ class SimpleFenEditor extends Component {
             this.chessboard = new Chessboard(this.editorRef, {
                 position: this.props.fen,
                 orientation: COLOR[this.props.orientation],
+                responsive: true,
                 assetsUrl: roiChessEditor.assetsUrl,
                 assetsCache: false,
                 style: {

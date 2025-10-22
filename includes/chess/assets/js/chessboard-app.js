@@ -128,6 +128,7 @@ class ChessEngineApp {
             // Créer l'échiquier avec toutes les extensions
             this.board = new Chessboard(this.container, {
                 position: this.initialFen,
+                responsive: true,
                 assetsUrl: chessEngineData.assetsUrl,
                 style: {
                     borderType: BORDER_TYPE[this.borderType] || BORDER_TYPE.none,
