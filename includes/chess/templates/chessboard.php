@@ -57,11 +57,12 @@ if ($is_editor) {
     <div id="<?php echo esc_attr($board_id); ?>" 
          class="chess-board-wrapper"
          data-fen="<?php echo esc_attr($atts['fen']); ?>"
-         data-player-color="<?php echo esc_attr($atts['playerColor']); ?>"
+         data-orientation="<?php echo esc_attr($atts['orientation']); ?>"
          data-engine-level="<?php echo esc_attr($atts['engineLevel']); ?>"
          data-enable-engine="<?php echo ($enable_engine && !$is_editor) ? 'true' : 'false'; ?>"
          data-enable-moves="<?php echo $enable_moves ? 'true' : 'false'; ?>"
          data-border-type="<?php echo esc_attr($atts['borderType']); ?>"
+         data-show-coordinates="<?php echo $atts['showCoordinates'] ? 'true' : 'false'; ?>"
          data-pieces="<?php echo esc_attr($atts['pieces']); ?>"
          data-css-class="<?php echo esc_attr($atts['cssClass']); ?>">
     </div>

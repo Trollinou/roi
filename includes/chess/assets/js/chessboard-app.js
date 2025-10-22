@@ -39,13 +39,14 @@ class ChessEngineApp {
         this.container = containerElement;
         this.boardId = containerElement.id;
         this.initialFen = containerElement.dataset.fen;
-        this.playerColor = containerElement.dataset.playerColor;
-        this.engineLevel = parseInt(containerElement.dataset.engineLevel) || 10;
+        this.orientation = containerElement.dataset.orientation;
+        this.engineLevel = parseInt(containerElement.dataset.engineLevel) || 5;
         this.enableEngine = containerElement.dataset.enableEngine === 'true';
-        this.enableMoves = containerElement.dataset.enableMoves === 'true';
-        this.borderType = containerElement.dataset.borderType || 'none';
+        this.enableMoves = containerElement.dataset.enableMoves !== 'false';
+        this.borderType = containerElement.dataset.borderType || 'frame';
+        this.showCoordinates = containerElement.dataset.showCoordinates !== 'false';
         this.pieces = containerElement.dataset.pieces || 'standard';
-        this.cssClass = containerElement.dataset.cssClass || 'green';
+        this.cssClass = containerElement.dataset.cssClass || 'chessboard-js';
 
         this.Chess = null;
         this.chess = null;
@@ -60,7 +61,7 @@ class ChessEngineApp {
 
         // Éléments du dialogue
         this.configDialog = null;
-        this.selectedColor = this.playerColor;
+        this.selectedColor = this.orientation;
         this.selectedLevel = this.engineLevel;
 
         this.init();
@@ -106,7 +107,7 @@ class ChessEngineApp {
             }
 
             // Déterminer la couleur du joueur
-            const orientation = this.playerColor === 'black' ? this.COLOR.black : this.COLOR.white;
+            const orientation = this.orientation === 'black' ? this.COLOR.black : this.COLOR.white;
 
             // Initialiser Stockfish seulement si activé
             if (this.enableEngine) {
@@ -122,7 +123,8 @@ class ChessEngineApp {
                     pieces: {
                         file: `pieces/${this.pieces}.svg`
                     },
-                    cssClass: this.cssClass
+                    cssClass: this.cssClass,
+                    showCoordinates: this.showCoordinates
                 },
                 orientation: orientation,
                 extensions: [
@@ -196,7 +198,7 @@ class ChessEngineApp {
         });
 
         // Sélectionner la couleur par défaut
-        const defaultColorBtn = this.configDialog.querySelector(`[data-color="${this.playerColor}"]`);
+        const defaultColorBtn = this.configDialog.querySelector(`[data-color="${this.orientation}"]`);
         if (defaultColorBtn) {
             defaultColorBtn.classList.add('selected');
         }
@@ -244,7 +246,7 @@ class ChessEngineApp {
             finalColor = Math.random() < 0.5 ? 'white' : 'black';
         }
 
-        this.playerColor = finalColor;
+        this.orientation = finalColor;
         this.engineLevel = this.selectedLevel;
 
         // Mettre à jour le niveau de Stockfish
@@ -261,7 +263,7 @@ class ChessEngineApp {
         }
 
         // Mettre à jour l'orientation de l'échiquier
-        const orientation = this.playerColor === 'black' ? this.COLOR.black : this.COLOR.white;
+        const orientation = this.orientation === 'black' ? this.COLOR.black : this.COLOR.white;
 
         if (this.board) {
             // IMPORTANT: Désactiver d'abord l'input avant de le réactiver
@@ -284,7 +286,7 @@ class ChessEngineApp {
         this.hideConfigDialog();
 
         // Afficher le statut et démarrer
-        if (this.playerColor === 'black') {
+        if (this.orientation === 'black') {
             this.updateStatus(chessEngineData.translations.engineThinking, 'thinking');
             setTimeout(() => {
                 if (!this.engineThinking) {
@@ -753,7 +755,7 @@ class ChessEngineApp {
                 if (this.enableMoves) {
                     this.board.disableMoveInput();
                     if (this.enableEngine) {
-                        const orientation = this.playerColor === 'black' ? this.COLOR.black : this.COLOR.white;
+                        const orientation = this.orientation === 'black' ? this.COLOR.black : this.COLOR.white;
                         this.board.enableMoveInput(this.inputHandler.bind(this), orientation);
                     } else {
                         this.board.enableMoveInput(this.inputHandlerFreeMode.bind(this));

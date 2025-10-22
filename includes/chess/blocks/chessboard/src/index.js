@@ -92,7 +92,9 @@ class SimpleFenEditor extends Component {
         if (
             prevProps.pieces !== this.props.pieces ||
             prevProps.borderType !== this.props.borderType ||
-            prevProps.cssClass !== this.props.cssClass
+            prevProps.cssClass !== this.props.cssClass ||
+            prevProps.orientation !== this.props.orientation ||
+            prevProps.showCoordinates !== this.props.showCoordinates
         ) {
             await this.initChessboard();
         }
@@ -125,10 +127,11 @@ class SimpleFenEditor extends Component {
 
         try {
             const ChessboardModule = await import(/* webpackIgnore: true */ roiChessEditor.chessboardUrl);
-            const { Chessboard, INPUT_EVENT_TYPE, BORDER_TYPE } = ChessboardModule;
+            const { Chessboard, INPUT_EVENT_TYPE, BORDER_TYPE, COLOR } = ChessboardModule;
 
             this.chessboard = new Chessboard(this.editorRef, {
                 position: this.props.fen,
+                orientation: COLOR[this.props.orientation],
                 assetsUrl: roiChessEditor.assetsUrl,
                 assetsCache: false,
                 style: {
@@ -136,6 +139,7 @@ class SimpleFenEditor extends Component {
                     borderType: BORDER_TYPE[this.props.borderType],
                     pieces: { file: `pieces/${this.props.pieces}.svg` },
                     cssClass: this.props.cssClass,
+                    showCoordinates: this.props.showCoordinates,
                 }
             });
 
@@ -394,6 +398,11 @@ registerBlockType(metadata.name, {
                             ]}
                             onChange={(value) => setAttributes({ borderType: value })}
                         />
+                        <ToggleControl
+                            label={__('Afficher les coordonnées', 'roi')}
+                            checked={attributes.showCoordinates}
+                            onChange={(value) => setAttributes({ showCoordinates: value })}
+                        />
                         <SelectControl
                             label={__('Style des pièces', 'roi')}
                             value={attributes.pieces}
@@ -417,27 +426,25 @@ registerBlockType(metadata.name, {
                         />
                     </PanelBody>
                     <PanelBody title={__('Mode de jeu', 'roi')}>
-                        <ToggleControl
-                            label={__('Activer le moteur Stockfish', 'roi')}
-                            checked={isEngineEnabled}
-                            onChange={(value) => setAttributes({ enableEngine: value ? 'true' : 'false' })}
+                        <SelectControl
+                            label={__('Couleur', 'roi')}
+                            value={attributes.orientation}
+                            options={[
+                                { label: __('Blancs', 'roi'), value: 'white' },
+                                { label: __('Noirs', 'roi'), value: 'black' }
+                            ]}
+                            onChange={(value) => setAttributes({ orientation: value })}
                         />
                         <ToggleControl
                             label={__('Permettre de déplacer', 'roi')}
                             checked={isMovesEnabled}
                             onChange={(value) => setAttributes({ enableMoves: value ? 'true' : 'false' })}
                         />
-                        {isEngineEnabled && (
-                            <SelectControl
-                                label={__('Couleur', 'roi')}
-                                value={attributes.playerColor}
-                                options={[
-                                    { label: __('Blancs', 'roi'), value: 'white' },
-                                    { label: __('Noirs', 'roi'), value: 'black' }
-                                ]}
-                                onChange={(value) => setAttributes({ playerColor: value })}
-                            />
-                        )}
+                        <ToggleControl
+                            label={__('Activer le moteur Stockfish', 'roi')}
+                            checked={isEngineEnabled}
+                            onChange={(value) => setAttributes({ enableEngine: value ? 'true' : 'false' })}
+                        />
                         {isEngineEnabled && (
                             <RangeControl
                                 label={__('Niveau', 'roi')}
@@ -473,6 +480,8 @@ registerBlockType(metadata.name, {
                         pieces={attributes.pieces}
                         borderType={attributes.borderType}
                         cssClass={attributes.cssClass}
+                        orientation={attributes.orientation}
+                        showCoordinates={attributes.showCoordinates}
                         onChange={(newFen) => setAttributes({ fen: newFen })}
                     />
 
