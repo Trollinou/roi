@@ -427,7 +427,7 @@ registerBlockType(metadata.name, {
                     </PanelBody>
                     <PanelBody title={__('Mode de jeu', 'roi')}>
                         <SelectControl
-                            label={__('Couleur', 'roi')}
+                            label={__('Orientation', 'roi')}
                             value={attributes.orientation}
                             options={[
                                 { label: __('Blancs', 'roi'), value: 'white' },
