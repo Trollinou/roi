@@ -8,7 +8,7 @@ module.exports = {
     },
     output: {
         ...defaultConfig.output,
-        filename: 'index.js',
+        filename: 'chessboard-block.js',
         path: path.resolve(__dirname, 'includes/chess/blocks/chessboard/build'),
     },
 };
