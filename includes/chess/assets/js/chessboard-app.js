@@ -118,7 +118,7 @@ class ChessEngineApp {
                 position: this.initialFen,
                 assetsUrl: chessEngineData.assetsUrl,
                 style: {
-                    borderType: BORDER_TYPE[this.borderType.toUpperCase()],
+                    borderType: BORDER_TYPE[this.borderType] || BORDER_TYPE.none,
                     pieces: {
                         file: `pieces/${this.pieces}.svg`
                     },
