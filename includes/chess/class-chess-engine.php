@@ -32,7 +32,7 @@ class Roi_Chess_Engine {
     }
     
     public function register_block() {
-        register_block_type( $this->plugin_path . 'includes/chess/blocks/chessboard', array(
+        register_block_type( $this->plugin_path . 'includes/chess/blocks/chessboard/build', array(
             'render_callback' => array( $this, 'render_block' ),
         ) );
     }

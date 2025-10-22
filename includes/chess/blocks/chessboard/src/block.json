@@ -1,0 +1,51 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 2,
+    "name": "roi/chessboard",
+    "title": "Échiquier",
+    "category": "widgets",
+    "icon": "grid-view",
+    "description": "Insérer un échiquier interactif",
+    "attributes": {
+        "fen": {
+            "type": "string",
+            "default": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        },
+        "playerColor": {
+            "type": "string",
+            "default": "white"
+        },
+        "engineLevel": {
+            "type": "string",
+            "default": "10"
+        },
+        "enableEngine": {
+            "type": "string",
+            "default": "true"
+        },
+        "enableMoves": {
+            "type": "string",
+            "default": "true"
+        },
+        "borderType": {
+            "type": "string",
+            "default": "none"
+        },
+        "pieces": {
+            "type": "string",
+            "default": "standard"
+        },
+        "cssClass": {
+            "type": "string",
+            "default": "green"
+        }
+    },
+    "editorScript": "file:./chessboard-block.js",
+    "editorStyle": [
+        "file:./editor.css",
+        "file:../../../vendor/cm-chessboard/assets/chessboard.css"
+    ],
+    "style": [
+        "file:../../../vendor/cm-chessboard/assets/chessboard.css"
+    ]
+}
