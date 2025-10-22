@@ -1,4 +1,15 @@
 // Fonction pour charger dynamiquement cm-chessboard
+const getEloLabel = (level) => {
+    const eloMap = [
+        '100–400', '400–600', '600–800', '800–1000', '1000–1200',
+        '1200–1400', '1400–1600', '1600–1800', '1800–2000', '2000–2200',
+        '2200–2300', '2300–2400', '2400–2500', '2500–2600', '2600–2700',
+        '2700–2800', '2800–2900', '2900–3000', '3000–3100', '3100–3200',
+        '3200+'
+    ];
+    return eloMap[level] || level;
+};
+
 async function loadChessboard() {
     const module = await import(chessEngineData.chessboardSrc);
     return module;
@@ -208,12 +219,14 @@ class ChessEngineApp {
         const levelValue = this.configDialog.querySelector('.level-value');
 
         if (levelSlider && levelValue) {
-            levelSlider.value = this.engineLevel;
-            levelValue.textContent = this.engineLevel;
+            const initialLevel = parseInt(levelSlider.value);
+            levelValue.textContent = getEloLabel(initialLevel);
+            this.selectedLevel = initialLevel;
+
 
             levelSlider.addEventListener('input', (e) => {
                 this.selectedLevel = parseInt(e.target.value);
-                levelValue.textContent = this.selectedLevel;
+                levelValue.textContent = getEloLabel(this.selectedLevel);
             });
         }
 

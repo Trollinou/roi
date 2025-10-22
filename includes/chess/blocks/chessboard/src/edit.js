@@ -12,6 +12,17 @@ import {
     ExternalLink,
 } from '@wordpress/components';
 
+const getEloLabel = (level) => {
+    const eloMap = [
+        '100–400', '400–600', '600–800', '800–1000', '1000–1200',
+        '1200–1400', '1400–1600', '1600–1800', '1800–2000', '2000–2200',
+        '2200–2300', '2300–2400', '2400–2500', '2500–2600', '2600–2700',
+        '2700–2800', '2800–2900', '2900–3000', '3000–3100', '3100–3200',
+        '3200+'
+    ];
+    return eloMap[level] || level;
+};
+
 export default function Edit({ attributes, setAttributes }) {
     const {
         fen,
@@ -79,6 +90,7 @@ export default function Edit({ attributes, setAttributes }) {
                             />
 
                             <RangeControl
+                                className="elo-range-control"
                                 label={__('Niveau du moteur', 'roi')}
                                 value={parseInt(engineLevel)}
                                 onChange={(value) =>
@@ -86,7 +98,7 @@ export default function Edit({ attributes, setAttributes }) {
                                 }
                                 min={0}
                                 max={20}
-                                help={__('0 = Débutant, 20 = Expert', 'roi')}
+                                help={`${__('ELO approximatif', 'roi')} : ${getEloLabel(parseInt(engineLevel))}`}
                             />
                         </>
                     )}

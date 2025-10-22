@@ -41,7 +41,11 @@ if ($is_editor) {
             </div>
             
             <div class="chess-config-section">
-                <label><?php _e('Niveau de difficulté :', 'roi'); ?> <span class="level-value">10</span></label>
+                <label><?php _e('Niveau de difficulté :', 'roi'); ?></label>
+                <div class="level-display">
+                    <span class="elo-label"><?php _e('ELO approximatif', 'roi'); ?> : </span>
+                    <span class="level-value"></span>
+                </div>
                 <input type="range" class="chess-level-slider" min="0" max="20" value="<?php echo esc_attr($atts['engineLevel']); ?>" step="1">
                 <div class="level-labels">
                     <span><?php _e('Débutant', 'roi'); ?></span>
