@@ -126,11 +126,12 @@ class Roi_Chess_Engine {
     public function render_chessboard($atts) {
         $atts = shortcode_atts(array(
             'fen' => 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-            'playerColor' => 'white',
+            'orientation' => 'white',
             'engineLevel' => '10',
             'enableEngine' => 'true',
             'enableMoves' => 'true',
             'borderType' => 'none',
+            'showCoordinates' => true,
             'pieces' => 'standard',
             'cssClass' => 'green',
         ), $atts, 'chess_board');
