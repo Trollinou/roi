@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3 - 2025-10-22
+
+*   **Amélioration du bloc Échiquier :**
+    *   Le sélecteur de niveau du moteur Stockfish affiche désormais une estimation ELO conviviale (par exemple, "1200-1400") au lieu d'une valeur numérique (0-20), à la fois dans l'éditeur et sur la page publique.
+    *   Refonte de la structure du code du bloc pour suivre les conventions de WordPress, en séparant la logique de l'éditeur (`edit.js`) de l'enregistrement du bloc (`index.js`) pour une meilleure maintenabilité.
+
 ## 1.0.2 - 2025-10-22
 
 *   **Amélioration du bloc Échiquier :**
