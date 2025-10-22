@@ -127,13 +127,13 @@ class Roi_Chess_Engine {
         $atts = shortcode_atts(array(
             'fen' => 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
             'orientation' => 'white',
-            'engineLevel' => '10',
-            'enableEngine' => 'true',
+            'engineLevel' => '5',
+            'enableEngine' => 'false',
             'enableMoves' => 'true',
-            'borderType' => 'none',
+            'borderType' => 'frame',
             'showCoordinates' => true,
             'pieces' => 'standard',
-            'cssClass' => 'green',
+            'cssClass' => 'chessboard-js',
         ), $atts, 'chess_board');
         
         $board_id = 'chessboard-' . uniqid();

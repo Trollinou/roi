@@ -17,11 +17,11 @@
         },
         "engineLevel": {
             "type": "string",
-            "default": "10"
+            "default": "5"
         },
         "enableEngine": {
             "type": "string",
-            "default": "true"
+            "default": "false"
         },
         "enableMoves": {
             "type": "string",
@@ -29,7 +29,7 @@
         },
         "borderType": {
             "type": "string",
-            "default": "none"
+            "default": "frame"
         },
         "showCoordinates": {
             "type": "boolean",
@@ -41,7 +41,7 @@
         },
         "cssClass": {
             "type": "string",
-            "default": "green"
+            "default": "chessboard-js"
         }
     },
     "editorScript": "file:./chessboard-block.js",

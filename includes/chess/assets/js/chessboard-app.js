@@ -40,13 +40,13 @@ class ChessEngineApp {
         this.boardId = containerElement.id;
         this.initialFen = containerElement.dataset.fen;
         this.orientation = containerElement.dataset.orientation;
-        this.engineLevel = parseInt(containerElement.dataset.engineLevel) || 10;
+        this.engineLevel = parseInt(containerElement.dataset.engineLevel) || 5;
         this.enableEngine = containerElement.dataset.enableEngine === 'true';
-        this.enableMoves = containerElement.dataset.enableMoves === 'true';
-        this.borderType = containerElement.dataset.borderType || 'none';
+        this.enableMoves = containerElement.dataset.enableMoves !== 'false';
+        this.borderType = containerElement.dataset.borderType || 'frame';
         this.showCoordinates = containerElement.dataset.showCoordinates !== 'false';
         this.pieces = containerElement.dataset.pieces || 'standard';
-        this.cssClass = containerElement.dataset.cssClass || 'green';
+        this.cssClass = containerElement.dataset.cssClass || 'chessboard-js';
 
         this.Chess = null;
         this.chess = null;

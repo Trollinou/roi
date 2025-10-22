@@ -1,6 +1,6 @@
 # ROI - Ressources et Organisation pour l’Initiation aux échecs
 
-**Version:** 1.0.0
+**Version:** 1.0.2
 **Auteur:** Etienne Gagnon
 **Licence:** GPL v2 or later
 
@@ -32,3 +32,15 @@ Ce plugin est dépendant du plugin DAME. Vous devez avoir le plugin DAME install
 ### Sauvegarde Automatique
 
 Vous pouvez configurer l'heure de la sauvegarde journalière dans la section "Paramètres de sauvegarde" de la page d'options.
+
+## Changelog
+
+### 1.0.2 - 2025-10-22
+*   **Amélioration du bloc Échiquier :**
+    *   L'option "Couleur" (orientation de l'échiquier) est désormais toujours visible.
+    *   Ajout d'une option "Afficher les coordonnées".
+    *   Réorganisation des paramètres du bloc.
+    *   Correction d'un bug sur l'affichage des coordonnées sur la page publique.
+
+### 1.0.0 - 2025-09-15
+*   Première version du plugin.
