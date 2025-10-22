@@ -41,5 +41,11 @@
         }
     },
     "editorScript": "file:./chessboard-block.js",
-    "editorStyle": "file:./editor.css"
+    "editorStyle": [
+        "file:./editor.css",
+        "file:../../vendor/cm-chessboard/assets/chessboard.css"
+    ],
+    "style": [
+        "file:../../vendor/cm-chessboard/assets/chessboard.css"
+    ]
 }

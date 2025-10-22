@@ -1,10 +1,66 @@
 import { registerBlockType } from '@wordpress/blocks';
-import { InspectorControls } from '@wordpress/block-editor';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { PanelBody, TextControl, SelectControl, ToggleControl, RangeControl, Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import metadata from './block.json';
 
+
+// ========================================
+// COMPOSANT PieceIcon
+// ========================================
+class PieceIcon extends Component {
+    constructor(props) {
+        super(props);
+        this.svgRef = null;
+    }
+
+    componentDidMount() {
+        this.drawPiece();
+    }
+
+    componentDidUpdate() {
+        this.drawPiece();
+    }
+
+    drawPiece() {
+        if (!this.svgRef) return;
+
+        // Vider le SVG précédent
+        while (this.svgRef.firstChild) {
+            this.svgRef.removeChild(this.svgRef.firstChild);
+        }
+
+        // Utiliser la méthode de la librairie pour dessiner la pièce
+        if (this.props.chessboard && this.props.chessboard.view) {
+            this.props.chessboard.view.drawPiece(this.svgRef, this.props.pieceCode, { x: 0, y: 0 });
+
+            // Correction : La librairie ajoute un `transform="scale(...)"` qui n'est pas
+            // désiré pour les icônes. Nous le retirons manuellement.
+            // Le setTimeout garantit que ce code s'exécute après le cycle de rendu de la librairie.
+            setTimeout(() => {
+                if (this.svgRef) { // Le composant pourrait être démonté
+                    const useElement = this.svgRef.querySelector('use');
+                    if (useElement) {
+                        useElement.removeAttribute('transform');
+                    }
+                }
+            }, 0);
+        }
+    }
+
+    render() {
+        return (
+            <svg
+                ref={(ref) => { this.svgRef = ref; }}
+                style={{
+                    width: '40px',
+                    height: '40px',
+                }}
+            />
+        );
+    }
+}
 
 // ========================================
 // CLASSE SimpleFenEditor
@@ -30,21 +86,24 @@ class SimpleFenEditor extends Component {
         }
     }
 
-    async componentDidUpdate(prevProps) {
-        if (this.chessboard && this.state.chessboardLoaded) {
-            if (prevProps.fen !== this.props.fen) {
-                try {
-                    await this.chessboard.setPosition(this.props.fen, false);
-                    this.addSquareClickHandlers();
-                } catch (e) {
-                    console.warn('FEN invalide:', e);
-                }
-            } else if (
-                prevProps.pieces !== this.props.pieces ||
-                prevProps.borderType !== this.props.borderType ||
-                prevProps.cssClass !== this.props.cssClass
-            ) {
-                await this.initChessboard();
+    async componentDidUpdate(prevProps, prevState) {
+        // Si le style des pièces, le type de bordure ou la classe CSS a changé,
+        // nous devons détruire et recréer l'échiquier.
+        if (
+            prevProps.pieces !== this.props.pieces ||
+            prevProps.borderType !== this.props.borderType ||
+            prevProps.cssClass !== this.props.cssClass
+        ) {
+            await this.initChessboard();
+        }
+        // Si seulement le FEN a changé, nous mettons simplement à jour la position.
+        else if (prevProps.fen !== this.props.fen && this.chessboard && this.state.chessboardLoaded) {
+            try {
+                // When FEN is updated externally (e.g. from the TextControl), update the board
+                await this.chessboard.setPosition(this.props.fen, false);
+                this.addSquareClickHandlers();
+            } catch (e) {
+                console.warn('FEN invalide:', e);
             }
         }
     }
@@ -71,15 +130,17 @@ class SimpleFenEditor extends Component {
             this.chessboard = new Chessboard(this.editorRef, {
                 position: this.props.fen,
                 assetsUrl: roiChessEditor.assetsUrl,
+                assetsCache: false,
                 style: {
                     aspectRatio: 1,
-                    borderType: BORDER_TYPE[this.props.borderType.toUpperCase()],
+                    borderType: BORDER_TYPE[this.props.borderType],
                     pieces: { file: `pieces/${this.props.pieces}.svg` },
                     cssClass: this.props.cssClass,
                 }
             });
 
             this.chessboard.enableMoveInput((event) => {
+                // This handles moving and deleting existing pieces
                 if (event.type === INPUT_EVENT_TYPE.movingOverSquare) {
                     return;
                 }
@@ -93,7 +154,7 @@ class SimpleFenEditor extends Component {
                 }
 
                 if (event.type === INPUT_EVENT_TYPE.moveInputCanceled) {
-                    console.log('Mouvement annulé, suppression de la pièce');
+                    // This is triggered when a piece is dragged off the board
                     this.chessboard.setPiece(event.squareFrom, null);
                     setTimeout(() => {
                         const partialFen = this.chessboard.getPosition();
@@ -114,8 +175,8 @@ class SimpleFenEditor extends Component {
 
             setTimeout(() => {
                 this.addSquareClickHandlers();
-                this.setState({ chessboardLoaded: true });
-            }, 500);
+            }, 50);
+            this.setState({ chessboardLoaded: true });
 
         } catch (error) {
             console.error('Erreur chargement échiquier:', error);
@@ -155,8 +216,6 @@ class SimpleFenEditor extends Component {
                 }, 10);
             }
         });
-
-        console.log('Écouteur de clic ajouté');
     }
 
     clearBoard() {
@@ -188,22 +247,15 @@ class SimpleFenEditor extends Component {
             { code: 'bk', label: 'Roi noir' }
         ];
 
-        const pieceImageUrl = (pieceCode) => {
-            return `${roiChessEditor.assetsUrl}pieces/${this.props.pieces}/${pieceCode}.svg`;
-        };
-
         const pieceButtonStyle = {
-            padding: '8px',
-            minWidth: '50px',
+            padding: '0',
+            width: '50px',
             height: '50px',
             cursor: 'pointer',
             userSelect: 'none',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundSize: '80%',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
         };
 
         return (
@@ -223,13 +275,15 @@ class SimpleFenEditor extends Component {
                     {blackPieces.map(piece =>
                         <button
                             key={piece.code}
-                            className={`button ${this.state.selectedPiece === piece.code ? 'button-primary' : ''}`}
+                            className={`button ${this.state.selectedPiece === piece.code ? 'is-primary roi-chess-piece-selected' : ''}`}
                             onClick={() => {
                                 this.setState({ selectedPiece: this.state.selectedPiece === piece.code ? null : piece.code });
                             }}
                             title={piece.label}
-                            style={{ ...pieceButtonStyle, backgroundImage: `url(${pieceImageUrl(piece.code)})` }}
-                        />
+                            style={pieceButtonStyle}
+                        >
+                            <PieceIcon pieceCode={piece.code} chessboard={this.chessboard} />
+                        </button>
                     )}
                 </div>
 
@@ -237,7 +291,8 @@ class SimpleFenEditor extends Component {
                     ref={(ref) => { this.editorRef = ref; }}
                     style={{
                         maxWidth: '500px',
-                        margin: '0 auto'
+                        margin: '0 auto',
+                        cursor: this.state.selectedPiece ? 'copy' : 'default'
                     }}
                 />
 
@@ -256,13 +311,15 @@ class SimpleFenEditor extends Component {
                     {whitePieces.map(piece =>
                         <button
                             key={piece.code}
-                            className={`button ${this.state.selectedPiece === piece.code ? 'button-primary' : ''}`}
+                            className={`button ${this.state.selectedPiece === piece.code ? 'is-primary roi-chess-piece-selected' : ''}`}
                             onClick={() => {
                                 this.setState({ selectedPiece: this.state.selectedPiece === piece.code ? null : piece.code });
                             }}
                             title={piece.label}
-                            style={{ ...pieceButtonStyle, backgroundImage: `url(${pieceImageUrl(piece.code)})` }}
-                        />
+                            style={pieceButtonStyle}
+                        >
+                            <PieceIcon pieceCode={piece.code} chessboard={this.chessboard} />
+                        </button>
                     )}
                 </div>
 
@@ -313,9 +370,10 @@ registerBlockType(metadata.name, {
         const { attributes, setAttributes } = props;
         const isEngineEnabled = attributes.enableEngine === 'true';
         const isMovesEnabled = attributes.enableMoves === 'true';
+        const blockProps = useBlockProps();
 
         return (
-            <div className='wp-block-roi-chessboard'>
+            <div {...blockProps}>
                 <InspectorControls>
                     <PanelBody title={__('Configuration', 'roi')}>
                         <TextControl
