@@ -1,6 +1,6 @@
 # ROI - Ressources et Organisation pour l’Initiation aux échecs
 
-**Version:** 1.0.2
+**Version:** 1.0.3
 **Auteur:** Etienne Gagnon
 **Licence:** GPL v2 or later
 
@@ -34,6 +34,11 @@ Ce plugin est dépendant du plugin DAME. Vous devez avoir le plugin DAME install
 Vous pouvez configurer l'heure de la sauvegarde journalière dans la section "Paramètres de sauvegarde" de la page d'options.
 
 ## Changelog
+
+### 1.0.3 - 2025-10-22
+*   **Amélioration du bloc Échiquier :**
+    *   Le sélecteur de niveau du moteur Stockfish affiche désormais une estimation ELO conviviale (par exemple, "1200-1400") au lieu d'une valeur numérique (0-20).
+    *   Refonte de la structure du code du bloc pour suivre les conventions de WordPress, améliorant ainsi la maintenabilité.
 
 ### 1.0.2 - 2025-10-22
 *   **Amélioration du bloc Échiquier :**

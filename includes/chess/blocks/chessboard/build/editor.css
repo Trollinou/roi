@@ -29,3 +29,12 @@
     outline: 3px solid #00a0d2 !important;
     box-shadow: 0 0 5px rgba(0, 160, 210, 0.8) !important;
 }
+
+/*
+ * Hide the numeric input and the tooltip value for the ELO RangeControl.
+ * A highly specific selector is needed to override default WordPress editor styles.
+ */
+.wp-block-roi-chessboard .elo-range-control .components-range-control__number,
+.wp-block-roi-chessboard .elo-range-control .components-range-control__tooltip-content {
+    display: none !important;
+}
