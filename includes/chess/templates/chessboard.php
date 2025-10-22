@@ -60,7 +60,10 @@ if ($is_editor) {
          data-player-color="<?php echo esc_attr($atts['playerColor']); ?>"
          data-engine-level="<?php echo esc_attr($atts['engineLevel']); ?>"
          data-enable-engine="<?php echo ($enable_engine && !$is_editor) ? 'true' : 'false'; ?>"
-         data-enable-moves="<?php echo $enable_moves ? 'true' : 'false'; ?>">
+         data-enable-moves="<?php echo $enable_moves ? 'true' : 'false'; ?>"
+         data-border-type="<?php echo esc_attr($atts['borderType']); ?>"
+         data-pieces="<?php echo esc_attr($atts['pieces']); ?>"
+         data-css-class="<?php echo esc_attr($atts['cssClass']); ?>">
     </div>
     
     <?php if (($enable_engine || $enable_moves) && !$is_editor): ?>

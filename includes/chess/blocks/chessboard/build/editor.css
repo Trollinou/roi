@@ -24,3 +24,8 @@
 .roi-chessboard-editor button.button-primary {
     box-shadow: 0 0 0 3px rgba(0, 115, 170, 0.3);
 }
+
+.roi-chess-piece-selected {
+    outline: 3px solid #00a0d2 !important;
+    box-shadow: 0 0 5px rgba(0, 160, 210, 0.8) !important;
+}
