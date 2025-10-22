@@ -1,0 +1,31 @@
+.wp-block-roi-chessboard {
+    margin: 20px 0;
+}
+
+.roi-simple-fen-editor {
+    width: 100%;
+}
+
+.cm-chessboard {
+  pointer-events: auto !important;  /* Assurez-vous que les clics sont possibles */
+  user-select: none;  /* Evite la sélection involontaire */
+}
+
+/* Boutons de pièces */
+.roi-chessboard-editor button.button {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.roi-chessboard-editor button.button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.roi-chessboard-editor button.button-primary {
+    box-shadow: 0 0 0 3px rgba(0, 115, 170, 0.3);
+}
+
+.roi-chess-piece-selected {
+    outline: 3px solid #00a0d2 !important;
+    box-shadow: 0 0 5px rgba(0, 160, 210, 0.8) !important;
+}
