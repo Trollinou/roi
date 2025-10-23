@@ -1,7 +1,8 @@
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { PanelBody, TextControl, SelectControl, ToggleControl, RangeControl, Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { Component } from '@wordpress/element';
+import { Component, useState } from '@wordpress/element';
+import { Chess } from '../../../vendor/chess.js/chess.js';
 
 // ========================================
 // COMPOSANT PieceIcon
@@ -59,13 +60,16 @@ class SimpleFenEditor extends Component {
         super(props);
         this.state = {
             selectedPiece: null,
-            chessboardLoaded: false
+            chessboardLoaded: false,
+            chess: new Chess(),
+            fenError: null
         };
         this.editorRef = null;
         this.chessboard = null;
     }
 
     async componentDidMount() {
+        this.state.chess.load(this.props.fen);
         await this.initChessboard();
     }
 
@@ -85,22 +89,17 @@ class SimpleFenEditor extends Component {
         ) {
             await this.initChessboard();
         }
-        else if (prevProps.fen !== this.props.fen && this.chessboard && this.state.chessboardLoaded) {
-            try {
-                await this.chessboard.setPosition(this.props.fen, false);
-                this.addSquareClickHandlers();
-            } catch (e) {
-                console.warn('FEN invalide:', e);
+        else if (prevProps.fen !== this.props.fen) {
+            this.state.chess.load(this.props.fen);
+            if (this.chessboard && this.state.chessboardLoaded) {
+                try {
+                    await this.chessboard.setPosition(this.props.fen, false);
+                    this.addSquareClickHandlers();
+                } catch (e) {
+                    console.warn('FEN invalide:', e);
+                }
             }
         }
-    }
-
-    completeFen(partialFen) {
-        const tokens = partialFen.trim().split(/\s+/);
-        if (tokens.length === 6) {
-            return partialFen;
-        }
-        return partialFen + ' w KQkq - 0 1';
     }
 
     async initChessboard() {
@@ -113,7 +112,7 @@ class SimpleFenEditor extends Component {
             const { Chessboard, INPUT_EVENT_TYPE, BORDER_TYPE, COLOR } = ChessboardModule;
 
             this.chessboard = new Chessboard(this.editorRef, {
-                position: this.props.fen,
+                position: this.state.chess.fen(),
                 orientation: COLOR[this.props.orientation],
                 responsive: true,
                 assetsUrl: roiChessEditor.assetsUrl,
@@ -128,30 +127,35 @@ class SimpleFenEditor extends Component {
             });
 
             this.chessboard.enableMoveInput((event) => {
-                if (event.type === INPUT_EVENT_TYPE.movingOverSquare) {
-                    return;
-                }
-                if (event.type === INPUT_EVENT_TYPE.moveInputStarted) {
-                    return true;
-                }
-                if (event.type === INPUT_EVENT_TYPE.validateMoveInput) {
-                    return true;
-                }
-                if (event.type === INPUT_EVENT_TYPE.moveInputCanceled) {
-                    this.chessboard.setPiece(event.squareFrom, null);
-                    setTimeout(() => {
-                        const partialFen = this.chessboard.getPosition();
-                        const completeFen = this.completeFen(partialFen);
-                        this.props.onChange(completeFen);
-                    }, 10);
-                    return;
-                }
-                if (event.type === INPUT_EVENT_TYPE.moveInputFinished) {
-                    setTimeout(() => {
-                        const partialFen = this.chessboard.getPosition();
-                        const completeFen = this.completeFen(partialFen);
-                        this.props.onChange(completeFen);
-                    }, 10);
+                switch (event.type) {
+                    case INPUT_EVENT_TYPE.moveInputStarted:
+                        return true;
+
+                    case INPUT_EVENT_TYPE.validateMoveInput:
+                        const moves = this.state.chess.moves({ square: event.squareFrom, verbose: true });
+                        return moves.some(move => move.to === event.squareTo);
+
+                    case INPUT_EVENT_TYPE.moveInputFinished:
+                        if (event.legal) {
+                            this.state.chess.move({ from: event.squareFrom, to: event.squareTo, promotion: 'q' });
+                            this.props.onChange(this.state.chess.fen());
+                        }
+                        break;
+
+                    case INPUT_EVENT_TYPE.moveInputCanceled:
+                        // Si l'annulation est due à un mouvement illégal
+                        if (event.legal === false) {
+                            // On peut choisir de ne rien faire ou de remettre la pièce à sa place.
+                            // cm-chessboard le fait automatiquement.
+
+                        } else { // Annulation par l'utilisateur (clic droit, etc.)
+                            const piece = this.state.chess.get(event.squareFrom);
+                            if(piece) {
+                                this.state.chess.remove(event.squareFrom);
+                                this.props.onChange(this.state.chess.fen());
+                            }
+                        }
+                        break;
                 }
             });
 
@@ -184,26 +188,25 @@ class SimpleFenEditor extends Component {
             if (target && target.classList && target.classList.contains('square')) {
                 const squareName = target.getAttribute('data-square');
                 if (!squareName) return;
+
                 if (this.state.selectedPiece) {
-                    this.chessboard.setPiece(squareName, this.state.selectedPiece);
+                    const piece = {
+                        type: this.state.selectedPiece.charAt(1),
+                        color: this.state.selectedPiece.charAt(0)
+                    };
+                    this.state.chess.put(piece, squareName);
+                    this.props.onChange(this.state.chess.fen());
+                } else {
+                    this.state.chess.remove(squareName);
+                    this.props.onChange(this.state.chess.fen());
                 }
-                setTimeout(() => {
-                    const partialFen = this.chessboard.getPosition();
-                    const completeFen = this.completeFen(partialFen);
-                    this.props.onChange(completeFen);
-                }, 10);
             }
         });
     }
 
     clearBoard() {
-        if (this.chessboard) {
-            this.chessboard.setPosition('8/8/8/8/8/8/8/8 w - - 0 1', false).then(() => {
-                const partialFen = this.chessboard.getPosition();
-                const completeFen = this.completeFen(partialFen);
-                this.props.onChange(completeFen);
-            });
-        }
+        this.state.chess.clear();
+        this.props.onChange(this.state.chess.fen());
     }
 
     render() {
@@ -316,7 +319,10 @@ class SimpleFenEditor extends Component {
 
                     <Button
                         isSecondary
-                        onClick={() => this.props.onChange('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')}
+                        onClick={() => {
+                            this.state.chess.reset();
+                            this.props.onChange(this.state.chess.fen());
+                        }}
                     >
                         {__('Position initiale', 'roi')}
                     </Button>
@@ -344,6 +350,22 @@ export default function Edit(props) {
     const isEngineEnabled = attributes.enableEngine === 'true';
     const isMovesEnabled = attributes.enableMoves === 'true';
     const blockProps = useBlockProps();
+    const [fenError, setFenError] = useState(null);
+    const [fenSuccess, setFenSuccess] = useState(false);
+
+    const handleFenChange = (newFen) => {
+        try {
+            const chess = new Chess(newFen);
+            setAttributes({ fen: chess.fen() });
+            setFenError(null);
+            setFenSuccess(true);
+            setTimeout(() => setFenSuccess(false), 2000);
+        } catch (e) {
+            // Ne mettez pas à jour l'attribut avec un FEN invalide
+            setFenError(__('FEN invalide', 'roi'));
+            setFenSuccess(false);
+        }
+    };
 
     return (
         <div {...blockProps}>
@@ -352,9 +374,12 @@ export default function Edit(props) {
                     <TextControl
                         label={__('Position FEN', 'roi')}
                         value={attributes.fen}
-                        onChange={(value) => setAttributes({ fen: value })}
+                        onChange={handleFenChange}
                         help={__('Modifiable visuellement ci-dessous', 'roi')}
+                        className={fenSuccess ? 'is-success' : ''}
                     />
+                    {fenError && <p style={{ color: 'red' }}>{fenError}</p>}
+                    {fenSuccess && <p style={{ color: 'green' }}>{__('FEN valide', 'roi')}</p>}
                 </PanelBody>
                 <PanelBody title={__('Style de l\'échiquier', 'roi')}>
                     <SelectControl
