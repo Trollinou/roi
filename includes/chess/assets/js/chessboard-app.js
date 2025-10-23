@@ -520,6 +520,10 @@ class ChessEngineApp {
             this.board.removeLegalMovesMarkers();
 
             if (event.legalMove) {
+                // The move was legal, so we can be sure that chess.js has been updated.
+                // We just need to make sure the view is in sync.
+                this.board.setPosition(this.chess.fen());
+
                 // Réactiver l'input pour continuer à jouer
                 setTimeout(() => {
                     try {
@@ -529,11 +533,15 @@ class ChessEngineApp {
                         console.error('Erreur réactivation input:', e);
                     }
                 }, 100);
+            } else {
+                // The move was illegal, so we need to refresh the board from the official FEN
+                this.board.setPosition(this.chess.fen());
             }
         }
 
         if (event.type === this.INPUT_EVENT_TYPE.moveInputCanceled) {
             this.board.removeLegalMovesMarkers();
+            this.board.setPosition(this.chess.fen());
         }
     }
 
@@ -543,61 +551,51 @@ class ChessEngineApp {
             return false;
         }
 
-        if (event.type === this.INPUT_EVENT_TYPE.movingOverSquare) {
-            return;
-        }
-
         if (event.type === this.INPUT_EVENT_TYPE.moveInputStarted) {
             const moves = this.chess.moves({ square: event.squareFrom, verbose: true });
             this.board.addLegalMovesMarkers(moves);
             this.removeLastMoveArrow();
             return moves.length > 0;
-        }
+        } else if (event.type === this.INPUT_EVENT_TYPE.validateMoveInput) {
+            const moves = this.chess.moves({ square: event.squareFrom, verbose: true });
+            return moves.some(move => move.to === event.squareTo);
+        } else if (event.type === this.INPUT_EVENT_TYPE.moveInputFinished) {
+            this.board.removeLegalMovesMarkers();
+            if (event.legalMove) {
+                const piece = this.chess.get(event.squareFrom);
+                const isPromotion = piece && piece.type === 'p' &&
+                    ((piece.color === 'w' && event.squareTo[1] === '8') ||
+                     (piece.color === 'b' && event.squareTo[1] === '1'));
 
-        if (event.type === this.INPUT_EVENT_TYPE.validateMoveInput) {
-            const piece = this.chess.get(event.squareFrom);
-            const isPromotion = piece && piece.type === 'p' &&
-                               ((piece.color === 'w' && event.squareTo[1] === '8') ||
-                                (piece.color === 'b' && event.squareTo[1] === '1'));
-
-            if (isPromotion) {
-                return new Promise((resolve) => {
+                if (isPromotion) {
                     this.board.showPromotionDialog(event.squareTo, piece.color, (result) => {
                         if (result) {
-                            const move = this.chess.move({
+                            this.chess.move({
                                 from: event.squareFrom,
                                 to: event.squareTo,
                                 promotion: result.piece.charAt(1)
                             });
-                            resolve(!!move);
-                        } else {
-                            resolve(false);
+                            this.board.setPosition(this.chess.fen());
+                            this.checkGameStatus();
+                            if (!this.chess.isGameOver()) {
+                                setTimeout(() => this.makeEngineMove(), 200);
+                            }
                         }
                     });
-                });
-            } else {
-                const move = this.chess.move({
-                    from: event.squareFrom,
-                    to: event.squareTo
-                });
-                return !!move;
-            }
-        }
-
-        if (event.type === this.INPUT_EVENT_TYPE.moveInputFinished) {
-            this.board.removeLegalMovesMarkers();
-
-            if (event.legalMove) {
-                this.checkGameStatus();
-
-                if (!this.chess.isGameOver()) {
-                    setTimeout(() => this.makeEngineMove(), 200);
+                } else {
+                    this.chess.move({ from: event.squareFrom, to: event.squareTo });
+                    this.board.setPosition(this.chess.fen());
+                    this.checkGameStatus();
+                    if (!this.chess.isGameOver()) {
+                        setTimeout(() => this.makeEngineMove(), 200);
+                    }
                 }
+            } else {
+                this.board.setPosition(this.chess.fen());
             }
-        }
-
-        if (event.type === this.INPUT_EVENT_TYPE.moveInputCanceled) {
+        } else if (event.type === this.INPUT_EVENT_TYPE.moveInputCanceled) {
             this.board.removeLegalMovesMarkers();
+            this.board.setPosition(this.chess.fen());
         }
     }
 
