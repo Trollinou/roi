@@ -425,11 +425,35 @@ class ChessEngineApp {
                 return new Promise((resolve) => {
                     this.board.showPromotionDialog(event.squareTo, piece.color, (result) => {
                         if (result) {
+                            // Forcer le tour si nécessaire
+                            const currentTurn = this.chess.turn();
+                            if (piece.color !== currentTurn) {
+                                const fen = this.chess.fen();
+                                const fenParts = fen.split(' ');
+                                fenParts[1] = piece.color;
+                                const modifiedFen = fenParts.join(' ');
+                                this.chess.load(modifiedFen, { skipValidation: true });
+                            }
+
                             const move = this.chess.move({
                                 from: event.squareFrom,
                                 to: event.squareTo,
                                 promotion: result.piece.charAt(1)
                             });
+
+                            // Restaurer le tour original
+                            if (piece.color !== currentTurn) {
+                                const fen = this.chess.fen();
+                                const fenParts = fen.split(' ');
+                                fenParts[1] = currentTurn;
+                                const restoredFen = fenParts.join(' ');
+                                this.chess.load(restoredFen, { skipValidation: true });
+                            }
+
+                            if (move) {
+                                this.board.setPosition(this.chess.fen());
+                            }
+
                             resolve(!!move);
                         } else {
                             resolve(false);
@@ -459,6 +483,15 @@ class ChessEngineApp {
                     from: event.squareFrom,
                     to: event.squareTo
                 });
+
+                // Restaurer le tour original
+                if (piece.color !== currentTurn) {
+                    const fen = this.chess.fen();
+                    const fenParts = fen.split(' ');
+                    fenParts[1] = currentTurn;
+                    const restoredFen = fenParts.join(' ');
+                    this.chess.load(restoredFen, { skipValidation: true });
+                }
 
                 if (move) {
                     // Mettre à jour l'affichage avec la nouvelle position
