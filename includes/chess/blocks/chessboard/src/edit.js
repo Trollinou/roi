@@ -382,13 +382,13 @@ export default function Edit(props) {
         const chess = new Chess(newFen, { skipValidation: true });
         setAttributes({ fen: chess.fen() });
 
-        const { ok } = validateFen(newFen);
-        if (ok) {
+        const validationResult = validateFen(newFen);
+        if (validationResult.ok) {
             setFenError(null);
             setFenSuccess(true);
             setTimeout(() => setFenSuccess(false), 2000);
         } else {
-            setFenError(__('FEN invalide pour Stockfish', 'roi'));
+            setFenError(validationResult.error);
             setFenSuccess(false);
         }
     };
