@@ -12,6 +12,9 @@
         *   Correction d'un bug majeur qui empêchait la promotion des pions de fonctionner correctement.
         *   Correction d'une régression où le mode "exercice" (sans moteur) n'appliquait plus les règles du jeu. Les mouvements légaux sont de nouveau validés.
         *   Correction d'un bug visuel où les pièces se superposaient après une tentative de mouvement illégal.
+        *   Correction d'un bug où l'IA pouvait jouer le premier coup à la place du joueur si une position personnalisée commençait par le trait au joueur.
+    *   **Nouvelle fonctionnalité :**
+        *   Ajout d'un sélecteur "Trait" dans l'éditeur pour choisir qui a le prochain coup (Blancs ou Noirs), offrant un contrôle total sur la FEN.
 
 ## 1.0.3 - 2025-10-22
 
