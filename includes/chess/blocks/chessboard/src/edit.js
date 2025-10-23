@@ -367,12 +367,17 @@ export default function Edit(props) {
     const [isFenValid, setIsFenValid] = useState(true);
 
     useEffect(() => {
-        const { ok } = validateFen(attributes.fen);
-        setIsFenValid(ok);
+        const validationResult = validateFen(attributes.fen);
+        setIsFenValid(validationResult.ok);
 
-        // If the FEN becomes invalid, make sure to disable the engine.
-        if (!ok && attributes.enableEngine === 'true') {
-            setAttributes({ enableEngine: 'false' });
+        if (!validationResult.ok) {
+            setFenError(validationResult.error);
+            // If the FEN becomes invalid, make sure to disable the engine.
+            if (attributes.enableEngine === 'true') {
+                setAttributes({ enableEngine: 'false' });
+            }
+        } else {
+            setFenError(null);
         }
     }, [attributes.fen]);
 
@@ -384,11 +389,9 @@ export default function Edit(props) {
 
         const validationResult = validateFen(newFen);
         if (validationResult.ok) {
-            setFenError(null);
             setFenSuccess(true);
             setTimeout(() => setFenSuccess(false), 2000);
         } else {
-            setFenError(validationResult.error);
             setFenSuccess(false);
         }
     };
