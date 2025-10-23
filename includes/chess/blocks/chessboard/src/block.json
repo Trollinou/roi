@@ -15,9 +15,9 @@
             "type": "string",
             "default": "white"
         },
-        "engineLevel": {
-            "type": "string",
-            "default": "5"
+        "engineElo": {
+            "type": "number",
+            "default": 1200
         },
         "enableEngine": {
             "type": "string",

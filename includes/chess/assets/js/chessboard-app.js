@@ -1,15 +1,4 @@
 // Fonction pour charger dynamiquement cm-chessboard
-const getEloLabel = (level) => {
-    const eloMap = [
-        '100–400', '400–600', '600–800', '800–1000', '1000–1200',
-        '1200–1400', '1400–1600', '1600–1800', '1800–2000', '2000–2200',
-        '2200–2300', '2300–2400', '2400–2500', '2500–2600', '2600–2700',
-        '2700–2800', '2800–2900', '2900–3000', '3000–3100', '3100–3200',
-        '3200+'
-    ];
-    return eloMap[level] || level;
-};
-
 async function loadChessboard() {
     const module = await import(chessEngineData.chessboardSrc);
     return module;
@@ -51,7 +40,7 @@ class ChessEngineApp {
         this.boardId = containerElement.id;
         this.initialFen = containerElement.dataset.fen;
         this.orientation = containerElement.dataset.orientation;
-        this.engineLevel = parseInt(containerElement.dataset.engineLevel) || 5;
+        this.engineElo = parseInt(containerElement.dataset.engineElo) || 1200;
         this.enableEngine = containerElement.dataset.enableEngine === 'true';
         this.enableMoves = containerElement.dataset.enableMoves !== 'false';
         this.borderType = containerElement.dataset.borderType || 'frame';
@@ -220,14 +209,13 @@ class ChessEngineApp {
         const levelValue = this.configDialog.querySelector('.level-value');
 
         if (levelSlider && levelValue) {
-            const initialLevel = parseInt(levelSlider.value);
-            levelValue.textContent = getEloLabel(initialLevel);
-            this.selectedLevel = initialLevel;
-
+            const initialElo = parseInt(levelSlider.value);
+            levelValue.textContent = initialElo;
+            this.selectedElo = initialElo;
 
             levelSlider.addEventListener('input', (e) => {
-                this.selectedLevel = parseInt(e.target.value);
-                levelValue.textContent = getEloLabel(this.selectedLevel);
+                this.selectedElo = parseInt(e.target.value);
+                levelValue.textContent = this.selectedElo;
             });
         }
 
@@ -261,11 +249,12 @@ class ChessEngineApp {
         }
 
         this.orientation = finalColor;
-        this.engineLevel = this.selectedLevel;
+        this.engineElo = this.selectedElo;
 
         // Mettre à jour le niveau de Stockfish
         if (this.stockfish) {
-            this.stockfish.postMessage(`setoption name Skill Level value ${this.engineLevel}`);
+            this.stockfish.postMessage('setoption name UCI_LimitStrength value true');
+            this.stockfish.postMessage(`setoption name UCI_Elo value ${this.engineElo}`);
             this.stockfish.postMessage('ucinewgame');
             this.stockfish.postMessage('isready');
         }
@@ -354,7 +343,8 @@ class ChessEngineApp {
                 };
 
                 this.stockfish.postMessage('uci');
-                this.stockfish.postMessage(`setoption name Skill Level value ${this.engineLevel}`);
+                this.stockfish.postMessage('setoption name UCI_LimitStrength value true');
+                this.stockfish.postMessage(`setoption name UCI_Elo value ${this.engineElo}`);
                 this.stockfish.postMessage('setoption name Move Overhead value 100');
                 this.stockfish.postMessage('ucinewgame');
                 this.stockfish.postMessage('isready');
