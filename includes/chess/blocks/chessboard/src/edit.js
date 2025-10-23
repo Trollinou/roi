@@ -1,7 +1,7 @@
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { PanelBody, TextControl, SelectControl, ToggleControl, RangeControl, Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { Component } from '@wordpress/element';
+import { Component, useEffect, useState } from '@wordpress/element';
 
 // ========================================
 // COMPOSANT PieceIcon
@@ -96,11 +96,9 @@ class SimpleFenEditor extends Component {
     }
 
     completeFen(partialFen) {
-        const tokens = partialFen.trim().split(/\s+/);
-        if (tokens.length === 6) {
-            return partialFen;
-        }
-        return partialFen + ' w KQkq - 0 1';
+        const tokens = this.props.fen.split(' ');
+        tokens[0] = partialFen;
+        return tokens.join(' ');
     }
 
     async initChessboard() {
@@ -198,11 +196,7 @@ class SimpleFenEditor extends Component {
 
     clearBoard() {
         if (this.chessboard) {
-            this.chessboard.setPosition('8/8/8/8/8/8/8/8 w - - 0 1', false).then(() => {
-                const partialFen = this.chessboard.getPosition();
-                const completeFen = this.completeFen(partialFen);
-                this.props.onChange(completeFen);
-            });
+            this.props.onChange('8/8/8/8/8/8/8/8 w - - 0 1');
         }
     }
 
@@ -341,9 +335,58 @@ class SimpleFenEditor extends Component {
 
 export default function Edit(props) {
     const { attributes, setAttributes } = props;
+    const { fen, turn = 'w' } = attributes;
+
+    const [fenValidation, setFenValidation] = useState({ isValid: true, error: null });
+
     const isEngineEnabled = attributes.enableEngine === 'true';
     const isMovesEnabled = attributes.enableMoves === 'true';
     const blockProps = useBlockProps();
+
+    useEffect(() => {
+        async function validate() {
+            try {
+                const { Chess } = await import(/* webpackIgnore: true */ roiChessEditor.chessJsSrc);
+                new Chess(fen);
+                setFenValidation({ isValid: true, error: null });
+            } catch (e) {
+                setFenValidation({ isValid: false, error: e.message });
+            }
+        }
+        validate();
+    }, [fen]);
+
+    useEffect(() => {
+        async function syncTurnFromFen() {
+            try {
+                const { Chess } = await import(/* webpackIgnore: true */ roiChessEditor.chessJsSrc);
+                const chess = new Chess(fen);
+                if (chess.turn() !== turn) {
+                    setAttributes({ turn: chess.turn() });
+                }
+            } catch (e) {
+                // Ignore invalid FEN
+            }
+        }
+        syncTurnFromFen();
+    }, [fen]);
+
+    useEffect(() => {
+        async function syncFenFromTurn() {
+            try {
+                const { Chess } = await import(/* webpackIgnore: true */ roiChessEditor.chessJsSrc);
+                const chess = new Chess(fen);
+                if (chess.turn() !== turn) {
+                    const tokens = chess.fen().split(' ');
+                    tokens[1] = turn;
+                    setAttributes({ fen: tokens.join(' ') });
+                }
+            } catch (e) {
+                // Ignore invalid FEN
+            }
+        }
+        syncFenFromTurn();
+    }, [turn]);
 
     return (
         <div {...blockProps}>
@@ -353,7 +396,23 @@ export default function Edit(props) {
                         label={__('Position FEN', 'roi')}
                         value={attributes.fen}
                         onChange={(value) => setAttributes({ fen: value })}
-                        help={__('Modifiable visuellement ci-dessous', 'roi')}
+                        help={
+                            !fenValidation.isValid ? (
+                                <span style={{ color: 'red' }}>{fenValidation.error}</span>
+                            ) : (
+                                __('Modifiable visuellement ci-dessous', 'roi')
+                            )
+                        }
+                    />
+                     <SelectControl
+                        label={__('Trait', 'roi')}
+                        value={attributes.turn}
+                        options={[
+                            { label: __('Aux Blancs', 'roi'), value: 'w' },
+                            { label: __('Aux Noirs', 'roi'), value: 'b' }
+                        ]}
+                        onChange={(value) => setAttributes({ turn: value })}
+                        help={__('Qui doit jouer le prochain coup ?', 'roi')}
                     />
                 </PanelBody>
                 <PanelBody title={__('Style de l\'échiquier', 'roi')}>

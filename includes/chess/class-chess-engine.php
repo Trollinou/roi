@@ -43,6 +43,7 @@ class Roi_Chess_Engine {
         wp_localize_script('roi-chessboard-editor-script', 'roiChessEditor', array(
 			'assetsUrl' => $chess_url . 'vendor/cm-chessboard/assets/',
 			'chessboardUrl' => $chess_url . 'vendor/cm-chessboard/src/Chessboard.js',
+            'chessJsSrc' => $chess_url . 'vendor/chess.js/chess.js',
 		));
     }
     
