@@ -363,164 +363,20 @@ class ChessEngineApp {
 
     // Input handler pour le mode libre (exercice)
     inputHandlerFreeMode(event) {
-        if (event.type === this.INPUT_EVENT_TYPE.movingOverSquare) {
-            return;
-        }
+        switch (event.type) {
+            case this.INPUT_EVENT_TYPE.moveInputStarted:
+                // allow all moves
+                return true;
 
-        if (event.type === this.INPUT_EVENT_TYPE.moveInputStarted) {
-            // En mode libre, afficher tous les mouvements possibles sans vérifier le tour
-            const piece = this.chess.get(event.squareFrom);
+            case this.INPUT_EVENT_TYPE.validateMoveInput:
+                // allow all moves
+                return true;
 
-            if (!piece) {
-                return false; // Pas de pièce sur cette case
-            }
-
-            // Calculer les mouvements possibles pour cette pièce en forçant son tour
-            const currentTurn = this.chess.turn();
-
-            // Forcer temporairement le tour pour cette couleur si nécessaire
-            if (piece.color !== currentTurn) {
-                // Modifier temporairement le FEN pour changer le tour
-                const fen = this.chess.fen();
-                const fenParts = fen.split(' ');
-                fenParts[1] = piece.color; // Changer le tour actif
-                const modifiedFen = fenParts.join(' ');
-
-                try {
-                    this.chess.load(modifiedFen, { skipValidation: true });
-                } catch (e) {
-                    console.error('Erreur chargement FEN:', e);
-                    return false;
-                }
-            }
-
-            const moves = this.chess.moves({ square: event.squareFrom, verbose: true });
-            this.board.addLegalMovesMarkers(moves);
-
-            // Restaurer le FEN original si on l'avait modifié
-            if (piece.color !== currentTurn) {
-                const fen = this.chess.fen();
-                const fenParts = fen.split(' ');
-                fenParts[1] = currentTurn; // Restaurer le tour original
-                const restoredFen = fenParts.join(' ');
-                this.chess.load(restoredFen, { skipValidation: true });
-            }
-
-            return moves.length > 0;
-        }
-
-        if (event.type === this.INPUT_EVENT_TYPE.validateMoveInput) {
-            const piece = this.chess.get(event.squareFrom);
-
-            if (!piece) {
-                return false;
-            }
-
-            // Vérifier si c'est une promotion
-            const isPromotion = piece.type === 'p' &&
-                               ((piece.color === 'w' && event.squareTo[1] === '8') ||
-                                (piece.color === 'b' && event.squareTo[1] === '1'));
-
-            if (isPromotion) {
-                return new Promise((resolve) => {
-                    this.board.showPromotionDialog(event.squareTo, piece.color, (result) => {
-                        if (result) {
-                            // Forcer le tour si nécessaire
-                            const currentTurn = this.chess.turn();
-                            if (piece.color !== currentTurn) {
-                                const fen = this.chess.fen();
-                                const fenParts = fen.split(' ');
-                                fenParts[1] = piece.color;
-                                const modifiedFen = fenParts.join(' ');
-                                this.chess.load(modifiedFen, { skipValidation: true });
-                            }
-
-                            const move = this.chess.move({
-                                from: event.squareFrom,
-                                to: event.squareTo,
-                                promotion: result.piece.charAt(1)
-                            });
-
-                            // Restaurer le tour original
-                            if (piece.color !== currentTurn) {
-                                const fen = this.chess.fen();
-                                const fenParts = fen.split(' ');
-                                fenParts[1] = currentTurn;
-                                const restoredFen = fenParts.join(' ');
-                                this.chess.load(restoredFen, { skipValidation: true });
-                            }
-
-                            if (move) {
-                                this.board.setPosition(this.chess.fen());
-                            }
-
-                            resolve(!!move);
-                        } else {
-                            resolve(false);
-                        }
-                    });
-                });
-            } else {
-                // Mouvement normal (pas de promotion)
-                const currentTurn = this.chess.turn();
-
-                // Forcer temporairement le tour pour permettre le mouvement
-                if (piece.color !== currentTurn) {
-                    const fen = this.chess.fen();
-                    const fenParts = fen.split(' ');
-                    fenParts[1] = piece.color;
-                    const modifiedFen = fenParts.join(' ');
-
-                    try {
-                        this.chess.load(modifiedFen, { skipValidation: true });
-                    } catch (e) {
-                        console.error('Erreur chargement FEN:', e);
-                        return false;
-                    }
-                }
-
-                const move = this.chess.move({
-                    from: event.squareFrom,
-                    to: event.squareTo
-                });
-
-                // Restaurer le tour original
-                if (piece.color !== currentTurn) {
-                    const fen = this.chess.fen();
-                    const fenParts = fen.split(' ');
-                    fenParts[1] = currentTurn;
-                    const restoredFen = fenParts.join(' ');
-                    this.chess.load(restoredFen, { skipValidation: true });
-                }
-
-                if (move) {
-                    // Mettre à jour l'affichage avec la nouvelle position
-                    this.board.setPosition(this.chess.fen(), true);
-                    return true;
-                }
-
-                return false;
-            }
-        }
-
-        if (event.type === this.INPUT_EVENT_TYPE.moveInputFinished) {
-            this.board.removeLegalMovesMarkers();
-
-            if (event.legalMove) {
-                // Réactiver l'input pour continuer à jouer
-                setTimeout(() => {
-                    try {
-                        this.board.disableMoveInput();
-                        this.board.enableMoveInput(this.inputHandlerFreeMode.bind(this));
-                    } catch (e) {
-                        console.error('Erreur réactivation input:', e);
-                    }
-                }, 100);
-            }
-        }
-
-        if (event.type === this.INPUT_EVENT_TYPE.moveInputCanceled) {
-            this.board.removeLegalMovesMarkers();
+            case this.INPUT_EVENT_TYPE.moveInputFinished:
+                // After the move is finished on the board, synchronize chess.js
+                const newFen = this.board.getPosition();
+                this.chess.load(newFen, { skipValidation: true });
+                break;
         }
     }
 
@@ -554,7 +410,7 @@ class ChessEngineApp {
                             const move = this.chess.move({
                                 from: event.squareFrom,
                                 to: event.squareTo,
-                                promotion: result.piece.type
+                                promotion: result.piece.charAt(1)
                             });
                             resolve(!!move);
                         } else {
