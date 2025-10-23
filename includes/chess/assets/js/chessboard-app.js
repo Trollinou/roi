@@ -363,20 +363,36 @@ class ChessEngineApp {
 
     // Input handler pour le mode libre (exercice)
     inputHandlerFreeMode(event) {
-        switch (event.type) {
-            case this.INPUT_EVENT_TYPE.moveInputStarted:
-                // allow all moves
-                return true;
+        if (event.type === this.INPUT_EVENT_TYPE.moveInputStarted) {
+            return true;
+        } else if (event.type === this.INPUT_EVENT_TYPE.validateMoveInput) {
+            const piece = this.chess.get(event.squareFrom);
+            if (!piece) return false;
 
-            case this.INPUT_EVENT_TYPE.validateMoveInput:
-                // allow all moves
-                return true;
+            // Handle promotion
+            const isPromotion = piece.type === 'p' &&
+                ((piece.color === 'w' && event.squareTo[1] === '8') ||
+                    (piece.color === 'b' && event.squareTo[1] === '1'));
 
-            case this.INPUT_EVENT_TYPE.moveInputFinished:
-                // After the move is finished on the board, synchronize chess.js
-                const newFen = this.board.getPosition();
-                this.chess.load(newFen, { skipValidation: true });
-                break;
+            if (isPromotion) {
+                this.board.showPromotionDialog(event.squareTo, piece.color, (result) => {
+                    if (result) {
+                        this.chess.remove(event.squareFrom);
+                        this.chess.put({ type: result.piece.charAt(1), color: piece.color }, event.squareTo);
+                        this.board.setPosition(this.chess.fen());
+                    } else {
+                        // Promotion cancelled
+                        this.board.setPosition(this.chess.fen());
+                    }
+                });
+            } else {
+                this.chess.remove(event.squareFrom);
+                this.chess.put(piece, event.squareTo);
+            }
+            return true;
+        } else if (event.type === this.INPUT_EVENT_TYPE.moveInputFinished) {
+            // Synchronize the board with the final state from chess.js
+            this.board.setPosition(this.chess.fen());
         }
     }
 
