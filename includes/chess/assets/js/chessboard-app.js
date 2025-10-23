@@ -289,7 +289,8 @@ class ChessEngineApp {
         this.hideConfigDialog();
 
         // Afficher le statut et démarrer
-        if (this.orientation === 'black') {
+        const playerColor = this.orientation === 'white' ? 'w' : 'b';
+        if (this.chess.turn() !== playerColor) {
             this.updateStatus(chessEngineData.translations.engineThinking, 'thinking');
             setTimeout(() => {
                 if (!this.engineThinking) {
