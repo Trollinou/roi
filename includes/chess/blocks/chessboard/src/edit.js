@@ -199,10 +199,14 @@ class SimpleFenEditor extends Component {
                         color: this.state.selectedPiece.charAt(0)
                     };
                     this.state.chess.put(piece, squareName);
-                    this.props.onChange(this.state.chess.fen());
                 } else {
                     this.state.chess.remove(squareName);
-                    this.props.onChange(this.state.chess.fen());
+                }
+
+                const newFen = this.state.chess.fen();
+                this.props.onChange(newFen);
+                if (this.chessboard) {
+                    this.chessboard.setPosition(newFen);
                 }
             }
         });
