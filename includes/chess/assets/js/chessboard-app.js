@@ -422,62 +422,16 @@ class ChessEngineApp {
                                 (piece.color === 'b' && event.squareTo[1] === '1'));
 
             if (isPromotion) {
-                // Gestion spéciale de la promotion en mode libre
-                const pieceColor = piece.color;
-                const boardColor = pieceColor === 'w' ? this.COLOR.white : this.COLOR.black;
-
-                // Sauvegarder la position actuelle
-                const currentPosition = this.chess.fen();
-
                 return new Promise((resolve) => {
-                    this.board.showPromotionDialog(event.squareTo, boardColor, (result) => {
-                        if (result && result.piece) {
-                            // Forcer le tour si nécessaire
-                            const currentTurn = this.chess.turn();
-
-                            if (pieceColor !== currentTurn) {
-                                const fen = this.chess.fen();
-                                const fenParts = fen.split(' ');
-                                fenParts[1] = pieceColor;
-                                const modifiedFen = fenParts.join(' ');
-                                this.chess.load(modifiedFen, { skipValidation: true });
-                            }
-
-                            // Extraire le type de pièce (enlever la couleur)
-                            // result.piece est au format "wq", "bq", etc.
-                            const promotionPieceType = result.piece.type || result.piece.charAt(1);
-
-                            // Effectuer le mouvement avec promotion
+                    this.board.showPromotionDialog(event.squareTo, piece.color, (result) => {
+                        if (result) {
                             const move = this.chess.move({
                                 from: event.squareFrom,
                                 to: event.squareTo,
-                                promotion: promotionPieceType
+                                promotion: result.piece.charAt(1)
                             });
-
-                            if (move) {
-                                // Mettre à jour l'affichage avec la nouvelle position
-                                this.board.setPosition(this.chess.fen(), true);
-                                resolve(true);
-                            } else {
-                                // Si le mouvement échoue, utiliser la méthode directe
-                                console.warn('Mouvement échoué, utilisation de setPiece');
-                                this.board.setPiece(event.squareTo, result.piece, true);
-
-                                // Mettre à jour chess.js manuellement
-                                try {
-                                    // Retirer le pion de la case de départ
-                                    const newFen = this.chess.fen().replace(event.squareFrom, '');
-                                    this.chess.load(newFen, { skipValidation: true });
-                                } catch (e) {
-                                    console.error('Erreur mise à jour FEN:', e);
-                                }
-
-                                resolve(true);
-                            }
+                            resolve(!!move);
                         } else {
-                            // Annulation de la promotion
-                            this.chess.load(currentPosition, { skipValidation: true });
-                            this.board.setPosition(currentPosition);
                             resolve(false);
                         }
                     });
