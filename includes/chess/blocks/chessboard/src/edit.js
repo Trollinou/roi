@@ -132,12 +132,16 @@ class SimpleFenEditor extends Component {
                         return true;
 
                     case INPUT_EVENT_TYPE.validateMoveInput:
-                        const moves = this.state.chess.moves({ square: event.squareFrom, verbose: true });
-                        return moves.some(move => move.to === event.squareTo);
+                        // In editor mode, we allow any piece placement.
+                        return true;
 
                     case INPUT_EVENT_TYPE.moveInputFinished:
-                        if (event.legal) {
-                            this.state.chess.move({ from: event.squareFrom, to: event.squareTo, promotion: 'q' });
+                        // `move` validates the move, which we don't want in the editor.
+                        // We manually `get`, `remove`, and `put` the piece to simulate a move.
+                        const piece = this.state.chess.get(event.squareFrom);
+                        if (piece) {
+                            this.state.chess.remove(event.squareFrom);
+                            this.state.chess.put(piece, event.squareTo);
                             this.props.onChange(this.state.chess.fen());
                         }
                         break;
@@ -206,7 +210,11 @@ class SimpleFenEditor extends Component {
 
     clearBoard() {
         this.state.chess.clear();
-        this.props.onChange(this.state.chess.fen());
+        const newFen = this.state.chess.fen();
+        this.props.onChange(newFen);
+        if (this.chessboard) {
+            this.chessboard.setPosition(newFen, false);
+        }
     }
 
     render() {
