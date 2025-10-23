@@ -1,8 +1,8 @@
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { PanelBody, TextControl, SelectControl, ToggleControl, RangeControl, Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { Component, useState } from '@wordpress/element';
-import { Chess } from '../../../vendor/chess.js/chess.js';
+import { Component, useState, useEffect } from '@wordpress/element';
+import { Chess, validateFen } from '../../../vendor/chess.js/chess.js';
 
 // ========================================
 // COMPOSANT PieceIcon
@@ -69,7 +69,7 @@ class SimpleFenEditor extends Component {
     }
 
     async componentDidMount() {
-        this.state.chess.load(this.props.fen);
+        this.state.chess.load(this.props.fen, { skipValidation: true });
         await this.initChessboard();
     }
 
@@ -90,7 +90,7 @@ class SimpleFenEditor extends Component {
             await this.initChessboard();
         }
         else if (prevProps.fen !== this.props.fen) {
-            this.state.chess.load(this.props.fen);
+            this.state.chess.load(this.props.fen, { skipValidation: true });
             if (this.chessboard && this.state.chessboardLoaded) {
                 try {
                     await this.chessboard.setPosition(this.props.fen, false);
@@ -364,17 +364,31 @@ export default function Edit(props) {
     const blockProps = useBlockProps();
     const [fenError, setFenError] = useState(null);
     const [fenSuccess, setFenSuccess] = useState(false);
+    const [isFenValid, setIsFenValid] = useState(true);
+
+    useEffect(() => {
+        const { ok } = validateFen(attributes.fen);
+        setIsFenValid(ok);
+
+        // If the FEN becomes invalid, make sure to disable the engine.
+        if (!ok && attributes.enableEngine === 'true') {
+            setAttributes({ enableEngine: 'false' });
+        }
+    }, [attributes.fen]);
 
     const handleFenChange = (newFen) => {
-        try {
-            const chess = new Chess(newFen);
-            setAttributes({ fen: chess.fen() });
+        // We use skipValidation to allow creating custom positions
+        // that might not be legal in a real game.
+        const chess = new Chess(newFen, { skipValidation: true });
+        setAttributes({ fen: chess.fen() });
+
+        const { ok } = validateFen(newFen);
+        if (ok) {
             setFenError(null);
             setFenSuccess(true);
             setTimeout(() => setFenSuccess(false), 2000);
-        } catch (e) {
-            // Ne mettez pas à jour l'attribut avec un FEN invalide
-            setFenError(__('FEN invalide', 'roi'));
+        } else {
+            setFenError(__('FEN invalide pour Stockfish', 'roi'));
             setFenSuccess(false);
         }
     };
@@ -450,8 +464,10 @@ export default function Edit(props) {
                         label={__('Activer le moteur Stockfish', 'roi')}
                         checked={isEngineEnabled}
                         onChange={(value) => setAttributes({ enableEngine: value ? 'true' : 'false' })}
+                        disabled={!isFenValid}
+                        help={!isFenValid ? __('FEN invalide pour activer Stockfish', 'roi') : ''}
                     />
-                    {isEngineEnabled && (
+                    {isEngineEnabled && isFenValid && (
                         <RangeControl
                             className="elo-range-control"
                             label={`${__('Niveau', 'roi')} (ELO ${attributes.engineElo})`}
