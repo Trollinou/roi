@@ -38,3 +38,7 @@
 .wp-block-roi-chessboard .elo-range-control .components-range-control__tooltip-content {
     display: none !important;
 }
+
+.is-success .components-text-control__input {
+    border-color: green;
+}

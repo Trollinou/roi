@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.4 - 2025-10-23
+
+*   **Amélioration majeure du bloc Échiquier :**
+    *   Intégration de la bibliothèque `chess.js` pour une gestion robuste et professionnelle de l'état de l'échiquier et de la notation FEN.
+    *   **Éditeur de position :**
+        *   Permet la création de positions personnalisées, même si elles sont "illégales" au sens des échecs (ex: 3 fous), sans faire planter l'éditeur.
+        *   Valide en temps réel la notation FEN et affiche des messages d'erreur détaillés et clairs pour aider à la correction.
+        *   L'activation du moteur Stockfish est désormais conditionnelle à la validité de la FEN, empêchant son utilisation avec des positions incompatibles.
+    *   **Visualisation (Front-end) :**
+        *   Correction d'un bug majeur qui empêchait la promotion des pions de fonctionner correctement.
+        *   Correction d'une régression où le mode "exercice" (sans moteur) n'appliquait plus les règles du jeu. Les mouvements légaux sont de nouveau validés.
+        *   Correction d'un bug visuel où les pièces se superposaient après une tentative de mouvement illégal.
+
 ## 1.0.3 - 2025-10-22
 
 *   **Amélioration du bloc Échiquier :**

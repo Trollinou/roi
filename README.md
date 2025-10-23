@@ -1,6 +1,6 @@
 # ROI - Ressources et Organisation pour l’Initiation aux échecs
 
-**Version:** 1.0.3
+**Version:** 1.0.4
 **Auteur:** Etienne Gagnon
 **Licence:** GPL v2 or later
 
@@ -34,6 +34,12 @@ Ce plugin est dépendant du plugin DAME. Vous devez avoir le plugin DAME install
 Vous pouvez configurer l'heure de la sauvegarde journalière dans la section "Paramètres de sauvegarde" de la page d'options.
 
 ## Changelog
+
+### 1.0.4 - 2025-10-23
+*   **Amélioration majeure du bloc Échiquier :**
+    *   Intégration de `chess.js` pour une gestion robuste de l'état de l'échiquier et de la validation FEN.
+    *   **Éditeur de position :** Permet la création de positions personnalisées (même "illégales"), valide la FEN en temps réel avec des messages d'erreur détaillés, et conditionne l'activation de Stockfish à la validité de la FEN.
+    *   **Visualisation (Front-end) :** Correction de bugs critiques sur la promotion des pions, la validation des mouvements en mode exercice, et les glitches visuels après un coup illégal.
 
 ### 1.0.3 - 2025-10-22
 *   **Amélioration du bloc Échiquier :**
