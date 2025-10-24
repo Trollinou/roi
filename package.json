@@ -4,7 +4,7 @@
     "start": "wp-scripts start"
   },
   "devDependencies": {
-    "@wordpress/scripts": "^30.26.0",
-    "copy-webpack-plugin": "^12.0.2"
+    "@wordpress/scripts": "^30.12.1",
+    "copy-webpack-plugin": "^13.0.1"
   }
 }
