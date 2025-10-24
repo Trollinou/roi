@@ -12,6 +12,12 @@ if ( ! defined( 'WPINC' ) ) {
 
 /**
  * Enqueues front-end scripts and styles.
+ *
+ * This function is hooked into 'wp_enqueue_scripts' and is responsible for
+ * adding the public-facing stylesheet for the plugin to the website's front-end.
+ *
+ * @since 1.0.0
+ * @return void
  */
 function roi_enqueue_public_assets() {
     // Enqueue the public-facing stylesheet.

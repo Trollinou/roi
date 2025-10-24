@@ -12,6 +12,11 @@ if ( ! defined( 'WPINC' ) ) {
 
 /**
  * Register the Leçon CPT.
+ *
+ * This function defines and registers the 'roi_lecon' custom post type for lessons.
+ *
+ * @since 1.0.0
+ * @return void
  */
 function roi_register_lecon_cpt() {
 
@@ -71,6 +76,12 @@ add_action( 'init', 'roi_register_lecon_cpt', 0 );
 
 /**
  * Register the Exercice CPT.
+ *
+ * This function defines and registers the 'roi_exercice' custom post type for exercises,
+ * including custom capabilities for more granular access control.
+ *
+ * @since 1.0.0
+ * @return void
  */
 function roi_register_exercice_cpt() {
 
@@ -134,6 +145,12 @@ add_action( 'init', 'roi_register_exercice_cpt', 0 );
 
 /**
  * Register the Cours CPT.
+ *
+ * This function defines and registers the 'roi_cours' custom post type for courses,
+ * which are composed of lessons and exercises. It also includes custom capabilities.
+ *
+ * @since 1.0.0
+ * @return void
  */
 function roi_register_cours_cpt() {
 

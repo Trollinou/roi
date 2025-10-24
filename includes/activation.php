@@ -5,13 +5,20 @@
  * @package ROI
  */
 
-// If this file is called directly, abort.
+// If this file is a called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
 /**
  * The code that runs during plugin activation.
+ *
+ * This function is hooked to run on plugin activation. It adds custom
+ * capabilities to user roles and flushes the rewrite rules to ensure that
+ * the custom post types are correctly registered.
+ *
+ * @since 1.0.0
+ * @return void
  */
 function roi_activate() {
     // Add custom capabilities to roles.
@@ -24,6 +31,13 @@ function roi_activate() {
 
 /**
  * The code that runs during plugin deactivation.
+ *
+ * This function is hooked to run on plugin deactivation. It removes the
+ * custom capabilities from user roles and flushes the rewrite rules to
+ * ensure that the custom post types are correctly unregistered.
+ *
+ * @since 1.0.0
+ * @return void
  */
 function roi_deactivate() {
     // Remove custom capabilities from roles.

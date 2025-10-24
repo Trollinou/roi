@@ -1,6 +1,16 @@
+/**
+ * @file Manages the interactive exercise interface for the [roi_exercices] shortcode.
+ * @author Your Name
+ * @version 1.0.0
+ */
+
 (function($) {
     'use strict';
 
+    /**
+     * Initializes the exercise interface on document ready.
+     * @namespace
+     */
     $(document).ready(function() {
         let scoreCorrect = 0;
         let scoreAttempted = 0;
@@ -21,7 +31,13 @@
             fetchNextExercise();
         });
 
-
+        /**
+         * Fetches the next exercise based on the selected filters.
+         * This function makes an AJAX call to retrieve a random exercise
+         * matching the difficulty and category criteria. It avoids showing the
+         * same exercise twice in a row.
+         * @returns {void}
+         */
         function fetchNextExercise() {
             const difficulty = $('#roi-difficulty-filter').val();
             const category = $('#roi-category-filter').val();
@@ -53,6 +69,13 @@
             });
         }
 
+        /**
+         * Submits the user's answer for the current exercise.
+         * This function sends the serialized form data via an AJAX call to be
+         * checked. It then displays feedback, the solution, updates the score,
+         * and shows the 'Next Exercise' button.
+         * @returns {void}
+         */
         function submitAnswer() {
             const exerciseId = $('#roi-exercice-id').val();
             const answerData = $('#roi-exercice-form').serialize();

@@ -13,7 +13,12 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Generates a backup file for the "Apprentissage" data and saves it to a temporary directory.
  *
- * @return string|WP_Error The path to the backup file on success, or a WP_Error object on failure.
+ * This function gathers all learning content (posts and terms), JSON-encodes and
+ * compresses it, and then saves it to a file in the `wp-content/uploads/roi-backups`
+ * directory.
+ *
+ * @since 1.0.0
+ * @return string|WP_Error The full path to the backup file on success, or a WP_Error object on failure.
  */
 function roi_generate_apprentissage_backup_file() {
     if ( ! function_exists( 'roi_get_apprentissage_export_data' ) ) {

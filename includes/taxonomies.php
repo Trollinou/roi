@@ -11,7 +11,14 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Register Chess Category Taxonomy
+ * Register Chess Category Taxonomy.
+ *
+ * This function defines and registers the 'roi_chess_category' custom taxonomy,
+ * which is used to categorize the 'roi_lecon', 'roi_exercice', and 'roi_cours'
+ * custom post types.
+ *
+ * @since 1.0.0
+ * @return void
  */
 function roi_register_chess_category_taxonomy() {
     $labels = array(

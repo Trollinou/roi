@@ -13,7 +13,13 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Gathers all learning content data for export.
  *
- * @return array The complete export data for learning content.
+ * This function queries the database for all posts of the specified custom post types
+ * ('roi_lecon', 'roi_exercice', 'roi_cours') and all terms from the 'roi_chess_category'
+ * taxonomy. It then compiles this data, including post metadata, into a structured
+ * array ready for export.
+ *
+ * @since 1.0.0
+ * @return array The complete export data for learning content, structured into 'posts' and 'terms' keys.
  */
 function roi_get_apprentissage_export_data() {
     $post_types = array( 'roi_lecon', 'roi_exercice', 'roi_cours' );
@@ -82,6 +88,14 @@ function roi_get_apprentissage_export_data() {
 
 /**
  * Handles the export of learning data.
+ *
+ * Triggered by the 'roi_backup_action' button on the admin page. This function
+ * verifies user permissions and nonces, then retrieves the learning data using
+ * roi_get_apprentissage_export_data(). It encodes the data as a JSON string,
+ * compresses it using gzcompress, and serves it as a downloadable .json.gz file.
+ *
+ * @since 1.0.0
+ * @return void
  */
 function roi_handle_backup_action() {
     if ( ! isset( $_POST['roi_backup_action'] ) || ! isset( $_POST['roi_backup_nonce'] ) || ! wp_verify_nonce( $_POST['roi_backup_nonce'], 'roi_backup_nonce_action' ) ) {
@@ -109,6 +123,14 @@ add_action( 'admin_init', 'roi_handle_backup_action' );
 
 /**
  * Handles the import of learning data.
+ *
+ * Triggered by the 'roi_restore_action' form submission. This function handles
+ * file upload, validation (ensuring it's a .json.gz file), and data restoration.
+ * It first deletes all existing learning content (posts and terms) before importing
+ * the new data from the backup file. It maintains term hierarchies.
+ *
+ * @since 1.0.0
+ * @return void
  */
 function roi_handle_restore_action() {
     if ( ! isset( $_POST['roi_restore_action'] ) || ! isset( $_POST['roi_restore_nonce'] ) || ! wp_verify_nonce( $_POST['roi_restore_nonce'], 'roi_restore_nonce_action' ) ) {

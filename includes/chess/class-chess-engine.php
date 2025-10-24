@@ -1,18 +1,51 @@
 <?php
 /**
  * Chess Engine Integration
+ *
+ * @package ROI
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
+/**
+ * Class Roi_Chess_Engine
+ *
+ * Manages the integration of the chess engine, including the Gutenberg block,
+ * shortcode, and all necessary asset enqueueing for both the front-end and
+ * the block editor.
+ */
 class Roi_Chess_Engine {
     
+    /**
+     * The single instance of the class.
+     *
+     * @var Roi_Chess_Engine|null
+     */
     private static $instance = null;
+
+    /**
+     * The plugin's base URL.
+     *
+     * @var string
+     */
     private $plugin_url;
+
+    /**
+     * The plugin's base path.
+     *
+     * @var string
+     */
     private $plugin_path;
     
+    /**
+     * Gets the single instance of the class.
+     *
+     * @param string $plugin_url  The plugin's base URL.
+     * @param string $plugin_path The plugin's base path.
+     * @return Roi_Chess_Engine The single instance of the class.
+     */
     public static function get_instance($plugin_url, $plugin_path) {
         if (null === self::$instance) {
             self::$instance = new self($plugin_url, $plugin_path);
@@ -20,6 +53,12 @@ class Roi_Chess_Engine {
         return self::$instance;
     }
     
+    /**
+     * Private constructor to prevent direct instantiation.
+     *
+     * @param string $plugin_url  The plugin's base URL.
+     * @param string $plugin_path The plugin's base path.
+     */
     private function __construct($plugin_url, $plugin_path) {
         $this->plugin_url = $plugin_url;
         $this->plugin_path = $plugin_path;
@@ -31,12 +70,27 @@ class Roi_Chess_Engine {
         add_action('enqueue_block_editor_assets', array($this, 'enqueue_block_editor_assets'));
     }
     
+    /**
+     * Registers the Gutenberg block for the chessboard.
+     *
+     * @since 1.0.0
+     * @return void
+     */
     public function register_block() {
         register_block_type( $this->plugin_path . 'includes/chess/blocks/chessboard/build', array(
             'render_callback' => array( $this, 'render_block' ),
         ) );
     }
 
+    /**
+     * Enqueues assets for the block editor.
+     *
+     * This function localizes a script to provide necessary paths and URLs
+     * for the chessboard block's editor interface.
+     *
+     * @since 1.0.0
+     * @return void
+     */
     public function enqueue_block_editor_assets() {
         $chess_url = $this->plugin_url . 'includes/chess/';
 
@@ -47,10 +101,31 @@ class Roi_Chess_Engine {
 		));
     }
     
+    /**
+     * Renders the chessboard block on the front-end.
+     *
+     * This function serves as the render callback for the Gutenberg block,
+     * passing the block's attributes to the main rendering function.
+     *
+     * @since 1.0.0
+     * @param array $attributes The attributes of the block.
+     * @return string The HTML output of the chessboard.
+     */
     public function render_block($attributes) {
         return $this->render_chessboard($attributes);
     }
     
+    /**
+     * Enqueues front-end scripts and styles for the chessboard.
+     *
+     * This function enqueues all necessary CSS and JavaScript files for the
+     * chessboard, including the cm-chessboard library and its extensions,
+     * as well as the main application script. It also localizes data
+     * for the script.
+     *
+     * @since 1.0.0
+     * @return void
+     */
     public function enqueue_assets() {
         $chess_url = $this->plugin_url . 'includes/chess/';
         
@@ -117,6 +192,18 @@ class Roi_Chess_Engine {
         ));
     }
     
+    /**
+     * Adds the 'type="module"' attribute to script tags.
+     *
+     * This function is hooked into 'script_loader_tag' to ensure that the
+     * main chess application script is loaded as a JavaScript module.
+     *
+     * @since 1.0.0
+     * @param string $tag    The original <script> tag.
+     * @param string $handle The script's handle.
+     * @param string $src    The script's source URL.
+     * @return string The modified <script> tag.
+     */
     public function add_module_type($tag, $handle, $src) {
         if ('roi-chess-app' === $handle || 'roi-chess-app-editor' === $handle) {
             $tag = '<script type="module" src="' . esc_url($src) . '" id="' . $handle . '-js"></script>';
@@ -124,6 +211,16 @@ class Roi_Chess_Engine {
         return $tag;
     }
     
+    /**
+     * Renders the chessboard using a template file.
+     *
+     * This function processes the shortcode or block attributes, sets default values,
+     * and includes a template file to generate the final HTML for the chessboard.
+     *
+     * @since 1.0.0
+     * @param array $atts The attributes for the chessboard.
+     * @return string The HTML output of the chessboard.
+     */
     public function render_chessboard($atts) {
         $atts = shortcode_atts(array(
             'fen' => 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',

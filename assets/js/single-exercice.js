@@ -1,6 +1,16 @@
+/**
+ * @file Manages the AJAX answer submission and feedback for single exercise pages.
+ * @author Your Name
+ * @version 1.0.0
+ */
+
 (function($) {
     'use strict';
 
+    /**
+     * Initializes the single exercise answer submission functionality on document ready.
+     * @namespace
+     */
     $(document).ready(function() {
         $('#roi-submit-answer').on('click', function() {
             const submitButton = $(this);

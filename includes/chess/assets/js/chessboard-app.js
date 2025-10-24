@@ -1,40 +1,78 @@
-// Fonction pour charger dynamiquement cm-chessboard
+/**
+ * @file Manages the front-end chessboard application, including engine integration, user interaction, and game state.
+ * @author Your Name
+ * @version 1.0.0
+ */
+
+/**
+ * Dynamically loads the cm-chessboard library.
+ * @async
+ * @returns {Promise<Object>} A promise that resolves with the chessboard module.
+ */
 async function loadChessboard() {
     const module = await import(chessEngineData.chessboardSrc);
     return module;
 }
 
-// Fonction pour charger l'extension Markers
+/**
+ * Dynamically loads the Markers extension for cm-chessboard.
+ * @async
+ * @returns {Promise<Object>} A promise that resolves with the Markers extension module.
+ */
 async function loadMarkersExtension() {
     const module = await import(chessEngineData.chessboardSrc.replace('Chessboard.js', 'extensions/markers/Markers.js'));
     return module;
 }
 
-// Fonction pour charger l'extension Arrows
+/**
+ * Dynamically loads the Arrows extension for cm-chessboard.
+ * @async
+ * @returns {Promise<Object>} A promise that resolves with the Arrows extension module.
+ */
 async function loadArrowsExtension() {
     const module = await import(chessEngineData.chessboardSrc.replace('Chessboard.js', 'extensions/arrows/Arrows.js'));
     return module;
 }
 
-// Fonction pour charger l'extension PromotionDialog
+/**
+ * Dynamically loads the PromotionDialog extension for cm-chessboard.
+ * @async
+ * @returns {Promise<Object>} A promise that resolves with the PromotionDialog extension module.
+ */
 async function loadPromotionDialogExtension() {
     const module = await import(chessEngineData.chessboardSrc.replace('Chessboard.js', 'extensions/promotion-dialog/PromotionDialog.js'));
     return module;
 }
 
-// Fonction pour charger l'extension RightClickAnnotator
+/**
+ * Dynamically loads the RightClickAnnotator extension for cm-chessboard.
+ * @async
+ * @returns {Promise<Object>} A promise that resolves with the RightClickAnnotator extension module.
+ */
 async function loadRightClickAnnotatorExtension() {
     const module = await import(chessEngineData.chessboardSrc.replace('Chessboard.js', 'extensions/right-click-annotator/RightClickAnnotator.js'));
     return module;
 }
 
-// Fonction pour charger dynamiquement chess.js
+/**
+ * Dynamically loads the chess.js library.
+ * @async
+ * @returns {Promise<Object>} A promise that resolves with the chess.js module.
+ */
 async function loadChessJs() {
     const module = await import(chessEngineData.chessJsSrc);
     return module;
 }
 
+/**
+ * @class ChessEngineApp
+ * @classdesc Main class to control a single chessboard instance.
+ */
 class ChessEngineApp {
+    /**
+     * Creates an instance of ChessEngineApp.
+     * @param {HTMLElement} containerElement - The container element for the chessboard.
+     */
     constructor(containerElement) {
         this.container = containerElement;
         this.boardId = containerElement.id;
@@ -67,6 +105,11 @@ class ChessEngineApp {
         this.init();
     }
 
+    /**
+     * Initializes the chessboard, libraries, extensions, and event handlers.
+     * @async
+     * @returns {void}
+     */
     async init() {
         try {
             // Charger chess.js
@@ -183,6 +226,10 @@ class ChessEngineApp {
         }
     }
 
+    /**
+     * Initializes the game configuration dialog.
+     * @returns {void}
+     */
     initConfigDialog() {
         this.configDialog = this.container.parentElement.querySelector('.chess-config-dialog');
 
@@ -229,18 +276,30 @@ class ChessEngineApp {
         }
     }
 
+    /**
+     * Shows the configuration dialog.
+     * @returns {void}
+     */
     showConfigDialog() {
         if (this.configDialog) {
             this.configDialog.classList.remove('hidden');
         }
     }
 
+    /**
+     * Hides the configuration dialog.
+     * @returns {void}
+     */
     hideConfigDialog() {
         if (this.configDialog) {
             this.configDialog.classList.add('hidden');
         }
     }
 
+    /**
+     * Starts a new game with the selected configuration.
+     * @returns {void}
+     */
     startNewGame() {
         // Déterminer la couleur finale
         let finalColor = this.selectedColor;
@@ -302,6 +361,11 @@ class ChessEngineApp {
         }
     }
 
+    /**
+     * Initializes the Stockfish chess engine.
+     * @async
+     * @returns {Promise<void>} A promise that resolves when Stockfish is ready.
+     */
     async initStockfish() {
         return new Promise((resolve, reject) => {
             try {
@@ -362,7 +426,11 @@ class ChessEngineApp {
         });
     }
 
-    // Input handler pour le mode libre (exercice)
+    /**
+     * Handles user input on the board in free mode (no engine).
+     * @param {object} event - The move input event from cm-chessboard.
+     * @returns {boolean|Promise<boolean>} Result of the move validation.
+     */
     inputHandlerFreeMode(event) {
         if (event.type === this.INPUT_EVENT_TYPE.movingOverSquare) {
             return;
@@ -546,7 +614,11 @@ class ChessEngineApp {
         }
     }
 
-    // Input handler pour le mode avec moteur
+    /**
+     * Handles user input on the board when the engine is enabled.
+     * @param {object} event - The move input event from cm-chessboard.
+     * @returns {boolean} Result of the move validation.
+     */
     inputHandler(event) {
         if (this.engineThinking) {
             return false;
@@ -600,6 +672,10 @@ class ChessEngineApp {
         }
     }
 
+    /**
+     * Removes the arrow indicating the last move from the board.
+     * @returns {void}
+     */
     removeLastMoveArrow() {
         if (this.lastMoveArrow) {
             this.board.removeArrows(this.ARROW_TYPE.default, this.lastMoveArrow.from, this.lastMoveArrow.to);
@@ -607,6 +683,10 @@ class ChessEngineApp {
         }
     }
 
+    /**
+     * Synchronizes the Stockfish engine's internal position with the game state.
+     * @returns {void}
+     */
     syncStockfishPosition() {
         if (!this.stockfish) {
             return;
@@ -637,6 +717,10 @@ class ChessEngineApp {
         this.stockfish.postMessage('isready');
     }
 
+    /**
+     * Triggers the Stockfish engine to calculate and make a move.
+     * @returns {void}
+     */
     makeEngineMove() {
         if (!this.stockfish || this.engineThinking) {
             return;
@@ -649,6 +733,13 @@ class ChessEngineApp {
         this.stockfish.postMessage('go depth 12');
     }
 
+    /**
+     * Makes a move on the board and in the chess.js instance.
+     * @param {string} from - The starting square of the move.
+     * @param {string} to - The ending square of the move.
+     * @param {string} [promotion] - The piece to promote to (e.g., 'q').
+     * @returns {void}
+     */
     makeMove(from, to, promotion) {
         const move = this.chess.move({
             from: from,
@@ -674,6 +765,10 @@ class ChessEngineApp {
         }
     }
 
+    /**
+     * Checks the current game status (checkmate, draw, stalemate, check) and updates the UI.
+     * @returns {void}
+     */
     checkGameStatus() {
         // En mode libre, ne pas désactiver l'échiquier
         if (!this.enableEngine) {
@@ -696,6 +791,12 @@ class ChessEngineApp {
         }
     }
 
+    /**
+     * Updates the status message displayed to the user.
+     * @param {string} message - The message to display.
+     * @param {string} [className=''] - An optional CSS class to add to the status element.
+     * @returns {void}
+     */
     updateStatus(message, className = '') {
         const statusElement = this.container.parentElement.querySelector('.chess-status');
         if (statusElement) {
@@ -704,6 +805,10 @@ class ChessEngineApp {
         }
     }
 
+    /**
+     * Initializes the control buttons (reset, flip, undo).
+     * @returns {void}
+     */
     initControls() {
         const container = this.container.parentElement;
 

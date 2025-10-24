@@ -13,6 +13,11 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Adds a "Mark as Completed" button to the end of a lesson's content.
  *
+ * This function filters the content of 'roi_lecon' posts. If the user is logged in
+ * and has an appropriate role, it appends either a completion button or a message
+ * indicating the lesson is already completed.
+ *
+ * @since 1.0.0
  * @param string $content The post content.
  * @return string The modified post content.
  */
@@ -50,6 +55,13 @@ add_filter( 'the_content', 'roi_add_lesson_completion_button' );
 
 /**
  * Enqueue scripts for lesson completion.
+ *
+ * Conditionally enqueues the JavaScript file responsible for handling the
+ * AJAX request when the "Mark as Completed" button is clicked. It only loads
+ * on single 'roi_lecon' post pages.
+ *
+ * @since 1.0.0
+ * @return void
  */
 function roi_enqueue_lesson_completion_scripts() {
     if ( is_singular( 'roi_lecon' ) ) {
@@ -64,6 +76,12 @@ add_action( 'wp_enqueue_scripts', 'roi_enqueue_lesson_completion_scripts' );
 
 /**
  * AJAX handler for marking a lesson as complete.
+ *
+ * This function handles the AJAX request to mark a lesson as completed for the
+ * currently logged-in user. It updates the 'roi_completed_lessons' user meta field.
+ *
+ * @since 1.0.0
+ * @return void Sends a JSON response.
  */
 function roi_complete_lesson_ajax_handler() {
     // Check nonce

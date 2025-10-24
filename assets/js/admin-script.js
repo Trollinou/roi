@@ -1,6 +1,16 @@
+/**
+ * @file Manages the dual-list interface for the Course Builder meta box in the WordPress admin.
+ * @author Your Name
+ * @version 1.0.0
+ */
+
 (function($) {
     'use strict';
 
+    /**
+     * Initializes the course builder interface on document ready.
+     * @namespace
+     */
     $(document).ready(function() {
         const availableList = $('#roi-available-items-select');
         const courseList = $('#roi-course-items-select');
@@ -9,6 +19,13 @@
         const availableItemsPlaceholder = $('#roi-available-items-placeholder');
         const i18n = roi_course_builder_data.i18n;
 
+        /**
+         * Fetches available lessons and exercises based on the selected difficulty.
+         * This function makes an AJAX call to the server to get the content
+         * that matches the selected difficulty and is not already in the course.
+         * It then populates the 'Available Items' list.
+         * @returns {void}
+         */
         function fetchAvailableItems() {
             var difficulty = difficultySelect.val();
 
@@ -112,7 +129,13 @@
             fetchAvailableItems();
         }
 
-        // Function to synchronize the hidden inputs with the course list
+        /**
+         * Synchronizes the hidden input fields with the current course list.
+         * This function ensures that the order and content of the course items
+         * are correctly submitted with the form. It clears and rebuilds the
+         * hidden inputs every time the course list changes.
+         * @returns {void}
+         */
         function syncHiddenInputs() {
             hiddenInputsContainer.empty(); // Clear existing inputs
             courseList.find('option').each(function() {

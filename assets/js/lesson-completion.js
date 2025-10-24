@@ -1,6 +1,16 @@
+/**
+ * @file Handles the AJAX functionality for the "Mark as Completed" button on single lesson pages.
+ * @author Your Name
+ * @version 1.0.0
+ */
+
 (function($) {
     'use strict';
 
+    /**
+     * Initializes the lesson completion button functionality on document ready.
+     * @namespace
+     */
     $(document).ready(function() {
         $('#roi-complete-lesson-btn').on('click', function() {
             var $button = $(this);

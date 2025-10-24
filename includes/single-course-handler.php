@@ -13,8 +13,13 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Appends the list of course items to the content on single course pages.
  *
+ * This function filters the content of 'roi_cours' posts to display an ordered
+ * list of the lessons and exercises that make up the course. It only includes items
+ * whose difficulty level matches the course's overall difficulty.
+ *
+ * @since 1.0.0
  * @param string $content The post content.
- * @return string The modified post content.
+ * @return string The modified post content including the course items list.
  */
 function roi_display_single_course_content( $content ) {
     if ( is_singular( 'roi_cours' ) ) {
