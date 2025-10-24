@@ -357,6 +357,12 @@ export default function Edit(props) {
     }, [fen]);
 
     useEffect(() => {
+        if (!fenValidation.isValid && isEngineEnabled) {
+            setAttributes({ enableEngine: 'false' });
+        }
+    }, [fenValidation.isValid]);
+
+    useEffect(() => {
         async function syncTurnFromFen() {
             try {
                 const { Chess } = await import(/* webpackIgnore: true */ roiChessEditor.chessJsSrc);
@@ -472,6 +478,12 @@ export default function Edit(props) {
                         label={__('Activer le moteur Stockfish', 'roi')}
                         checked={isEngineEnabled}
                         onChange={(value) => setAttributes({ enableEngine: value ? 'true' : 'false' })}
+                        disabled={!fenValidation.isValid}
+                        help={
+                            !fenValidation.isValid
+                                ? __('Le FEN doit être valide pour activer le moteur.', 'roi')
+                                : ''
+                        }
                     />
                     {isEngineEnabled && (
                         <RangeControl
