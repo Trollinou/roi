@@ -13,8 +13,12 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Appends the exercise answer form to the content on single exercise pages.
  *
+ * This function filters the content of 'roi_exercice' posts to add an interactive
+ * form that allows users to submit their answers. The form is processed via AJAX.
+ *
+ * @since 1.0.0
  * @param string $content The post content.
- * @return string The modified post content.
+ * @return string The modified post content with the answer form appended.
  */
 function roi_display_single_exercice_form( $content ) {
     if ( is_singular( 'roi_exercice' ) ) {
@@ -62,6 +66,12 @@ add_filter( 'the_content', 'roi_display_single_exercice_form' );
 
 /**
  * Enqueues scripts for the single exercise page.
+ *
+ * This function conditionally enqueues the JavaScript file responsible for handling
+ * the answer submission and feedback display on single 'roi_exercice' pages.
+ *
+ * @since 1.0.0
+ * @return void
  */
 function roi_enqueue_single_exercice_scripts() {
     if ( is_singular( 'roi_exercice' ) ) {

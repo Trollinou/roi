@@ -12,6 +12,12 @@ if ( ! defined( 'WPINC' ) ) {
 
 /**
  * Add the Backup/Restore page to the Apprentissage menu.
+ *
+ * Hooks into the 'admin_menu' action to register the submenu page for
+ * backing up and restoring learning content.
+ *
+ * @since 1.0.0
+ * @return void
  */
 function roi_add_backup_restore_page() {
     add_submenu_page(
@@ -27,6 +33,14 @@ add_action( 'admin_menu', 'roi_add_backup_restore_page' );
 
 /**
  * Renders the backup/restore page.
+ *
+ * This function outputs the HTML for the backup and restore interface,
+ * including forms for downloading a backup and uploading a restore file.
+ * It also includes an inline script to confirm the restore action due to
+ * its destructive nature.
+ *
+ * @since 1.0.0
+ * @return void
  */
 function roi_render_backup_restore_page() {
     ?>

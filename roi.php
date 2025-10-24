@@ -22,6 +22,13 @@ if ( ! defined( 'WPINC' ) ) {
 
 /**
  * Checks if the DAME plugin is active.
+ *
+ * This function is hooked into 'admin_init' and verifies if the required
+ * 'dame/dame.php' plugin is active. If not, it displays an admin notice
+ * and deactivates the current plugin.
+ *
+ * @since 1.0.0
+ * @return void
  */
 function roi_check_dame_dependency() {
     if ( ! is_plugin_active( 'dame/dame.php' ) ) {
@@ -33,6 +40,13 @@ add_action( 'admin_init', 'roi_check_dame_dependency' );
 
 /**
  * Displays an admin notice if the DAME plugin is not active.
+ *
+ * This function renders an error notice in the WordPress admin area, informing
+ * the user that the ROI plugin has been deactivated because its dependency,
+ * the DAME plugin, is not active.
+ *
+ * @since 1.0.0
+ * @return void
  */
 function roi_dame_not_active_notice() {
     ?>
@@ -66,6 +80,12 @@ if ( is_admin() ) {
 
 /**
  * Load plugin textdomain.
+ *
+ * Loads the plugin's translated strings. This function is hooked into the
+ * 'plugins_loaded' action.
+ *
+ * @since 1.0.0
+ * @return void
  */
 function roi_load_textdomain() {
     load_plugin_textdomain( 'roi', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
@@ -73,7 +93,13 @@ function roi_load_textdomain() {
 add_action( 'plugins_loaded', 'roi_load_textdomain' );
 
 /**
- * Initialize Chess Engine
+ * Initialize Chess Engine.
+ *
+ * Hooks into the 'init' action to get the singleton instance of the
+ * Roi_Chess_Engine class, effectively initializing the chess-related
+ * functionalities of the plugin.
+ *
+ * @since 1.0.0
  */
 add_action('init', function() {
     Roi_Chess_Engine::get_instance(

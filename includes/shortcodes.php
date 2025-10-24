@@ -13,8 +13,13 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Renders the [roi_exercices] shortcode.
  *
- * @param array $atts Shortcode attributes.
- * @return string The shortcode output.
+ * This shortcode displays a user interface for selecting and completing exercises.
+ * It includes filters for difficulty and category, and loads exercises dynamically
+ * via AJAX.
+ *
+ * @since 1.0.0
+ * @param array $atts Shortcode attributes (not currently used).
+ * @return string The HTML output for the shortcode.
  */
 function roi_exercices_shortcode( $atts ) {
     wp_enqueue_script( 'roi-exercices', plugin_dir_url( __FILE__ ) . '../assets/js/exercices.js', array( 'jquery' ), ROI_VERSION, true );
@@ -74,6 +79,13 @@ add_shortcode( 'roi_exercices', 'roi_exercices_shortcode' );
 
 /**
  * AJAX handler to fetch a random exercice.
+ *
+ * This function queries for a random 'roi_exercice' post based on the provided
+ * difficulty and category filters, excluding any specified post ID. It returns
+ * the exercise content as an HTML string.
+ *
+ * @since 1.0.0
+ * @return void Sends a JSON response.
  */
 function roi_fetch_exercice_ajax_handler() {
     check_ajax_referer( 'roi_exercice_nonce', 'nonce' );
@@ -171,6 +183,13 @@ add_action( 'wp_ajax_nopriv_roi_fetch_exercice', 'roi_fetch_exercice_ajax_handle
 
 /**
  * AJAX handler to check the user's answer.
+ *
+ * This function compares the user's submitted answers for an exercise with the
+ * correct answers stored in post meta. It returns whether the answer was correct,
+ * the solution content, and the indices of both the user's and the correct answers.
+ *
+ * @since 1.0.0
+ * @return void Sends a JSON response.
  */
 function roi_check_answer_ajax_handler() {
     check_ajax_referer( 'roi_exercice_nonce', 'nonce' );
@@ -231,8 +250,9 @@ add_action( 'wp_ajax_nopriv_roi_check_answer', 'roi_check_answer_ajax_handler' )
  * This function is hooked into `the_content`, `widget_text_content`, and `comment_text`
  * to ensure that chess piece representations are consistent across the site.
  *
+ * @since 1.0.0
  * @param string $content The content to filter.
- * @return string The filtered content with chess piece shortcodes replaced.
+ * @return string The filtered content with chess piece shortcodes replaced by HTML span elements.
  */
 function roi_chess_pieces_shortcodes_filter( $content ) {
     $chess_pieces = array(

@@ -1,6 +1,6 @@
 <?php
 /**
- * File for handling custom roles.
+ * File for handling custom roles and capabilities.
  *
  * @package ROI
  */
@@ -13,6 +13,10 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Returns the capabilities for the Exercice CPT.
  *
+ * This helper function provides a consistent array of custom capabilities
+ * related to the 'roi_exercice' custom post type.
+ *
+ * @since 1.0.0
  * @return array The list of capabilities.
  */
 function roi_get_exercice_capabilities() {
@@ -30,6 +34,10 @@ function roi_get_exercice_capabilities() {
 /**
  * Returns the capabilities for the Cours CPT.
  *
+ * This helper function provides a consistent array of custom capabilities
+ * related to the 'roi_cours' custom post type.
+ *
+ * @since 1.0.0
  * @return array The list of capabilities.
  */
 function roi_get_cours_capabilities() {
@@ -46,6 +54,13 @@ function roi_get_cours_capabilities() {
 
 /**
  * Adds the custom capabilities for the plugin to the relevant roles.
+ *
+ * This function grants the custom capabilities for managing 'roi_exercice' and
+ * 'roi_cours' post types to the 'entraineur' (Coach) and 'administrator' roles.
+ * It is hooked into the 'init' action to ensure roles are available.
+ *
+ * @since 1.0.0
+ * @return void
  */
 function roi_add_capabilities_to_roles() {
     // Add caps to Entraineur
@@ -76,6 +91,13 @@ add_action( 'init', 'roi_add_capabilities_to_roles' );
 
 /**
  * Remove custom capabilities on plugin deactivation.
+ *
+ * This function removes all the custom capabilities added by the plugin from the
+ * 'entraineur' and 'administrator' roles. It is intended to be called upon
+ * plugin deactivation to clean up the database.
+ *
+ * @since 1.0.0
+ * @return void
  */
 function roi_remove_capabilities_from_roles() {
     // Remove caps from Entraineur

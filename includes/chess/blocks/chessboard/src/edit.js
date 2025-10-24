@@ -1,3 +1,9 @@
+/**
+ * @file This file contains the editor component for the Chessboard Gutenberg block.
+ * @author Your Name
+ * @version 1.0.0
+ */
+
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { PanelBody, TextControl, SelectControl, ToggleControl, RangeControl, Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
@@ -6,20 +12,39 @@ import { Component, useEffect, useState } from '@wordpress/element';
 // ========================================
 // COMPOSANT PieceIcon
 // ========================================
+/**
+ * @class PieceIcon
+ * @extends Component
+ * @classdesc A React component to render a single SVG chess piece using the cm-chessboard library's drawing function.
+ */
 class PieceIcon extends Component {
+    /**
+     * Creates an instance of PieceIcon.
+     * @param {object} props - The component props.
+     */
     constructor(props) {
         super(props);
         this.svgRef = null;
     }
 
+    /**
+     * Draws the piece when the component mounts.
+     */
     componentDidMount() {
         this.drawPiece();
     }
 
+    /**
+     * Redraws the piece when the component updates.
+     */
     componentDidUpdate() {
         this.drawPiece();
     }
 
+    /**
+     * Renders the chess piece SVG inside the component's SVG container.
+     * It leverages the cm-chessboard instance's internal `drawPiece` method.
+     */
     drawPiece() {
         if (!this.svgRef) return;
         while (this.svgRef.firstChild) {
@@ -38,6 +63,10 @@ class PieceIcon extends Component {
         }
     }
 
+    /**
+     * Renders the SVG container for the piece.
+     * @returns {JSX.Element} The rendered SVG element.
+     */
     render() {
         return (
             <svg
@@ -54,7 +83,17 @@ class PieceIcon extends Component {
 // ========================================
 // CLASSE SimpleFenEditor
 // ========================================
+/**
+ * @class SimpleFenEditor
+ * @extends Component
+ * @classdesc A component that provides a visual FEN editor using cm-chessboard,
+ * allowing users to place, move, and remove pieces to construct a board position.
+ */
 class SimpleFenEditor extends Component {
+    /**
+     * Creates an instance of SimpleFenEditor.
+     * @param {object} props - The component props.
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -65,16 +104,28 @@ class SimpleFenEditor extends Component {
         this.chessboard = null;
     }
 
+    /**
+     * Initializes the chessboard when the component mounts.
+     */
     async componentDidMount() {
         await this.initChessboard();
     }
 
+    /**
+     * Destroys the chessboard instance when the component unmounts.
+     */
     componentWillUnmount() {
         if (this.chessboard) {
             this.chessboard.destroy();
         }
     }
 
+    /**
+     * Handles component updates, re-initializing the board on style changes
+     * or updating the position if the FEN string changes.
+     * @param {object} prevProps - The previous props.
+     * @param {object} prevState - The previous state.
+     */
     async componentDidUpdate(prevProps, prevState) {
         if (
             prevProps.pieces !== this.props.pieces ||
@@ -95,12 +146,24 @@ class SimpleFenEditor extends Component {
         }
     }
 
+    /**
+     * Completes a partial FEN string (piece placement) with the full FEN data
+     * from the block's attributes (turn, castling rights, etc.).
+     * @param {string} partialFen - The piece placement part of the FEN.
+     * @returns {string} The full, completed FEN string.
+     */
     completeFen(partialFen) {
         const tokens = this.props.fen.split(' ');
         tokens[0] = partialFen;
         return tokens.join(' ');
     }
 
+    /**
+     * Initializes the cm-chessboard instance for the editor.
+     * This function dynamically imports the library, creates a new chessboard
+     * instance with the appropriate settings for freeform editing, and sets up
+     * event handlers.
+     */
     async initChessboard() {
         if (!this.editorRef) return;
         if (this.chessboard) {
@@ -166,6 +229,11 @@ class SimpleFenEditor extends Component {
         }
     }
 
+    /**
+     * Adds click handlers to the board squares for piece placement.
+     * This is necessary because the default drag-and-drop behavior can
+     * interfere with simple click-to-place functionality.
+     */
     addSquareClickHandlers() {
         if (!this.editorRef) return;
         const boardGroup = this.editorRef.querySelector('g.board.input-enabled');
@@ -194,12 +262,20 @@ class SimpleFenEditor extends Component {
         });
     }
 
+    /**
+     * Clears all pieces from the board.
+     */
     clearBoard() {
         if (this.chessboard) {
             this.props.onChange('8/8/8/8/8/8/8/8 w - - 0 1');
         }
     }
 
+    /**
+     * Renders the FEN editor interface, including piece selection palettes
+     * and the chessboard itself.
+     * @returns {JSX.Element} The rendered component.
+     */
     render() {
         const whitePieces = [
             { code: 'wp', label: 'Pion blanc' },
@@ -332,7 +408,13 @@ class SimpleFenEditor extends Component {
     }
 }
 
-
+/**
+ * The main Edit component for the Gutenberg block.
+ * @param {object} props - The component props provided by WordPress.
+ * @param {object} props.attributes - The block's attributes.
+ * @param {function} props.setAttributes - A function to update the block's attributes.
+ * @returns {JSX.Element} The rendered block editor interface.
+ */
 export default function Edit(props) {
     const { attributes, setAttributes } = props;
     const { fen, turn = 'w' } = attributes;
@@ -344,6 +426,9 @@ export default function Edit(props) {
     const blockProps = useBlockProps();
 
     useEffect(() => {
+        /**
+         * Validates the FEN string using chess.js.
+         */
         async function validate() {
             try {
                 const { Chess } = await import(/* webpackIgnore: true */ roiChessEditor.chessJsSrc);
@@ -357,12 +442,16 @@ export default function Edit(props) {
     }, [fen]);
 
     useEffect(() => {
+        // Disables the engine if the FEN becomes invalid.
         if (!fenValidation.isValid && isEngineEnabled) {
             setAttributes({ enableEngine: 'false' });
         }
     }, [fenValidation.isValid]);
 
     useEffect(() => {
+        /**
+         * Synchronizes the 'turn' attribute with the turn specified in the FEN string.
+         */
         async function syncTurnFromFen() {
             try {
                 const { Chess } = await import(/* webpackIgnore: true */ roiChessEditor.chessJsSrc);
@@ -378,6 +467,9 @@ export default function Edit(props) {
     }, [fen]);
 
     useEffect(() => {
+        /**
+         * Synchronizes the FEN string with the 'turn' attribute.
+         */
         async function syncFenFromTurn() {
             try {
                 const { Chess } = await import(/* webpackIgnore: true */ roiChessEditor.chessJsSrc);

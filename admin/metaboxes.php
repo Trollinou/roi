@@ -13,8 +13,13 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Adds a transient-based admin notice.
  *
+ * This function stores a message and its type in a transient to be displayed
+ * on the next admin page load.
+ *
+ * @since 1.0.0
  * @param string $message The message to display.
  * @param string $type    The type of notice ('success', 'warning', 'error', 'info').
+ * @return void
  */
 function roi_add_admin_notice( $message, $type = 'success' ) {
     $transient_name = 'roi_admin_notice_' . md5( $message );
@@ -23,6 +28,12 @@ function roi_add_admin_notice( $message, $type = 'success' ) {
 
 /**
  * Displays admin notices stored in transients.
+ *
+ * This function retrieves and displays any notices set by roi_add_admin_notice(),
+ * then deletes the transient.
+ *
+ * @since 1.0.0
+ * @return void
  */
 function roi_display_admin_notices() {
     global $wp_version;
@@ -48,6 +59,11 @@ add_action( 'admin_notices', 'roi_display_admin_notices' );
 
 /**
  * Adds the meta boxes for the Lecon CPT.
+ *
+ * Hooks into 'add_meta_boxes' to register the 'Détails de la leçon' meta box.
+ *
+ * @since 1.0.0
+ * @return void
  */
 function roi_add_lecon_meta_boxes() {
     add_meta_box(
@@ -64,7 +80,12 @@ add_action( 'add_meta_boxes', 'roi_add_lecon_meta_boxes' );
 /**
  * Renders the meta box for lecon details.
  *
+ * This function outputs the HTML for the meta box, which includes a dropdown
+ * to select the difficulty level for the lesson.
+ *
+ * @since 1.0.0
  * @param WP_Post $post The post object.
+ * @return void
  */
 function roi_render_lecon_details_metabox( $post ) {
     wp_nonce_field( 'roi_save_lecon_meta', 'roi_lecon_metabox_nonce' );
@@ -93,7 +114,13 @@ function roi_render_lecon_details_metabox( $post ) {
 /**
  * Save meta box content for Lecon CPT.
  *
- * @param int $post_id Post ID
+ * This function handles the saving and sanitization of the custom meta field
+ * for the 'roi_lecon' post type. It performs security checks and validates
+ * that the required 'difficulty' field is not empty.
+ *
+ * @since 1.0.0
+ * @param int $post_id Post ID.
+ * @return void
  */
 function roi_save_lecon_meta( $post_id ) {
     // --- Security checks ---
@@ -131,6 +158,11 @@ add_action( 'save_post_roi_lecon', 'roi_save_lecon_meta' );
 
 /**
  * Adds the meta boxes for the Exercice CPT.
+ *
+ * Hooks into 'add_meta_boxes' to register the 'Détails de l\'exercice' meta box.
+ *
+ * @since 1.0.0
+ * @return void
  */
 function roi_add_exercice_meta_boxes() {
     add_meta_box(
@@ -147,7 +179,13 @@ add_action( 'add_meta_boxes', 'roi_add_exercice_meta_boxes' );
 /**
  * Renders the meta box for exercice details.
  *
+ * Outputs the HTML for the exercise meta box, including fields for difficulty,
+ * question type (radio buttons), possible answers (text inputs with checkboxes),
+ * and a rich text editor for the solution.
+ *
+ * @since 1.0.0
  * @param WP_Post $post The post object.
+ * @return void
  */
 function roi_render_exercice_details_metabox( $post ) {
     wp_nonce_field( 'roi_save_exercice_meta', 'roi_exercice_metabox_nonce' );
@@ -218,7 +256,13 @@ function roi_render_exercice_details_metabox( $post ) {
 /**
  * Save meta box content for Exercice CPT.
  *
- * @param int $post_id Post ID
+ * Handles saving, validation, and sanitization for the 'roi_exercice' meta fields.
+ * It ensures the required difficulty field is set and processes the answer data,
+ * allowing for shortcodes in the answer text which are sanitized on output.
+ *
+ * @since 1.0.0
+ * @param int $post_id Post ID.
+ * @return void
  */
 function roi_save_exercice_meta( $post_id ) {
     // --- Security checks ---
@@ -278,6 +322,11 @@ add_action( 'save_post_roi_exercice', 'roi_save_exercice_meta' );
 
 /**
  * Adds the meta box for the Cours CPT.
+ *
+ * Hooks into 'add_meta_boxes' to register the 'Constructeur de Cours' meta box.
+ *
+ * @since 1.0.0
+ * @return void
  */
 function roi_add_cours_meta_boxes() {
     add_meta_box(
@@ -294,7 +343,14 @@ add_action( 'add_meta_boxes', 'roi_add_cours_meta_boxes' );
 /**
  * Renders the dual list meta box for the course builder.
  *
+ * Outputs the HTML for the course builder interface, which includes a difficulty
+ * selector and a dual-list interface for adding/removing lessons and exercises
+ * to the course. The available content is loaded via AJAX based on the selected
+ * difficulty.
+ *
+ * @since 1.0.0
  * @param WP_Post $post The post object.
+ * @return void
  */
 function roi_render_cours_builder_metabox( $post ) {
     wp_nonce_field( 'roi_save_cours_meta', 'roi_cours_metabox_nonce' );
@@ -401,6 +457,13 @@ function roi_render_cours_builder_metabox( $post ) {
 
 /**
  * Save meta box content for Cours CPT.
+ *
+ * Handles saving the difficulty and the ordered list of course items (lessons
+ * and exercises) for the 'roi_cours' post type.
+ *
+ * @since 1.0.0
+ * @param int $post_id The post ID.
+ * @return void
  */
 function roi_save_cours_meta( $post_id ) {
     if ( ! isset( $_POST['roi_cours_metabox_nonce'] ) || ! wp_verify_nonce( $_POST['roi_cours_metabox_nonce'], 'roi_save_cours_meta' ) ) {
@@ -450,6 +513,15 @@ function roi_save_cours_meta( $post_id ) {
 }
 add_action( 'save_post_roi_cours', 'roi_save_cours_meta' );
 
+/**
+ * AJAX handler to get available lessons and exercises for the course builder.
+ *
+ * Fetches all 'roi_lecon' and 'roi_exercice' posts that match the specified
+ * difficulty level and are not already part of the current course.
+ *
+ * @since 1.0.0
+ * @return void Sends JSON response.
+ */
 function roi_get_course_builder_items() {
     check_ajax_referer( 'roi_course_builder_nonce', 'nonce' );
 
@@ -510,7 +582,13 @@ add_action( 'wp_ajax_roi_get_course_builder_items', 'roi_get_course_builder_item
 /**
  * Enqueues admin scripts for the plugin.
  *
- * @param string $hook The current admin page.
+ * This function conditionally enqueues the course builder JavaScript and its
+ * localized data on the 'roi_cours' post edit screen. It also enqueues
+ * the WordPress editor and admin styles on the 'roi_exercice' screen.
+ *
+ * @since 1.0.0
+ * @param string $hook The current admin page hook.
+ * @return void
  */
 function roi_enqueue_admin_scripts( $hook ) {
 	global $post;
