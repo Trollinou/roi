@@ -1,114 +1,114 @@
 # ROI - Ressources et Organisation pour l’Initiation aux échecs
 
-**Version:** 1.0.4
-**Author:** Etienne Gagnon
-**License:** GPL v2 or later
-**Requires WordPress:** 6.8+
-**Requires PHP:** 8.2+
+**Version :** 1.0.4
+**Auteur :** Etienne Gagnon
+**Licence :** GPL v2 ou ultérieure
+**WordPress Requis :** 6.8+
+**PHP Requis :** 8.2+
 
 ## Description
 
-The "ROI - Ressources et Organisation pour l’Initiation aux échecs" (Resources and Organization for Chess Initiation) plugin is a comprehensive Learning Management System (LMS) designed for chess education within a WordPress environment. It provides a robust framework for creating, managing, and delivering chess lessons, exercises, and courses. The plugin includes a sophisticated interactive chessboard block powered by Stockfish, `chess.js`, and `cm-chessboard`, allowing for demonstrations, exercises, and player-vs-AI games.
+Le plugin "ROI - Ressources et Organisation pour l’Initiation aux échecs" est un système de gestion de l'apprentissage (LMS) complet, conçu pour l'enseignement des échecs dans un environnement WordPress. Il fournit un cadre robuste pour la création, la gestion et la diffusion de leçons, d'exercices et de cours d'échecs. Le plugin inclut un bloc d'échiquier interactif sophistiqué, alimenté par Stockfish, `chess.js` et `cm-chessboard`, permettant des démonstrations, des exercices et des parties joueur contre IA.
 
-This plugin was developed following WordPress best practices for security, performance, and maintainability.
+Ce plugin a été développé en suivant les meilleures pratiques de WordPress en matière de sécurité, de performance et de maintenabilité.
 
-## Dependencies
+## Dépendances
 
-This plugin requires the **DAME** plugin to be installed and activated. The plugin will automatically deactivate itself if the DAME dependency is not met.
+Ce plugin nécessite que le plugin **DAME** soit installé et activé. Le plugin se désactivera automatiquement si la dépendance DAME n'est pas satisfaite.
 
 ## Installation
 
-1.  **Download the plugin:** Obtain the plugin zip file.
-2.  **Upload to WordPress:** Navigate to your WordPress admin dashboard, go to `Plugins` > `Add New`, and click `Upload Plugin`.
-3.  **Select and Install:** Choose the downloaded zip file and click `Install Now`.
-4.  **Activate:** Once the installation is complete, click `Activate Plugin`.
-5.  **Verify Dependencies:** Ensure the **DAME** plugin is installed and activated.
+1.  **Télécharger le plugin :** Obtenez le fichier zip du plugin.
+2.  **Téléverser sur WordPress :** Accédez à votre tableau de bord d'administration WordPress, allez dans `Extensions` > `Ajouter`, et cliquez sur `Téléverser une extension`.
+3.  **Sélectionner et Installer :** Choisissez le fichier zip téléchargé et cliquez sur `Installer maintenant`.
+4.  **Activer :** Une fois l'installation terminée, cliquez sur `Activer l'extension`.
+5.  **Vérifier les dépendances :** Assurez-vous que le plugin **DAME** est installé et activé.
 
-## Key Features
+## Fonctionnalités Principales
 
-### Learning Management System (LMS)
+### Système de Gestion de l'Apprentissage (LMS)
 
-*   **Custom Post Types:**
-    *   **Lessons (`roi_lecon`):** Create detailed chess lessons with text, images, and embedded chessboards.
-    *   **Exercises (`roi_exercice`):** Design interactive multiple-choice or true/false questions, often featuring a chessboard for context.
-    *   **Courses (`roi_cours`):** Build structured learning paths by assembling lessons and exercises in a specific order.
-*   **Unified Difficulty System:** Assign a difficulty level (from "Very Easy" to "Expert") to all content, allowing for filtered learning.
-*   **Visual Course Builder:** An intuitive dual-list interface to drag-and-drop lessons and exercises into a course.
-*   **User Progression Tracking:** Logged-in members can mark lessons as complete. (Note: Full tracking features are managed by the DAME plugin).
-*   **Interactive Exercise Interface:** A shortcode `[roi_exercices]` that generates a public-facing quiz system with immediate feedback.
+*   **Types de Publication Personnalisés :**
+    *   **Leçons (`roi_lecon`) :** Créez des leçons d'échecs détaillées avec du texte, des images et des échiquiers intégrés.
+    *   **Exercices (`roi_exercice`) :** Concevez des questions interactives à choix multiples ou vrai/faux, souvent accompagnées d'un échiquier pour le contexte.
+    *   **Cours (`roi_cours`) :** Construisez des parcours d'apprentissage structurés en assemblant des leçons et des exercices dans un ordre précis.
+*   **Système de Difficulté Unifié :** Attribuez un niveau de difficulté (de "Très Facile" à "Expert") à tout le contenu, permettant un apprentissage filtré.
+*   **Constructeur de Cours Visuel :** Une interface intuitive à double liste pour glisser-déposer des leçons et des exercices dans un cours.
+*   **Suivi de la Progression des Utilisateurs :** Les membres connectés peuvent marquer les leçons comme terminées. (Note : Les fonctionnalités de suivi complètes sont gérées par le plugin DAME).
+*   **Interface d'Exercices Interactifs :** Un shortcode `[roi_exercices]` qui génère un système de quiz public avec des retours immédiats.
 
-### Interactive Chessboard Block (`roi/chessboard`)
+### Bloc d'Échiquier Interactif (`roi/chessboard`)
 
-*   **Multiple Modes:**
-    *   **Demonstration:** A static board to display positions.
-    *   **Exercise:** Allows free movement of pieces for setting up and solving puzzles.
-    *   **Game vs. AI:** Play against the integrated Stockfish engine with adjustable ELO strength.
-*   **Visual FEN Editor:** A powerful in-editor tool to visually create any board position. The editor provides real-time FEN validation and error messaging.
-*   **High Customization:** Control board orientation, piece style, border type, coordinates, and color schemes.
-*   **Robust Engine:** Powered by `chess.js` for game logic and `cm-chessboard` for rendering, ensuring accurate and reliable behavior.
+*   **Modes Multiples :**
+    *   **Démonstration :** Un échiquier statique pour afficher des positions.
+    *   **Exercice :** Permet le déplacement libre des pièces pour la mise en place et la résolution de problèmes.
+    *   **Partie vs IA :** Jouez contre le moteur Stockfish intégré avec une force ELO réglable.
+*   **Éditeur de FEN Visuel :** Un outil puissant dans l'éditeur pour créer visuellement n'importe quelle position sur l'échiquier. L'éditeur fournit une validation FEN en temps réel et des messages d'erreur.
+*   **Haute Personnalisation :** Contrôlez l'orientation de l'échiquier, le style des pièces, le type de bordure, les coordonnées et les schémas de couleurs.
+*   **Moteur Robuste :** Propulsé par `chess.js` pour la logique de jeu et `cm-chessboard` pour le rendu, garantissant un comportement précis et fiable.
 
 ### Administration
 
-*   **Content Backup & Restore:** A dedicated admin page to export all learning content (lessons, exercises, courses, categories) to a `.json.gz` file and restore it, preventing data loss.
+*   **Sauvegarde et Restauration du Contenu :** Une page d'administration dédiée pour exporter tout le contenu pédagogique (leçons, exercices, cours, catégories) dans un fichier `.json.gz` et le restaurer, prévenant ainsi la perte de données.
 
-## How to Use
+## Comment Utiliser
 
-### Creating Content
+### Création de Contenu
 
-1.  Navigate to the **Apprentissage** menu in the WordPress admin dashboard.
-2.  Select **Leçons**, **Exercices**, or **Cours** to create new content.
-3.  Use the custom fields to set the difficulty and other relevant details.
-4.  For courses, use the **Constructeur de Cours** meta box to assemble your curriculum.
+1.  Accédez au menu **Apprentissage** dans le tableau de bord d'administration de WordPress.
+2.  Sélectionnez **Leçons**, **Exercices**, ou **Cours** pour créer du nouveau contenu.
+3.  Utilisez les champs personnalisés pour définir la difficulté et d'autres détails pertinents.
+4.  Pour les cours, utilisez la meta box **Constructeur de Cours** pour assembler votre programme.
 
-### Using the Chessboard Block
+### Utilisation du Bloc Échiquier
 
-1.  In the block editor, add a new block and search for "Échiquier".
-2.  Use the block's sidebar controls (the Inspector) to configure the board's appearance and functionality.
-3.  Use the visual editor within the block to set the desired piece positions, or paste a valid FEN string.
+1.  Dans l'éditeur de blocs, ajoutez un nouveau bloc et recherchez "Échiquier".
+2.  Utilisez les contrôles de la barre latérale du bloc (l'Inspecteur) pour configurer l'apparence et les fonctionnalités de l'échiquier.
+3.  Utilisez l'éditeur visuel à l'intérieur du bloc pour définir les positions de pièces souhaitées, ou collez une chaîne FEN valide.
 
 ### Shortcodes
 
-*   `[roi_exercices]`: Displays the interactive exercise system on any page or post.
-*   `[chess_board fen="..." enableEngine="true" ...]`: A legacy shortcode is available for rendering the chessboard. However, using the Gutenberg block is recommended.
+*   `[roi_exercices]`: Affiche le système d'exercices interactifs sur n'importe quelle page ou article.
+*   `[chess_board fen="..." enableEngine="true" ...]`: Un shortcode hérité est disponible pour afficher l'échiquier. Cependant, l'utilisation du bloc Gutenberg est recommandée.
 
-## Development & File Structure
+## Développement et Structure des Fichiers
 
-The plugin is organized into the following main directories:
+Le plugin est organisé dans les répertoires principaux suivants :
 
-*   `/admin`: Contains files related to the WordPress admin area, such as menu pages, meta boxes, and the backup/restore functionality.
-*   `/assets`: Holds public-facing CSS and JS files.
-*   `/includes`: The core logic of the plugin.
-    *   `/chess`: Contains all chess-related functionality, including the Gutenberg block source (`/blocks`), the front-end JS app (`/assets`), PHP class (`class-chess-engine.php`), and third-party libraries (`/vendor`).
-*   `/roi.php`: The main plugin file.
-*   `/webpack.config.js`: Configuration for the `@wordpress/scripts` build process for the Gutenberg block.
+*   `/admin`: Contient les fichiers relatifs à la zone d'administration de WordPress, tels que les pages de menu, les meta boxes et la fonctionnalité de sauvegarde/restauration.
+*   `/assets`: Contient les fichiers CSS et JS publics.
+*   `/includes`: La logique principale du plugin.
+    *   `/chess`: Contient toutes les fonctionnalités liées aux échecs, y compris la source du bloc Gutenberg (`/blocks`), l'application JS front-end (`/assets`), la classe PHP (`class-chess-engine.php`), et les bibliothèques tierces (`/vendor`).
+*   `/roi.php`: Le fichier principal du plugin.
+*   `/webpack.config.js`: Configuration pour le processus de build `@wordpress/scripts` pour le bloc Gutenberg.
 
-### Build Process
+### Processus de Build
 
-The project uses `@wordpress/scripts` to compile the Gutenberg block assets. To modify the block's JavaScript or CSS:
+Le projet utilise `@wordpress/scripts` pour compiler les assets du bloc Gutenberg. Pour modifier le JavaScript ou le CSS du bloc :
 
-1.  Navigate to the plugin's root directory in your terminal.
-2.  Run `npm install` to install dependencies.
-3.  Run `npm run build` to compile the source files from `includes/chess/blocks/chessboard/src` into the `includes/chess/blocks/chessboard/build` directory.
+1.  Accédez au répertoire racine du plugin dans votre terminal.
+2.  Exécutez `npm install` pour installer les dépendances.
+3.  Exécutez `npm run build` pour compiler les fichiers source de `includes/chess/blocks/chessboard/src` dans le répertoire `includes/chess/blocks/chessboard/build`.
 
 ## Changelog
 
 ### 1.0.4 - 2025-10-23
-*   **Major Chessboard Block Improvement:**
-    *   Integrated `chess.js` for robust board state management and FEN validation.
-    *   **Position Editor:** Allows creating custom positions (even "illegal" ones), validates FEN in real-time with detailed error messages, and makes Stockfish activation conditional on FEN validity.
-    *   **Frontend View:** Fixed critical bugs related to pawn promotion, move validation in exercise mode, and visual glitches after an illegal move.
+*   **Amélioration majeure du bloc Échiquier :**
+    *   Intégration de `chess.js` pour une gestion robuste de l'état de l'échiquier et de la validation FEN.
+    *   **Éditeur de position :** Permet la création de positions personnalisées (même "illégales"), valide la FEN en temps réel avec des messages d'erreur détaillés, et conditionne l'activation de Stockfish à la validité de la FEN.
+    *   **Visualisation (Front-end) :** Correction de bugs critiques sur la promotion des pions, la validation des mouvements en mode exercice, et les glitches visuels après un coup illégal.
 
 ### 1.0.3 - 2025-10-22
-*   **Chessboard Block Improvement:**
-    *   The Stockfish engine level selector now displays a user-friendly ELO estimate (e.g., "1200-1400") instead of a numeric value (0-20).
-    *   Refactored the block's code structure to follow WordPress conventions, improving maintainability.
+*   **Amélioration du bloc Échiquier :**
+    *   Le sélecteur de niveau du moteur Stockfish affiche désormais une estimation ELO conviviale (par exemple, "1200-1400") au lieu d'une valeur numérique (0-20).
+    *   Refonte de la structure du code du bloc pour suivre les conventions de WordPress, améliorant ainsi la maintenabilité.
 
 ### 1.0.2 - 2025-10-22
-*   **Chessboard Block Improvement:**
-    *   The "Color" option (board orientation) is now always visible.
-    *   Added a "Show Coordinates" option.
-    *   Reorganized block settings.
-    *   Fixed a bug with coordinate display on the public page.
+*   **Amélioration du bloc Échiquier :**
+    *   L'option "Couleur" (orientation de l'échiquier) est désormais toujours visible.
+    *   Ajout d'une option "Afficher les coordonnées".
+    *   Réorganisation des paramètres du bloc.
+    *   Correction d'un bug sur l'affichage des coordonnées sur la page publique.
 
 ### 1.0.0 - 2025-09-15
-*   Initial release of the plugin.
+*   Première version du plugin.
