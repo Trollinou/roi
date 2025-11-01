@@ -9,15 +9,16 @@
 }
 
 .wp-block-roi-chessboard .castling-controls__row {
-    display: grid;
-    grid-template-columns: 60px 1fr 1fr;
+    display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 4px;
+    gap: 4px;
+    margin-bottom: 2px;
 }
 
 .wp-block-roi-chessboard .castling-controls__row span {
     font-size: 12px;
+    min-width: 45px;
+    display: inline-block;
 }
 
 .wp-block-roi-chessboard .castling-controls .components-base-control {
