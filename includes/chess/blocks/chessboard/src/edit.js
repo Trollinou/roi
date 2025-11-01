@@ -47,7 +47,7 @@ class SimpleFenEditor extends Component {
         await this.initChessboard();
         this.resizeObserver = new ResizeObserver(() => {
             if (this.chessboard) {
-                this.chessboard.redraw();
+                this.chessboard.view.redrawBoard();
             }
         });
         if (this.editorRef) {

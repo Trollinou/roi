@@ -11,21 +11,23 @@
 .wp-block-roi-chessboard .castling-controls__row {
     display: flex;
     align-items: center;
-    gap: 4px;
-    margin-bottom: 2px;
+    gap: 8px; /* Augmentation pour espacer "O-O" et "O-O-O" */
+    margin-bottom: 4px;
 }
 
 .wp-block-roi-chessboard .castling-controls__row span {
     font-size: 12px;
     min-width: 45px;
-    display: inline-block;
 }
 
+/* Forcer les CheckboxControl à s'aligner horizontalement */
 .wp-block-roi-chessboard .castling-controls .components-base-control {
-    margin-bottom: 0;
-    display: inline-flex;
-    align-items: center;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    margin-bottom: 0 !important;
 }
+
 .wp-block-roi-chessboard .castling-controls .components-checkbox-control__label {
     margin-left: 4px;
 }
