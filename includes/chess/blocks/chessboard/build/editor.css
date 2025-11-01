@@ -61,3 +61,8 @@
 .piece-selection-dialog-button:hover {
     fill: rgba(136, 153, 166, 0.3);
 }
+
+/* Ensure the piece icon doesn't block the click event on the button */
+.piece-selection-dialog-group use {
+    pointer-events: none;
+}

@@ -108,31 +108,47 @@ export class PieceSelectionDialog extends Extension {
         if (this.state.displayState === DISPLAY_STATE.shown) {
             const squareWidth = this.chessboard.view.squareWidth;
             const squareHeight = this.chessboard.view.squareHeight;
-            const squareCenterPoint = this.chessboard.view.squareToPoint(this.state.dialogParams.square);
+            const squarePoint = this.chessboard.view.squareToPoint(this.state.dialogParams.square);
 
             const whitePieces = ['wp', 'wb', 'wn', 'wr', 'wq', 'wk'];
             const blackPieces = ['bp', 'bb', 'bn', 'br', 'bq', 'bk'];
 
-            const offsetX = squareCenterPoint.x + squareWidth > this.chessboard.view.width ? -squareWidth * 2 : 0;
+            // Adjust position to stay within the board boundaries
+            const dialogWidth = squareWidth * 2;
+            let dialogX = squarePoint.x;
+            if (dialogX + dialogWidth > this.chessboard.view.width) {
+                dialogX = this.chessboard.view.width - dialogWidth;
+            }
+
+            const dialogHeight = squareHeight * 6;
+            let dialogY = squarePoint.y;
+            if (dialogY + dialogHeight > this.chessboard.view.height) {
+                // Try to align the dialog's bottom with the square's bottom
+                dialogY = squarePoint.y + squareHeight - dialogHeight;
+                // If it overflows the top, align it to the top
+                if (dialogY < 0) {
+                    dialogY = 0;
+                }
+            }
 
             Svg.addElement(this.pieceSelectionDialogGroup, 'rect', {
-                x: squareCenterPoint.x + offsetX,
-                y: squareCenterPoint.y,
-                width: squareWidth * 2,
-                height: squareHeight * 6,
+                x: dialogX,
+                y: dialogY,
+                width: dialogWidth,
+                height: dialogHeight,
                 class: 'piece-selection-dialog',
             });
 
             for (let i = 0; i < 6; i++) {
                 // White pieces
                 this.drawPieceButton(whitePieces[i], {
-                    x: squareCenterPoint.x + offsetX,
-                    y: squareCenterPoint.y + i * squareHeight,
+                    x: dialogX,
+                    y: dialogY + i * squareHeight,
                 });
                 // Black pieces
                 this.drawPieceButton(blackPieces[i], {
-                    x: squareCenterPoint.x + offsetX + squareWidth,
-                    y: squareCenterPoint.y + i * squareHeight,
+                    x: dialogX + squareWidth,
+                    y: dialogY + i * squareHeight,
                 });
             }
         }
