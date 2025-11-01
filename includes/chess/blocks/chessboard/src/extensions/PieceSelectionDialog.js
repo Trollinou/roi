@@ -6,6 +6,7 @@
  */
 
 import { Extension, EXTENSION_POINT } from '../../../../vendor/cm-chessboard/src/model/Extension.js';
+import { PIECE } from '../../../../vendor/cm-chessboard/src/Chessboard.js';
 import { Svg } from '../../../../vendor/cm-chessboard/src/lib/Svg.js';
 import { Utils } from '../../../../vendor/cm-chessboard/src/lib/Utils.js';
 
@@ -110,8 +111,8 @@ export class PieceSelectionDialog extends Extension {
             const squareHeight = this.chessboard.view.squareHeight;
             const squarePoint = this.chessboard.view.squareToPoint(this.state.dialogParams.square);
 
-            const whitePieces = ['wp', 'wb', 'wn', 'wr', 'wq', 'wk'];
-            const blackPieces = ['bp', 'bb', 'bn', 'br', 'bq', 'bk'];
+            const whitePieces = [PIECE.wp, PIECE.wb, PIECE.wn, PIECE.wr, PIECE.wq, PIECE.wk];
+            const blackPieces = [PIECE.bp, PIECE.bb, PIECE.bn, PIECE.br, PIECE.bq, PIECE.bk];
 
             // Adjust position to stay within the board boundaries
             const dialogWidth = squareWidth * 2;
@@ -184,6 +185,7 @@ export class PieceSelectionDialog extends Extension {
     pieceSelectionDialogOnCancel(event) {
         if (this.state.displayState === DISPLAY_STATE.shown) {
             event.preventDefault();
+            event.stopImmediatePropagation();
             this.setDisplayState(DISPLAY_STATE.hidden);
             if (this.state.callback) {
                 this.state.callback({ type: PIECE_SELECTION_DIALOG_RESULT_TYPE.canceled });
