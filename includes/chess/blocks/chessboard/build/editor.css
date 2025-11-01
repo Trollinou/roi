@@ -42,3 +42,38 @@
 .is-success .components-text-control__input {
     border-color: green;
 }
+
+/* Styles for the Piece Selection Dialog, adapted from PromotionDialog */
+.piece-selection-dialog-group rect,
+.piece-selection-dialog-group g[data-piece] {
+    animation: fade-in 0.25s ease-in;
+}
+
+.piece-selection-dialog-group .piece-selection-dialog {
+    fill: white;
+    fill-opacity: 0.85;
+    stroke: rgba(0, 0, 0, 0.4);
+    stroke-width: 1px;
+}
+
+.piece-selection-dialog-group .piece-selection-dialog-button {
+    fill: transparent;
+    cursor: pointer;
+}
+
+.piece-selection-dialog-group .piece-selection-dialog-button:hover {
+    fill: rgba(0, 0, 0, 0.2);
+}
+
+.piece-selection-dialog-group .piece {
+    pointer-events: none;
+}
+
+@keyframes fade-in {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
