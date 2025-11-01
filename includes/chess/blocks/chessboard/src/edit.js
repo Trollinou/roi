@@ -69,10 +69,50 @@ class SimpleFenEditor extends Component {
         else if (prevProps.fen !== this.props.fen && this.chessboard && this.state.chessboardLoaded) {
             try {
                 await this.chessboard.setPosition(this.props.fen, false);
+                this.addSquareClickHandlers();
             } catch (e) {
                 console.warn('FEN invalide:', e);
             }
         }
+    }
+
+    addSquareClickHandlers() {
+        if (!this.editorRef) return;
+        const boardGroup = this.editorRef.querySelector('g.board.input-enabled');
+        if (!boardGroup) {
+            console.warn('g.board.input-enabled non trouvé');
+            return;
+        }
+        boardGroup.style.cursor = 'pointer';
+        // Clone and replace to remove old event listeners
+        const newBoardGroup = boardGroup.cloneNode(true);
+        boardGroup.parentNode.replaceChild(newBoardGroup, boardGroup);
+
+        newBoardGroup.addEventListener('pointerdown', (e) => {
+            if (this.chessboard.isPieceSelectionDialogShown()) {
+                return;
+            }
+            if (this.clickTimeout) {
+                clearTimeout(this.clickTimeout);
+            }
+            this.clickTimeout = setTimeout(() => {
+                const target = e.target;
+                if (target && target.classList && target.classList.contains('square')) {
+                    const squareName = target.getAttribute('data-square');
+                    if (!squareName) return;
+                    this.chessboard.showPieceSelectionDialog(squareName, (result) => {
+                        if (result.type === PIECE_SELECTION_DIALOG_RESULT_TYPE.pieceSelected) {
+                            this.chessboard.setPiece(result.square, result.piece);
+                            setTimeout(() => {
+                                const partialFen = this.chessboard.getPosition();
+                                const completeFen = this.completeFen(partialFen);
+                                this.props.onChange(completeFen);
+                            }, 10);
+                        }
+                    });
+                }
+            }, 150);
+        });
     }
 
     /**
@@ -155,26 +195,9 @@ class SimpleFenEditor extends Component {
                 }
             });
 
-            this.chessboard.enableSquareSelect((event) => {
-                if (this.chessboard.isPieceSelectionDialogShown()) {
-                    return;
-                }
-                if (this.clickTimeout) {
-                    clearTimeout(this.clickTimeout);
-                }
-                this.clickTimeout = setTimeout(() => {
-                    this.chessboard.showPieceSelectionDialog(event.square, (result) => {
-                        if (result.type === PIECE_SELECTION_DIALOG_RESULT_TYPE.pieceSelected) {
-                            this.chessboard.setPiece(result.square, result.piece);
-                            setTimeout(() => {
-                                const partialFen = this.chessboard.getPosition();
-                                const completeFen = this.completeFen(partialFen);
-                                this.props.onChange(completeFen);
-                            }, 10);
-                        }
-                    });
-                }, 200);
-            });
+            setTimeout(() => {
+                this.addSquareClickHandlers();
+            }, 50);
 
             this.setState({ chessboardLoaded: true });
 
