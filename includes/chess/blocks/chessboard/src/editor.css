@@ -23,6 +23,8 @@
 
 .wp-block-roi-chessboard .castling-controls .components-base-control {
     margin-bottom: 0;
+    display: inline-flex;
+    align-items: center;
 }
 .wp-block-roi-chessboard .castling-controls .components-checkbox-control__label {
     margin-left: 4px;
