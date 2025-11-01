@@ -69,7 +69,6 @@ class SimpleFenEditor extends Component {
         else if (prevProps.fen !== this.props.fen && this.chessboard && this.state.chessboardLoaded) {
             try {
                 await this.chessboard.setPosition(this.props.fen, false);
-                this.addSquareClickHandlers();
             } catch (e) {
                 console.warn('FEN invalide:', e);
             }
