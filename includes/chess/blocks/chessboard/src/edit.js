@@ -31,7 +31,6 @@ class SimpleFenEditor extends Component {
         };
         this.editorRef = null;
         this.chessboard = null;
-        this.clickTimeout = null;
     }
 
     /**
@@ -92,14 +91,13 @@ class SimpleFenEditor extends Component {
             if (this.chessboard.isPieceSelectionDialogShown()) {
                 return;
             }
-            if (this.clickTimeout) {
-                clearTimeout(this.clickTimeout);
-            }
-            this.clickTimeout = setTimeout(() => {
-                const target = e.target;
-                if (target && target.classList && target.classList.contains('square')) {
-                    const squareName = target.getAttribute('data-square');
-                    if (!squareName) return;
+            const target = e.target;
+            if (target && target.classList && target.classList.contains('square')) {
+                const squareName = target.getAttribute('data-square');
+                if (!squareName) return;
+
+                const piece = this.chessboard.getPiece(squareName);
+                if (!piece) {
                     this.chessboard.showPieceSelectionDialog(squareName, (result) => {
                         if (result.type === PIECE_SELECTION_DIALOG_RESULT_TYPE.pieceSelected) {
                             this.chessboard.setPiece(result.square, result.piece);
@@ -111,7 +109,7 @@ class SimpleFenEditor extends Component {
                         }
                     });
                 }
-            }, 150);
+            }
         });
     }
 
@@ -162,10 +160,6 @@ class SimpleFenEditor extends Component {
 
             this.chessboard.enableMoveInput((event) => {
                 if (event.type === INPUT_EVENT_TYPE.movingOverSquare) {
-                    if (this.clickTimeout) {
-                        clearTimeout(this.clickTimeout);
-                        this.clickTimeout = null;
-                    }
                     return;
                 }
                 if (event.type === INPUT_EVENT_TYPE.moveInputStarted) {
