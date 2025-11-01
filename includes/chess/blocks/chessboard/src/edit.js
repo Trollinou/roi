@@ -177,7 +177,10 @@ class SimpleFenEditor extends Component {
         boardGroup.replaceWith(boardGroup.cloneNode(true));
         const newBoardGroup = this.editorRef.querySelector('g.board.input-enabled');
 
-        newBoardGroup.addEventListener('click', (e) => {
+        newBoardGroup.addEventListener('pointerdown', (e) => {
+            if (this.chessboard.isPieceSelectionDialogShown()) {
+                return;
+            }
             const target = e.target;
             if (target && target.classList && target.classList.contains('square')) {
                 const squareName = target.getAttribute('data-square');

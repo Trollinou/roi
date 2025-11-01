@@ -43,26 +43,37 @@
     border-color: green;
 }
 
-/* Styles for the Piece Selection Dialog */
-.piece-selection-dialog {
-    fill: rgba(44, 51, 56, 0.9);
-    stroke: #6c757d;
-    stroke-width: 1px;
-    rx: 4px;
-    ry: 4px;
+/* Styles for the Piece Selection Dialog, adapted from PromotionDialog */
+.piece-selection-dialog-group rect,
+.piece-selection-dialog-group g[data-piece] {
+    animation: fade-in 0.25s ease-in;
 }
 
-.piece-selection-dialog-button {
+.piece-selection-dialog-group .piece-selection-dialog {
+    fill: white;
+    fill-opacity: 0.85;
+    stroke: rgba(0, 0, 0, 0.4);
+    stroke-width: 1px;
+}
+
+.piece-selection-dialog-group .piece-selection-dialog-button {
     fill: transparent;
     cursor: pointer;
-    transition: fill 0.2s ease;
 }
 
-.piece-selection-dialog-button:hover {
-    fill: rgba(136, 153, 166, 0.3);
+.piece-selection-dialog-group .piece-selection-dialog-button:hover {
+    fill: rgba(0, 0, 0, 0.2);
 }
 
-/* Ensure the piece icon doesn't block the click event on the button */
-.piece-selection-dialog-group use {
+.piece-selection-dialog-group .piece {
     pointer-events: none;
+}
+
+@keyframes fade-in {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
 }
