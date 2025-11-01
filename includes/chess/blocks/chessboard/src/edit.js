@@ -8,77 +8,7 @@ import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { PanelBody, TextControl, SelectControl, ToggleControl, RangeControl, Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { Component, useEffect, useState } from '@wordpress/element';
-
-// ========================================
-// COMPOSANT PieceIcon
-// ========================================
-/**
- * @class PieceIcon
- * @extends Component
- * @classdesc A React component to render a single SVG chess piece using the cm-chessboard library's drawing function.
- */
-class PieceIcon extends Component {
-    /**
-     * Creates an instance of PieceIcon.
-     * @param {object} props - The component props.
-     */
-    constructor(props) {
-        super(props);
-        this.svgRef = null;
-    }
-
-    /**
-     * Draws the piece when the component mounts.
-     */
-    componentDidMount() {
-        this.drawPiece();
-    }
-
-    /**
-     * Redraws the piece when the component updates.
-     */
-    componentDidUpdate() {
-        this.drawPiece();
-    }
-
-    /**
-     * Renders the chess piece SVG inside the component's SVG container.
-     * It leverages the cm-chessboard instance's internal `drawPiece` method.
-     */
-    drawPiece() {
-        if (!this.svgRef) return;
-        while (this.svgRef.firstChild) {
-            this.svgRef.removeChild(this.svgRef.firstChild);
-        }
-        if (this.props.chessboard && this.props.chessboard.view) {
-            this.props.chessboard.view.drawPiece(this.svgRef, this.props.pieceCode, { x: 0, y: 0 });
-            setTimeout(() => {
-                if (this.svgRef) {
-                    const useElement = this.svgRef.querySelector('use');
-                    if (useElement) {
-                        useElement.removeAttribute('transform');
-                    }
-                }
-            }, 0);
-        }
-    }
-
-    /**
-     * Renders the SVG container for the piece.
-     * @returns {JSX.Element} The rendered SVG element.
-     */
-    render() {
-        return (
-            <svg
-                ref={(ref) => { this.svgRef = ref; }}
-                style={{
-                    width: '40px',
-                    height: '40px',
-                }}
-            />
-        );
-    }
-}
+import { PieceSelectionDialog, PIECE_SELECTION_DIALOG_RESULT_TYPE } from './extensions/PieceSelectionDialog.js';
 
 // ========================================
 // CLASSE SimpleFenEditor
@@ -97,7 +27,6 @@ class SimpleFenEditor extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            selectedPiece: null,
             chessboardLoaded: false
         };
         this.editorRef = null;
@@ -185,7 +114,10 @@ class SimpleFenEditor extends Component {
                     pieces: { file: `pieces/${this.props.pieces}.svg` },
                     cssClass: this.props.cssClass,
                     showCoordinates: this.props.showCoordinates,
-                }
+                },
+                extensions: [
+                    { class: PieceSelectionDialog },
+                ],
             });
 
             this.chessboard.enableMoveInput((event) => {
@@ -250,14 +182,16 @@ class SimpleFenEditor extends Component {
             if (target && target.classList && target.classList.contains('square')) {
                 const squareName = target.getAttribute('data-square');
                 if (!squareName) return;
-                if (this.state.selectedPiece) {
-                    this.chessboard.setPiece(squareName, this.state.selectedPiece);
-                }
-                setTimeout(() => {
-                    const partialFen = this.chessboard.getPosition();
-                    const completeFen = this.completeFen(partialFen);
-                    this.props.onChange(completeFen);
-                }, 10);
+                this.chessboard.showPieceSelectionDialog(squareName, (result) => {
+                    if (result.type === PIECE_SELECTION_DIALOG_RESULT_TYPE.pieceSelected) {
+                        this.chessboard.setPiece(result.square, result.piece);
+                        setTimeout(() => {
+                            const partialFen = this.chessboard.getPosition();
+                            const completeFen = this.completeFen(partialFen);
+                            this.props.onChange(completeFen);
+                        }, 10);
+                    }
+                });
             }
         });
     }
@@ -277,97 +211,15 @@ class SimpleFenEditor extends Component {
      * @returns {JSX.Element} The rendered component.
      */
     render() {
-        const whitePieces = [
-            { code: 'wp', label: 'Pion blanc' },
-            { code: 'wn', label: 'Cavalier blanc' },
-            { code: 'wb', label: 'Fou blanc' },
-            { code: 'wr', label: 'Tour blanche' },
-            { code: 'wq', label: 'Dame blanche' },
-            { code: 'wk', label: 'Roi blanc' }
-        ];
-        const blackPieces = [
-            { code: 'bp', label: 'Pion noir' },
-            { code: 'bn', label: 'Cavalier noir' },
-            { code: 'bb', label: 'Fou noir' },
-            { code: 'br', label: 'Tour noire' },
-            { code: 'bq', label: 'Dame noire' },
-            { code: 'bk', label: 'Roi noir' }
-        ];
-        const pieceButtonStyle = {
-            padding: '0',
-            width: '50px',
-            height: '50px',
-            cursor: 'pointer',
-            userSelect: 'none',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-        };
-
         return (
             <div>
-                <div
-                    style={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        justifyContent: 'center',
-                        gap: '6px',
-                        marginBottom: '15px',
-                        padding: '10px',
-                        backgroundColor: '#2c3338',
-                        borderRadius: '4px'
-                    }}
-                >
-                    {blackPieces.map(piece =>
-                        <button
-                            key={piece.code}
-                            className={`button ${this.state.selectedPiece === piece.code ? 'is-primary roi-chess-piece-selected' : ''}`}
-                            onClick={() => {
-                                this.setState({ selectedPiece: this.state.selectedPiece === piece.code ? null : piece.code });
-                            }}
-                            title={piece.label}
-                            style={pieceButtonStyle}
-                        >
-                            <PieceIcon pieceCode={piece.code} chessboard={this.chessboard} />
-                        </button>
-                    )}
-                </div>
-
                 <div
                     ref={(ref) => { this.editorRef = ref; }}
                     style={{
                         maxWidth: '500px',
                         margin: '0 auto',
-                        cursor: this.state.selectedPiece ? 'copy' : 'default'
                     }}
                 />
-
-                <div
-                    style={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        justifyContent: 'center',
-                        gap: '6px',
-                        marginTop: '15px',
-                        padding: '10px',
-                        backgroundColor: '#f0f0f1',
-                        borderRadius: '4px'
-                    }}
-                >
-                    {whitePieces.map(piece =>
-                        <button
-                            key={piece.code}
-                            className={`button ${this.state.selectedPiece === piece.code ? 'is-primary roi-chess-piece-selected' : ''}`}
-                            onClick={() => {
-                                this.setState({ selectedPiece: this.state.selectedPiece === piece.code ? null : piece.code });
-                            }}
-                            title={piece.label}
-                            style={pieceButtonStyle}
-                        >
-                            <PieceIcon pieceCode={piece.code} chessboard={this.chessboard} />
-                        </button>
-                    )}
-                </div>
 
                 <div
                     style={{
@@ -401,7 +253,7 @@ class SimpleFenEditor extends Component {
                         fontStyle: 'italic'
                     }}
                 >
-                    {__('💡 Cliquez sur une pièce puis sur une case pour la placer. Glissez-déposez pour déplacer. Glissez en dehors pour supprimer.', 'roi')}
+                    {__('💡 Cliquez sur une case pour choisir une pièce. Glissez-déposez pour déplacer. Glissez en dehors pour supprimer.', 'roi')}
                 </p>
             </div>
         );

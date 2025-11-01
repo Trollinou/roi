@@ -42,3 +42,22 @@
 .is-success .components-text-control__input {
     border-color: green;
 }
+
+/* Styles for the Piece Selection Dialog */
+.piece-selection-dialog {
+    fill: rgba(44, 51, 56, 0.9);
+    stroke: #6c757d;
+    stroke-width: 1px;
+    rx: 4px;
+    ry: 4px;
+}
+
+.piece-selection-dialog-button {
+    fill: transparent;
+    cursor: pointer;
+    transition: fill 0.2s ease;
+}
+
+.piece-selection-dialog-button:hover {
+    fill: rgba(136, 153, 166, 0.3);
+}
