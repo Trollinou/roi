@@ -1,6 +1,6 @@
 # ROI - Ressources et Organisation pour l’Initiation aux échecs
 
-**Version :** 1.0.4
+**Version :** 1.0.5
 **Auteur :** Etienne Gagnon
 **Licence :** GPL v2 ou ultérieure
 **WordPress Requis :** 6.8+

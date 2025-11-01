@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.5 - 2025-11-01
+
+*   **Amélioration de l'interface de l'éditeur du bloc Échiquier :**
+    *   Remplacement des bandes de sélection de pièces statiques par une boîte de dialogue popup moderne et intuitive.
+    *   La popup s'affiche désormais uniquement lors d'un clic gauche sur une case vide, libérant le clic droit pour de futures fonctionnalités.
+    *   L'expérience utilisateur est plus fluide et l'interface de l'éditeur est moins encombrée.
+
 ## 1.0.4 - 2025-10-23
 
 *   **Amélioration majeure du bloc Échiquier :**
