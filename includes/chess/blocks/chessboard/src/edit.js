@@ -31,6 +31,7 @@ class SimpleFenEditor extends Component {
         };
         this.editorRef = null;
         this.chessboard = null;
+        this.clickTimeout = null;
     }
 
     /**
@@ -125,6 +126,13 @@ class SimpleFenEditor extends Component {
                     return;
                 }
                 if (event.type === INPUT_EVENT_TYPE.moveInputStarted) {
+                    if (this.clickTimeout) {
+                        clearTimeout(this.clickTimeout);
+                        this.clickTimeout = null;
+                    }
+                    if (this.chessboard.isPieceSelectionDialogShown()) {
+                        return false;
+                    }
                     return true;
                 }
                 if (event.type === INPUT_EVENT_TYPE.validateMoveInput) {
@@ -148,9 +156,27 @@ class SimpleFenEditor extends Component {
                 }
             });
 
-            setTimeout(() => {
-                this.addSquareClickHandlers();
-            }, 50);
+            this.chessboard.enableSquareSelect((event) => {
+                if (this.chessboard.isPieceSelectionDialogShown()) {
+                    return;
+                }
+                if (this.clickTimeout) {
+                    clearTimeout(this.clickTimeout);
+                }
+                this.clickTimeout = setTimeout(() => {
+                    this.chessboard.showPieceSelectionDialog(event.square, (result) => {
+                        if (result.type === PIECE_SELECTION_DIALOG_RESULT_TYPE.pieceSelected) {
+                            this.chessboard.setPiece(result.square, result.piece);
+                            setTimeout(() => {
+                                const partialFen = this.chessboard.getPosition();
+                                const completeFen = this.completeFen(partialFen);
+                                this.props.onChange(completeFen);
+                            }, 10);
+                        }
+                    });
+                }, 200);
+            });
+
             this.setState({ chessboardLoaded: true });
 
         } catch (error) {
@@ -159,44 +185,6 @@ class SimpleFenEditor extends Component {
                 this.editorRef.innerHTML = '<div style="padding: 20px; text-align: center; background: #fee; border-radius: 4px; color: #c00;">⚠️ Erreur de chargement</div>';
             }
         }
-    }
-
-    /**
-     * Adds click handlers to the board squares for piece placement.
-     * This is necessary because the default drag-and-drop behavior can
-     * interfere with simple click-to-place functionality.
-     */
-    addSquareClickHandlers() {
-        if (!this.editorRef) return;
-        const boardGroup = this.editorRef.querySelector('g.board.input-enabled');
-        if (!boardGroup) {
-            console.warn('g.board.input-enabled non trouvé');
-            return;
-        }
-        boardGroup.style.cursor = 'pointer';
-        boardGroup.replaceWith(boardGroup.cloneNode(true));
-        const newBoardGroup = this.editorRef.querySelector('g.board.input-enabled');
-
-        newBoardGroup.addEventListener('pointerdown', (e) => {
-            if (this.chessboard.isPieceSelectionDialogShown()) {
-                return;
-            }
-            const target = e.target;
-            if (target && target.classList && target.classList.contains('square')) {
-                const squareName = target.getAttribute('data-square');
-                if (!squareName) return;
-                this.chessboard.showPieceSelectionDialog(squareName, (result) => {
-                    if (result.type === PIECE_SELECTION_DIALOG_RESULT_TYPE.pieceSelected) {
-                        this.chessboard.setPiece(result.square, result.piece);
-                        setTimeout(() => {
-                            const partialFen = this.chessboard.getPosition();
-                            const completeFen = this.completeFen(partialFen);
-                            this.props.onChange(completeFen);
-                        }, 10);
-                    }
-                });
-            }
-        });
     }
 
     /**
