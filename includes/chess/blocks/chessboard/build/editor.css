@@ -1,39 +1,39 @@
-.wp-block-roi-chessboard {
-    margin: 20px 0;
+.wp-block-roi-chessboard .castling-controls {
+    margin-bottom: 10px;
 }
 
-.roi-simple-fen-editor {
-    width: 100%;
+.wp-block-roi-chessboard .castling-controls__label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.wp-block-roi-chessboard .castling-controls__row {
+    display: grid;
+    grid-template-columns: 60px 1fr 1fr;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.wp-block-roi-chessboard .castling-controls__row span {
+    font-size: 12px;
+}
+
+.wp-block-roi-chessboard .castling-controls .components-base-control {
+    margin-bottom: 0;
+}
+.wp-block-roi-chessboard .castling-controls .components-checkbox-control__label {
+    margin-left: 4px;
 }
 
 .cm-chessboard {
-  pointer-events: auto !important;  /* Assurez-vous que les clics sont possibles */
-  user-select: none;  /* Evite la sélection involontaire */
+    pointer-events: auto !important;
+    user-select: none;
+    width: 100% !important;
+    max-width: none !important;
 }
 
-/* Boutons de pièces */
-.roi-chessboard-editor button.button {
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.roi-chessboard-editor button.button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
-
-.roi-chessboard-editor button.button-primary {
-    box-shadow: 0 0 0 3px rgba(0, 115, 170, 0.3);
-}
-
-.roi-chess-piece-selected {
-    outline: 3px solid #00a0d2 !important;
-    box-shadow: 0 0 5px rgba(0, 160, 210, 0.8) !important;
-}
-
-/*
- * Hide the numeric input and the tooltip value for the ELO RangeControl.
- * A highly specific selector is needed to override default WordPress editor styles.
- */
 .wp-block-roi-chessboard .elo-range-control .components-range-control__number,
 .wp-block-roi-chessboard .elo-range-control .components-range-control__tooltip-content {
     display: none !important;
@@ -43,7 +43,6 @@
     border-color: green;
 }
 
-/* Styles for the Piece Selection Dialog, adapted from PromotionDialog */
 .piece-selection-dialog-group rect,
 .piece-selection-dialog-group g[data-piece] {
     animation: fade-in 0.25s ease-in;
