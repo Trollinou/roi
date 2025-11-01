@@ -123,13 +123,13 @@ class SimpleFenEditor extends Component {
 
             this.chessboard.enableMoveInput((event) => {
                 if (event.type === INPUT_EVENT_TYPE.movingOverSquare) {
-                    return;
-                }
-                if (event.type === INPUT_EVENT_TYPE.moveInputStarted) {
                     if (this.clickTimeout) {
                         clearTimeout(this.clickTimeout);
                         this.clickTimeout = null;
                     }
+                    return;
+                }
+                if (event.type === INPUT_EVENT_TYPE.moveInputStarted) {
                     if (this.chessboard.isPieceSelectionDialogShown()) {
                         return false;
                     }
