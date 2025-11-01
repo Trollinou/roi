@@ -376,16 +376,20 @@ export default function Edit(props) {
                     />
                     <div className="castling-controls">
                         <label className="castling-controls__label">{__('Roques', 'roi')}</label>
-                        <div className="castling-controls__row">
-                            <span>{__('Blancs :', 'roi')}</span>
-                            <CheckboxControl label="O-O" checked={castlingRights.includes('K')} onChange={(isChecked) => handleCastleChange('K', isChecked)} />
-                            <CheckboxControl label="O-O-O" checked={castlingRights.includes('Q')} onChange={(isChecked) => handleCastleChange('Q', isChecked)} />
-                        </div>
-                        <div className="castling-controls__row">
-                            <span>{__('Noirs :', 'roi')}</span>
-                            <CheckboxControl label="O-O" checked={castlingRights.includes('k')} onChange={(isChecked) => handleCastleChange('k', isChecked)} />
-                            <CheckboxControl label="O-O-O" checked={castlingRights.includes('q')} onChange={(isChecked) => handleCastleChange('q', isChecked)} />
-                        </div>
+                        <table className="castling-table">
+                            <tbody>
+                                <tr>
+                                    <td>{__('Blancs :', 'roi')}</td>
+                                    <td><CheckboxControl label="O-O" checked={castlingRights.includes('K')} onChange={(isChecked) => handleCastleChange('K', isChecked)} /></td>
+                                    <td><CheckboxControl label="O-O-O" checked={castlingRights.includes('Q')} onChange={(isChecked) => handleCastleChange('Q', isChecked)} /></td>
+                                </tr>
+                                <tr>
+                                    <td>{__('Noirs :', 'roi')}</td>
+                                    <td><CheckboxControl label="O-O" checked={castlingRights.includes('k')} onChange={(isChecked) => handleCastleChange('k', isChecked)} /></td>
+                                    <td><CheckboxControl label="O-O-O" checked={castlingRights.includes('q')} onChange={(isChecked) => handleCastleChange('q', isChecked)} /></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                     <SelectControl
                         label={__('Trait', 'roi')}

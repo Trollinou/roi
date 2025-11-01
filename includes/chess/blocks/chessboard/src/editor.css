@@ -1,4 +1,3 @@
-/* Styles pour les contrôles de roque */
 .wp-block-roi-chessboard .castling-controls {
     margin-bottom: 16px;
 }
@@ -9,29 +8,23 @@
     margin-bottom: 8px;
 }
 
-.wp-block-roi-chessboard .castling-controls__row {
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
+.wp-block-roi-chessboard .castling-table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-.wp-block-roi-chessboard .castling-controls__row span {
+.wp-block-roi-chessboard .castling-table td {
+    padding: 2px 4px;
+    vertical-align: middle;
+}
+
+.wp-block-roi-chessboard .castling-table td:first-child {
     font-size: 13px;
-    margin-right: 12px;
-    min-width: 50px;
+    width: 60px; /* Largeur pour "Blancs :" et "Noirs :" */
 }
 
-/* Correctif final pour forcer l'alignement en ligne */
-.wp-block-roi-chessboard .castling-controls__row .components-base-control.components-checkbox-control {
-    display: inline-flex; /* Afficher en ligne */
-    align-items: center;
-    margin-bottom: 0 !important; /* Annuler la marge par défaut */
-    margin-right: 12px; /* Espacement entre les cases */
-    width: auto !important; /* Annuler la largeur de 100% */
-}
-
-.wp-block-roi-chessboard .castling-controls .components-checkbox-control__label {
-    margin-left: 8px;
+.wp-block-roi-chessboard .castling-table .components-base-control {
+    margin-bottom: 0;
 }
 
 /* --- Autres styles --- */
