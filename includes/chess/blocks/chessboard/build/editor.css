@@ -1,36 +1,40 @@
+/* Styles pour les contrôles de roque */
 .wp-block-roi-chessboard .castling-controls {
-    margin-bottom: 10px;
+    margin-bottom: 16px;
 }
 
 .wp-block-roi-chessboard .castling-controls__label {
     display: block;
     font-weight: 500;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
 }
 
 .wp-block-roi-chessboard .castling-controls__row {
     display: flex;
     align-items: center;
-    gap: 8px; /* Augmentation pour espacer "O-O" et "O-O-O" */
-    margin-bottom: 4px;
+    margin-bottom: 8px;
 }
 
 .wp-block-roi-chessboard .castling-controls__row span {
-    font-size: 12px;
-    min-width: 45px;
+    font-size: 13px;
+    margin-right: 12px;
+    min-width: 50px;
 }
 
-/* Forcer les CheckboxControl à s'aligner horizontalement */
-.wp-block-roi-chessboard .castling-controls .components-base-control {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    margin-bottom: 0 !important;
+/* Correctif final pour forcer l'alignement en ligne */
+.wp-block-roi-chessboard .castling-controls__row .components-base-control.components-checkbox-control {
+    display: inline-flex; /* Afficher en ligne */
+    align-items: center;
+    margin-bottom: 0 !important; /* Annuler la marge par défaut */
+    margin-right: 12px; /* Espacement entre les cases */
+    width: auto !important; /* Annuler la largeur de 100% */
 }
 
 .wp-block-roi-chessboard .castling-controls .components-checkbox-control__label {
-    margin-left: 4px;
+    margin-left: 8px;
 }
+
+/* --- Autres styles --- */
 
 .cm-chessboard {
     pointer-events: auto !important;
