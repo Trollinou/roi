@@ -51,7 +51,9 @@
     "editorScript": "file:./chessboard-block.js",
     "editorStyle": [
         "file:./editor.css",
-        "file:../../../vendor/cm-chessboard/assets/chessboard.css"
+        "file:../../../vendor/cm-chessboard/assets/chessboard.css",
+        "file:../../../vendor/cm-chessboard/assets/extensions/arrows.css",
+        "file:../../../vendor/cm-chessboard/assets/extensions/markers.css"
     ],
     "style": [
         "file:../../../vendor/cm-chessboard/assets/chessboard.css"
