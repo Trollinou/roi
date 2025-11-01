@@ -99,7 +99,11 @@ class SimpleFenEditor extends Component {
                 if (!squareName) return;
 
                 const piece = this.chessboard.getPiece(squareName);
-                if (!piece) {
+                if (piece) {
+                    this.chessboard.removeMarkers(MARKER_TYPE.frame);
+                    this.chessboard.addMarker(MARKER_TYPE.frame, squareName);
+                } else {
+                    this.chessboard.removeMarkers(MARKER_TYPE.frame);
                     this.chessboard.showPieceSelectionDialog(squareName, (result) => {
                         if (result.type === PIECE_SELECTION_DIALOG_RESULT_TYPE.pieceSelected) {
                             this.chessboard.setPiece(result.square, result.piece);
@@ -157,7 +161,7 @@ class SimpleFenEditor extends Component {
                 },
                 extensions: [
                     { class: PieceSelectionDialog },
-                    { class: Markers, props: { autoMarkers: MARKER_TYPE.frame } },
+                    { class: Markers },
                 ],
             });
 
@@ -177,6 +181,7 @@ class SimpleFenEditor extends Component {
                 }
                 if (event.type === INPUT_EVENT_TYPE.moveInputCanceled) {
                     this.isMoveInProgress = false;
+                    this.chessboard.removeMarkers(MARKER_TYPE.frame);
                     this.chessboard.setPiece(event.squareFrom, null);
                     setTimeout(() => {
                         const partialFen = this.chessboard.getPosition();
@@ -187,6 +192,7 @@ class SimpleFenEditor extends Component {
                 }
                 if (event.type === INPUT_EVENT_TYPE.moveInputFinished) {
                     this.isMoveInProgress = false;
+                    this.chessboard.removeMarkers(MARKER_TYPE.frame);
                     setTimeout(() => {
                         const partialFen = this.chessboard.getPosition();
                         const completeFen = this.completeFen(partialFen);
