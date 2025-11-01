@@ -9,7 +9,6 @@ import { PanelBody, TextControl, SelectControl, ToggleControl, RangeControl, But
 import { __ } from '@wordpress/i18n';
 import { Component, useEffect, useState } from '@wordpress/element';
 import { PieceSelectionDialog, PIECE_SELECTION_DIALOG_RESULT_TYPE } from './extensions/PieceSelectionDialog.js';
-import { Markers, MARKER_TYPE } from '../../../vendor/cm-chessboard/src/extensions/markers/Markers.js';
 
 // ========================================
 // CLASSE SimpleFenEditor
@@ -90,6 +89,9 @@ class SimpleFenEditor extends Component {
         boardGroup.parentNode.replaceChild(newBoardGroup, boardGroup);
 
         newBoardGroup.addEventListener('pointerdown', (e) => {
+            if (e.button !== 0) { // Ne réagit qu'au clic gauche
+                return;
+            }
             if (this.isMoveInProgress || this.chessboard.isPieceSelectionDialogShown()) {
                 return;
             }
@@ -100,10 +102,8 @@ class SimpleFenEditor extends Component {
 
                 const piece = this.chessboard.getPiece(squareName);
                 if (piece) {
-                    this.chessboard.removeMarkers(MARKER_TYPE.frame);
-                    this.chessboard.addMarker(MARKER_TYPE.frame, squareName);
+                    // Clic sur une pièce : géré par le drag-and-drop de cm-chessboard
                 } else {
-                    this.chessboard.removeMarkers(MARKER_TYPE.frame);
                     this.chessboard.showPieceSelectionDialog(squareName, (result) => {
                         if (result.type === PIECE_SELECTION_DIALOG_RESULT_TYPE.pieceSelected) {
                             this.chessboard.setPiece(result.square, result.piece);
@@ -161,7 +161,6 @@ class SimpleFenEditor extends Component {
                 },
                 extensions: [
                     { class: PieceSelectionDialog },
-                    { class: Markers },
                 ],
             });
 
@@ -181,7 +180,6 @@ class SimpleFenEditor extends Component {
                 }
                 if (event.type === INPUT_EVENT_TYPE.moveInputCanceled) {
                     this.isMoveInProgress = false;
-                    this.chessboard.removeMarkers(MARKER_TYPE.frame);
                     this.chessboard.setPiece(event.squareFrom, null);
                     setTimeout(() => {
                         const partialFen = this.chessboard.getPosition();
@@ -192,7 +190,6 @@ class SimpleFenEditor extends Component {
                 }
                 if (event.type === INPUT_EVENT_TYPE.moveInputFinished) {
                     this.isMoveInProgress = false;
-                    this.chessboard.removeMarkers(MARKER_TYPE.frame);
                     setTimeout(() => {
                         const partialFen = this.chessboard.getPosition();
                         const completeFen = this.completeFen(partialFen);
