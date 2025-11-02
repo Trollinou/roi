@@ -36,6 +36,7 @@ export class PieceSelectionDialog extends Extension {
         this.registerExtensionPoint(EXTENSION_POINT.afterRedrawBoard, this.extensionPointRedrawBoard.bind(this));
         chessboard.showPieceSelectionDialog = this.showPieceSelectionDialog.bind(this);
         chessboard.isPieceSelectionDialogShown = this.isPieceSelectionDialogShown.bind(this);
+        chessboard.closePieceSelectionDialog = this.closePieceSelectionDialog.bind(this);
         this.pieceSelectionDialogGroup = Svg.addElement(chessboard.view.interactiveTopLayer, 'g', { class: 'piece-selection-dialog-group' });
         this.state = {
             displayState: DISPLAY_STATE.hidden,
@@ -44,6 +45,13 @@ export class PieceSelectionDialog extends Extension {
                 square: null,
             },
         };
+    }
+
+    /**
+     * Closes the piece selection dialog.
+     */
+    closePieceSelectionDialog() {
+        this.setDisplayState(DISPLAY_STATE.hidden);
     }
 
     /**
