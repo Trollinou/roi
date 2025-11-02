@@ -5,10 +5,15 @@
  */
 
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
-import { PanelBody, TextControl, SelectControl, ToggleControl, RangeControl, Button } from '@wordpress/components';
+import { PanelBody, TextControl, SelectControl, ToggleControl, RangeControl, CheckboxControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { Component, useEffect, useState } from '@wordpress/element';
 import { PieceSelectionDialog, PIECE_SELECTION_DIALOG_RESULT_TYPE } from './extensions/PieceSelectionDialog.js';
+import { FEN } from '../../../vendor/cm-chessboard/src/model/Position.js';
+import { Arrows } from '../../../vendor/cm-chessboard/src/extensions/arrows/Arrows.js';
+import { Markers, MARKER_TYPE } from '../../../vendor/cm-chessboard/src/extensions/markers/Markers.js';
+import { RightClickAnnotator } from '../../../vendor/cm-chessboard/src/extensions/right-click-annotator/RightClickAnnotator.js';
+
 
 // ========================================
 // CLASSE SimpleFenEditor
@@ -32,21 +37,33 @@ class SimpleFenEditor extends Component {
         this.editorRef = null;
         this.chessboard = null;
         this.isMoveInProgress = false;
+        this.resizeObserver = null;
     }
 
     /**
-     * Initializes the chessboard when the component mounts.
+     * Initializes the chessboard and sets up a resize observer when the component mounts.
      */
     async componentDidMount() {
         await this.initChessboard();
+        this.resizeObserver = new ResizeObserver(() => {
+            if (this.chessboard) {
+                this.chessboard.view.redrawBoard();
+            }
+        });
+        if (this.editorRef) {
+            this.resizeObserver.observe(this.editorRef);
+        }
     }
 
     /**
-     * Destroys the chessboard instance when the component unmounts.
+     * Destroys the chessboard instance and disconnects the resize observer when the component unmounts.
      */
     componentWillUnmount() {
         if (this.chessboard) {
             this.chessboard.destroy();
+        }
+        if (this.resizeObserver) {
+            this.resizeObserver.disconnect();
         }
     }
 
@@ -54,9 +71,16 @@ class SimpleFenEditor extends Component {
      * Handles component updates, re-initializing the board on style changes
      * or updating the position if the FEN string changes.
      * @param {object} prevProps - The previous props.
-     * @param {object} prevState - The previous state.
      */
-    async componentDidUpdate(prevProps, prevState) {
+    async componentDidUpdate(prevProps) {
+        // Close piece selection dialog when the block is deselected
+        if (prevProps.isSelected && !this.props.isSelected) {
+            if (this.chessboard && this.chessboard.isPieceSelectionDialogShown()) {
+                this.chessboard.closePieceSelectionDialog();
+                this.chessboard.view.redrawBoard(); // Force a redraw
+            }
+        }
+
         if (
             prevProps.pieces !== this.props.pieces ||
             prevProps.borderType !== this.props.borderType ||
@@ -90,6 +114,11 @@ class SimpleFenEditor extends Component {
 
         newBoardGroup.addEventListener('pointerdown', (e) => {
             if (e.button !== 0) { // Ne réagit qu'au clic gauche
+                return;
+            }
+            if (!this.props.isSelected) {
+                // If the block is not selected, the click should only select it, not open the dialog.
+                // The block selection is handled by Gutenberg itself.
                 return;
             }
             if (this.isMoveInProgress || this.chessboard.isPieceSelectionDialogShown()) {
@@ -161,6 +190,9 @@ class SimpleFenEditor extends Component {
                 },
                 extensions: [
                     { class: PieceSelectionDialog },
+                    { class: Arrows },
+                    { class: Markers, props: { autoMarkers: MARKER_TYPE.frame } },
+                    { class: RightClickAnnotator },
                 ],
             });
 
@@ -213,65 +245,12 @@ class SimpleFenEditor extends Component {
     }
 
     /**
-     * Clears all pieces from the board.
-     */
-    clearBoard() {
-        if (this.chessboard) {
-            this.props.onChange('8/8/8/8/8/8/8/8 w - - 0 1');
-        }
-    }
-
-    /**
-     * Renders the FEN editor interface, including piece selection palettes
-     * and the chessboard itself.
+     * Renders the FEN editor interface, including the chessboard itself.
      * @returns {JSX.Element} The rendered component.
      */
     render() {
         return (
-            <div>
-                <div
-                    ref={(ref) => { this.editorRef = ref; }}
-                    style={{
-                        maxWidth: '500px',
-                        margin: '0 auto',
-                    }}
-                />
-
-                <div
-                    style={{
-                        display: 'flex',
-                        gap: '8px',
-                        justifyContent: 'center',
-                        marginTop: '15px'
-                    }}
-                >
-                    <Button
-                        isSecondary
-                        onClick={() => this.clearBoard()}
-                    >
-                        {__('Vider l\'échiquier', 'roi')}
-                    </Button>
-
-                    <Button
-                        isSecondary
-                        onClick={() => this.props.onChange('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')}
-                    >
-                        {__('Position initiale', 'roi')}
-                    </Button>
-                </div>
-
-                <p
-                    style={{
-                        textAlign: 'center',
-                        fontSize: '13px',
-                        color: '#646970',
-                        marginTop: '15px',
-                        fontStyle: 'italic'
-                    }}
-                >
-                    {__('💡 Cliquez sur une case pour choisir une pièce. Glissez-déposez pour déplacer. Glissez en dehors pour supprimer.', 'roi')}
-                </p>
-            </div>
+            <div ref={(ref) => { this.editorRef = ref; }} />
         );
     }
 }
@@ -281,10 +260,11 @@ class SimpleFenEditor extends Component {
  * @param {object} props - The component props provided by WordPress.
  * @param {object} props.attributes - The block's attributes.
  * @param {function} props.setAttributes - A function to update the block's attributes.
+ * @param {boolean} props.isSelected - Whether the block is currently selected.
  * @returns {JSX.Element} The rendered block editor interface.
  */
 export default function Edit(props) {
-    const { attributes, setAttributes } = props;
+    const { attributes, setAttributes, isSelected } = props;
     const { fen, turn = 'w' } = attributes;
 
     const [fenValidation, setFenValidation] = useState({ isValid: true, error: null });
@@ -354,10 +334,52 @@ export default function Edit(props) {
         syncFenFromTurn();
     }, [turn]);
 
+    /**
+     * Handles changes to the castling rights checkboxes.
+     * @param {string} right - The castling right to change ('K', 'Q', 'k', 'q').
+     * @param {boolean} isChecked - The new state of the checkbox.
+     */
+    const handleCastleChange = (right, isChecked) => {
+        const fenTokens = fen.split(' ');
+        let castling = fenTokens[2] || '-';
+        if (castling === '-') {
+            castling = '';
+        }
+
+        if (isChecked) {
+            castling += right;
+        } else {
+            castling = castling.replace(right, '');
+        }
+
+        const sortedCastling = ['K', 'Q', 'k', 'q']
+            .filter(r => castling.includes(r))
+            .join('');
+
+        fenTokens[2] = sortedCastling || '-';
+        setAttributes({ fen: fenTokens.join(' ') });
+    };
+
+    const castlingRights = (fen.split(' ')[2] || '-');
+
     return (
         <div {...blockProps}>
             <InspectorControls>
                 <PanelBody title={__('Configuration', 'roi')}>
+                    <SelectControl
+                        label={__("Charger une position", 'roi')}
+                        value={''} // Unmanaged value
+                        options={[
+                            { label: __('Sélectionner...', 'roi'), value: '', disabled: true },
+                            { label: __('Position initiale', 'roi'), value: FEN.start },
+                            { label: __('Échiquier vide', 'roi'), value: FEN.empty }
+                        ]}
+                        onChange={(value) => {
+                            if (value) setAttributes({ fen: value });
+                        }}
+                        __next40pxDefaultSize={true}
+                        __nextHasNoMarginBottom={true}
+                    />
                     <TextControl
                         label={__('Position FEN', 'roi')}
                         value={attributes.fen}
@@ -365,12 +387,29 @@ export default function Edit(props) {
                         help={
                             !fenValidation.isValid ? (
                                 <span style={{ color: 'red' }}>{fenValidation.error}</span>
-                            ) : (
-                                __('Modifiable visuellement ci-dessous', 'roi')
-                            )
+                            ) : null
                         }
+                        __next40pxDefaultSize={true}
+                        __nextHasNoMarginBottom={true}
                     />
-                     <SelectControl
+                    <div className="castling-controls">
+                        <label className="castling-controls__label">{__('Roques', 'roi')}</label>
+                        <table className="castling-table">
+                            <tbody>
+                                <tr>
+                                    <td>{__('Blancs :', 'roi')}</td>
+                                    <td><CheckboxControl label="O-O" checked={castlingRights.includes('K')} onChange={(isChecked) => handleCastleChange('K', isChecked)} __nextHasNoMarginBottom={true} /></td>
+                                    <td><CheckboxControl label="O-O-O" checked={castlingRights.includes('Q')} onChange={(isChecked) => handleCastleChange('Q', isChecked)} __nextHasNoMarginBottom={true} /></td>
+                                </tr>
+                                <tr>
+                                    <td>{__('Noirs :', 'roi')}</td>
+                                    <td><CheckboxControl label="O-O" checked={castlingRights.includes('k')} onChange={(isChecked) => handleCastleChange('k', isChecked)} __nextHasNoMarginBottom={true} /></td>
+                                    <td><CheckboxControl label="O-O-O" checked={castlingRights.includes('q')} onChange={(isChecked) => handleCastleChange('q', isChecked)} __nextHasNoMarginBottom={true} /></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <SelectControl
                         label={__('Trait', 'roi')}
                         value={attributes.turn}
                         options={[
@@ -378,7 +417,8 @@ export default function Edit(props) {
                             { label: __('Aux Noirs', 'roi'), value: 'b' }
                         ]}
                         onChange={(value) => setAttributes({ turn: value })}
-                        help={__('Qui doit jouer le prochain coup ?', 'roi')}
+                        __next40pxDefaultSize={true}
+                        __nextHasNoMarginBottom={true}
                     />
                 </PanelBody>
                 <PanelBody title={__('Style de l\'échiquier', 'roi')}>
@@ -391,11 +431,14 @@ export default function Edit(props) {
                             { label: __('Cadre', 'roi'), value: 'frame' },
                         ]}
                         onChange={(value) => setAttributes({ borderType: value })}
+                        __next40pxDefaultSize={true}
+                        __nextHasNoMarginBottom={true}
                     />
                     <ToggleControl
                         label={__('Afficher les coordonnées', 'roi')}
                         checked={attributes.showCoordinates}
                         onChange={(value) => setAttributes({ showCoordinates: value })}
+                        __nextHasNoMarginBottom={true}
                     />
                     <SelectControl
                         label={__('Style des pièces', 'roi')}
@@ -405,6 +448,8 @@ export default function Edit(props) {
                             { label: __('Staunty', 'roi'), value: 'staunty' },
                         ]}
                         onChange={(value) => setAttributes({ pieces: value })}
+                        __next40pxDefaultSize={true}
+                        __nextHasNoMarginBottom={true}
                     />
                     <SelectControl
                         label={__('Couleur de l\'échiquier', 'roi')}
@@ -417,6 +462,8 @@ export default function Edit(props) {
                             { label: __('Noir et blanc', 'roi'), value: 'black-and-white' },
                         ]}
                         onChange={(value) => setAttributes({ cssClass: value })}
+                        __next40pxDefaultSize={true}
+                        __nextHasNoMarginBottom={true}
                     />
                 </PanelBody>
                 <PanelBody title={__('Mode de jeu', 'roi')}>
@@ -428,11 +475,14 @@ export default function Edit(props) {
                             { label: __('Noirs', 'roi'), value: 'black' }
                         ]}
                         onChange={(value) => setAttributes({ orientation: value })}
+                        __next40pxDefaultSize={true}
+                        __nextHasNoMarginBottom={true}
                     />
                     <ToggleControl
                         label={__('Permettre de déplacer', 'roi')}
                         checked={isMovesEnabled}
                         onChange={(value) => setAttributes({ enableMoves: value ? 'true' : 'false' })}
+                        __nextHasNoMarginBottom={true}
                     />
                     <ToggleControl
                         label={__('Activer le moteur Stockfish', 'roi')}
@@ -444,6 +494,7 @@ export default function Edit(props) {
                                 ? __('Le FEN doit être valide pour activer le moteur.', 'roi')
                                 : ''
                         }
+                        __nextHasNoMarginBottom={true}
                     />
                     {isEngineEnabled && (
                         <RangeControl
@@ -459,63 +510,16 @@ export default function Edit(props) {
                 </PanelBody>
             </InspectorControls>
 
-            <div
-                style={{
-                    padding: '20px',
-                    backgroundColor: '#f8f9fa',
-                    borderRadius: '8px',
-                    border: '2px solid #0073aa'
-                }}
-            >
-                <h3
-                    style={{
-                        textAlign: 'center',
-                        marginTop: '0',
-                        marginBottom: '15px'
-                    }}
-                >
-                    {__('📝 Éditeur de position', 'roi')}
-                </h3>
-
-                <SimpleFenEditor
-                    fen={attributes.fen}
-                    pieces={attributes.pieces}
-                    borderType={attributes.borderType}
-                    cssClass={attributes.cssClass}
-                    orientation={attributes.orientation}
-                    showCoordinates={attributes.showCoordinates}
-                    onChange={(newFen) => setAttributes({ fen: newFen })}
-                />
-
-                <div
-                    style={{
-                        marginTop: '15px',
-                        padding: '10px',
-                        backgroundColor: 'white',
-                        borderRadius: '4px',
-                        fontSize: '11px',
-                        fontFamily: 'monospace',
-                        wordBreak: 'break-all'
-                    }}
-                >
-                    {attributes.fen}
-                </div>
-
-                <div
-                    style={{
-                        marginTop: '10px',
-                        textAlign: 'center',
-                        fontSize: '13px'
-                    }}
-                >
-                    <strong>
-                        {isEngineEnabled ? '🎮 Jeu vs IA' :
-                            isMovesEnabled ? '✏️ Exercice' :
-                                '👁️ Démo'
-                        }
-                    </strong>
-                </div>
-            </div>
+            <SimpleFenEditor
+                fen={attributes.fen}
+                pieces={attributes.pieces}
+                borderType={attributes.borderType}
+                cssClass={attributes.cssClass}
+                orientation={attributes.orientation}
+                showCoordinates={attributes.showCoordinates}
+                onChange={(newFen) => setAttributes({ fen: newFen })}
+                isSelected={isSelected}
+            />
         </div>
     );
 }

@@ -6,6 +6,20 @@
     *   Remplacement des bandes de sélection de pièces statiques par une boîte de dialogue popup moderne et intuitive.
     *   La popup s'affiche désormais uniquement lors d'un clic gauche sur une case vide, libérant le clic droit pour de futures fonctionnalités.
     *   L'expérience utilisateur est plus fluide et l'interface de l'éditeur est moins encombrée.
+*   **Refonte majeure de l'interface de l'éditeur du bloc Échiquier :**
+    *   **Interface épurée :** L'éditeur n'affiche plus que l'échiquier, supprimant le titre, la notation FEN et autres textes pour un aperçu fidèle au rendu final ("What You See Is What You Get").
+    *   **Nouvelles extensions interactives :** Intégration des extensions `arrows`, `markers` et `right-click-annotator` de `cm-chessboard`, permettant de dessiner des flèches et de marquer des cases directement dans l'éditeur.
+    *   **Contrôles dans la barre latérale :**
+        *   Les boutons "Position initiale" et "Échiquier vide" sont remplacés par une liste déroulante plus compacte.
+        *   Ajout de contrôles précis (cases à cocher) pour gérer les droits de roque pour les blancs et les noirs, organisés dans un tableau pour un affichage stable et compact.
+    *   **Amélioration de l'expérience utilisateur (UX) :**
+        *   Un premier clic sur le bloc non sélectionné se contente de le sélectionner, permettant l'accès aux paramètres sans déclencher d'action sur l'échiquier.
+        *   Le menu de sélection des pièces ne s'ouvre que si le bloc est déjà sélectionné.
+        *   Le menu se ferme automatiquement lorsque le bloc perd le focus, garantissant une interface propre.
+    *   **Technique et corrections :**
+        *   L'échiquier est désormais entièrement responsive dans l'éditeur et s'adapte à la taille de son conteneur.
+        *   Correction de multiples avertissements de dépréciation des composants WordPress (`SelectControl`, `TextControl`, etc.) pour assurer la compatibilité future.
+        *   Correction de bugs liés à la fermeture et au rafraîchissement visuel du menu de sélection des pièces.
 
 ## 1.0.4 - 2025-10-23
 
