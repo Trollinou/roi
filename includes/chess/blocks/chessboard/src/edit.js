@@ -363,6 +363,8 @@ export default function Edit(props) {
                         onChange={(value) => {
                             if (value) setAttributes({ fen: value });
                         }}
+                        __next40pxDefaultSize={true}
+                        __nextHasNoMarginBottom={true}
                     />
                     <TextControl
                         label={__('Position FEN', 'roi')}
@@ -373,6 +375,8 @@ export default function Edit(props) {
                                 <span style={{ color: 'red' }}>{fenValidation.error}</span>
                             ) : null
                         }
+                        __next40pxDefaultSize={true}
+                        __nextHasNoMarginBottom={true}
                     />
                     <div className="castling-controls">
                         <label className="castling-controls__label">{__('Roques', 'roi')}</label>
@@ -380,13 +384,13 @@ export default function Edit(props) {
                             <tbody>
                                 <tr>
                                     <td>{__('Blancs :', 'roi')}</td>
-                                    <td><CheckboxControl label="O-O" checked={castlingRights.includes('K')} onChange={(isChecked) => handleCastleChange('K', isChecked)} /></td>
-                                    <td><CheckboxControl label="O-O-O" checked={castlingRights.includes('Q')} onChange={(isChecked) => handleCastleChange('Q', isChecked)} /></td>
+                                    <td><CheckboxControl label="O-O" checked={castlingRights.includes('K')} onChange={(isChecked) => handleCastleChange('K', isChecked)} __nextHasNoMarginBottom={true} /></td>
+                                    <td><CheckboxControl label="O-O-O" checked={castlingRights.includes('Q')} onChange={(isChecked) => handleCastleChange('Q', isChecked)} __nextHasNoMarginBottom={true} /></td>
                                 </tr>
                                 <tr>
                                     <td>{__('Noirs :', 'roi')}</td>
-                                    <td><CheckboxControl label="O-O" checked={castlingRights.includes('k')} onChange={(isChecked) => handleCastleChange('k', isChecked)} /></td>
-                                    <td><CheckboxControl label="O-O-O" checked={castlingRights.includes('q')} onChange={(isChecked) => handleCastleChange('q', isChecked)} /></td>
+                                    <td><CheckboxControl label="O-O" checked={castlingRights.includes('k')} onChange={(isChecked) => handleCastleChange('k', isChecked)} __nextHasNoMarginBottom={true} /></td>
+                                    <td><CheckboxControl label="O-O-O" checked={castlingRights.includes('q')} onChange={(isChecked) => handleCastleChange('q', isChecked)} __nextHasNoMarginBottom={true} /></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -399,6 +403,8 @@ export default function Edit(props) {
                             { label: __('Aux Noirs', 'roi'), value: 'b' }
                         ]}
                         onChange={(value) => setAttributes({ turn: value })}
+                        __next40pxDefaultSize={true}
+                        __nextHasNoMarginBottom={true}
                     />
                 </PanelBody>
                 <PanelBody title={__('Style de l\'échiquier', 'roi')}>
@@ -411,11 +417,14 @@ export default function Edit(props) {
                             { label: __('Cadre', 'roi'), value: 'frame' },
                         ]}
                         onChange={(value) => setAttributes({ borderType: value })}
+                        __next40pxDefaultSize={true}
+                        __nextHasNoMarginBottom={true}
                     />
                     <ToggleControl
                         label={__('Afficher les coordonnées', 'roi')}
                         checked={attributes.showCoordinates}
                         onChange={(value) => setAttributes({ showCoordinates: value })}
+                        __nextHasNoMarginBottom={true}
                     />
                     <SelectControl
                         label={__('Style des pièces', 'roi')}
@@ -425,6 +434,8 @@ export default function Edit(props) {
                             { label: __('Staunty', 'roi'), value: 'staunty' },
                         ]}
                         onChange={(value) => setAttributes({ pieces: value })}
+                        __next40pxDefaultSize={true}
+                        __nextHasNoMarginBottom={true}
                     />
                     <SelectControl
                         label={__('Couleur de l\'échiquier', 'roi')}
@@ -437,6 +448,8 @@ export default function Edit(props) {
                             { label: __('Noir et blanc', 'roi'), value: 'black-and-white' },
                         ]}
                         onChange={(value) => setAttributes({ cssClass: value })}
+                        __next40pxDefaultSize={true}
+                        __nextHasNoMarginBottom={true}
                     />
                 </PanelBody>
                 <PanelBody title={__('Mode de jeu', 'roi')}>
@@ -448,11 +461,14 @@ export default function Edit(props) {
                             { label: __('Noirs', 'roi'), value: 'black' }
                         ]}
                         onChange={(value) => setAttributes({ orientation: value })}
+                        __next40pxDefaultSize={true}
+                        __nextHasNoMarginBottom={true}
                     />
                     <ToggleControl
                         label={__('Permettre de déplacer', 'roi')}
                         checked={isMovesEnabled}
                         onChange={(value) => setAttributes({ enableMoves: value ? 'true' : 'false' })}
+                        __nextHasNoMarginBottom={true}
                     />
                     <ToggleControl
                         label={__('Activer le moteur Stockfish', 'roi')}
@@ -464,6 +480,7 @@ export default function Edit(props) {
                                 ? __('Le FEN doit être valide pour activer le moteur.', 'roi')
                                 : ''
                         }
+                        __nextHasNoMarginBottom={true}
                     />
                     {isEngineEnabled && (
                         <RangeControl
