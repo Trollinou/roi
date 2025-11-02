@@ -73,6 +73,13 @@ class SimpleFenEditor extends Component {
      * @param {object} prevProps - The previous props.
      */
     async componentDidUpdate(prevProps) {
+        // Close piece selection dialog when the block is deselected
+        if (prevProps.isSelected && !this.props.isSelected) {
+            if (this.chessboard && this.chessboard.isPieceSelectionDialogShown()) {
+                this.chessboard.closePieceSelectionDialog();
+            }
+        }
+
         if (
             prevProps.pieces !== this.props.pieces ||
             prevProps.borderType !== this.props.borderType ||
@@ -106,6 +113,11 @@ class SimpleFenEditor extends Component {
 
         newBoardGroup.addEventListener('pointerdown', (e) => {
             if (e.button !== 0) { // Ne réagit qu'au clic gauche
+                return;
+            }
+            if (!this.props.isSelected) {
+                // If the block is not selected, the click should only select it, not open the dialog.
+                // The block selection is handled by Gutenberg itself.
                 return;
             }
             if (this.isMoveInProgress || this.chessboard.isPieceSelectionDialogShown()) {
@@ -247,10 +259,11 @@ class SimpleFenEditor extends Component {
  * @param {object} props - The component props provided by WordPress.
  * @param {object} props.attributes - The block's attributes.
  * @param {function} props.setAttributes - A function to update the block's attributes.
+ * @param {boolean} props.isSelected - Whether the block is currently selected.
  * @returns {JSX.Element} The rendered block editor interface.
  */
 export default function Edit(props) {
-    const { attributes, setAttributes } = props;
+    const { attributes, setAttributes, isSelected } = props;
     const { fen, turn = 'w' } = attributes;
 
     const [fenValidation, setFenValidation] = useState({ isValid: true, error: null });
@@ -504,6 +517,7 @@ export default function Edit(props) {
                 orientation={attributes.orientation}
                 showCoordinates={attributes.showCoordinates}
                 onChange={(newFen) => setAttributes({ fen: newFen })}
+                isSelected={isSelected}
             />
         </div>
     );
