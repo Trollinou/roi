@@ -77,6 +77,7 @@ class SimpleFenEditor extends Component {
         if (prevProps.isSelected && !this.props.isSelected) {
             if (this.chessboard && this.chessboard.isPieceSelectionDialogShown()) {
                 this.chessboard.closePieceSelectionDialog();
+                this.chessboard.view.redrawBoard(); // Force a redraw
             }
         }
 
