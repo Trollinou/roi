@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.1.0 - 2026-04-22
+
+*   **Modernisation de l'architecture technique :**
+    *   **Refonte POO (PHP 8.4) :** Mise en conformité de la logique PHP avec les standards de programmation orientée objet stricte, incluant le typage fort et l'optimisation des services.
+    *   **Standard ES2021 :** Migration de l'ensemble du code JavaScript vers la syntaxe ES2021 (Modules, Async/Await, Optional Chaining) pour une meilleure performance et maintenabilité.
+    *   **Gestion des Dépendances :** Transition des librairies locales (`chess.js`, `cm-chessboard`) vers des paquets npm standards.
+    *   **Automatisation Webpack :** Configuration avancée pour le bundling des scripts publics et la gestion automatisée des assets de librairies.
+    *   **Nettoyage :** Suppression de l'ancien dossier `includes/lib` au profit d'une structure modulaire propre.
+*   **Amélioration drastique de la qualité du code (QA) :**
+    *   **Validation JavaScript :** Correction de plus de 1800 erreurs via ESLint/Prettier (Standard WordPress + ES2021).
+    *   **Validation PHP :** Configuration de PHPStan au Niveau 6 pour garantir la robustesse du typage PHP 8.4.
+    *   **React :** Sécurisation des dépendances des Hooks dans l'éditeur de blocs.
+*   **Automatisation du Packaging :**
+    *   Création d'un script `package.sh` pour générer proprement les archives de livraison ZIP.
+    *   Optimisation du fichier `.distignore` pour garantir que seuls les fichiers de production (incluant le dossier `build/`) sont livrés.
+    *   Ajout de la commande `npm run package` pour simplifier le processus de release.
+
 ## 1.0.5 - 2025-11-01
 
 *   **Amélioration de l'interface de l'éditeur du bloc Échiquier :**

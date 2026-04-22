@@ -1,0 +1,23 @@
+{
+  "name": "echiquier-ledonien/dame",
+  "description": "Dossier Administratif des Membres Échiquéens",
+  "type": "wordpress-plugin",
+  "require-dev": {
+    "phpstan/phpstan": "^2.1",
+    "szepeviktor/phpstan-wordpress": "^2.0",
+    "phpunit/phpunit": "^11.0"
+  },
+  "scripts": {
+    "lint:php": "phpstan analyze"
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "DAME\\Tests\\": "tests/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "szepeviktor/phpstan-wordpress": true
+    }
+  }
+}

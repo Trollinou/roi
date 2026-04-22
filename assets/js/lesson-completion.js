@@ -1,48 +1,66 @@
 /**
- * @file Handles the AJAX functionality for the "Mark as Completed" button on single lesson pages.
- * @author Your Name
- * @version 1.0.0
+ * @file Gère la fonctionnalité AJAX pour le bouton "Marquer comme terminée" sur les pages de leçons.
+ * @author ROI
+ * @version 2.0.0
  */
 
-(function($) {
-    'use strict';
+document.addEventListener( 'DOMContentLoaded', () => {
+	'use strict';
 
-    /**
-     * Initializes the lesson completion button functionality on document ready.
-     * @namespace
-     */
-    $(document).ready(function() {
-        $('#roi-complete-lesson-btn').on('click', function() {
-            var $button = $(this);
-            var lessonId = $button.data('lesson-id');
-            var $feedbackDiv = $('#roi-lesson-completion-feedback');
+	const completeBtn = document.getElementById( 'roi-complete-lesson-btn' );
+	if ( ! completeBtn ) {
+		return;
+	}
 
-            $button.prop('disabled', true);
-            $feedbackDiv.text('Processing...');
+	const feedbackDiv = document.getElementById(
+		'roi-lesson-completion-feedback'
+	);
 
-            $.ajax({
-                url: roi_ajax.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'roi_complete_lesson',
-                    nonce: roi_ajax.nonce,
-                    lesson_id: lessonId
-                },
-                success: function(response) {
-                    if (response.success) {
-                        $feedbackDiv.text(response.data).css('color', 'green');
-                        $button.hide();
-                    } else {
-                        $feedbackDiv.text(response.data).css('color', 'red');
-                        $button.prop('disabled', false);
-                    }
-                },
-                error: function() {
-                    $feedbackDiv.text('An error occurred.').css('color', 'red');
-                    $button.prop('disabled', false);
-                }
-            });
-        });
-    });
+	completeBtn.addEventListener( 'click', async () => {
+		const lessonId = completeBtn.getAttribute( 'data-lesson-id' );
+		if ( ! lessonId ) {
+			return;
+		}
 
-})(jQuery);
+		completeBtn.disabled = true;
+		if ( feedbackDiv ) {
+			feedbackDiv.textContent = 'Traitement en cours...';
+			feedbackDiv.style.color = 'inherit';
+		}
+
+		try {
+			const formData = new FormData();
+			formData.append( 'action', 'roi_complete_lesson' );
+			formData.append( 'nonce', roi_ajax.nonce );
+			formData.append( 'lesson_id', lessonId );
+
+			const response = await fetch( roi_ajax.ajax_url, {
+				method: 'POST',
+				body: formData,
+			} );
+
+			const data = await response.json();
+
+			if ( data.success ) {
+				if ( feedbackDiv ) {
+					feedbackDiv.textContent = data.data;
+					feedbackDiv.style.color = 'green';
+				}
+				completeBtn.style.display = 'none';
+			} else {
+				if ( feedbackDiv ) {
+					feedbackDiv.textContent = data.data;
+					feedbackDiv.style.color = 'red';
+				}
+				completeBtn.disabled = false;
+			}
+		} catch ( error ) {
+			if ( feedbackDiv ) {
+				feedbackDiv.textContent = 'Une erreur est survenue.';
+				feedbackDiv.style.color = 'red';
+			}
+			completeBtn.disabled = false;
+			console.error( 'ROI Error:', error );
+		}
+	} );
+} );

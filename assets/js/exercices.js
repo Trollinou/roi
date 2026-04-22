@@ -1,128 +1,167 @@
 /**
- * @file Manages the interactive exercise interface for the [roi_exercices] shortcode.
- * @author Your Name
- * @version 1.0.0
+ * @file Gère l'interface interactive des exercices pour le shortcode [roi_exercices].
+ * @author ROI
+ * @version 2.0.0
  */
 
-(function($) {
-    'use strict';
+document.addEventListener( 'DOMContentLoaded', () => {
+	'use strict';
 
-    /**
-     * Initializes the exercise interface on document ready.
-     * @namespace
-     */
-    $(document).ready(function() {
-        let scoreCorrect = 0;
-        let scoreAttempted = 0;
-        let currentExerciseId = null;
+	let scoreCorrect = 0;
+	let scoreAttempted = 0;
+	let currentExerciseId = null;
 
-        // Start fetching exercises
-        $('#roi-start-exercices').on('click', function() {
-            fetchNextExercise();
-        });
+	const wrapper = document.getElementById( 'roi-exercices-wrapper' );
+	if ( ! wrapper ) {
+		return;
+	}
 
-        // Delegate click for answer submission
-        $('#roi-exercice-display').on('click', '#roi-submit-answer', function() {
-            submitAnswer();
-        });
+	const displayDiv = document.getElementById( 'roi-exercice-display' );
+	const scoreCorrectSpan = document.getElementById( 'roi-score-correct' );
+	const scoreAttemptedSpan = document.getElementById( 'roi-score-attempted' );
 
-        // Delegate click for next exercise
-        $('#roi-exercice-display').on('click', '#roi-next-exercice', function() {
-            fetchNextExercise();
-        });
+	// Démarrer les exercices
+	const startBtn = document.getElementById( 'roi-start-exercices' );
+	startBtn?.addEventListener( 'click', () => fetchNextExercise() );
 
-        /**
-         * Fetches the next exercise based on the selected filters.
-         * This function makes an AJAX call to retrieve a random exercise
-         * matching the difficulty and category criteria. It avoids showing the
-         * same exercise twice in a row.
-         * @returns {void}
-         */
-        function fetchNextExercise() {
-            const difficulty = $('#roi-difficulty-filter').val();
-            const category = $('#roi-category-filter').val();
-            const displayDiv = $('#roi-exercice-display');
+	// Délégation d'événements pour le conteneur d'affichage
+	displayDiv?.addEventListener( 'click', ( event ) => {
+		const target = event.target;
+		if ( target.id === 'roi-submit-answer' ) {
+			submitAnswer();
+		} else if ( target.id === 'roi-next-exercice' ) {
+			fetchNextExercise();
+		}
+	} );
 
-            displayDiv.html('<p>Chargement du prochain exercice...</p>');
+	/**
+	 * Récupère l'exercice suivant via AJAX (Fetch API).
+	 */
+	async function fetchNextExercise() {
+		const difficulty = document.getElementById(
+			'roi-difficulty-filter'
+		)?.value;
+		const category = document.getElementById(
+			'roi-category-filter'
+		)?.value;
 
-            $.ajax({
-                url: roi_exercices_ajax.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'roi_fetch_exercice',
-                    nonce: roi_exercices_ajax.nonce,
-                    difficulty: difficulty,
-                    category: category,
-                    exclude: currentExerciseId // To avoid showing the same one twice in a row
-                },
-                success: function(response) {
-                    if (response.success) {
-                        displayDiv.html(response.data.html);
-                        currentExerciseId = response.data.id;
-                    } else {
-                        displayDiv.html('<p>' + response.data + '</p>');
-                    }
-                },
-                error: function() {
-                    displayDiv.html('<p>Une erreur est survenue.</p>');
-                }
-            });
-        }
+		if ( displayDiv ) {
+			displayDiv.innerHTML = '<p>Chargement du prochain exercice...</p>';
+		}
 
-        /**
-         * Submits the user's answer for the current exercise.
-         * This function sends the serialized form data via an AJAX call to be
-         * checked. It then displays feedback, the solution, updates the score,
-         * and shows the 'Next Exercise' button.
-         * @returns {void}
-         */
-        function submitAnswer() {
-            const exerciseId = $('#roi-exercice-id').val();
-            const answerData = $('#roi-exercice-form').serialize();
-            const solutionDiv = $('#roi-exercice-solution');
-            const submitButton = $('#roi-submit-answer');
+		try {
+			const formData = new FormData();
+			formData.append( 'action', 'roi_fetch_exercice' );
+			formData.append( 'nonce', roi_exercices_ajax.nonce );
+			formData.append( 'difficulty', difficulty ?? 'any' );
+			formData.append( 'category', category ?? 'any' );
+			if ( currentExerciseId ) {
+				formData.append( 'exclude', currentExerciseId );
+			}
 
-            submitButton.prop('disabled', true);
+			const response = await fetch( roi_exercices_ajax.ajax_url, {
+				method: 'POST',
+				body: formData,
+			} );
 
-            $.ajax({
-                url: roi_exercices_ajax.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'roi_check_answer',
-                    nonce: roi_exercices_ajax.nonce,
-                    exercise_id: exerciseId,
-                    answer: answerData
-                },
-                success: function(response) {
-                    scoreAttempted++;
-                    $('#roi-score-attempted').text(scoreAttempted);
+			const data = await response.json();
 
-                    if (response.success) {
-                        if (response.data.correct) {
-                            scoreCorrect++;
-                            $('#roi-score-correct').text(scoreCorrect);
-                            solutionDiv.before('<p style="color:green;">' + response.data.message + '</p>');
-                        } else {
-                             let feedbackHtml = '<p style="color:red;">' + response.data.message + '</p>';
-                             if (response.data.correct_answers) {
-                                 feedbackHtml += '<p>' + "La bonne réponse était :" + '</p>' + response.data.correct_answers;
-                             }
-                             solutionDiv.before(feedbackHtml);
-                        }
-                        solutionDiv.html(response.data.solution).show();
-                        submitButton.hide();
-                        $('#roi-next-exercice').show();
-                    } else {
-                        solutionDiv.before('<p style="color:red;">' + response.data + '</p>');
-                        submitButton.prop('disabled', false);
-                    }
-                },
-                error: function() {
-                     solutionDiv.before('<p style="color:red;">Une erreur est survenue.</p>');
-                     submitButton.prop('disabled', false);
-                }
-            });
-        }
-    });
+			if ( data.success ) {
+				if ( displayDiv ) {
+					displayDiv.innerHTML = data.data.html;
+				}
+				currentExerciseId = data.data.id;
+			} else if ( displayDiv ) {
+				displayDiv.innerHTML = `<p>${ data.data }</p>`;
+			}
+		} catch ( error ) {
+			if ( displayDiv ) {
+				displayDiv.innerHTML =
+					'<p>Une erreur est survenue lors du chargement.</p>';
+			}
+			console.error( 'ROI Error:', error );
+		}
+	}
 
-})(jQuery);
+	/**
+	 * Soumet la réponse de l'utilisateur.
+	 */
+	async function submitAnswer() {
+		const form = document.getElementById( 'roi-exercice-form' );
+		const exerciseId = document.getElementById( 'roi-exercice-id' )?.value;
+		const submitButton = document.getElementById( 'roi-submit-answer' );
+
+		if ( ! form || ! exerciseId || ! submitButton ) {
+			return;
+		}
+
+		const solutionDiv = document.getElementById( 'roi-exercice-solution' );
+		submitButton.disabled = true;
+
+		try {
+			// Sérialisation manuelle simple pour cet usage
+			const formData = new FormData( form );
+			const searchParams = new URLSearchParams();
+			for ( const pair of formData.entries() ) {
+				searchParams.append( pair[ 0 ], pair[ 1 ] );
+			}
+
+			const requestData = new FormData();
+			requestData.append( 'action', 'roi_check_answer' );
+			requestData.append( 'nonce', roi_exercices_ajax.nonce );
+			requestData.append( 'exercise_id', exerciseId );
+			requestData.append( 'answer', searchParams.toString() );
+
+			const response = await fetch( roi_exercices_ajax.ajax_url, {
+				method: 'POST',
+				body: requestData,
+			} );
+
+			const data = await response.json();
+
+			scoreAttempted++;
+			if ( scoreAttemptedSpan ) {
+				scoreAttemptedSpan.textContent = scoreAttempted.toString();
+			}
+
+			if ( data.success ) {
+				const result = data.data;
+				const feedbackColor = result.correct ? 'green' : 'red';
+				const feedbackHtml = `<p style="color:${ feedbackColor }; font-weight: bold;">${ result.message }</p>`;
+
+				if ( result.correct ) {
+					scoreCorrect++;
+					if ( scoreCorrectSpan ) {
+						scoreCorrectSpan.textContent = scoreCorrect.toString();
+					}
+				}
+
+				if ( solutionDiv ) {
+					solutionDiv.insertAdjacentHTML(
+						'beforebegin',
+						feedbackHtml
+					);
+					solutionDiv.innerHTML = result.solution;
+					solutionDiv.style.display = 'block';
+				}
+
+				submitButton.style.display = 'none';
+				document.getElementById( 'roi-next-exercice' ).style.display =
+					'inline-block';
+			} else {
+				solutionDiv?.insertAdjacentHTML(
+					'beforebegin',
+					`<p style="color:red;">${ data.data }</p>`
+				);
+				submitButton.disabled = false;
+			}
+		} catch ( error ) {
+			solutionDiv?.insertAdjacentHTML(
+				'beforebegin',
+				'<p style="color:red;">Une erreur est survenue lors de la validation.</p>'
+			);
+			submitButton.disabled = false;
+			console.error( 'ROI Error:', error );
+		}
+	}
+} );

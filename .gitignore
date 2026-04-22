@@ -1,2 +1,8 @@
 .DS_Store
 node_modules/
+/vendor/
+/.sync.ffs_db
+fix_types.py
+.github/
+.gemini/
+gha-creds-*.json

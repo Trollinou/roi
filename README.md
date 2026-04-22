@@ -1,6 +1,6 @@
 # ROI - Ressources et Organisation pour l’Initiation aux échecs
 
-**Version :** 1.0.5
+**Version :** 1.1.0
 **Auteur :** Etienne Gagnon
 **Licence :** GPL v2 ou ultérieure
 **WordPress Requis :** 6.8+
@@ -91,6 +91,12 @@ Le projet utilise `@wordpress/scripts` pour compiler les assets du bloc Gutenber
 3.  Exécutez `npm run build` pour compiler les fichiers source de `includes/chess/blocks/chessboard/src` dans le répertoire `includes/chess/blocks/chessboard/build`.
 
 ## Changelog
+
+### 1.1.0 - 2026-04-22
+*   **Refonte Technique Majeure :** Architecture POO (PHP 8.4) et standardisation ES2021 du code JavaScript.
+*   **Modernisation de l'infrastructure :** Utilisation de paquets npm pour `chess.js` et `cm-chessboard`, configuration Webpack automatisée.
+*   **Qualité (QA) :** Correction exhaustive d'ESLint (1800+ erreurs) et PHPStan (Niveau 6).
+*   **Automatisation :** Script de packaging optimisé et mise à jour de `.distignore`.
 
 ### 1.0.4 - 2025-10-23
 *   **Amélioration majeure du bloc Échiquier :**

@@ -1,208 +1,236 @@
 /**
- * @file Manages the dual-list interface for the Course Builder meta box in the WordPress admin.
- * @author Your Name
- * @version 1.0.0
+ * @file Gère l'interface de double liste pour la métabox du Constructeur de Cours dans l'admin WordPress.
+ * @author ROI
+ * @version 2.0.0
  */
 
-(function($) {
-    'use strict';
+document.addEventListener( 'DOMContentLoaded', () => {
+	'use strict';
 
-    /**
-     * Initializes the course builder interface on document ready.
-     * @namespace
-     */
-    $(document).ready(function() {
-        const availableList = $('#roi-available-items-select');
-        const courseList = $('#roi-course-items-select');
-        const hiddenInputsContainer = $('#roi-course-items-hidden-inputs');
-        const difficultySelect = $('#roi_difficulty');
-        const availableItemsPlaceholder = $('#roi-available-items-placeholder');
-        const i18n = roi_course_builder_data.i18n;
+	const courseList = document.getElementById( 'roi-course-items-select' );
+	const difficultySelect = document.getElementById( 'roi_difficulty' );
 
-        /**
-         * Fetches available lessons and exercises based on the selected difficulty.
-         * This function makes an AJAX call to the server to get the content
-         * that matches the selected difficulty and is not already in the course.
-         * It then populates the 'Available Items' list.
-         * @returns {void}
-         */
-        function fetchAvailableItems() {
-            var difficulty = difficultySelect.val();
+	if ( ! courseList || ! difficultySelect ) {
+		return;
+	}
 
-            if (!difficulty) {
-                availableList.empty().prop('disabled', true);
-                if (availableItemsPlaceholder) {
-                    availableItemsPlaceholder.text(i18n.no_content).show();
-                }
-                return;
-            }
+	const availableList = document.getElementById(
+		'roi-available-items-select'
+	);
+	const hiddenInputsContainer = document.getElementById(
+		'roi-course-items-hidden-inputs'
+	);
+	const availableItemsPlaceholder = document.getElementById(
+		'roi-available-items-placeholder'
+	);
 
-            availableList.empty().prop('disabled', true);
-            if (availableItemsPlaceholder) {
-                availableItemsPlaceholder.text(i18n.loading).show();
-            }
+	const i18n = roi_course_builder_data.i18n;
 
-            $.ajax({
-                url: roi_course_builder_data.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'roi_get_course_builder_items',
-                    nonce: roi_course_builder_data.nonce,
-                    difficulty: difficulty,
-                    course_id: roi_course_builder_data.course_id
-                },
-                success: function(response) {
-                    if (response.success) {
-                        var lessons = response.data.lessons;
-                        var exercices = response.data.exercices;
+	/**
+	 * Récupère les éléments disponibles via AJAX (Fetch API).
+	 */
+	async function fetchAvailableItems() {
+		const difficulty = difficultySelect.value;
 
-                        if (lessons.length > 0) {
-                            var lessonOptgroup = $('<optgroup>').attr('label', i18n.lessons);
-                            lessons.forEach(function(item) {
-                                lessonOptgroup.append($('<option>').val('lecon:' + item.id).text(item.title));
-                            });
-                            availableList.append(lessonOptgroup);
-                        }
+		if ( ! difficulty ) {
+			if ( availableList ) {
+				availableList.innerHTML = '';
+				availableList.disabled = true;
+			}
+			if ( availableItemsPlaceholder ) {
+				availableItemsPlaceholder.textContent = i18n.no_content;
+				availableItemsPlaceholder.style.display = 'block';
+			}
+			return;
+		}
 
-                        if (exercices.length > 0) {
-                            var exerciceOptgroup = $('<optgroup>').attr('label', i18n.exercices);
-                            exercices.forEach(function(item) {
-                                exerciceOptgroup.append($('<option>').val('exercice:' + item.id).text(item.title));
-                            });
-                            availableList.append(exerciceOptgroup);
-                        }
+		if ( availableList ) {
+			availableList.innerHTML = '';
+			availableList.disabled = true;
+		}
+		if ( availableItemsPlaceholder ) {
+			availableItemsPlaceholder.textContent = i18n.loading;
+			availableItemsPlaceholder.style.display = 'block';
+		}
 
-                        if (lessons.length === 0 && exercices.length === 0) {
-                            if (availableItemsPlaceholder) {
-                                availableItemsPlaceholder.text(i18n.no_content).show();
-                            }
-                        } else {
-                            if (availableItemsPlaceholder) {
-                                availableItemsPlaceholder.hide();
-                            }
-                        }
+		try {
+			const formData = new FormData();
+			formData.append( 'action', 'roi_get_course_builder_items' );
+			formData.append( 'nonce', roi_course_builder_data.nonce );
+			formData.append( 'difficulty', difficulty );
+			formData.append( 'course_id', roi_course_builder_data.course_id );
 
-                        availableList.prop('disabled', false);
-                    } else {
-                        if (availableItemsPlaceholder) {
-                            availableItemsPlaceholder.text(i18n.error).show();
-                        }
-                    }
-                },
-                error: function() {
-                    if (availableItemsPlaceholder) {
-                        availableItemsPlaceholder.text(i18n.error).show();
-                    }
-                }
-            });
-        }
+			const response = await fetch( roi_course_builder_data.ajax_url, {
+				method: 'POST',
+				body: formData,
+			} );
 
-        difficultySelect.on('focus', function () {
-            // Store the original value on focus
-            $(this).data('previous-value', $(this).val());
-        }).on('change', function() {
-            var previousValue = $(this).data('previous-value');
-            var currentValue = $(this).val();
+			const data = await response.json();
 
-            if (courseList.find('option').length > 0) {
-                if (confirm("Changer le niveau de difficulté videra la liste des leçons et exercices déjà sélectionnés. Voulez-vous continuer ?")) {
-                    // User confirmed, clear the list and fetch new items
-                    courseList.empty();
-                    syncHiddenInputs();
-                    fetchAvailableItems();
-                } else {
-                    // User canceled, revert the dropdown to its previous value
-                    $(this).val(previousValue);
-                    return;
-                }
-            } else {
-                // List is empty, just fetch items
-                fetchAvailableItems();
-            }
+			if ( data.success ) {
+				const { lessons, exercices } = data.data;
 
-            // Update the previous value for the next change event
-            $(this).data('previous-value', currentValue);
-        });
+				if ( availableList ) {
+					if ( lessons.length > 0 ) {
+						const lessonGroup =
+							document.createElement( 'optgroup' );
+						lessonGroup.label = i18n.lessons;
+						lessons.forEach( ( item ) => {
+							const opt = new Option(
+								item.title,
+								`lecon:${ item.id }`
+							);
+							lessonGroup.appendChild( opt );
+						} );
+						availableList.appendChild( lessonGroup );
+					}
 
-        // Initial load if a difficulty is already selected
-        if (difficultySelect.val()) {
-            fetchAvailableItems();
-        }
+					if ( exercices.length > 0 ) {
+						const exerciceGroup =
+							document.createElement( 'optgroup' );
+						exerciceGroup.label = i18n.exercices;
+						exercices.forEach( ( item ) => {
+							const opt = new Option(
+								item.title,
+								`exercice:${ item.id }`
+							);
+							exerciceGroup.appendChild( opt );
+						} );
+						availableList.appendChild( exerciceGroup );
+					}
 
-        /**
-         * Synchronizes the hidden input fields with the current course list.
-         * This function ensures that the order and content of the course items
-         * are correctly submitted with the form. It clears and rebuilds the
-         * hidden inputs every time the course list changes.
-         * @returns {void}
-         */
-        function syncHiddenInputs() {
-            hiddenInputsContainer.empty(); // Clear existing inputs
-            courseList.find('option').each(function() {
-                hiddenInputsContainer.append(
-                    $('<input>', {
-                        type: 'hidden',
-                        name: 'roi_course_items[]',
-                        value: $(this).val()
-                    })
-                );
-            });
-        }
+					if ( lessons.length === 0 && exercices.length === 0 ) {
+						if ( availableItemsPlaceholder ) {
+							availableItemsPlaceholder.textContent =
+								i18n.no_content;
+							availableItemsPlaceholder.style.display = 'block';
+						}
+					} else if ( availableItemsPlaceholder ) {
+						availableItemsPlaceholder.style.display = 'none';
+					}
 
-        // Move selected items to the course list
-        $('#roi-add-to-course').on('click', function() {
-            availableList.find('option:selected').each(function() {
-                $(this).remove().appendTo(courseList);
-            });
-            syncHiddenInputs(); // Sync after adding
-        });
+					availableList.disabled = false;
+				}
+			} else if ( availableItemsPlaceholder ) {
+				availableItemsPlaceholder.textContent = i18n.error;
+			}
+		} catch ( error ) {
+			if ( availableItemsPlaceholder ) {
+				availableItemsPlaceholder.textContent = i18n.error;
+			}
+			console.error( 'ROI Error:', error );
+		}
+	}
 
-        // Remove selected items from the course list
-        $('#roi-remove-from-course').on('click', function() {
-            courseList.find('option:selected').each(function() {
-                const option = $(this);
-                const value = option.val();
-                const type = value.split(':')[0]; // 'lecon' or 'exercice'
-                const optgroupLabel = (type === 'lecon') ? i18n.lessons : i18n.exercices;
+	// Gestion du changement de difficulté avec confirmation si la liste n'est pas vide
+	let previousDifficulty = difficultySelect.value;
+	difficultySelect.addEventListener( 'change', () => {
+		if ( courseList.options.length > 0 ) {
+			if (
+				confirm(
+					'Changer le niveau de difficulté videra la liste des leçons et exercices déjà sélectionnés. Voulez-vous continuer ?'
+				)
+			) {
+				courseList.innerHTML = '';
+				syncHiddenInputs();
+				fetchAvailableItems();
+				previousDifficulty = difficultySelect.value;
+			} else {
+				difficultySelect.value = previousDifficulty;
+			}
+		} else {
+			fetchAvailableItems();
+			previousDifficulty = difficultySelect.value;
+		}
+	} );
 
-                let optgroup = availableList.find('optgroup[label="' + optgroupLabel + '"]');
+	// Chargement initial
+	if ( difficultySelect.value ) {
+		fetchAvailableItems();
+	}
 
-                if (optgroup.length === 0) {
-                    // Create the optgroup if it doesn't exist
-                    optgroup = $('<optgroup>').attr('label', optgroupLabel);
-                    availableList.append(optgroup);
-                }
+	/**
+	 * Synchronise les champs cachés avec la liste du cours.
+	 */
+	function syncHiddenInputs() {
+		if ( ! hiddenInputsContainer ) {
+			return;
+		}
+		hiddenInputsContainer.innerHTML = '';
+		Array.from( courseList.options ).forEach( ( opt ) => {
+			const input = document.createElement( 'input' );
+			input.type = 'hidden';
+			input.name = 'roi_course_items[]';
+			input.value = opt.value;
+			hiddenInputsContainer.appendChild( input );
+		} );
+	}
 
-                // Append the option to the correct optgroup
-                option.remove().appendTo(optgroup);
-            });
-            syncHiddenInputs(); // Sync after removing
-        });
+	// Ajouter au cours
+	document
+		.getElementById( 'roi-add-to-course' )
+		?.addEventListener( 'click', () => {
+			if ( ! availableList ) {
+				return;
+			}
+			Array.from( availableList.selectedOptions ).forEach( ( opt ) => {
+				courseList.appendChild( opt );
+			} );
+			syncHiddenInputs();
+		} );
 
-        // Move selected items up in the course list
-        $('#roi-move-up').on('click', function() {
-            courseList.find('option:selected').each(function() {
-                const prev = $(this).prev();
-                if (prev.length) {
-                    $(this).insertBefore(prev);
-                }
-            });
-            syncHiddenInputs(); // Sync after reordering
-        });
+	// Retirer du cours
+	document
+		.getElementById( 'roi-remove-from-course' )
+		?.addEventListener( 'click', () => {
+			if ( ! availableList ) {
+				return;
+			}
+			Array.from( courseList.selectedOptions ).forEach( ( opt ) => {
+				const [ type ] = opt.value.split( ':' );
+				const groupLabel =
+					type === 'lecon' ? i18n.lessons : i18n.exercices;
 
-        // Move selected items down in the course list
-        $('#roi-move-down').on('click', function() {
-            $(courseList.find('option:selected').get().reverse()).each(function() {
-                const next = $(this).next();
-                if (next.length) {
-                    $(this).insertAfter(next);
-                }
-            });
-            syncHiddenInputs(); // Sync after reordering
-        });
+				let group = availableList.querySelector(
+					`optgroup[label="${ groupLabel }"]`
+				);
+				if ( ! group ) {
+					group = document.createElement( 'optgroup' );
+					group.label = groupLabel;
+					availableList.appendChild( group );
+				}
+				group.appendChild( opt );
+			} );
+			syncHiddenInputs();
+		} );
 
-        // On load, ensure the hidden inputs match the course list.
-        syncHiddenInputs();
-    });
+	// Déplacer vers le haut
+	document.getElementById( 'roi-move-up' )?.addEventListener( 'click', () => {
+		Array.from( courseList.selectedOptions ).forEach( ( opt ) => {
+			const prev = opt.previousElementSibling;
+			if ( prev ) {
+				courseList.insertBefore( opt, prev );
+			}
+		} );
+		syncHiddenInputs();
+	} );
 
-})(jQuery);
+	// Déplacer vers le bas
+	document
+		.getElementById( 'roi-move-down' )
+		?.addEventListener( 'click', () => {
+			// Inverser l'ordre pour le déplacement vers le bas afin de garder la sélection cohérente
+			Array.from( courseList.selectedOptions )
+				.reverse()
+				.forEach( ( opt ) => {
+					const next = opt.nextElementSibling;
+					if ( next ) {
+						courseList.insertBefore( next, opt );
+					}
+				} );
+			syncHiddenInputs();
+		} );
+
+	// Init au chargement
+	syncHiddenInputs();
+} );

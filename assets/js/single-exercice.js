@@ -1,83 +1,105 @@
 /**
- * @file Manages the AJAX answer submission and feedback for single exercise pages.
- * @author Your Name
- * @version 1.0.0
+ * @file Gère la soumission des réponses AJAX et le feedback sur les pages d'exercices individuels.
+ * @author ROI
+ * @version 2.0.0
  */
 
-(function($) {
-    'use strict';
+document.addEventListener( 'DOMContentLoaded', () => {
+	'use strict';
 
-    /**
-     * Initializes the single exercise answer submission functionality on document ready.
-     * @namespace
-     */
-    $(document).ready(function() {
-        $('#roi-submit-answer').on('click', function() {
-            const submitButton = $(this);
-            const exerciseId = $('#roi-exercice-id').val();
-            const answerData = $('#roi-exercice-form').serialize();
-            const feedbackDiv = $('#roi-exercice-feedback');
-            const solutionDiv = $('#roi-exercice-solution');
+	const submitBtn = document.getElementById( 'roi-submit-answer' );
+	if ( ! submitBtn ) {
+		return;
+	}
 
-            submitButton.prop('disabled', true);
-            feedbackDiv.html('<p>Vérification...</p>');
+	const exerciseIdInput = document.getElementById( 'roi-exercice-id' );
+	const form = document.getElementById( 'roi-exercice-form' );
+	const feedbackDiv = document.getElementById( 'roi-exercice-feedback' );
+	const solutionDiv = document.getElementById( 'roi-exercice-solution' );
 
-            $.ajax({
-                url: roi_single_exercice_ajax.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'roi_check_answer', // We can reuse the same AJAX action
-                    nonce: roi_single_exercice_ajax.nonce,
-                    exercise_id: exerciseId,
-                    answer: answerData
-                },
-                success: function(response) {
-                    if (response.success) {
-                        const inputs = $('#roi-exercice-form input[name="roi_answer[]"]');
-                        const userSelected = response.data.user_selected_indices || [];
-                        const correctAnswers = response.data.correct_indices || [];
+	submitBtn.addEventListener( 'click', async () => {
+		const exerciseId = exerciseIdInput?.value;
+		if ( ! form || ! exerciseId ) {
+			return;
+		}
 
-                        // Disable all inputs and the submit button
-                        inputs.prop('disabled', true);
-                        submitButton.hide();
+		submitBtn.disabled = true;
+		if ( feedbackDiv ) {
+			feedbackDiv.innerHTML = '<p>Vérification...</p>';
+		}
 
-                        // Apply highlighting
-                        inputs.each(function() {
-                            const input = $(this);
-                            const inputValue = parseInt(input.val(), 10);
-                            const label = input.closest('label');
-                            const isSelected = userSelected.includes(inputValue);
-                            const isCorrect = correctAnswers.includes(inputValue);
+		try {
+			const formData = new FormData( form );
+			const searchParams = new URLSearchParams();
+			for ( const pair of formData.entries() ) {
+				searchParams.append( pair[ 0 ], pair[ 1 ] );
+			}
 
-                            if (isCorrect) {
-                                label.addClass('correct-answer'); // Highlight all correct answers green
-                            }
-                            if (isSelected && !isCorrect) {
-                                label.addClass('user-incorrect-choice'); // Strike through user's incorrect choices
-                            }
-                        });
+			const requestData = new FormData();
+			requestData.append( 'action', 'roi_check_answer' );
+			requestData.append( 'nonce', roi_single_exercice_ajax.nonce );
+			requestData.append( 'exercise_id', exerciseId );
+			requestData.append( 'answer', searchParams.toString() );
 
-                        // Display feedback message
-                        let feedbackHtml = '';
-                        if (response.data.correct) {
-                            feedbackHtml = '<p style="color:green;">' + response.data.message + '</p>';
-                        } else {
-                            feedbackHtml = '<p style="color:red;">' + response.data.message + '</p>';
-                        }
-                        feedbackDiv.html(feedbackHtml);
-                        solutionDiv.html(response.data.solution).show();
+			const response = await fetch( roi_single_exercice_ajax.ajax_url, {
+				method: 'POST',
+				body: requestData,
+			} );
 
-                    } else {
-                        feedbackDiv.html('<p style="color:red;">' + response.data + '</p>');
-                        submitButton.prop('disabled', false);
-                    }
-                },
-                error: function() {
-                    feedbackDiv.html('<p style="color:red;">Une erreur est survenue.</p>');
-                    submitButton.prop('disabled', false);
-                }
-            });
-        });
-    });
+			const data = await response.json();
 
-})(jQuery);
+			if ( data.success ) {
+				const result = data.data;
+				const inputs = form.querySelectorAll(
+					'input[name="roi_answer[]"]'
+				);
+				const userSelected = result.user_selected_indices || [];
+				const correctAnswers = result.correct_indices || [];
+
+				// Désactiver tous les champs et cacher le bouton
+				inputs.forEach( ( input ) => ( input.disabled = true ) );
+				submitBtn.style.display = 'none';
+
+				// Appliquer la coloration
+				inputs.forEach( ( input ) => {
+					const inputValue = parseInt( input.value, 10 );
+					const label = input.closest( 'label' );
+					const isSelected = userSelected.includes( inputValue );
+					const isCorrect = correctAnswers.includes( inputValue );
+
+					if ( label ) {
+						if ( isCorrect ) {
+							label.classList.add( 'correct-answer' );
+						}
+						if ( isSelected && ! isCorrect ) {
+							label.classList.add( 'user-incorrect-choice' );
+						}
+					}
+				} );
+
+				// Afficher le message de feedback
+				if ( feedbackDiv ) {
+					const color = result.correct ? 'green' : 'red';
+					feedbackDiv.innerHTML = `<p style="color:${ color }; font-weight: bold;">${ result.message }</p>`;
+				}
+
+				if ( solutionDiv ) {
+					solutionDiv.innerHTML = result.solution;
+					solutionDiv.style.display = 'block';
+				}
+			} else {
+				if ( feedbackDiv ) {
+					feedbackDiv.innerHTML = `<p style="color:red;">${ data.data }</p>`;
+				}
+				submitBtn.disabled = false;
+			}
+		} catch ( error ) {
+			if ( feedbackDiv ) {
+				feedbackDiv.innerHTML =
+					'<p style="color:red;">Une erreur est survenue lors de la validation.</p>';
+			}
+			submitBtn.disabled = false;
+			console.error( 'ROI Error:', error );
+		}
+	} );
+} );

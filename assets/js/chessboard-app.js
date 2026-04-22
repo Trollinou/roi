@@ -1,0 +1,958 @@
+/**
+ * @file Manages the front-end chessboard application, including engine integration, user interaction, and game state.
+ * @author Your Name
+ * @version 1.0.0
+ */
+
+import { Chess } from 'chess.js';
+import {
+	Chessboard,
+	COLOR,
+	INPUT_EVENT_TYPE,
+	BORDER_TYPE,
+} from 'cm-chessboard';
+import { Markers } from 'cm-chessboard/src/extensions/markers/Markers.js';
+import {
+	Arrows,
+	ARROW_TYPE,
+} from 'cm-chessboard/src/extensions/arrows/Arrows.js';
+import { PromotionDialog } from 'cm-chessboard/src/extensions/promotion-dialog/PromotionDialog.js';
+import { RightClickAnnotator } from 'cm-chessboard/src/extensions/right-click-annotator/RightClickAnnotator.js';
+
+/**
+ * @class ChessEngineApp
+ * @classdesc Main class to control a single chessboard instance.
+ */
+class ChessEngineApp {
+	/**
+	 * Creates an instance of ChessEngineApp.
+	 * @param {HTMLElement} containerElement - The container element for the chessboard.
+	 */
+	constructor( containerElement ) {
+		this.container = containerElement;
+		this.boardId = containerElement.id;
+		this.initialFen = containerElement.dataset.fen;
+		this.orientation = containerElement.dataset.orientation;
+		this.engineElo = parseInt( containerElement.dataset.engineElo ) || 1200;
+		this.enableEngine = containerElement.dataset.enableEngine === 'true';
+		this.enableMoves = containerElement.dataset.enableMoves !== 'false';
+		this.borderType = containerElement.dataset.borderType || 'frame';
+		this.showCoordinates =
+			containerElement.dataset.showCoordinates !== 'false';
+		this.pieces = containerElement.dataset.pieces || 'standard';
+		this.cssClass = containerElement.dataset.cssClass || 'chessboard-js';
+
+		this.Chess = Chess;
+		this.chess = null;
+		this.board = null;
+		this.stockfish = null;
+		this.engineThinking = false;
+		this.stockfishReady = false;
+		this.COLOR = COLOR;
+		this.INPUT_EVENT_TYPE = INPUT_EVENT_TYPE;
+		this.ARROW_TYPE = ARROW_TYPE;
+		this.lastMoveArrow = null;
+
+		// Éléments du dialogue
+		this.configDialog = null;
+		this.selectedColor = this.orientation;
+		this.selectedElo = this.engineElo;
+
+		this.init();
+	}
+
+	/**
+	 * Initializes the chessboard, libraries, extensions, and event handlers.
+	 * @async
+	 * @return {void}
+	 */
+	async init() {
+		try {
+			// Initialiser chess.js
+			if ( this.enableEngine ) {
+				// Mode avec moteur : validation stricte
+				this.chess = new this.Chess( this.initialFen );
+			} else if ( this.enableMoves ) {
+				// Mode exercice libre : désactiver la validation pour permettre des positions incomplètes
+				this.chess = new this.Chess( this.initialFen, {
+					skipValidation: true,
+				} );
+			} else {
+				// Mode démonstration : pas de validation nécessaire
+				this.chess = new this.Chess( this.initialFen, {
+					skipValidation: true,
+				} );
+			}
+
+			// Déterminer la couleur du joueur
+			const orientation =
+				this.orientation === 'black'
+					? this.COLOR.black
+					: this.COLOR.white;
+
+			// Initialiser Stockfish seulement si activé
+			if ( this.enableEngine ) {
+				await this.initStockfish();
+			}
+
+			// Créer l'échiquier avec toutes les extensions
+			this.board = new Chessboard( this.container, {
+				position: this.initialFen,
+				responsive: true,
+				assetsUrl:
+					( window.chessEngineData?.pluginUrl || '' ) +
+					'build/cm-chessboard-assets/',
+				style: {
+					borderType:
+						BORDER_TYPE[ this.borderType ] || BORDER_TYPE.none,
+					pieces: {
+						file: `pieces/${ this.pieces }.svg`,
+					},
+					cssClass: this.cssClass,
+					showCoordinates: this.showCoordinates,
+				},
+				orientation,
+				extensions: [
+					{
+						class: Markers,
+						props: {
+							autoMarkers: false,
+						},
+					},
+					{
+						class: Arrows,
+						props: {
+							autoArrows: false,
+						},
+					},
+					{
+						class: PromotionDialog,
+						props: {},
+					},
+					{
+						class: RightClickAnnotator,
+						props: {},
+					},
+				],
+			} );
+
+			// Initialiser le dialogue de configuration (seulement si moteur activé)
+			if ( this.enableEngine ) {
+				this.initConfigDialog();
+			}
+
+			// Initialiser les contrôles
+			this.initControls();
+
+			// Afficher le dialogue au démarrage si moteur activé
+			if ( this.enableEngine ) {
+				setTimeout( () => {
+					this.showConfigDialog();
+				}, 100 );
+			} else if ( this.enableMoves ) {
+				// Mode démonstration/leçon : activer les mouvements si autorisé
+				// Ne pas spécifier de couleur pour permettre de bouger les deux camps
+				this.board.enableMoveInput(
+					this.inputHandlerFreeMode.bind( this )
+				);
+				this.updateStatus(
+					'Vous pouvez déplacer les pièces librement'
+				);
+			}
+		} catch ( error ) {
+			console.error( "Erreur lors de l'initialisation:", error );
+			if ( this.enableEngine || this.enableMoves ) {
+				this.updateStatus(
+					'Erreur de chargement: ' + error.message,
+					'error'
+				);
+			}
+		}
+	}
+
+	/**
+	 * Initializes the game configuration dialog.
+	 * @return {void}
+	 */
+	initConfigDialog() {
+		this.configDialog = this.container.parentElement.querySelector(
+			'.chess-config-dialog'
+		);
+
+		if ( ! this.configDialog ) {
+			return;
+		}
+
+		// Gestion des boutons de couleur
+		const colorButtons = this.configDialog.querySelectorAll( '.color-btn' );
+		colorButtons.forEach( ( btn ) => {
+			btn.addEventListener( 'click', () => {
+				colorButtons.forEach( ( b ) =>
+					b.classList.remove( 'selected' )
+				);
+				btn.classList.add( 'selected' );
+				this.selectedColor = btn.dataset.color;
+			} );
+		} );
+
+		// Sélectionner la couleur par défaut
+		const defaultColorBtn = this.configDialog.querySelector(
+			`[data-color="${ this.orientation }"]`
+		);
+		if ( defaultColorBtn ) {
+			defaultColorBtn.classList.add( 'selected' );
+		}
+
+		// Gestion du slider de niveau
+		const levelSlider = this.configDialog.querySelector(
+			'.chess-level-slider'
+		);
+		const levelValue = this.configDialog.querySelector( '.level-value' );
+
+		if ( levelSlider && levelValue ) {
+			const initialElo = parseInt( levelSlider.value );
+			levelValue.textContent = initialElo;
+			this.selectedElo = initialElo;
+
+			levelSlider.addEventListener( 'input', ( e ) => {
+				this.selectedElo = parseInt( e.target.value );
+				levelValue.textContent = this.selectedElo;
+			} );
+		}
+
+		// Bouton démarrer
+		const startBtn = this.configDialog.querySelector( '.chess-start-btn' );
+		if ( startBtn ) {
+			startBtn.addEventListener( 'click', ( e ) => {
+				e.preventDefault();
+				this.startNewGame();
+			} );
+		}
+	}
+
+	/**
+	 * Shows the configuration dialog.
+	 * @return {void}
+	 */
+	showConfigDialog() {
+		if ( this.configDialog ) {
+			this.configDialog.classList.remove( 'hidden' );
+		}
+	}
+
+	/**
+	 * Hides the configuration dialog.
+	 * @return {void}
+	 */
+	hideConfigDialog() {
+		if ( this.configDialog ) {
+			this.configDialog.classList.add( 'hidden' );
+		}
+	}
+
+	/**
+	 * Starts a new game with the selected configuration.
+	 * @return {void}
+	 */
+	startNewGame() {
+		// Déterminer la couleur finale
+		let finalColor = this.selectedColor;
+		if ( finalColor === 'random' ) {
+			finalColor = Math.random() < 0.5 ? 'white' : 'black';
+		}
+
+		this.orientation = finalColor;
+		this.engineElo = this.selectedElo;
+
+		// Mettre à jour le niveau de Stockfish
+		if ( this.stockfish ) {
+			this.stockfish.postMessage(
+				'setoption name UCI_LimitStrength value true'
+			);
+			this.stockfish.postMessage(
+				`setoption name UCI_Elo value ${ this.engineElo }`
+			);
+			this.stockfish.postMessage( 'ucinewgame' );
+			this.stockfish.postMessage( 'isready' );
+		}
+
+		// Réinitialiser la partie
+		this.chess.reset();
+		if (
+			this.initialFen !==
+			'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+		) {
+			this.chess.load( this.initialFen );
+		}
+
+		// Mettre à jour l'orientation de l'échiquier
+		const orientation =
+			this.orientation === 'black' ? this.COLOR.black : this.COLOR.white;
+
+		if ( this.board ) {
+			// IMPORTANT: Désactiver d'abord l'input avant de le réactiver
+			this.board.disableMoveInput();
+
+			this.board.setOrientation( orientation );
+			this.board.setPosition( this.chess.fen(), true );
+			this.board.removeLegalMovesMarkers();
+			this.board.removeArrows();
+			this.board.removeMarkers();
+			this.lastMoveArrow = null;
+
+			// Réactiver l'input avec la bonne orientation
+			this.board.enableMoveInput(
+				this.inputHandler.bind( this ),
+				orientation
+			);
+		}
+
+		this.engineThinking = false;
+
+		// Cacher le dialogue
+		this.hideConfigDialog();
+
+		// Afficher le statut et démarrer
+		const playerColor = this.orientation === 'white' ? 'w' : 'b';
+		if ( this.chess.turn() !== playerColor ) {
+			this.updateStatus(
+				chessEngineData.translations.engineThinking,
+				'thinking'
+			);
+			setTimeout( () => {
+				if ( ! this.engineThinking ) {
+					this.makeEngineMove();
+				}
+			}, 500 );
+		} else {
+			this.updateStatus( chessEngineData.translations.yourTurn );
+		}
+	}
+
+	/**
+	 * Initializes the Stockfish chess engine.
+	 * @async
+	 * @return {Promise<void>} A promise that resolves when Stockfish is ready.
+	 */
+	async initStockfish() {
+		return new Promise( ( resolve, reject ) => {
+			try {
+				this.stockfish = new Worker( chessEngineData.stockfishPath );
+
+				this.stockfish.onmessage = ( event ) => {
+					const message = event.data;
+
+					if ( message === 'readyok' && ! this.stockfishReady ) {
+						this.stockfishReady = true;
+						resolve();
+					}
+
+					if ( message.startsWith( 'bestmove' ) ) {
+						const match = message.match(
+							/bestmove ([a-h][1-8])([a-h][1-8])([qrbn])?/
+						);
+						if ( match ) {
+							const from = match[ 1 ];
+							const to = match[ 2 ];
+							const promotion = match[ 3 ];
+
+							setTimeout( () => {
+								this.makeMove( from, to, promotion );
+								this.engineThinking = false;
+
+								if ( ! this.chess.isGameOver() ) {
+									this.updateStatus(
+										chessEngineData.translations.yourTurn
+									);
+								}
+							}, 300 );
+						} else {
+							this.engineThinking = false;
+							this.updateStatus(
+								chessEngineData.translations.yourTurn
+							);
+						}
+					}
+				};
+
+				this.stockfish.onerror = ( error ) => {
+					console.error( 'Erreur Stockfish:', error );
+					this.engineThinking = false;
+					reject( error );
+				};
+
+				this.stockfish.postMessage( 'uci' );
+				this.stockfish.postMessage(
+					'setoption name UCI_LimitStrength value true'
+				);
+				this.stockfish.postMessage(
+					`setoption name UCI_Elo value ${ this.engineElo }`
+				);
+				this.stockfish.postMessage(
+					'setoption name Move Overhead value 100'
+				);
+				this.stockfish.postMessage( 'ucinewgame' );
+				this.stockfish.postMessage( 'isready' );
+
+				setTimeout( () => {
+					if ( ! this.stockfishReady ) {
+						reject(
+							new Error( 'Timeout: Stockfish ne répond pas' )
+						);
+					}
+				}, 5000 );
+			} catch ( error ) {
+				reject( error );
+			}
+		} );
+	}
+
+	/**
+	 * Handles user input on the board in free mode (no engine).
+	 * @param {Object} event - The move input event from cm-chessboard.
+	 * @return {boolean|Promise<boolean>|void} Result of the move validation.
+	 */
+	inputHandlerFreeMode( event ) {
+		if ( event.type === this.INPUT_EVENT_TYPE.movingOverSquare ) {
+			return;
+		}
+
+		if ( event.type === this.INPUT_EVENT_TYPE.moveInputStarted ) {
+			// En mode libre, afficher tous les mouvements possibles sans vérifier le tour
+			const piece = this.chess.get( event.squareFrom );
+
+			if ( ! piece ) {
+				return false; // Pas de pièce sur cette case
+			}
+
+			// Calculer les mouvements possibles pour cette pièce en forçant son tour
+			const currentTurn = this.chess.turn();
+
+			// Forcer temporairement le tour pour cette couleur si nécessaire
+			if ( piece.color !== currentTurn ) {
+				// Modifier temporairement le FEN pour changer le tour
+				const fen = this.chess.fen();
+				const fenParts = fen.split( ' ' );
+				fenParts[ 1 ] = piece.color; // Changer le tour actif
+				const modifiedFen = fenParts.join( ' ' );
+
+				try {
+					this.chess.load( modifiedFen, { skipValidation: true } );
+				} catch ( e ) {
+					console.error( 'Erreur chargement FEN:', e );
+					return false;
+				}
+			}
+
+			const moves = this.chess.moves( {
+				square: event.squareFrom,
+				verbose: true,
+			} );
+			this.board.addLegalMovesMarkers( moves );
+
+			// Restaurer le FEN original si on l'avait modifié
+			if ( piece.color !== currentTurn ) {
+				const fen = this.chess.fen();
+				const fenParts = fen.split( ' ' );
+				fenParts[ 1 ] = currentTurn; // Restaurer le tour original
+				const restoredFen = fenParts.join( ' ' );
+				this.chess.load( restoredFen, { skipValidation: true } );
+			}
+
+			return moves.length > 0;
+		}
+
+		if ( event.type === this.INPUT_EVENT_TYPE.validateMoveInput ) {
+			const piece = this.chess.get( event.squareFrom );
+
+			if ( ! piece ) {
+				return false;
+			}
+
+			// Vérifier si c'est une promotion
+			const isPromotion =
+				piece.type === 'p' &&
+				( ( piece.color === 'w' && event.squareTo[ 1 ] === '8' ) ||
+					( piece.color === 'b' && event.squareTo[ 1 ] === '1' ) );
+
+			if ( isPromotion ) {
+				// Gestion spéciale de la promotion en mode libre
+				const pieceColor = piece.color;
+				const boardColor =
+					pieceColor === 'w' ? this.COLOR.white : this.COLOR.black;
+
+				// Sauvegarder la position actuelle
+				const currentPosition = this.chess.fen();
+
+				return new Promise( ( resolve ) => {
+					this.board.showPromotionDialog(
+						event.squareTo,
+						boardColor,
+						( result ) => {
+							if ( result && result.piece ) {
+								// Forcer le tour si nécessaire
+								const currentTurn = this.chess.turn();
+
+								if ( pieceColor !== currentTurn ) {
+									const fen = this.chess.fen();
+									const fenParts = fen.split( ' ' );
+									fenParts[ 1 ] = pieceColor;
+									const modifiedFen = fenParts.join( ' ' );
+									this.chess.load( modifiedFen, {
+										skipValidation: true,
+									} );
+								}
+
+								// Extraire le type de pièce (enlever la couleur)
+								// result.piece est au format "wq", "bq", etc.
+								const promotionPieceType =
+									result.piece.type ||
+									result.piece.charAt( 1 );
+
+								// Effectuer le mouvement avec promotion
+								const move = this.chess.move( {
+									from: event.squareFrom,
+									to: event.squareTo,
+									promotion: promotionPieceType,
+								} );
+
+								if ( move ) {
+									// Mettre à jour l'affichage avec la nouvelle position
+									this.board.setPosition(
+										this.chess.fen(),
+										true
+									);
+									resolve( true );
+								} else {
+									// Si le mouvement échoue, utiliser la méthode directe
+									console.warn(
+										'Mouvement échoué, utilisation de setPiece'
+									);
+									this.board.setPiece(
+										event.squareTo,
+										result.piece,
+										true
+									);
+
+									// Mettre à jour chess.js manuellement
+									try {
+										// Retirer le pion de la case de départ
+										const newFen = this.chess
+											.fen()
+											.replace( event.squareFrom, '' );
+										this.chess.load( newFen, {
+											skipValidation: true,
+										} );
+									} catch ( e ) {
+										console.error(
+											'Erreur mise à jour FEN:',
+											e
+										);
+									}
+
+									resolve( true );
+								}
+							} else {
+								// Annulation de la promotion
+								this.chess.load( currentPosition, {
+									skipValidation: true,
+								} );
+								this.board.setPosition( currentPosition );
+								resolve( false );
+							}
+						}
+					);
+				} );
+			}
+			// Mouvement normal (pas de promotion)
+			const currentTurn = this.chess.turn();
+
+			// Forcer temporairement le tour pour permettre le mouvement
+			if ( piece.color !== currentTurn ) {
+				const fen = this.chess.fen();
+				const fenParts = fen.split( ' ' );
+				fenParts[ 1 ] = piece.color;
+				const modifiedFen = fenParts.join( ' ' );
+
+				try {
+					this.chess.load( modifiedFen, {
+						skipValidation: true,
+					} );
+				} catch ( e ) {
+					console.error( 'Erreur chargement FEN:', e );
+					return false;
+				}
+			}
+
+			const move = this.chess.move( {
+				from: event.squareFrom,
+				to: event.squareTo,
+			} );
+
+			if ( move ) {
+				// Mettre à jour l'affichage avec la nouvelle position
+				this.board.setPosition( this.chess.fen(), true );
+				return true;
+			}
+
+			return false;
+		}
+
+		if ( event.type === this.INPUT_EVENT_TYPE.moveInputFinished ) {
+			this.board.removeLegalMovesMarkers();
+
+			if ( event.legalMove ) {
+				// The move was legal, so we can be sure that chess.js has been updated.
+				// We just need to make sure the view is in sync.
+				this.board.setPosition( this.chess.fen() );
+
+				// Réactiver l'input pour continuer à jouer
+				setTimeout( () => {
+					try {
+						this.board.disableMoveInput();
+						this.board.enableMoveInput(
+							this.inputHandlerFreeMode.bind( this )
+						);
+					} catch ( e ) {
+						console.error( 'Erreur réactivation input:', e );
+					}
+				}, 100 );
+			} else {
+				// The move was illegal, so we need to refresh the board from the official FEN
+				this.board.setPosition( this.chess.fen() );
+			}
+		}
+
+		if ( event.type === this.INPUT_EVENT_TYPE.moveInputCanceled ) {
+			this.board.removeLegalMovesMarkers();
+			this.board.setPosition( this.chess.fen() );
+		}
+	}
+
+	/**
+	 * Handles user input on the board when the engine is enabled.
+	 * @param {Object} event - The move input event from cm-chessboard.
+	 * @return {boolean|void} Result of the move validation.
+	 */
+	inputHandler( event ) {
+		if ( this.engineThinking ) {
+			return false;
+		}
+
+		if ( event.type === this.INPUT_EVENT_TYPE.moveInputStarted ) {
+			const moves = this.chess.moves( {
+				square: event.squareFrom,
+				verbose: true,
+			} );
+			this.board.addLegalMovesMarkers( moves );
+			this.removeLastMoveArrow();
+			return moves.length > 0;
+		} else if ( event.type === this.INPUT_EVENT_TYPE.validateMoveInput ) {
+			const moves = this.chess.moves( {
+				square: event.squareFrom,
+				verbose: true,
+			} );
+			return moves.some( ( move ) => move.to === event.squareTo );
+		} else if ( event.type === this.INPUT_EVENT_TYPE.moveInputFinished ) {
+			this.board.removeLegalMovesMarkers();
+			if ( event.legalMove ) {
+				const piece = this.chess.get( event.squareFrom );
+				const isPromotion =
+					piece &&
+					piece.type === 'p' &&
+					( ( piece.color === 'w' && event.squareTo[ 1 ] === '8' ) ||
+						( piece.color === 'b' &&
+							event.squareTo[ 1 ] === '1' ) );
+
+				if ( isPromotion ) {
+					this.board.showPromotionDialog(
+						event.squareTo,
+						piece.color,
+						( result ) => {
+							if ( result ) {
+								this.chess.move( {
+									from: event.squareFrom,
+									to: event.squareTo,
+									promotion: result.piece.charAt( 1 ),
+								} );
+								this.board.setPosition( this.chess.fen() );
+								this.checkGameStatus();
+								if ( ! this.chess.isGameOver() ) {
+									setTimeout(
+										() => this.makeEngineMove(),
+										200
+									);
+								}
+							}
+						}
+					);
+				} else {
+					this.chess.move( {
+						from: event.squareFrom,
+						to: event.squareTo,
+					} );
+					this.board.setPosition( this.chess.fen() );
+					this.checkGameStatus();
+					if ( ! this.chess.isGameOver() ) {
+						setTimeout( () => this.makeEngineMove(), 200 );
+					}
+				}
+			} else {
+				this.board.setPosition( this.chess.fen() );
+			}
+		} else if ( event.type === this.INPUT_EVENT_TYPE.moveInputCanceled ) {
+			this.board.removeLegalMovesMarkers();
+			this.board.setPosition( this.chess.fen() );
+		}
+	}
+
+	/**
+	 * Removes the arrow indicating the last move from the board.
+	 * @return {void}
+	 */
+	removeLastMoveArrow() {
+		if ( this.lastMoveArrow ) {
+			this.board.removeArrows(
+				this.ARROW_TYPE.default,
+				this.lastMoveArrow.from,
+				this.lastMoveArrow.to
+			);
+			this.lastMoveArrow = null;
+		}
+	}
+
+	/**
+	 * Synchronizes the Stockfish engine's internal position with the game state.
+	 * @return {void}
+	 */
+	syncStockfishPosition() {
+		if ( ! this.stockfish ) {
+			return;
+		}
+
+		this.stockfish.postMessage( 'ucinewgame' );
+
+		const moves = this.chess.history( { verbose: true } );
+
+		if ( moves.length > 0 ) {
+			const movesList = moves.map( ( move ) => {
+				return move.from + move.to + ( move.promotion || '' );
+			} );
+
+			if (
+				this.initialFen ===
+				'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+			) {
+				this.stockfish.postMessage(
+					`position startpos moves ${ movesList.join( ' ' ) }`
+				);
+			} else {
+				this.stockfish.postMessage(
+					`position fen ${ this.initialFen } moves ${ movesList.join(
+						' '
+					) }`
+				);
+			}
+		} else if (
+			this.initialFen ===
+			'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+		) {
+			this.stockfish.postMessage( 'position startpos' );
+		} else {
+			this.stockfish.postMessage( `position fen ${ this.initialFen }` );
+		}
+
+		this.stockfish.postMessage( 'isready' );
+	}
+
+	/**
+	 * Triggers the Stockfish engine to calculate and make a move.
+	 * @return {void}
+	 */
+	makeEngineMove() {
+		if ( ! this.stockfish || this.engineThinking ) {
+			return;
+		}
+
+		this.engineThinking = true;
+		this.updateStatus(
+			chessEngineData.translations.engineThinking,
+			'thinking'
+		);
+
+		this.syncStockfishPosition();
+		this.stockfish.postMessage( 'go depth 12' );
+	}
+
+	/**
+	 * Makes a move on the board and in the chess.js instance.
+	 * @param {string} from        - The starting square of the move.
+	 * @param {string} to          - The ending square of the move.
+	 * @param {string} [promotion] - The piece to promote to (e.g., 'q').
+	 * @return {void}
+	 */
+	makeMove( from, to, promotion ) {
+		const move = this.chess.move( {
+			from,
+			to,
+			promotion: promotion || 'q',
+		} );
+
+		if ( move ) {
+			this.removeLastMoveArrow();
+			this.board.setPosition( this.chess.fen(), true );
+			this.board.addArrow( this.ARROW_TYPE.default, from, to );
+			this.lastMoveArrow = { from, to };
+
+			setTimeout( () => {
+				this.removeLastMoveArrow();
+			}, 2000 );
+
+			this.checkGameStatus();
+		} else {
+			console.error( 'Coup invalide du moteur:', from, to, promotion );
+			this.engineThinking = false;
+			this.updateStatus( 'Erreur: coup invalide du moteur' );
+		}
+	}
+
+	/**
+	 * Checks the current game status (checkmate, draw, stalemate, check) and updates the UI.
+	 * @return {void}
+	 */
+	checkGameStatus() {
+		// En mode libre, ne pas désactiver l'échiquier
+		if ( ! this.enableEngine ) {
+			return;
+		}
+
+		if ( this.chess.isCheckmate() ) {
+			const winner = this.chess.turn() === 'w' ? 'Noirs' : 'Blancs';
+			this.updateStatus(
+				`${ chessEngineData.translations.checkmate } ${ winner } gagnent!`,
+				'checkmate'
+			);
+			this.board.disableMoveInput();
+		} else if ( this.chess.isDraw() || this.chess.isStalemate() ) {
+			const message = this.chess.isStalemate()
+				? chessEngineData.translations.stalemate
+				: chessEngineData.translations.draw;
+			this.updateStatus( message, 'draw' );
+			this.board.disableMoveInput();
+		} else if ( this.chess.isCheck() ) {
+			const currentPlayer =
+				this.chess.turn() === 'w' ? 'Blancs' : 'Noirs';
+			this.updateStatus( `Échec aux ${ currentPlayer }!`, 'check' );
+		}
+	}
+
+	/**
+	 * Updates the status message displayed to the user.
+	 * @param {string} message        - The message to display.
+	 * @param {string} [className=''] - An optional CSS class to add to the status element.
+	 * @return {void}
+	 */
+	updateStatus( message, className = '' ) {
+		const statusElement =
+			this.container.parentElement.querySelector( '.chess-status' );
+		if ( statusElement ) {
+			statusElement.textContent = message;
+			statusElement.className = 'chess-status ' + className;
+		}
+	}
+
+	/**
+	 * Initializes the control buttons (reset, flip, undo).
+	 * @return {void}
+	 */
+	initControls() {
+		const container = this.container.parentElement;
+
+		const resetBtn = container.querySelector( '[data-action="reset"]' );
+		if ( resetBtn ) {
+			resetBtn.addEventListener( 'click', () => {
+				if ( this.enableEngine ) {
+					this.showConfigDialog();
+				}
+			} );
+		}
+
+		const flipBtn = container.querySelector( '[data-action="flip"]' );
+		if ( flipBtn ) {
+			flipBtn.addEventListener( 'click', () => {
+				this.board.setOrientation(
+					this.board.getOrientation() === this.COLOR.white
+						? this.COLOR.black
+						: this.COLOR.white
+				);
+			} );
+		}
+
+		const undoBtn = container.querySelector( '[data-action="undo"]' );
+		if ( undoBtn && this.enableMoves ) {
+			undoBtn.addEventListener( 'click', () => {
+				if ( this.engineThinking ) {
+					return;
+				}
+
+				const historyLength = this.chess.history().length;
+
+				if ( this.enableEngine && historyLength >= 2 ) {
+					// Mode avec moteur : annuler 2 coups
+					this.chess.undo();
+					this.chess.undo();
+				} else if ( historyLength >= 1 ) {
+					// Mode sans moteur : annuler 1 coup
+					this.chess.undo();
+				} else {
+					return;
+				}
+
+				this.removeLastMoveArrow();
+
+				const currentFen = this.chess.fen();
+				this.board.setPosition( currentFen, true );
+				this.board.removeLegalMovesMarkers();
+
+				if ( this.enableEngine ) {
+					this.syncStockfishPosition();
+				}
+
+				if ( this.enableMoves ) {
+					this.board.disableMoveInput();
+					if ( this.enableEngine ) {
+						const orientation =
+							this.orientation === 'black'
+								? this.COLOR.black
+								: this.COLOR.white;
+						this.board.enableMoveInput(
+							this.inputHandler.bind( this ),
+							orientation
+						);
+					} else {
+						this.board.enableMoveInput(
+							this.inputHandlerFreeMode.bind( this )
+						);
+					}
+				}
+
+				if ( this.chess.isGameOver() ) {
+					this.updateStatus( 'Partie terminée' );
+				} else if ( this.enableEngine ) {
+					this.updateStatus( chessEngineData.translations.yourTurn );
+				} else {
+					this.updateStatus(
+						'Vous pouvez déplacer les pièces librement'
+					);
+				}
+			} );
+		}
+	}
+}
+
+document.addEventListener( 'DOMContentLoaded', () => {
+	const chessboards = document.querySelectorAll( '[id^="chessboard-"]' );
+	chessboards.forEach( ( board ) => {
+		new ChessEngineApp( board );
+	} );
+} );

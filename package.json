@@ -1,10 +1,21 @@
 {
+  "name": "roi",
+  "version": "1.1.0",
+  "description": "Ressources et Organisation pour l’Initiation aux échecs",
   "scripts": {
+    "build:css": "sass assets/scss/:assets/css/ --style=compressed --no-source-map",
     "build": "wp-scripts build",
-    "start": "wp-scripts start"
+    "lint:js": "wp-scripts lint-js assets/js/ src/",
+    "package": "./package.sh",
+    "start": "wp-scripts start",
+    "watch": "sass --watch assets/scss/:assets/css/"
   },
   "devDependencies": {
-    "@wordpress/scripts": "^30.12.1",
-    "copy-webpack-plugin": "^13.0.1"
+    "@wordpress/element": "^6.44.0",
+    "@wordpress/scripts": "^32.0.0",
+    "chess.js": "^1.4.0",
+    "cm-chessboard": "^8.12.7",
+    "copy-webpack-plugin": "^14.0.0",
+    "sass": "^1.99.0"
   }
 }
