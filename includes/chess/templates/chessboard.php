@@ -1,89 +1,88 @@
 <?php
 /**
- * Template pour l'affichage de l'échiquier
+ * Template pour l'affichage de l'échiquier (Gutenberg Chessboard / Chessground)
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-// Détecter si on est dans l'éditeur (requête REST API)
-$is_editor = defined('REST_REQUEST') && REST_REQUEST;
-
-// Dans l'éditeur, désactiver le dialogue et le moteur pour éviter les conflits
-if ($is_editor) {
-    $enable_engine = false;
+$show_bar = $use_stockfish && $show_evaluation_bar;
+$wrapper_class = 'gutemberg-chessboard-block';
+if ($show_bar) {
+    $wrapper_class .= ' has-evaluation-bar';
 }
 ?>
 
-<div class="chess-engine-container">
-    <?php if ($enable_engine && !$is_editor): ?>
-    <div class="chess-config-dialog" id="config-<?php echo esc_attr($board_id); ?>">
-        <div class="chess-config-content">
-            <h3><?php _e('Nouvelle partie', 'roi'); ?></h3>
-            
-            <div class="chess-config-section">
-                <label><?php _e('Jouer avec :', 'roi'); ?></label>
-                <div class="chess-color-selector">
-                    <button class="color-btn" data-color="white">
-                        <span class="color-icon">♔</span>
-                        <?php _e('Blancs', 'roi'); ?>
-                    </button>
-                    <button class="color-btn" data-color="random">
-                        <span class="color-icon">⚄</span>
-                        <?php _e('Aléatoire', 'roi'); ?>
-                    </button>
-                    <button class="color-btn" data-color="black">
-                        <span class="color-icon">♚</span>
-                        <?php _e('Noirs', 'roi'); ?>
-                    </button>
+<div id="<?php echo esc_attr($board_id); ?>" 
+     class="<?php echo esc_attr($wrapper_class); ?>"
+     data-fen="<?php echo esc_attr($atts['fen']); ?>"
+     data-orientation="<?php echo esc_attr($atts['orientation']); ?>"
+     data-coordinates="<?php echo $coordinates ? 'true' : 'false'; ?>"
+     data-view-only="<?php echo $view_only ? 'true' : 'false'; ?>"
+     data-player-color="<?php echo esc_attr($atts['playerColor']); ?>"
+     data-show-threats="<?php echo $show_threats ? 'true' : 'false'; ?>"
+     data-use-stockfish="<?php echo $use_stockfish ? 'true' : 'false'; ?>"
+     data-stockfish-elo="<?php echo esc_attr($atts['stockfishElo']); ?>"
+     data-show-evaluation-bar="<?php echo $show_evaluation_bar ? 'true' : 'false'; ?>"
+     data-free-mode="<?php echo $free_mode ? 'true' : 'false'; ?>">
+
+    <section class="main-wrap <?php echo $show_bar ? 'has-evaluation-bar' : ''; ?>">
+        <div class="main-board">
+            <div class="chessboard-mount-element"></div>
+            <?php if ($show_bar): ?>
+                <div class="evaluation-bar">
+                    <div class="evaluation-bar-fill"
+                         style="margin-top: <?php echo $atts['orientation'] === 'white' ? 'auto' : '0'; ?>; margin-bottom: <?php echo $atts['orientation'] === 'white' ? '0' : 'auto'; ?>;">
+                    </div>
                 </div>
-            </div>
-            
-            <div class="chess-config-section">
-                <label><?php _e('Niveau de difficulté :', 'roi'); ?></label>
-                <div class="level-display">
-                    <span class="elo-label"><?php _e('ELO approximatif', 'roi'); ?> : </span>
-                    <span class="level-value"></span>
+            <?php endif; ?>
+
+            <?php if (!$view_only && $use_stockfish): ?>
+                <div class="chess-config-dialog">
+                    <div class="config-dialog-content">
+                        <div class="color-selector">
+                            <button type="button" class="color-btn white active" data-color="white">
+                                <?php _e('Blancs', 'roi'); ?>
+                            </button>
+                            <button type="button" class="color-btn random" data-color="random">
+                                <?php _e('Aléatoire', 'roi'); ?>
+                            </button>
+                            <button type="button" class="color-btn black" data-color="black">
+                                <?php _e('Noirs', 'roi'); ?>
+                            </button>
+                        </div>
+                        <div class="difficulty-selector">
+                            <label>
+                                <?php _e('Difficulté :', 'roi'); ?>
+                                <span class="elo-value"><?php echo esc_html($atts['stockfishElo']); ?></span>
+                                ELO
+                            </label>
+                            <input type="range" class="elo-slider" min="1320" max="2800" value="<?php echo esc_attr($atts['stockfishElo']); ?>">
+                        </div>
+                        <button type="button" class="start-btn">
+                            <?php _e('Commencer', 'roi'); ?>
+                        </button>
+                    </div>
                 </div>
-                <input type="range" class="chess-level-slider" min="1200" max="2800" value="<?php echo esc_attr($atts['engineElo']); ?>" step="100">
-                <div class="level-labels">
-                    <span><?php _e('Débutant', 'roi'); ?></span>
-                    <span><?php _e('Expert', 'roi'); ?></span>
-                </div>
-            </div>
-            
-            <button class="chess-btn chess-start-btn"><?php _e('Commencer', 'roi'); ?></button>
+            <?php endif; ?>
         </div>
-    </div>
-    <?php endif; ?>
-    
-    <div id="<?php echo esc_attr($board_id); ?>" 
-         class="chess-board-wrapper"
-         data-fen="<?php echo esc_attr($atts['fen']); ?>"
-         data-orientation="<?php echo esc_attr($atts['orientation']); ?>"
-         data-engine-elo="<?php echo esc_attr($atts['engineElo']); ?>"
-         data-enable-engine="<?php echo ($enable_engine && !$is_editor) ? 'true' : 'false'; ?>"
-         data-enable-moves="<?php echo $enable_moves ? 'true' : 'false'; ?>"
-         data-border-type="<?php echo esc_attr($atts['borderType']); ?>"
-         data-show-coordinates="<?php echo $atts['showCoordinates'] ? 'true' : 'false'; ?>"
-         data-pieces="<?php echo esc_attr($atts['pieces']); ?>"
-         data-css-class="<?php echo esc_attr($atts['cssClass']); ?>">
-    </div>
-    
-    <?php if (($enable_engine || $enable_moves) && !$is_editor): ?>
-    <div class="chess-controls">
-        <?php if ($enable_engine): ?>
-        <button class="chess-btn" data-action="reset"><?php _e('Nouvelle partie', 'roi'); ?></button>
+
+        <?php if (!$view_only): ?>
+            <div class="chess-status"><?php _e('À vous de jouer', 'roi'); ?></div>
+            <?php if (!$free_mode): ?>
+                <div class="chess-controls">
+                    <button type="button" class="control-btn new-game">
+                        <?php _e('Nouvelle partie', 'roi'); ?>
+                    </button>
+                    <button type="button" class="control-btn flip-board">
+                        <?php _e('Retourner', 'roi'); ?>
+                    </button>
+                    <button type="button" class="control-btn undo-move">
+                        <?php _e('Annuler', 'roi'); ?>
+                    </button>
+                </div>
+            <?php endif; ?>
         <?php endif; ?>
-        <button class="chess-btn" data-action="flip"><?php _e('Retourner', 'roi'); ?></button>
-        <?php if ($enable_moves): ?>
-        <button class="chess-btn" data-action="undo"><?php _e('Annuler', 'roi'); ?></button>
-        <?php endif; ?>
-    </div>
-    <?php endif; ?>
-    
-    <?php if (($enable_engine || $enable_moves) && !$is_editor): ?>
-    <div class="chess-status"></div>
-    <?php endif; ?>
+    </section>
 </div>

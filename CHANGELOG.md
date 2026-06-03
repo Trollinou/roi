@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.6 - 2026-06-03
+
+*   **Remplacement complet de l'échiquier :**
+    *   Remplacement de la bibliothèque `cm-chessboard` obsolète par le bloc moderne `gutemberg-chessboard` basé sur **Chessground** (l'échiquier Lichess) et **chess.js**.
+    *   **Contrôles frontend visiteurs intégrés** : Ajout de boutons réactifs sous l'échiquier (Nouvelle partie, Retourner le plateau, Annuler le coup).
+    *   **Mise en place d'un dialogue de configuration** : Permet au visiteur de choisir sa couleur et de régler sa force ELO au lancement d'une partie avec Stockfish.
+    *   **Mode libre (Free Move)** : Ajout d'une option permettant aux blancs et aux noirs de jouer librement sans validation de tour stricte dans l'éditeur et sur le site (pratique pour l'élaboration de leçons).
+    *   **Barre d'évaluation & Stockfish** : Intégration directe du moteur Stockfish avec barre d'évaluation dynamique.
+
 ## 1.0.5 - 2025-11-01
 
 *   **Amélioration de l'interface de l'éditeur du bloc Échiquier :**

@@ -67,7 +67,6 @@ class Roi_Chess_Engine {
         add_action('wp_enqueue_scripts', array($this, 'enqueue_assets'));
         add_action('init', array($this, 'register_block'));
         add_shortcode('chess_board', array($this, 'render_chessboard'));
-        add_action('enqueue_block_editor_assets', array($this, 'enqueue_block_editor_assets'));
     }
     
     /**
@@ -77,30 +76,11 @@ class Roi_Chess_Engine {
      * @return void
      */
     public function register_block() {
-        register_block_type( $this->plugin_path . 'includes/chess/blocks/chessboard/build', array(
+        register_block_type( $this->plugin_path . 'includes/chess/dist', array(
             'render_callback' => array( $this, 'render_block' ),
         ) );
     }
 
-    /**
-     * Enqueues assets for the block editor.
-     *
-     * This function localizes a script to provide necessary paths and URLs
-     * for the chessboard block's editor interface.
-     *
-     * @since 1.0.0
-     * @return void
-     */
-    public function enqueue_block_editor_assets() {
-        $chess_url = $this->plugin_url . 'includes/chess/';
-
-        wp_localize_script('roi-chessboard-editor-script', 'roiChessEditor', array(
-			'assetsUrl' => $chess_url . 'vendor/cm-chessboard/assets/',
-			'chessboardUrl' => $chess_url . 'vendor/cm-chessboard/src/Chessboard.js',
-            'chessJsSrc' => $chess_url . 'vendor/chess.js/chess.js',
-		));
-    }
-    
     /**
      * Renders the chessboard block on the front-end.
      *
@@ -118,11 +98,6 @@ class Roi_Chess_Engine {
     /**
      * Enqueues front-end scripts and styles for the chessboard.
      *
-     * This function enqueues all necessary CSS and JavaScript files for the
-     * chessboard, including the cm-chessboard library and its extensions,
-     * as well as the main application script. It also localizes data
-     * for the script.
-     *
      * @since 1.0.0
      * @return void
      */
@@ -130,85 +105,19 @@ class Roi_Chess_Engine {
         $chess_url = $this->plugin_url . 'includes/chess/';
         
         wp_enqueue_style(
-            'cm-chessboard',
-            $chess_url . 'vendor/cm-chessboard/assets/chessboard.css',
+            'gutemberg-chessboard-style',
+            $chess_url . 'dist/style.css',
             array(),
-            ROI_VERSION
-        );
-        
-        wp_enqueue_style(
-            'cm-chessboard-markers',
-            $chess_url . 'vendor/cm-chessboard/assets/extensions/markers/markers.css',
-            array('cm-chessboard'),
-            ROI_VERSION
-        );
-        
-        wp_enqueue_style(
-            'cm-chessboard-arrows',
-            $chess_url . 'vendor/cm-chessboard/assets/extensions/arrows/arrows.css',
-            array('cm-chessboard'),
-            ROI_VERSION
-        );
-        
-        wp_enqueue_style(
-            'cm-chessboard-promotion',
-            $chess_url . 'vendor/cm-chessboard/assets/extensions/promotion-dialog/promotion-dialog.css',
-            array('cm-chessboard'),
-            ROI_VERSION
-        );
-        
-        wp_enqueue_style(
-            'roi-chess-style',
-            $chess_url . 'assets/css/chessboard-style.css',
-            array('cm-chessboard'),
             ROI_VERSION
         );
         
         wp_enqueue_script(
-            'roi-chess-app',
-            $chess_url . 'assets/js/chessboard-app.js',
-            array(),
+            'gutemberg-chessboard-view',
+            $chess_url . 'dist/gutemberg-chessboard-view.js',
+            array('wp-element'),
             ROI_VERSION,
             true
         );
-        
-        add_filter('script_loader_tag', array($this, 'add_module_type'), 10, 3);
-        
-        wp_localize_script('roi-chess-app', 'chessEngineData', array(
-            'pluginUrl' => $chess_url,
-            'assetsUrl' => $chess_url . 'vendor/cm-chessboard/assets/',
-            'chessboardSrc' => $chess_url . 'vendor/cm-chessboard/src/Chessboard.js',
-            'chessJsSrc' => $chess_url . 'vendor/chess.js/chess.js',
-            'stockfishPath' => $chess_url . 'vendor/stockfish/stockfish.js',
-            'stockfishWasmPath' => $chess_url . 'vendor/stockfish/stockfish.wasm',
-            'translations' => array(
-                'engineThinking' => __('Le moteur réfléchit...', 'roi'),
-                'yourTurn' => __('À vous de jouer', 'roi'),
-                'checkmate' => __('Échec et mat!', 'roi'),
-                'stalemate' => __('Pat!', 'roi'),
-                'draw' => __('Nulle!', 'roi'),
-                'selectPromotion' => __('Sélectionnez une pièce', 'roi'),
-            )
-        ));
-    }
-    
-    /**
-     * Adds the 'type="module"' attribute to script tags.
-     *
-     * This function is hooked into 'script_loader_tag' to ensure that the
-     * main chess application script is loaded as a JavaScript module.
-     *
-     * @since 1.0.0
-     * @param string $tag    The original <script> tag.
-     * @param string $handle The script's handle.
-     * @param string $src    The script's source URL.
-     * @return string The modified <script> tag.
-     */
-    public function add_module_type($tag, $handle, $src) {
-        if ('roi-chess-app' === $handle || 'roi-chess-app-editor' === $handle) {
-            $tag = '<script type="module" src="' . esc_url($src) . '" id="' . $handle . '-js"></script>';
-        }
-        return $tag;
     }
     
     /**
@@ -225,18 +134,23 @@ class Roi_Chess_Engine {
         $atts = shortcode_atts(array(
             'fen' => 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
             'orientation' => 'white',
-            'engineElo' => 1200,
-            'enableEngine' => 'false',
-            'enableMoves' => 'true',
-            'borderType' => 'frame',
-            'showCoordinates' => true,
-            'pieces' => 'standard',
-            'cssClass' => 'chessboard-js',
+            'playerColor' => 'both',
+            'viewOnly' => 'true',
+            'useStockfish' => 'false',
+            'stockfishElo' => 1500,
+            'showEvaluationBar' => 'false',
+            'showThreats' => 'false',
+            'coordinates' => 'true',
+            'freeMode' => 'false',
         ), $atts, 'chess_board');
         
         $board_id = 'chessboard-' . uniqid();
-        $enable_engine = filter_var($atts['enableEngine'], FILTER_VALIDATE_BOOLEAN);
-        $enable_moves = filter_var($atts['enableMoves'], FILTER_VALIDATE_BOOLEAN);
+        $use_stockfish = filter_var($atts['useStockfish'], FILTER_VALIDATE_BOOLEAN);
+        $show_evaluation_bar = filter_var($atts['showEvaluationBar'], FILTER_VALIDATE_BOOLEAN);
+        $view_only = filter_var($atts['viewOnly'], FILTER_VALIDATE_BOOLEAN);
+        $show_threats = filter_var($atts['showThreats'], FILTER_VALIDATE_BOOLEAN);
+        $coordinates = filter_var($atts['coordinates'], FILTER_VALIDATE_BOOLEAN);
+        $free_mode = filter_var($atts['freeMode'], FILTER_VALIDATE_BOOLEAN);
         
         ob_start();
         include $this->plugin_path . 'includes/chess/templates/chessboard.php';

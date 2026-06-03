@@ -1,6 +1,6 @@
 # ROI - Ressources et Organisation pour l’Initiation aux échecs
 
-**Version :** 1.0.5
+**Version :** 1.0.6
 **Auteur :** Etienne Gagnon
 **Licence :** GPL v2 ou ultérieure
 **WordPress Requis :** 6.8+
@@ -8,7 +8,7 @@
 
 ## Description
 
-Le plugin "ROI - Ressources et Organisation pour l’Initiation aux échecs" est un système de gestion de l'apprentissage (LMS) complet, conçu pour l'enseignement des échecs dans un environnement WordPress. Il fournit un cadre robuste pour la création, la gestion et la diffusion de leçons, d'exercices et de cours d'échecs. Le plugin inclut un bloc d'échiquier interactif sophistiqué, alimenté par Stockfish, `chess.js` et `cm-chessboard`, permettant des démonstrations, des exercices et des parties joueur contre IA.
+Le plugin "ROI - Ressources et Organisation pour l’Initiation aux échecs" est un système de gestion de l'apprentissage (LMS) complet, conçu pour l'enseignement des échecs dans un environnement WordPress. Il fournit un cadre robuste pour la création, la gestion et la diffusion de leçons, d'exercices et de cours d'échecs. Le plugin inclut un bloc d'échiquier interactif sophistiqué, alimenté par Stockfish, `chess.js` et **Chessground** (l'échiquier Lichess), permettant des démonstrations, des exercices libres et des parties joueur contre IA.
 
 Ce plugin a été développé en suivant les meilleures pratiques de WordPress en matière de sécurité, de performance et de maintenabilité.
 
@@ -41,11 +41,11 @@ Ce plugin nécessite que le plugin **DAME** soit installé et activé. Le plugin
 
 *   **Modes Multiples :**
     *   **Démonstration :** Un échiquier statique pour afficher des positions.
-    *   **Exercice :** Permet le déplacement libre des pièces pour la mise en place et la résolution de problèmes.
-    *   **Partie vs IA :** Jouez contre le moteur Stockfish intégré avec une force ELO réglable.
-*   **Éditeur de FEN Visuel :** Un outil puissant dans l'éditeur pour créer visuellement n'importe quelle position sur l'échiquier. L'éditeur fournit une validation FEN en temps réel et des messages d'erreur.
-*   **Haute Personnalisation :** Contrôlez l'orientation de l'échiquier, le style des pièces, le type de bordure, les coordonnées et les schémas de couleurs.
-*   **Moteur Robuste :** Propulsé par `chess.js` pour la logique de jeu et `cm-chessboard` pour le rendu, garantissant un comportement précis et fiable.
+    *   **Mode libre (Free Move) :** Permet le déplacement libre et alterné/consécutif des pièces pour la mise en place et la résolution de problèmes sans restriction de tour.
+    *   **Partie vs IA :** Jouez contre le moteur Stockfish intégré avec une force ELO réglable, une boîte de dialogue de démarrage et une barre d'évaluation dynamique.
+*   **Éditeur de FEN Visuel :** Un outil puissant dans l'éditeur pour créer visuellement n'importe quelle position sur l'échiquier. L'éditeur fournit une validation FEN en temps réel.
+*   **Haute Personnalisation :** Contrôlez l'orientation de l'échiquier, les coordonnées et les menaces.
+*   **Moteur Robuste :** Propulsé par `chess.js` pour la logique de jeu et `Chessground` pour le rendu, garantissant un comportement moderne, tactile et fiable.
 
 ### Administration
 
@@ -62,51 +62,39 @@ Ce plugin nécessite que le plugin **DAME** soit installé et activé. Le plugin
 
 ### Utilisation du Bloc Échiquier
 
-1.  Dans l'éditeur de blocs, ajoutez un nouveau bloc et recherchez "Échiquier".
-2.  Utilisez les contrôles de la barre latérale du bloc (l'Inspecteur) pour configurer l'apparence et les fonctionnalités de l'échiquier.
+1.  Dans l'éditeur de blocs, ajoutez un nouveau bloc et recherchez "Gutenberg Chessboard" (ou "Échiquier").
+2.  Utilisez les contrôles de la barre latérale du bloc (l'Inspecteur) pour configurer l'apparence et le mode de jeu.
 3.  Utilisez l'éditeur visuel à l'intérieur du bloc pour définir les positions de pièces souhaitées, ou collez une chaîne FEN valide.
 
 ### Shortcodes
 
 *   `[roi_exercices]`: Affiche le système d'exercices interactifs sur n'importe quelle page ou article.
-*   `[chess_board fen="..." enableEngine="true" ...]`: Un shortcode hérité est disponible pour afficher l'échiquier. Cependant, l'utilisation du bloc Gutenberg est recommandée.
+*   `[chess_board fen="..." freeMode="true" ...]`: Affiche l'échiquier via shortcode.
 
 ## Développement et Structure des Fichiers
 
 Le plugin est organisé dans les répertoires principaux suivants :
 
-*   `/admin`: Contient les fichiers relatifs à la zone d'administration de WordPress, tels que les pages de menu, les meta boxes et la fonctionnalité de sauvegarde/restauration.
-*   `/assets`: Contient les fichiers CSS et JS publics.
+*   `/admin`: Contient les fichiers relatifs à la zone d'administration de WordPress.
+*   `/assets`: Contient les fichiers CSS et JS publics de ROI.
 *   `/includes`: La logique principale du plugin.
-    *   `/chess`: Contient toutes les fonctionnalités liées aux échecs, y compris la source du bloc Gutenberg (`/blocks`), l'application JS front-end (`/assets`), la classe PHP (`class-chess-engine.php`), et les bibliothèques tierces (`/vendor`).
+*   `/includes/chess`: Contient les fonctionnalités liées aux échecs, avec les assets pré-compilés du bloc sous `/dist/`.
 *   `/roi.php`: Le fichier principal du plugin.
-*   `/webpack.config.js`: Configuration pour le processus de build `@wordpress/scripts` pour le bloc Gutenberg.
 
 ### Processus de Build
 
-Le projet utilise `@wordpress/scripts` pour compiler les assets du bloc Gutenberg. Pour modifier le JavaScript ou le CSS du bloc :
-
-1.  Accédez au répertoire racine du plugin dans votre terminal.
-2.  Exécutez `npm install` pour installer les dépendances.
-3.  Exécutez `npm run build` pour compiler les fichiers source de `includes/chess/blocks/chessboard/src` dans le répertoire `includes/chess/blocks/chessboard/build`.
+Les composants de l'échiquier sont désormais compilés en amont dans le dépôt indépendant de `gutemberg-chessboard` via Vite, puis copiés dans le dossier `/includes/chess/dist/`.
 
 ## Changelog
 
-### 1.0.4 - 2025-10-23
-*   **Amélioration majeure du bloc Échiquier :**
-    *   Intégration de `chess.js` pour une gestion robuste de l'état de l'échiquier et de la validation FEN.
-    *   **Éditeur de position :** Permet la création de positions personnalisées (même "illégales"), valide la FEN en temps réel avec des messages d'erreur détaillés, et conditionne l'activation de Stockfish à la validité de la FEN.
-    *   **Visualisation (Front-end) :** Correction de bugs critiques sur la promotion des pions, la validation des mouvements en mode exercice, et les glitches visuels après un coup illégal.
+### 1.0.6 - 2026-06-03
+*   **Remplacement complet de l'échiquier :** Intégration de `gutemberg-chessboard` basé sur **Chessground** et **chess.js**.
+*   **Contrôles frontend visiteurs** : Boutons Nouvelle partie, Retourner le plateau, Annuler le coup.
+*   **Dialogue de configuration** : Choix de la couleur et ELO pour les parties contre Stockfish.
+*   **Mode libre** : Possibilité de déplacer les pièces des deux camps sans blocage.
 
-### 1.0.3 - 2025-10-22
-*   **Amélioration du bloc Échiquier :**
-    *   Le sélecteur de niveau du moteur Stockfish affiche désormais une estimation ELO conviviale (par exemple, "1200-1400") au lieu d'une valeur numérique (0-20).
-    *   Refonte de la structure du code du bloc pour suivre les conventions de WordPress, améliorant ainsi la maintenabilité.
-
-### 1.0.2 - 2025-10-22
-*   **Amélioration du bloc Échiquier :**
-    *   L'option "Couleur" (orientation de l'échiquier) est désormais toujours visible.
-    *   Ajout d'une option "Afficher les coordonnées".
+### 1.0.5 - 2025-11-01
+*   **Amélioration de l'interface de l'éditeur du bloc Échiquier :** Popup moderne de placement de pièces, extensions interactives de tracé de flèches.
     *   Réorganisation des paramètres du bloc.
     *   Correction d'un bug sur l'affichage des coordonnées sur la page publique.
 

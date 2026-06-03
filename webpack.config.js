@@ -1,33 +1,3 @@
-const defaultConfig = require('@wordpress/scripts/config/webpack.config');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-const path = require('path');
-
-const sourceDir = path.resolve(process.cwd(), 'includes/chess/blocks/chessboard/src');
-const buildDir = path.resolve(process.cwd(), 'includes/chess/blocks/chessboard/build');
-
-module.exports = {
-    ...defaultConfig,
-    entry: {
-        'chessboard-block': path.join(sourceDir, 'index.js'),
-    },
-    output: {
-        ...defaultConfig.output,
-        path: buildDir,
-        filename: '[name].js',
-    },
-    plugins: [
-        ...defaultConfig.plugins,
-        new CopyWebpackPlugin({
-            patterns: [
-                {
-                    from: path.join(sourceDir, 'block.json'),
-                    to: path.join(buildDir, 'block.json'),
-                },
-                {
-                    from: path.join(sourceDir, 'editor.css'),
-                    to: path.join(buildDir, 'editor.css'),
-                },
-            ],
-        }),
-    ],
-};
+// Les assets du bloc chessboard sont pré-compilés via Vite dans le dépôt gutemberg-chessboard.
+// Ce fichier est conservé vide pour éviter les erreurs de build de wp-scripts.
+module.exports = {};
