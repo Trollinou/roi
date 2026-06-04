@@ -81,7 +81,7 @@ class Exercice {
 				'read_private_posts' => 'read_private_exercices',
 			],
 			'map_meta_cap'        => true,
-			'show_in_rest'        => true,
+			'show_in_rest'        => false,
 		];
 
 		register_post_type( 'roi_exercice', $args );

@@ -94,6 +94,31 @@ class Games {
 			return new WP_Error( 'invalid_member', __( 'ID de membre invalide.', 'roi' ), [ 'status' => 400 ] );
 		}
 
+		// Contrôle anti-doublons (Même membre et même PGN)
+		$existing_games = get_posts( [
+			'post_type'      => 'roi_partie',
+			'posts_per_page' => 1,
+			'fields'         => 'ids',
+			'meta_query'     => [
+				[
+					'key'   => '_roi_member_id',
+					'value' => $member_id,
+				],
+				[
+					'key'   => '_roi_pgn',
+					'value' => $pgn,
+				],
+			],
+		] );
+
+		if ( ! empty( $existing_games ) ) {
+			return rest_ensure_response( [
+				'success' => true,
+				'id'      => $existing_games[0],
+				'message' => __( 'Partie déjà enregistrée.', 'roi' ),
+			] );
+		}
+
 		// Vérifier que le membre existe bien (CPT adherent de Dame)
 		$member = get_post( $member_id );
 		if ( ! $member || 'adherent' !== $member->post_type ) {

@@ -75,8 +75,10 @@ class Plugin {
 		if ( is_admin() ) {
 			$admin_menu = new \ROI\Admin\Menu();
 			$admin_menu->init();
-			$metaboxes = new \ROI\Admin\Metaboxes();
-			$metaboxes->init();
+			( new \ROI\Metaboxes\Lecon() )->init();
+			( new \ROI\Metaboxes\Exercice() )->init();
+			( new \ROI\Metaboxes\Cours() )->init();
+			( new \ROI\Metaboxes\Partie() )->init();
 			$backup = new \ROI\Admin\Backup();
 			$backup->init();
 		}

@@ -6,6 +6,10 @@
 *   **Découpage granulaire :** Séparation des Custom Post Types dans des fichiers de classe individuels (`Lecon`, `Exercice`, `Cours`, `Partie`), isolation de l'intégration du moteur d'échecs (`ChessEngine`), et centralisation des modules dans une classe principale de bootstrap (`Plugin`).
 *   **Scripts npm multiplateformes :** Remplacement de `package.sh` par un script Node.js cross-platform (`package.cjs`) pour assurer le packaging sous Windows, macOS et Linux.
 *   **Standardisation des assets :** Renomage des fichiers JS publics selon les normes `{contexte}-{composant}.js`.
+*   **Contrôle anti-doublons (API) :** Implémentation d'une détection anti-doublons sur le endpoint `POST /roi/v1/games` bloquant les soumissions identiques (basé sur le couple Adhérent / PGN).
+*   **Metabox Partie dédiée :** Création de la classe modulaire `Partie` pour afficher de manière structurée les métadonnées de jeu (Adhérent avec lien cliquable, ELO Stockfish, Aides, Oups, Durée formatée et PGN).
+*   **Refactoring des Metaboxes :** Découpage de l'ancienne classe monolithique `Admin/Metaboxes.php` en classes isolées et typées (`Lecon.php`, `Exercice.php`, `Cours.php`) sous `includes/Metaboxes/` et migration des notices administratives vers `Admin/Menu.php`.
+*   **Éditeur classique et CPT :** Désactivation de Gutenberg (`show_in_rest => false`) sur les CPT `roi_lecon`, `roi_exercice`, `roi_cours` et `roi_partie` pour restaurer l'éditeur classique, et masquage de l'éditeur de texte principal (`supports`) sur le CPT `roi_cours`.
 
 ## 1.0.7 - 2026-06-04
 

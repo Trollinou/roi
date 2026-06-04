@@ -53,7 +53,7 @@ class Cours {
 			'label'               => __( 'Cours', 'roi' ),
 			'description'         => __( 'Cours constitués de leçons et d\'exercices', 'roi' ),
 			'labels'              => $labels,
-			'supports'            => [ 'title', 'editor', 'author' ],
+			'supports'            => [ 'title', 'author' ],
 			'taxonomies'          => [ 'roi_chess_category' ],
 			'hierarchical'        => false,
 			'public'              => true,
@@ -76,7 +76,7 @@ class Cours {
 				'read_private_posts' => 'read_private_cours',
 			],
 			'map_meta_cap'        => true,
-			'show_in_rest'        => true,
+			'show_in_rest'        => false,
 		];
 
 		register_post_type( 'roi_cours', $args );

@@ -54,7 +54,7 @@ class Partie {
 			'label'               => __( 'Partie', 'roi' ),
 			'description'         => __( 'Parties d\'échecs enregistrées depuis la PWA', 'roi' ),
 			'labels'              => $labels,
-			'supports'            => [ 'title', 'editor', 'author' ],
+			'supports'            => [ 'title', 'author' ],
 			'hierarchical'        => false,
 			'public'              => true,
 			'show_ui'             => true,
@@ -66,7 +66,7 @@ class Partie {
 			'exclude_from_search' => false,
 			'publicly_queryable'  => true,
 			'capability_type'     => 'post',
-			'show_in_rest'        => true,
+			'show_in_rest'        => false,
 		];
 
 		register_post_type( 'roi_partie', $args );
