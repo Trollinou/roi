@@ -39,3 +39,18 @@ Ce plugin ajoute les capacités suivantes au rôle "Entraineur":
 ## Sauvegarde et Restauration
 
 La sauvegarde et la restauration de la base de données d'apprentissage sont gérées par le plugin DAME.
+
+## Suivi des parties d'échecs (PWA)
+
+Les parties jouées dans la PWA de Dame contre l'ordinateur sont automatiquement sauvegardées sous forme de publications de type **Partie** (`roi_partie`) pour les adhérents (les profils de représentants/parents ne sont pas enregistrés).
+
+Chaque fiche de **Partie** contient :
+* La date exacte de fin de partie.
+* Le niveau ELO de l'ordinateur.
+* Le nombre d'aides obtenues.
+* Le nombre de retours en arrière (oups) effectués.
+* La durée de la partie en secondes.
+* Le PGN (historique de coups) complet.
+
+Ces données sont transmises de manière sécurisée via l'API REST de sauvegarde (`POST /wp-json/roi/v1/games`). En cas de déconnexion réseau, la PWA stocke les parties localement et les synchronise automatiquement dès le retour en ligne.
+
