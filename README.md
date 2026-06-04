@@ -1,6 +1,6 @@
 # ROI - Ressources et Organisation pour l’Initiation aux échecs
 
-**Version :** 1.1.0
+**Version :** 1.1.1
 **Auteur :** Etienne Gagnon
 **Licence :** GPL v2 ou ultérieure
 **WordPress Requis :** 6.9.1+
@@ -94,6 +94,11 @@ Le plugin est organisé dans les répertoires principaux suivants :
 Les composants de l'échiquier sont désormais compilés en amont dans le dépôt indépendant de `gutemberg-chessboard` via Vite, puis copiés dans le dossier `/includes/chess/dist/`.
 
 ## Changelog
+
+### 1.1.1 - 2026-06-04
+*   **Réorganisation des Metaboxes Partie :** Panneau latéral pour les données et zone centrale pour le lecteur interactif.
+*   **Lecteur PGN Interactif :** Boutons pas-à-pas et liste cliquable des coups.
+*   **Correction et robustesse :** Résolution du bug de hauteur de l'échiquier et décodage/normalisation du PGN.
 
 ### 1.1.0 - 2026-06-04
 *   **Refonte complète en POO :** Logique globale réécrite sous namespace `ROI\`, SPL autoloader natif et typage strict PHP 8.4.

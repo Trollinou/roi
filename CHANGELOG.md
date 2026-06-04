@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.1 - 2026-06-04
+
+*   **Réorganisation des Metaboxes Partie :** Déplacement des métadonnées vers un panneau latéral (`side`) et intégration du visualiseur de PGN interactif en zone centrale (`normal`).
+*   **Lecteur PGN Interactif :** Ajout de boutons de navigation pas-à-pas et d'une liste cliquable des coups.
+*   **Correction du rendu Chessground :** Suppression des styles en ligne forçant la hauteur, rétablissant le ratio carré 1:1 de Chessground.
+*   **Compatibilité et décodage PGN :** Intégration du décodage automatique des entités HTML et de la normalisation des espacements pour éviter les erreurs de parsing avec `chess.js`.
+
 ## 1.1.0 - 2026-06-04
 
 *   **Refonte complète en POO :** Conversion de l'intégralité du code procédural du plugin vers une architecture orientée objet standardisée (classes sous le namespace `ROI\`, SPL autoloader natif, typage strict PHP 8.4).
