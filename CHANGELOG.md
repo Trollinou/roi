@@ -1,6 +1,14 @@
 # Changelog
 
+## 1.1.0 - 2026-06-04
+
+*   **Refonte complète en POO :** Conversion de l'intégralité du code procédural du plugin vers une architecture orientée objet standardisée (classes sous le namespace `ROI\`, SPL autoloader natif, typage strict PHP 8.4).
+*   **Découpage granulaire :** Séparation des Custom Post Types dans des fichiers de classe individuels (`Lecon`, `Exercice`, `Cours`, `Partie`), isolation de l'intégration du moteur d'échecs (`ChessEngine`), et centralisation des modules dans une classe principale de bootstrap (`Plugin`).
+*   **Scripts npm multiplateformes :** Remplacement de `package.sh` par un script Node.js cross-platform (`package.cjs`) pour assurer le packaging sous Windows, macOS et Linux.
+*   **Standardisation des assets :** Renomage des fichiers JS publics selon les normes `{contexte}-{composant}.js`.
+
 ## 1.0.7 - 2026-06-04
+
 
 *   **CPT Parties (`roi_partie`) :** Enregistrement d'un nouveau type de contenu personnalisé pour stocker les parties jouées.
 *   **API REST de sauvegarde :** Ajout d'une route `POST /roi/v1/games` sécurisée permettant de sauvegarder les parties terminées (ID adhérent, difficulté ELO, nombre d'aides et d'annulations, PGN, durée en secondes et date de fin de partie).
