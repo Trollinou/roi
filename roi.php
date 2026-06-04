@@ -70,6 +70,14 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/roles.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/shortcodes.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/activation.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/chess/class-chess-engine.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/REST/Games.php';
+
+// Initialize REST API endpoints
+add_action( 'init', function() {
+    $games_rest = new \ROI\REST\Games();
+    $games_rest->init();
+} );
+
 
 if ( is_admin() ) {
     require_once plugin_dir_path( __FILE__ ) . 'admin/menu.php';
