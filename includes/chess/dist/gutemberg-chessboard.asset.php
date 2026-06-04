@@ -7,5 +7,5 @@ return array(
         'wp-block-editor',
         'wp-i18n',
     ),
-    'version'      => '1.0.4',
+    'version'      => '1.0.5',
 );

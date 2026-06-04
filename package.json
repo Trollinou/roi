@@ -1,7 +1,9 @@
 {
   "scripts": {
     "build": "wp-scripts build",
-    "start": "wp-scripts start"
+    "start": "wp-scripts start",
+    "update-chessboard": "node scripts/update-chessboard.cjs",
+    "package": "bash package.sh"
   },
   "devDependencies": {
     "@wordpress/scripts": "^30.12.1",
