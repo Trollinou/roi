@@ -1,16 +1,17 @@
 # ROI - Ressources et Organisation pour l’Initiation aux échecs
 
-**Version :** 1.0.7
+**Version :** 1.1.0
 **Auteur :** Etienne Gagnon
 **Licence :** GPL v2 ou ultérieure
-**WordPress Requis :** 6.8+
-**PHP Requis :** 8.2+
+**WordPress Requis :** 6.9.1+
+**PHP Requis :** 8.4+
 
 ## Description
 
 Le plugin "ROI - Ressources et Organisation pour l’Initiation aux échecs" est un système de gestion de l'apprentissage (LMS) complet, conçu pour l'enseignement des échecs dans un environnement WordPress. Il fournit un cadre robuste pour la création, la gestion et la diffusion de leçons, d'exercices et de cours d'échecs. Le plugin inclut un bloc d'échiquier interactif sophistiqué, alimenté par Stockfish, `chess.js` et **Chessground** (l'échiquier Lichess), permettant des démonstrations, des exercices libres et des parties joueur contre IA.
 
-Ce plugin a été développé en suivant les meilleures pratiques de WordPress en matière de sécurité, de performance et de maintenabilité.
+Ce plugin a été développé en suivant les meilleures pratiques de WordPress en matière de sécurité, de performance et de maintenabilité, et dispose d'une architecture orientée objet (POO) complète.
+
 
 ## Dépendances
 
@@ -78,11 +79,15 @@ Ce plugin nécessite que le plugin **DAME** soit installé et activé. Le plugin
 
 Le plugin est organisé dans les répertoires principaux suivants :
 
-*   `/admin`: Contient les fichiers relatifs à la zone d'administration de WordPress.
-*   `/assets`: Contient les fichiers CSS et JS publics de ROI.
-*   `/includes`: La logique principale du plugin.
-*   `/includes/chess`: Contient les fonctionnalités liées aux échecs, avec les assets pré-compilés du bloc sous `/dist/`.
-*   `/roi.php`: Le fichier principal du plugin.
+*   `/assets`: Contient les fichiers CSS et JS publics et d'administration de ROI.
+*   `/includes`: La logique principale du plugin, structurée selon le standard PSR-4 (namespace `ROI\`).
+*   `/includes/Admin`: Fichiers relatifs à la zone d'administration de WordPress (metaboxes, menus, backup).
+*   `/includes/Core`: Bootstrap, assets, rôles et activation/désactivation.
+*   `/includes/CPT`: Fichiers de classes pour chaque Custom Post Type.
+*   `/includes/Services`: Logique métier du plugin (complétion, handlers).
+*   `/includes/chess`: Moteur d'échecs, templates et assets pré-compilés sous `/dist/`.
+*   `/roi.php`: Le fichier principal du plugin (contient l'autoloader SPL).
+
 
 ### Processus de Build
 
@@ -90,16 +95,15 @@ Les composants de l'échiquier sont désormais compilés en amont dans le dépô
 
 ## Changelog
 
+### 1.1.0 - 2026-06-04
+*   **Refonte complète en POO :** Logique globale réécrite sous namespace `ROI\`, SPL autoloader natif et typage strict PHP 8.4.
+*   **Découpage granulaire :** Fichiers individuels par Custom Post Type, organisation par modules.
+*   **Script de packaging :** Version Node.js multiplateforme pour le build et la compression.
+
+### 1.0.7 - 2026-06-04
+*   **CPT Parties (`roi_partie`) :** Enregistrement d'un nouveau type de contenu personnalisé pour stocker les parties jouées.
+*   **API REST de sauvegarde :** Route `POST /roi/v1/games` sécurisée.
+
 ### 1.0.6 - 2026-06-03
 *   **Remplacement complet de l'échiquier :** Intégration de `gutemberg-chessboard` basé sur **Chessground** et **chess.js**.
-*   **Contrôles frontend visiteurs** : Boutons Nouvelle partie, Retourner le plateau, Annuler le coup.
-*   **Dialogue de configuration** : Choix de la couleur et ELO pour les parties contre Stockfish.
-*   **Mode libre** : Possibilité de déplacer les pièces des deux camps sans blocage.
 
-### 1.0.5 - 2025-11-01
-*   **Amélioration de l'interface de l'éditeur du bloc Échiquier :** Popup moderne de placement de pièces, extensions interactives de tracé de flèches.
-    *   Réorganisation des paramètres du bloc.
-    *   Correction d'un bug sur l'affichage des coordonnées sur la page publique.
-
-### 1.0.0 - 2025-09-15
-*   Première version du plugin.

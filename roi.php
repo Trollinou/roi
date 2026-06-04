@@ -3,7 +3,7 @@
  * Plugin Name:       ROI - Ressources et Organisation pour l’Initiation (aux échecs)
  * Plugin URI:        https://example.com/plugins/the-basics/
  * Description:       Ressources et Organisation pour l’Initiation aux échecs.
- * Version:           1.0.7
+ * Version:           1.1.0
  * Requires at least: 6.8
  * Requires PHP:      8.2
  * Author:            Etienne Gagnon
@@ -15,9 +15,11 @@
  * Depends:           dame
  */
 
+declare(strict_types=1);
+
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
-    die;
+	die;
 }
 
 /**
@@ -31,10 +33,10 @@ if ( ! defined( 'WPINC' ) ) {
  * @return void
  */
 function roi_check_dame_dependency() {
-    if ( ! is_plugin_active( 'dame/dame.php' ) ) {
-        add_action( 'admin_notices', 'roi_dame_not_active_notice' );
-        deactivate_plugins( plugin_basename( __FILE__ ) );
-    }
+	if ( ! is_plugin_active( 'dame/dame.php' ) ) {
+		add_action( 'admin_notices', 'roi_dame_not_active_notice' );
+		deactivate_plugins( plugin_basename( __FILE__ ) );
+	}
 }
 add_action( 'admin_init', 'roi_check_dame_dependency' );
 
@@ -49,42 +51,41 @@ add_action( 'admin_init', 'roi_check_dame_dependency' );
  * @return void
  */
 function roi_dame_not_active_notice() {
-    ?>
-    <div class="notice notice-error is-dismissible">
-        <p><?php _e( 'Le plugin ROI requiert que le plugin DAME soit activé. Le plugin ROI a été désactivé.', 'roi' ); ?></p>
-    </div>
-    <?php
+	?>
+	<div class="notice notice-error is-dismissible">
+		<p><?php _e( 'Le plugin ROI requiert que le plugin DAME soit activé. Le plugin ROI a été désactivé.', 'roi' ); ?></p>
+	</div>
+	<?php
 }
 
-define( 'ROI_VERSION', '1.0.7' );
+define( 'ROI_VERSION', '1.1.0' );
 define( 'ROI_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 
-// Include plugin files
-require_once plugin_dir_path( __FILE__ ) . 'includes/assets.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/cpt.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/taxonomies.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/lesson-completion.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/single-exercice-handler.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/single-course-handler.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/roles.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/shortcodes.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/activation.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/chess/class-chess-engine.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/REST/Games.php';
+// Autoloader SPL natif
+spl_autoload_register( function ( $class ) {
+	$prefix   = 'ROI\\';
+	$base_dir = plugin_dir_path( __FILE__ ) . 'includes/';
 
-// Initialize REST API endpoints
-add_action( 'init', function() {
-    $games_rest = new \ROI\REST\Games();
-    $games_rest->init();
+	$len = strlen( $prefix );
+	if ( strncmp( $prefix, $class, $len ) !== 0 ) {
+		return;
+	}
+
+	$relative_class = substr( $class, $len );
+	$file           = $base_dir . str_replace( '\\', '/', $relative_class ) . '.php';
+
+	if ( file_exists( $file ) ) {
+		require $file;
+	}
 } );
 
+// Initialisation du plugin
+$roi_plugin = new \ROI\Core\Plugin();
+$roi_plugin->run();
 
-if ( is_admin() ) {
-    require_once plugin_dir_path( __FILE__ ) . 'admin/menu.php';
-    require_once plugin_dir_path( __FILE__ ) . 'admin/metaboxes.php';
-    require_once plugin_dir_path( __FILE__ ) . 'admin/backup-restore.php';
-    require_once plugin_dir_path( __FILE__ ) . 'admin/backup-restore-page.php';
-}
+// Hooks d'activation et désactivation
+register_activation_hook( __FILE__, [ \ROI\Core\Activator::class, 'activate' ] );
+register_deactivation_hook( __FILE__, [ \ROI\Core\Deactivator::class, 'deactivate' ] );
 
 /**
  * Load plugin textdomain.
@@ -96,22 +97,16 @@ if ( is_admin() ) {
  * @return void
  */
 function roi_load_textdomain() {
-    load_plugin_textdomain( 'roi', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+	load_plugin_textdomain( 'roi', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
 add_action( 'plugins_loaded', 'roi_load_textdomain' );
 
 /**
- * Initialize Chess Engine.
+ * Backward compatibility wrapper for the chess pieces filter function.
  *
- * Hooks into the 'init' action to get the singleton instance of the
- * Roi_Chess_Engine class, effectively initializing the chess-related
- * functionalities of the plugin.
- *
- * @since 1.0.0
+ * @param string $content Raw content.
+ * @return string Filtered content.
  */
-add_action('init', function() {
-    Roi_Chess_Engine::get_instance(
-        plugin_dir_url(__FILE__),
-        plugin_dir_path(__FILE__)
-    );
-}, 5);
+function roi_chess_pieces_shortcodes_filter( string $content ): string {
+	return \ROI\Shortcodes\Shortcodes::chess_pieces_filter( $content );
+}
