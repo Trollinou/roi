@@ -74,6 +74,10 @@
     "freeMode": {
       "type": "boolean",
       "default": false
+    },
+    "clockPreset": {
+      "type": "string",
+      "default": "none"
     }
   },
   "textdomain": "roi",
