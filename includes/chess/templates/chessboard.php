@@ -25,7 +25,9 @@ if ($show_bar) {
      data-use-stockfish="<?php echo $use_stockfish ? 'true' : 'false'; ?>"
      data-stockfish-elo="<?php echo esc_attr($atts['stockfishElo']); ?>"
      data-show-evaluation-bar="<?php echo $show_evaluation_bar ? 'true' : 'false'; ?>"
-     data-free-mode="<?php echo $free_mode ? 'true' : 'false'; ?>">
+     data-free-mode="<?php echo $free_mode ? 'true' : 'false'; ?>"
+     data-clock-preset="<?php echo esc_attr($atts['clockPreset']); ?>"
+     data-show-material-indicator="<?php echo $show_material ? 'true' : 'false'; ?>">
 
     <section class="main-wrap <?php echo $show_bar ? 'has-evaluation-bar' : ''; ?>">
         <div class="main-board">
@@ -42,13 +44,13 @@ if ($show_bar) {
                 <div class="chess-config-dialog">
                     <div class="config-dialog-content">
                         <div class="color-selector">
-                            <button type="button" class="color-btn white active" data-color="white">
+                            <button type="button" class="color-btn white<?php echo ($atts['playerColor'] === 'white' || empty($atts['playerColor'])) ? ' active' : ''; ?>" data-color="white">
                                 <?php _e('Blancs', 'roi'); ?>
                             </button>
-                            <button type="button" class="color-btn random" data-color="random">
+                            <button type="button" class="color-btn random<?php echo ($atts['playerColor'] === 'both') ? ' active' : ''; ?>" data-color="random">
                                 <?php _e('Aléatoire', 'roi'); ?>
                             </button>
-                            <button type="button" class="color-btn black" data-color="black">
+                            <button type="button" class="color-btn black<?php echo ($atts['playerColor'] === 'black') ? ' active' : ''; ?>" data-color="black">
                                 <?php _e('Noirs', 'roi'); ?>
                             </button>
                         </div>

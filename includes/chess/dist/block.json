@@ -78,6 +78,10 @@
     "clockPreset": {
       "type": "string",
       "default": "none"
+    },
+    "showMaterialIndicator": {
+      "type": "boolean",
+      "default": true
     }
   },
   "textdomain": "roi",

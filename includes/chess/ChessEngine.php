@@ -123,28 +123,31 @@ class ChessEngine {
 	public function render_chessboard( $atts ): string {
 		$atts = shortcode_atts(
 			[
-				'fen'               => 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-				'orientation'       => 'white',
-				'playerColor'       => 'both',
-				'viewOnly'          => 'true',
-				'useStockfish'      => 'false',
-				'stockfishElo'      => 1500,
-				'showEvaluationBar' => 'false',
-				'showThreats'       => 'false',
-				'coordinates'       => 'true',
-				'freeMode'          => 'false',
+				'fen'                   => 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+				'orientation'           => 'white',
+				'playerColor'           => 'both',
+				'viewOnly'              => 'true',
+				'useStockfish'          => 'false',
+				'stockfishElo'          => 1500,
+				'showEvaluationBar'     => 'false',
+				'showThreats'           => 'false',
+				'coordinates'           => 'true',
+				'freeMode'              => 'false',
+				'clockPreset'           => 'none',
+				'showMaterialIndicator' => 'true',
 			],
 			$atts,
 			'chess_board'
 		);
 
-		$board_id            = 'chessboard-' . uniqid();
-		$use_stockfish       = filter_var( $atts['useStockfish'], FILTER_VALIDATE_BOOLEAN );
-		$show_evaluation_bar = filter_var( $atts['showEvaluationBar'], FILTER_VALIDATE_BOOLEAN );
-		$view_only           = filter_var( $atts['viewOnly'], FILTER_VALIDATE_BOOLEAN );
-		$show_threats        = filter_var( $atts['showThreats'], FILTER_VALIDATE_BOOLEAN );
-		$coordinates         = filter_var( $atts['coordinates'], FILTER_VALIDATE_BOOLEAN );
-		$free_mode           = filter_var( $atts['freeMode'], FILTER_VALIDATE_BOOLEAN );
+		$board_id              = 'chessboard-' . uniqid();
+		$use_stockfish         = filter_var( $atts['useStockfish'], FILTER_VALIDATE_BOOLEAN );
+		$show_evaluation_bar   = filter_var( $atts['showEvaluationBar'], FILTER_VALIDATE_BOOLEAN );
+		$view_only             = filter_var( $atts['viewOnly'], FILTER_VALIDATE_BOOLEAN );
+		$show_threats          = filter_var( $atts['showThreats'], FILTER_VALIDATE_BOOLEAN );
+		$coordinates           = filter_var( $atts['coordinates'], FILTER_VALIDATE_BOOLEAN );
+		$free_mode             = filter_var( $atts['freeMode'], FILTER_VALIDATE_BOOLEAN );
+		$show_material         = filter_var( $atts['showMaterialIndicator'], FILTER_VALIDATE_BOOLEAN );
 
 		ob_start();
 		include $this->plugin_path . 'includes/chess/templates/chessboard.php';
