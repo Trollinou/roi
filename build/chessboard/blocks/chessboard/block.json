@@ -1,0 +1,92 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "roi/chessboard",
+  "version": "1.0.5",
+  "title": "Échiquier",
+  "category": "widgets",
+  "icon": "games",
+  "description": "A native Gutenberg chessboard block for WordPress, powered by Chessground and chess.js.",
+  "supports": {
+    "html": false,
+    "align": [
+      "wide",
+      "full"
+    ]
+  },
+  "attributes": {
+    "boardConfig": {
+      "type": "object",
+      "default": {}
+    },
+    "playerColor": {
+      "type": "string",
+      "default": "both"
+    },
+    "reactiveConfig": {
+      "type": "boolean",
+      "default": false
+    },
+    "showThreats": {
+      "type": "boolean",
+      "default": false
+    },
+    "promotionDialogState": {
+      "type": "object",
+      "default": {
+        "isEnabled": false
+      }
+    },
+    "historyViewerState": {
+      "type": "object",
+      "default": {
+        "isEnabled": false
+      }
+    },
+    "fen": {
+      "type": "string",
+      "default": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    },
+    "orientation": {
+      "type": "string",
+      "default": "white"
+    },
+    "coordinates": {
+      "type": "boolean",
+      "default": true
+    },
+    "viewOnly": {
+      "type": "boolean",
+      "default": true
+    },
+    "useStockfish": {
+      "type": "boolean",
+      "default": false
+    },
+    "stockfishElo": {
+      "type": "number",
+      "default": 1500
+    },
+    "showEvaluationBar": {
+      "type": "boolean",
+      "default": false
+    },
+    "freeMode": {
+      "type": "boolean",
+      "default": false
+    },
+    "clockPreset": {
+      "type": "string",
+      "default": "none"
+    },
+    "showMaterialIndicator": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "textdomain": "roi",
+  "editorScript": "file:./chessboard.js",
+  "editorStyle": "file:./style.css",
+  "style": "file:./style.css",
+  "viewScript": "file:./chessboard-view.js"
+}

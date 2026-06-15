@@ -1,3 +1,39 @@
-// Les assets du bloc chessboard sont pré-compilés via Vite dans le dépôt gutemberg-chessboard.
-// Ce fichier est conservé vide pour éviter les erreurs de build de wp-scripts.
-module.exports = {};
+const defaultConfig = require('@wordpress/scripts/config/webpack.config');
+const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
+module.exports = {
+  ...defaultConfig,
+  entry: {
+    'chessboard': path.resolve(__dirname, 'src/blocks/chessboard/index.jsx'),
+    'chessboard-view': path.resolve(__dirname, 'src/blocks/chessboard/view.jsx')
+  },
+  output: {
+    ...defaultConfig.output,
+    path: path.resolve(__dirname, 'build/chessboard'),
+    filename: '[name].js'
+  },
+  plugins: [
+    ...defaultConfig.plugins,
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, 'src/blocks/chessboard/style.css'),
+          to: path.resolve(__dirname, 'build/chessboard/style.css')
+        },
+        {
+          from: path.resolve(__dirname, 'src/blocks/chessboard/block.json'),
+          to: path.resolve(__dirname, 'build/chessboard/block.json')
+        },
+        {
+          from: path.resolve(__dirname, 'node_modules/eg-chessboard/dist/stockfish.js'),
+          to: path.resolve(__dirname, 'build/chessboard/stockfish.js')
+        },
+        {
+          from: path.resolve(__dirname, 'node_modules/eg-chessboard/dist/stockfish.wasm'),
+          to: path.resolve(__dirname, 'build/chessboard/stockfish.wasm')
+        }
+      ]
+    })
+  ]
+};

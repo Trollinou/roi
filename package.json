@@ -2,11 +2,13 @@
   "scripts": {
     "build": "wp-scripts build",
     "start": "wp-scripts start",
-    "update-chessboard": "node scripts/update-chessboard.cjs",
     "package": "node scripts/package.cjs"
   },
   "devDependencies": {
     "@wordpress/scripts": "^30.12.1",
     "copy-webpack-plugin": "^13.0.1"
+  },
+  "dependencies": {
+    "eg-chessboard": "file:../../eg-chessboard"
   }
 }

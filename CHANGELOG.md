@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.0 - 2026-06-15
+
+*   **Migration vers `eg-chessboard` :** Remplacement complet de l'ancien dépôt `gutemberg-chessboard` par la bibliothèque partagée moderne `eg-chessboard` (basée sur Chessground et chess.js), déclarée comme dépendance locale (`file:`).
+*   **Compilation WordPress intégrée :** Le bloc Gutenberg et son script de visualisation front-end sont désormais compilés localement via `@wordpress/scripts` dans `build/chessboard/`.
+*   **Intégration Stockfish duale :** Support des configurations de moteurs d'analyse indépendants pour les blancs et les noirs, avec détection de la triple répétition de position.
+*   **Nettoyage & Standardisation :** Renommage du bloc en `roi/chessboard`, des classes CSS en `.chessboard-block` et du textdomain de traduction en `roi`. Suppression de l'ancien sous-dossier `includes/chess/dist/` et du script obsolète `update-chessboard.cjs`.
+
 ## 1.1.1 - 2026-06-04
 
 *   **Réorganisation des Metaboxes Partie :** Déplacement des métadonnées vers un panneau latéral (`side`) et intégration du visualiseur de PGN interactif en zone centrale (`normal`).

@@ -1,18 +1,15 @@
 {
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 2,
-  "name": "gutemberg-chessboard/chessboard",
+  "name": "roi/chessboard",
   "version": "1.0.5",
   "title": "Échiquier",
   "category": "widgets",
   "icon": "games",
-  "description": "Insérer un échiquier interactif tactilisé avec Chessground",
+  "description": "A native Gutenberg chessboard block for WordPress, powered by Chessground and chess.js.",
   "supports": {
     "html": false,
-    "align": [
-      "wide",
-      "full"
-    ]
+    "align": ["wide", "full"]
   },
   "attributes": {
     "boardConfig": {
@@ -85,8 +82,8 @@
     }
   },
   "textdomain": "roi",
-  "editorScript": "file:./gutemberg-chessboard.js",
+  "editorScript": "file:./chessboard.js",
   "editorStyle": "file:./style.css",
   "style": "file:./style.css",
-  "viewScript": "file:./gutemberg-chessboard-view.js"
+  "viewScript": "file:./chessboard-view.js"
 }

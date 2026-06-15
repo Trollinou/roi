@@ -80,18 +80,22 @@ Ce plugin nécessite que le plugin **DAME** soit installé et activé. Le plugin
 Le plugin est organisé dans les répertoires principaux suivants :
 
 *   `/assets`: Contient les fichiers CSS et JS publics et d'administration de ROI.
+*   `/src`: Contient les sources React et Gutenberg du bloc `roi/chessboard`.
+*   `/build`: Contient les assets compilés du bloc d'échecs (CSS, JS, et les workers Stockfish).
 *   `/includes`: La logique principale du plugin, structurée selon le standard PSR-4 (namespace `ROI\`).
 *   `/includes/Admin`: Fichiers relatifs à la zone d'administration de WordPress (metaboxes, menus, backup).
 *   `/includes/Core`: Bootstrap, assets, rôles et activation/désactivation.
 *   `/includes/CPT`: Fichiers de classes pour chaque Custom Post Type.
 *   `/includes/Services`: Logique métier du plugin (complétion, handlers).
-*   `/includes/chess`: Moteur d'échecs, templates et assets pré-compilés sous `/dist/`.
+*   `/includes/chess`: Intégration du moteur d'échecs (shortcodes, templates PHP).
 *   `/roi.php`: Le fichier principal du plugin (contient l'autoloader SPL).
-
 
 ### Processus de Build
 
-Les composants de l'échiquier sont désormais compilés en amont dans le dépôt indépendant de `gutemberg-chessboard` via Vite, puis copiés dans le dossier `/includes/chess/dist/`.
+Les composants de l'échiquier sont intégrés via le package local `eg-chessboard` et compilés à l'aide de `@wordpress/scripts` avec la commande suivante :
+```bash
+npm run build
+```
 
 ## Changelog
 

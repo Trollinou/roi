@@ -163,7 +163,7 @@ class Partie {
 				<!-- Colonne Droite : L'échiquier -->
 				<div class="roi-viewer-board-wrapper" style="width: 350px; flex-shrink: 0; position: relative;">
 					<div id="roi-partie-viewer-chessboard" 
-					     class="gutemberg-chessboard-block"
+					     class="chessboard-block"
 					     data-fen="<?php echo esc_attr( $initial_fen ); ?>"
 					     data-orientation="white"
 					     data-coordinates="true"
@@ -250,18 +250,18 @@ class Partie {
 
 		if ( 'post.php' === $hook || 'post-new.php' === $hook ) {
 			$plugin_url = plugin_dir_url( dirname( __DIR__, 2 ) . '/roi.php' );
-			$chess_url = $plugin_url . 'includes/chess/';
+			$chess_url = $plugin_url . 'build/chessboard/';
 
 			wp_enqueue_style(
-				'gutemberg-chessboard-style',
-				$chess_url . 'dist/style.css',
+				'chessboard-style',
+				$chess_url . 'style.css',
 				[],
 				ROI_VERSION
 			);
 
 			wp_enqueue_script(
-				'gutemberg-chessboard-view',
-				$chess_url . 'dist/gutemberg-chessboard-view.js',
+				'chessboard-view',
+				$chess_url . 'chessboard-view.js',
 				[ 'wp-element' ],
 				ROI_VERSION,
 				true
@@ -270,7 +270,7 @@ class Partie {
 			wp_enqueue_script(
 				'roi-admin-partie-viewer',
 				$plugin_url . 'assets/js/admin-partie-viewer.js',
-				[ 'gutemberg-chessboard-view' ],
+				[ 'chessboard-view' ],
 				ROI_VERSION,
 				true
 			);

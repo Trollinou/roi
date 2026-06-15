@@ -8,7 +8,7 @@ if (!defined('ABSPATH')) {
 }
 
 $show_bar = $use_stockfish && $show_evaluation_bar;
-$wrapper_class = 'gutemberg-chessboard-block';
+$wrapper_class = 'chessboard-block';
 if ($show_bar) {
     $wrapper_class .= ' has-evaluation-bar';
 }

@@ -73,7 +73,7 @@ class ChessEngine {
 	 */
 	public function register_block(): void {
 		register_block_type(
-			$this->plugin_path . 'includes/chess/dist',
+			$this->plugin_path . 'build/chessboard',
 			[
 				'render_callback' => [ $this, 'render_block' ],
 			]
@@ -96,18 +96,18 @@ class ChessEngine {
 	 * @return void
 	 */
 	public function enqueue_assets(): void {
-		$chess_url = $this->plugin_url . 'includes/chess/';
+		$chess_url = $this->plugin_url . 'build/chessboard/';
 
 		wp_enqueue_style(
-			'gutemberg-chessboard-style',
-			$chess_url . 'dist/style.css',
+			'chessboard-style',
+			$chess_url . 'style.css',
 			[],
 			ROI_VERSION
 		);
 
 		wp_enqueue_script(
-			'gutemberg-chessboard-view',
-			$chess_url . 'dist/gutemberg-chessboard-view.js',
+			'chessboard-view',
+			$chess_url . 'chessboard-view.js',
 			[ 'wp-element' ],
 			ROI_VERSION,
 			true
