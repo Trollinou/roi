@@ -9,6 +9,6 @@
     "copy-webpack-plugin": "^13.0.1"
   },
   "dependencies": {
-    "eg-chessboard": "file:../../eg-chessboard"
+    "eg-chessboard": "file:../eg-chessboard"
   }
 }
