@@ -287,6 +287,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     };
 
+    // Resolve Stockfish worker URL conforming to AGENTS.md assets structure
+    const viewScript = document.querySelector(
+      'script[src*="chessboard-view.js"]'
+    );
+    let workerUrl = '';
+    if (viewScript) {
+      workerUrl = viewScript.src.replace(
+        'build/chessboard/chessboard-view.js',
+        'assets/js/stockfish.js'
+      );
+    } else {
+      workerUrl = '/wp-content/plugins/roi/assets/js/stockfish.js';
+    }
+
+    // Direct Stockfish to the custom WASM REST endpoint to bypass MIME type issues
+    window.dameWasmUrl = window.location.origin + '/wp-json/roi/v1/stockfish-wasm';
+
     const boardAPI = new BoardCore(
       mountElement,
       state,
@@ -294,7 +311,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Handle state changes if any
       },
       emit,
-      boardConfig
+      boardConfig,
+      {
+        workerUrl: workerUrl
+      }
     );
     block.boardAPI = boardAPI;
 
@@ -422,20 +442,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     if (useStockfish || showEvaluationBar) {
-      const viewScript = document.querySelector(
-        'script[src*="chessboard-view.js"]'
-      );
-      let workerUrl = '';
-      if (viewScript) {
-        workerUrl = viewScript.src.replace(
-          'chessboard-view.js',
-          'stockfish.js'
-        );
-      } else {
-        workerUrl =
-          '/wp-content/plugins/roi/build/chessboard/stockfish.js';
-      }
-
       try {
         stockfishManager = new StockfishManager(workerUrl);
 

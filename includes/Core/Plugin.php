@@ -45,6 +45,8 @@ class Plugin {
 		add_action( 'init', function() {
 			$games_rest = new \ROI\REST\Games();
 			$games_rest->init();
+			$stockfish_rest = new \ROI\REST\Stockfish();
+			$stockfish_rest->init();
 		} );
 
 		// Chess Engine Integration

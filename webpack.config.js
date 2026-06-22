@@ -13,6 +13,14 @@ module.exports = {
     path: path.resolve(__dirname, 'build/chessboard'),
     filename: '[name].js'
   },
+  performance: {
+    hints: 'warning',
+    maxEntrypointSize: 350 * 1024,
+    maxAssetSize: 350 * 1024,
+    assetFilter: function(assetFilename) {
+      return !assetFilename.endsWith('.wasm');
+    }
+  },
   plugins: [
     ...defaultConfig.plugins,
     new CopyWebpackPlugin({
@@ -27,11 +35,11 @@ module.exports = {
         },
         {
           from: path.resolve(__dirname, 'node_modules/eg-chessboard/dist/stockfish.js'),
-          to: path.resolve(__dirname, 'build/chessboard/stockfish.js')
+          to: path.resolve(__dirname, 'assets/js/stockfish.js')
         },
         {
           from: path.resolve(__dirname, 'node_modules/eg-chessboard/dist/stockfish.wasm'),
-          to: path.resolve(__dirname, 'build/chessboard/stockfish.wasm')
+          to: path.resolve(__dirname, 'assets/js/stockfish.wasm')
         }
       ]
     })
