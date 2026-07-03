@@ -76,7 +76,7 @@ class Cours {
 				'read_private_posts' => 'read_private_cours',
 			],
 			'map_meta_cap'        => true,
-			'show_in_rest'        => false,
+			'show_in_rest'        => true,
 		];
 
 		register_post_type( 'roi_cours', $args );

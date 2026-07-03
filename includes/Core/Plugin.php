@@ -47,6 +47,8 @@ class Plugin {
 			$games_rest->init();
 			$stockfish_rest = new \ROI\REST\Stockfish();
 			$stockfish_rest->init();
+			$exercices_rest = new \ROI\REST\Exercices();
+			$exercices_rest->init();
 		} );
 
 		// Chess Engine Integration
@@ -57,29 +59,11 @@ class Plugin {
 			);
 		}, 5 );
 
-		// Lesson Completion
-		$lesson_completion = new \ROI\Services\LessonCompletion();
-		$lesson_completion->init();
-
-		// Single Course Handler
-		$course_handler = new \ROI\Services\CourseHandler();
-		$course_handler->init();
-
-		// Single Exercice Handler
-		$exercice_handler = new \ROI\Services\ExerciceHandler();
-		$exercice_handler->init();
-
-		// Shortcodes
-		$shortcodes = new \ROI\Shortcodes\Shortcodes();
-		$shortcodes->init();
-
 		// Admin pages & functionalities
 		if ( is_admin() ) {
 			$admin_menu = new \ROI\Admin\Menu();
 			$admin_menu->init();
-			( new \ROI\Metaboxes\Lecon() )->init();
-			( new \ROI\Metaboxes\Exercice() )->init();
-			( new \ROI\Metaboxes\Cours() )->init();
+			new \ROI\Metaboxes\Exercice();
 			( new \ROI\Metaboxes\Partie() )->init();
 			$backup = new \ROI\Admin\Backup();
 			$backup->init();

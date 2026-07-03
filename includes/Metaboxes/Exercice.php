@@ -1,6 +1,6 @@
 <?php
 /**
- * Custom Meta Box for Exercice CPT.
+ * Metabox for Exercice CPT.
  *
  * @package ROI
  */
@@ -9,35 +9,31 @@ declare(strict_types=1);
 
 namespace ROI\Metaboxes;
 
-use WP_Post;
-
 /**
  * Class Exercice
- * Handles registration and rendering of the metabox for roi_exercice CPT.
+ * Handles registration and saving of exercise-specific metadata.
  */
 class Exercice {
 
 	/**
-	 * Initialize actions.
-	 *
-	 * @return void
+	 * Constructor.
+	 * Registers actions.
 	 */
-	public function init(): void {
-		add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ] );
-		add_action( 'save_post_roi_exercice', [ $this, 'save_meta' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
+	public function __construct() {
+		add_action( 'add_meta_boxes', [ $this, 'ajouter_metabox' ] );
+		add_action( 'save_post', [ $this, 'sauvegarder_metabox' ] );
 	}
 
 	/**
-	 * Adds the meta boxes for the Exercice CPT.
+	 * Adds the config metabox.
 	 *
 	 * @return void
 	 */
-	public function add_meta_boxes(): void {
+	public function ajouter_metabox(): void {
 		add_meta_box(
-			'roi_exercice_details_metabox',
-			__( 'Détails de l\'exercice', 'roi' ),
-			[ $this, 'render_details_metabox' ],
+			'roi_exercice_config_box',
+			'Configuration de l\'Exercice (Headless)',
+			[ $this, 'afficher_metabox' ],
 			'roi_exercice',
 			'normal',
 			'high'
@@ -45,157 +41,86 @@ class Exercice {
 	}
 
 	/**
-	 * Renders the meta box for exercice details.
+	 * Renders the metabox content.
 	 *
-	 * @param WP_Post $post The post object.
+	 * @param \WP_Post $post The post object.
 	 * @return void
 	 */
-	public function render_details_metabox( WP_Post $post ): void {
-		wp_nonce_field( 'roi_save_exercice_meta', 'roi_exercice_metabox_nonce' );
+	public function afficher_metabox( $post ): void {
+		wp_nonce_field( 'roi_sauvegarder_exercice', 'roi_exercice_nonce' );
 
-		$difficulty    = get_post_meta( $post->ID, '_roi_difficulty', true );
-		$question_type = get_post_meta( $post->ID, '_roi_question_type', true );
-		$solution      = get_post_meta( $post->ID, '_roi_solution', true );
-		$answers       = get_post_meta( $post->ID, '_roi_answers', true );
+		$type   = get_post_meta( $post->ID, '_roi_exercice_type', true );
+		$config = get_post_meta( $post->ID, '_roi_exercice_config', true );
+
+		if ( empty( $config ) ) {
+			$config = '{"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "pgn": ""}';
+		}
 		?>
-		<table class="form-table">
-			<tr>
-				<th><label for="roi_difficulty"><?php _e( 'Difficulté', 'roi' ); ?></label></th>
-				<td>
-					<select name="roi_difficulty" id="roi_difficulty">
-						<option value="" <?php selected( $difficulty, '' ); ?>><?php _e( '— Sélectionner une difficulté —', 'roi' ); ?></option>
-						<option value="1" <?php selected( $difficulty, 1 ); ?>><?php _e( '1 - Très facile', 'roi' ); ?></option>
-						<option value="2" <?php selected( $difficulty, 2 ); ?>><?php _e( '2 - Facile', 'roi' ); ?></option>
-						<option value="3" <?php selected( $difficulty, 3 ); ?>><?php _e( '3 - Modéré', 'roi' ); ?></option>
-						<option value="4" <?php selected( $difficulty, 4 ); ?>><?php _e( '4 - Difficile', 'roi' ); ?></option>
-						<option value="5" <?php selected( $difficulty, 5 ); ?>><?php _e( '5 - Très Difficile', 'roi' ); ?></option>
-						<option value="6" <?php selected( $difficulty, 6 ); ?>><?php _e( '6 - Expert', 'roi' ); ?></option>
-					</select>
-				</td>
-			</tr>
-			<tr>
-				<th><?php _e( 'Type de question', 'roi' ); ?></th>
-				<td>
-					<label><input type="radio" name="roi_question_type" value="true_false" <?php checked( $question_type, 'true_false' ); ?>> <?php _e( 'Vrai/Faux', 'roi' ); ?></label><br>
-					<label><input type="radio" name="roi_question_type" value="qcm_single" <?php checked( $question_type, 'qcm_single' ); ?>> <?php _e( 'QCM - Choix unique', 'roi' ); ?></label><br>
-					<label><input type="radio" name="roi_question_type" value="qcm_multiple" <?php checked( $question_type, 'qcm_multiple' ); ?>> <?php _e( 'QCM - Choix multiples', 'roi' ); ?></label>
-				</td>
-			</tr>
-			<tr>
-				<th><?php _e( 'Réponses possibles', 'roi' ); ?></th>
-				<td>
-					<p class="description"><?php _e( 'Pour chaque réponse, entrez le texte (les shortcodes sont autorisés) et cochez la case si c\'est une réponse correcte.', 'roi' ); ?></p>
-					<?php
-					$answers = is_array( $answers ) ? $answers : array_fill( 0, 5, [
-						'text'    => '',
-						'correct' => false,
-					] );
-					for ( $i = 0; $i < 5; $i++ ) :
-						$answer_text = $answers[$i]['text'] ?? '';
-						$is_correct  = (bool) ( $answers[$i]['correct'] ?? false );
-						?>
-					<div style="margin-bottom: 15px;">
-						<label for="roi_answer_text_<?php echo esc_attr( (string) $i ); ?>"><?php printf( __( 'Réponse %d', 'roi' ), $i + 1 ); ?></label>
-						<input type="text" name="roi_answers[<?php echo esc_attr( (string) $i ); ?>][text]" id="roi_answer_text_<?php echo esc_attr( (string) $i ); ?>" value="<?php echo esc_attr( $answer_text ); ?>" style="width: 80%;" />
-						<label><input type="checkbox" name="roi_answers[<?php echo esc_attr( (string) $i ); ?>][correct]" value="1" <?php checked( $is_correct ); ?> /> <?php _e( 'Correcte', 'roi' ); ?></label>
-					</div>
-					<?php endfor; ?>
-				</td>
-			</tr>
-			<tr>
-				<th><label for="roi_exercice_solution"><?php _e( 'Solution', 'roi' ); ?></label></th>
-				<td>
-					<?php
-					wp_editor(
-						(string) $solution,
-						'roi_exercice_solution',
-						[
-							'textarea_name' => 'roi_exercice_solution',
-							'media_buttons' => false,
-							'textarea_rows' => 10,
-						]
-					);
-					?>
-					<p class="description"><?php _e( 'La solution sera affichée après que l\'utilisateur a répondu à l\'exercice.', 'roi' ); ?></p>
-				</td>
-			</tr>
-		</table>
+		<p>
+			<label for="roi_exercice_type"><strong>Type d'exercice :</strong></label><br>
+			<select name="roi_exercice_type" id="roi_exercice_type">
+				<option value="1" <?php selected( $type, '1' ); ?>>1 - 100 Commandements</option>
+				<option value="2" <?php selected( $type, '2' ); ?>>2 - Pop'Echecs</option>
+				<option value="3" <?php selected( $type, '3' ); ?>>3 - ABCDaire Tactique</option>
+				<option value="4" <?php selected( $type, '4' ); ?>>4 - La Partie dont tu es le Héros</option>
+				<option value="5" <?php selected( $type, '5' ); ?>>5 - Posi'Plan</option>
+				<option value="6" <?php selected( $type, '6' ); ?>>6 - Associ'Plan</option>
+				<option value="7" <?php selected( $type, '7' ); ?>>7 - Marche du Héros</option>
+				<option value="8" <?php selected( $type, '8' ); ?>>8 - Vision'checs</option>
+				<option value="9" <?php selected( $type, '9' ); ?>>9 - Parcours</option>
+				<option value="10" <?php selected( $type, '10' ); ?>>10 - Echec'éval</option>
+				<option value="11" <?php selected( $type, '11' ); ?>>11 - Class'échecs</option>
+				<option value="12" <?php selected( $type, '12' ); ?>>12 - Qui-suis-je ?</option>
+				<option value="13" <?php selected( $type, '13' ); ?>>13 - Ouvre'boite / Cap / Jugement</option>
+			</select>
+		</p>
+		<p>
+			<label for="roi_exercice_config"><strong>Configuration JSON (Données brutes de l'exercice) :</strong></label><br>
+			<textarea name="roi_exercice_config" id="roi_exercice_config" rows="12" style="width:100%; font-family: monospace; background:#f9f9f9;"><?php echo esc_textarea( $config ); ?></textarea>
+			<br><small><em>Note : Ce champ est actuellement manuel pour les tests, mais il sera alimenté automatiquement par le bloc Gutenberg React par la suite.</em></small>
+		</p>
 		<?php
 	}
 
 	/**
-	 * Save meta box content for Exercice CPT.
+	 * Saves metabox fields.
 	 *
-	 * @param int $post_id Post ID.
+	 * @param int $post_id The post ID.
 	 * @return void
 	 */
-	public function save_meta( int $post_id ): void {
-		if ( ! isset( $_POST['roi_exercice_metabox_nonce'] ) || ! wp_verify_nonce( $_POST['roi_exercice_metabox_nonce'], 'roi_save_exercice_meta' ) ) {
+	public function sauvegarder_metabox( int $post_id ): void {
+		// Nonce check
+		if ( ! isset( $_POST['roi_exercice_nonce'] ) || ! wp_verify_nonce( $_POST['roi_exercice_nonce'], 'roi_sauvegarder_exercice' ) ) {
 			return;
 		}
+
+		// Autosave check
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			return;
 		}
+
+		// Permissions check
 		if ( ! current_user_can( 'edit_post', $post_id ) ) {
 			return;
 		}
 
-		if ( empty( $_POST['roi_difficulty'] ) ) {
-			set_transient( 'roi_error_message', __( 'La difficulté est un champ obligatoire. L\'exercice n\'a pas été publié.', 'roi' ), 10 );
-
-			remove_action( 'save_post_roi_exercice', [ $this, 'save_meta' ] );
-			wp_update_post( [
-				'ID'          => $post_id,
-				'post_status' => 'draft',
-			] );
-			add_action( 'save_post_roi_exercice', [ $this, 'save_meta' ] );
-
-			return;
+		// Save exercise type (integer value)
+		if ( isset( $_POST['roi_exercice_type'] ) ) {
+			update_post_meta( $post_id, '_roi_exercice_type', (int) $_POST['roi_exercice_type'] );
 		}
 
-		if ( isset( $_POST['roi_difficulty'] ) && '' !== $_POST['roi_difficulty'] ) {
-			update_post_meta( $post_id, '_roi_difficulty', (int) $_POST['roi_difficulty'] );
-		} else {
-			delete_post_meta( $post_id, '_roi_difficulty' );
-		}
-		if ( isset( $_POST['roi_question_type'] ) ) {
-			update_post_meta( $post_id, '_roi_question_type', sanitize_key( (string) $_POST['roi_question_type'] ) );
-		}
-		if ( isset( $_POST['roi_exercice_solution'] ) ) {
-			update_post_meta( $post_id, '_roi_solution', wp_kses_post( (string) $_POST['roi_exercice_solution'] ) );
-		}
-		if ( isset( $_POST['roi_answers'] ) && is_array( $_POST['roi_answers'] ) ) {
-			$sanitized_answers = [];
-			foreach ( $_POST['roi_answers'] as $answer ) {
-				if ( ! empty( $answer['text'] ) ) {
-					$sanitized_answers[] = [
-						'text'    => $answer['text'],
-						'correct' => isset( $answer['correct'] ),
-					];
-				}
+		// Save raw JSON config
+		if ( isset( $_POST['roi_exercice_config'] ) ) {
+			$json_raw = wp_unslash( $_POST['roi_exercice_config'] );
+			
+			// Validate JSON structure
+			json_decode( $json_raw );
+			if ( json_last_error() === JSON_ERROR_NONE ) {
+				update_post_meta( $post_id, '_roi_exercice_config', $json_raw );
+			} else {
+				// Save anyway but avoid corruption by preserving raw layout
+				update_post_meta( $post_id, '_roi_exercice_config', $json_raw );
 			}
-			update_post_meta( $post_id, '_roi_answers', $sanitized_answers );
-		}
-	}
-
-	/**
-	 * Enqueues admin scripts for the exercice screen.
-	 *
-	 * @param string $hook The current admin page hook.
-	 * @return void
-	 */
-	public function enqueue_admin_scripts( string $hook ): void {
-		global $post;
-		$plugin_url = plugin_dir_url( dirname( __DIR__, 2 ) . '/roi.php' );
-
-		if ( ( 'post.php' === $hook || 'post-new.php' === $hook ) && isset( $post->post_type ) && 'roi_exercice' === $post->post_type ) {
-			wp_enqueue_editor();
-			wp_enqueue_style(
-				'roi-admin-styles',
-				$plugin_url . 'assets/css/admin-style.css',
-				[],
-				ROI_VERSION
-			);
 		}
 	}
 }
