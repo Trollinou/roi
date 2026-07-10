@@ -49,12 +49,18 @@ class Exercice {
 	public function afficher_metabox( $post ): void {
 		wp_nonce_field( 'roi_sauvegarder_exercice', 'roi_exercice_nonce' );
 
-		$type   = get_post_meta( $post->ID, '_roi_exercice_type', true );
-		$config = get_post_meta( $post->ID, '_roi_exercice_config', true );
+		$type     = get_post_meta( $post->ID, '_roi_exercice_type', true );
+		$niveau   = get_post_meta( $post->ID, '_roi_exercice_niveau', true );
+		$chapitre = get_post_meta( $post->ID, '_roi_exercice_chapitre', true );
+		$couleur  = get_post_meta( $post->ID, '_roi_exercice_couleur', true );
+		$ordre    = get_post_meta( $post->ID, '_roi_exercice_ordre', true );
+		$config   = get_post_meta( $post->ID, '_roi_exercice_config', true );
 
 		if ( empty( $config ) ) {
 			$config = '{"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "pgn": ""}';
 		}
+
+		$ordre_val = ( '' === $ordre ) ? 0 : (int) $ordre;
 		?>
 		<p>
 			<label for="roi_exercice_type"><strong>Type d'exercice :</strong></label><br>
@@ -71,8 +77,37 @@ class Exercice {
 				<option value="10" <?php selected( $type, '10' ); ?>>10 - Echec'éval</option>
 				<option value="11" <?php selected( $type, '11' ); ?>>11 - Class'échecs</option>
 				<option value="12" <?php selected( $type, '12' ); ?>>12 - Qui-suis-je ?</option>
-				<option value="13" <?php selected( $type, '13' ); ?>>13 - Ouvre'boite / Cap / Jugement</option>
+				<option value="13" <?php selected( $type, '13' ); ?>>13 - Ouvre'boite</option>
+				<option value="14" <?php selected( $type, '14' ); ?>>14 - Cap ou pas cap ?</option>
+				<option value="15" <?php selected( $type, '15' ); ?>>15 - Jugement final</option>
+				<option value="16" <?php selected( $type, '16' ); ?>>16 - Destination finale</option>
 			</select>
+		</p>
+		<p>
+			<label for="roi_exercice_niveau"><strong>Niveau de difficulté :</strong></label><br>
+			<select name="roi_exercice_niveau" id="roi_exercice_niveau">
+				<?php for ( $i = 1; $i <= 6; $i++ ) : ?>
+					<option value="<?php echo $i; ?>" <?php selected( $niveau, (string) $i ); ?>><?php echo $i; ?></option>
+				<?php endfor; ?>
+			</select>
+		</p>
+		<p>
+			<label for="roi_exercice_chapitre"><strong>Chapitre :</strong></label><br>
+			<input type="text" name="roi_exercice_chapitre" id="roi_exercice_chapitre" value="<?php echo esc_attr( $chapitre ); ?>" style="width: 100%; max-width: 400px;">
+		</p>
+		<p>
+			<label for="roi_exercice_couleur"><strong>Couleur du chapitre :</strong></label><br>
+			<select name="roi_exercice_couleur" id="roi_exercice_couleur">
+				<option value="primary" <?php selected( $couleur, "primary" ); ?>>Bleu (primary)</option>
+				<option value="warning" <?php selected( $couleur, "warning" ); ?>>Orange (warning)</option>
+				<option value="danger" <?php selected( $couleur, "danger" ); ?>>Rouge (danger)</option>
+				<option value="success" <?php selected( $couleur, "success" ); ?>>Vert (success)</option>
+				<option value="tertiary" <?php selected( $couleur, "tertiary" ); ?>>Violet (tertiary)</option>
+			</select>
+		</p>
+		<p>
+			<label for="roi_exercice_ordre"><strong>Ordre d'affichage dans le chapitre :</strong></label><br>
+			<input type="number" name="roi_exercice_ordre" id="roi_exercice_ordre" value="<?php echo (int) $ordre_val; ?>" min="0" step="1">
 		</p>
 		<p>
 			<label for="roi_exercice_config"><strong>Configuration JSON (Données brutes de l'exercice) :</strong></label><br>
@@ -107,6 +142,33 @@ class Exercice {
 		// Save exercise type (integer value)
 		if ( isset( $_POST['roi_exercice_type'] ) ) {
 			update_post_meta( $post_id, '_roi_exercice_type', (int) $_POST['roi_exercice_type'] );
+		}
+
+		// Save exercise level (integer value between 1 and 6)
+		if ( isset( $_POST['roi_exercice_niveau'] ) ) {
+			$niveau = (int) $_POST['roi_exercice_niveau'];
+			if ( $niveau >= 1 && $niveau <= 6 ) {
+				update_post_meta( $post_id, '_roi_exercice_niveau', $niveau );
+			}
+		}
+
+		// Save exercise chapter (string)
+		if ( isset( $_POST['roi_exercice_chapitre'] ) ) {
+			update_post_meta( $post_id, '_roi_exercice_chapitre', sanitize_text_field( wp_unslash( $_POST['roi_exercice_chapitre'] ) ) );
+		}
+
+		// Save exercise color (string)
+		if ( isset( $_POST['roi_exercice_couleur'] ) ) {
+			$couleur        = sanitize_text_field( wp_unslash( $_POST['roi_exercice_couleur'] ) );
+			$allowed_colors = [ 'primary', 'warning', 'danger', 'success', 'tertiary' ];
+			if ( in_array( $couleur, $allowed_colors, true ) ) {
+				update_post_meta( $post_id, '_roi_exercice_couleur', $couleur );
+			}
+		}
+
+		// Save exercise order (integer value)
+		if ( isset( $_POST['roi_exercice_ordre'] ) ) {
+			update_post_meta( $post_id, '_roi_exercice_ordre', intval( $_POST['roi_exercice_ordre'] ) );
 		}
 
 		// Save raw JSON config

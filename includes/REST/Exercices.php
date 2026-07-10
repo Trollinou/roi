@@ -88,21 +88,30 @@ class Exercices {
 			);
 		}
 
-		$type_meta   = get_post_meta( $post->ID, '_roi_exercice_type', true );
-		$config_meta = get_post_meta( $post->ID, '_roi_exercice_config', true );
+		$type_meta     = get_post_meta( $post->ID, '_roi_exercice_type', true );
+		$niveau_meta   = get_post_meta( $post->ID, '_roi_exercice_niveau', true );
+		$chapitre_meta = get_post_meta( $post->ID, '_roi_exercice_chapitre', true );
+		$couleur_meta  = get_post_meta( $post->ID, '_roi_exercice_couleur', true );
+		$config_meta   = get_post_meta( $post->ID, '_roi_exercice_config', true );
 
-		$type   = is_numeric( $type_meta ) ? (int) $type_meta : 0;
-		$config = json_decode( $config_meta ?: '{}' );
+		$type     = is_numeric( $type_meta ) ? (int) $type_meta : 0;
+		$niveau   = is_numeric( $niveau_meta ) ? (int) $niveau_meta : 1;
+		$chapitre = (string) $chapitre_meta;
+		$couleur  = (string) $couleur_meta;
+		$config   = json_decode( $config_meta ?: '{}' );
 
 		if ( json_last_error() !== JSON_ERROR_NONE ) {
 			$config = null;
 		}
 
 		$data = [
-			'id'     => $post->ID,
-			'title'  => $post->post_title,
-			'type'   => $type,
-			'config' => $config,
+			'id'       => $post->ID,
+			'title'    => $post->post_title,
+			'type'     => $type,
+			'niveau'   => $niveau,
+			'chapitre' => $chapitre,
+			'couleur'  => $couleur,
+			'config'   => $config,
 		];
 
 		return rest_ensure_response( $data );
@@ -119,15 +128,25 @@ class Exercices {
 			'post_type'      => 'roi_exercice',
 			'post_status'    => 'publish',
 			'posts_per_page' => -1,
+			'meta_key'       => '_roi_exercice_ordre',
+			'orderby'        => 'meta_value_num',
+			'order'          => 'ASC',
 		] );
 
 		$data = [];
 		foreach ( $posts as $post ) {
-			$type_meta = get_post_meta( $post->ID, '_roi_exercice_type', true );
-			$data[]    = [
-				'id'    => $post->ID,
-				'title' => $post->post_title,
-				'type'  => is_numeric( $type_meta ) ? (int) $type_meta : 0,
+			$type_meta     = get_post_meta( $post->ID, '_roi_exercice_type', true );
+			$niveau_meta   = get_post_meta( $post->ID, '_roi_exercice_niveau', true );
+			$chapitre_meta = get_post_meta( $post->ID, '_roi_exercice_chapitre', true );
+			$couleur_meta  = get_post_meta( $post->ID, '_roi_exercice_couleur', true );
+
+			$data[] = [
+				'id'       => $post->ID,
+				'titre'    => $post->post_title,
+				'type'     => is_numeric( $type_meta ) ? (int) $type_meta : 0,
+				'niveau'   => is_numeric( $niveau_meta ) ? (int) $niveau_meta : 1,
+				'chapitre' => (string) $chapitre_meta,
+				'couleur'  => (string) $couleur_meta,
 			];
 		}
 
