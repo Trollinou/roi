@@ -106,7 +106,7 @@ class Exercices {
 
 		$data = [
 			'id'       => $post->ID,
-			'title'    => $post->post_title,
+			'titre'    => $post->post_title,
 			'type'     => $type,
 			'niveau'   => $niveau,
 			'chapitre' => $chapitre,
