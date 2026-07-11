@@ -49,6 +49,8 @@ class Plugin {
 			$stockfish_rest->init();
 			$exercices_rest = new \ROI\REST\Exercices();
 			$exercices_rest->init();
+			$progression_rest = new \ROI\REST\Progression();
+			$progression_rest->init();
 		} );
 
 		// Chess Engine Integration

@@ -54,3 +54,25 @@ Chaque fiche de **Partie** contient :
 
 Ces données sont transmises de manière sécurisée via l'API REST de sauvegarde (`POST /wp-json/roi/v1/games`). En cas de déconnexion réseau, la PWA stocke les parties localement et les synchronise automatiquement dès le retour en ligne.
 
+## Suivi des progressions (PWA)
+
+### 1. Enregistrement d'une réussite (Élève)
+* **Route :** `POST /wp-json/roi/v1/progression`
+* **Paramètres JSON :** `{"exercice_id": 123}`
+* **Sécurité :** Authentification requise. L'utilisateur connecté doit posséder le rôle `adherent`.
+* **Fonctionnement :** La réussite est ajoutée aux métadonnées de l'utilisateur sous la clé `_roi_exercice_reussi` (avec la date de validation).
+
+### 2. Consultation des progressions (Entraîneur)
+* **Route :** `GET /wp-json/roi/v1/progression/groupe`
+* **Sécurité :** Authentification requise. L'utilisateur connecté doit posséder le rôle `entraineur` ou `administrator`.
+* **Réponse JSON :** Retourne un tableau d'élèves (`adherent`) contenant leur ID, nom, prénom, et un tableau des ID d'exercices qu'ils ont validés :
+  ```json
+  [
+    {
+      "id": 42,
+      "nom": "Dupont",
+      "prenom": "Jean",
+      "exercices": [101, 105, 112]
+    }
+  ]
+  ```

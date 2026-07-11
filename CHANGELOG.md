@@ -7,6 +7,7 @@
 *   **Ordonnancement :** Ajout d'un champ numérique pour l'ordre d'affichage dans le chapitre.
 *   **Triage dans l'API REST :** Les exercices retournés par l'API REST globale de listing sont triés selon l'ordre d'affichage et la réponse est allégée (sans la configuration JSON lourde).
 *   **API REST Exercice individuel :** Modification de la clé de retour `title` en `titre` pour la faire correspondre à celle de l'API de liste (`obtenir_liste_exercices`).
+*   **Suivi des progressions :** Création du contrôleur dédié `includes/REST/Progression.php` gérant la route `POST /wp-json/roi/v1/progression` (enregistrement d'une réussite par l'adhérent connecté sous la clé `_roi_exercice_reussi`) et la route `GET /wp-json/roi/v1/progression/groupe` (consultation groupée des réussites d'exercices réservée aux entraîneurs/administrateurs).
 
 ## 1.2.0 - 2026-06-15
 
