@@ -474,6 +474,18 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {} }) {
           background: #2b45be;
         }
 
+        /* Réduction de la taille de l'échiquier sur les écrans de faible hauteur */
+        @media (max-height: 750px) {
+          .fen-editor-board-col {
+            flex: 0 0 320px;
+            width: 320px;
+          }
+          .fen-editor-main-board {
+            width: 320px;
+            height: 320px;
+          }
+        }
+
         @media (max-width: 768px) {
           .fen-editor-container {
             flex-direction: column;
