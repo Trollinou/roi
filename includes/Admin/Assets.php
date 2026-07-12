@@ -44,14 +44,14 @@ class Assets {
 		// Enqueue eg-chessboard styles & script
 		wp_enqueue_style(
 			'roi-chessboard-style',
-			$chess_url . 'style.css',
+			$chess_url . 'eg-chessboard.css',
 			[],
 			ROI_VERSION
 		);
 
 		wp_enqueue_script(
-			'roi-chessboard-view',
-			$chess_url . 'chessboard-view.js',
+			'roi-admin-fen-editor',
+			$chess_url . 'admin-fen-editor.js',
 			[ 'wp-element' ],
 			ROI_VERSION,
 			true
@@ -61,7 +61,7 @@ class Assets {
 		wp_enqueue_script(
 			'roi-admin-exercice-builder',
 			$plugin_url . 'assets/js/admin-exercice-builder.js',
-			[ 'roi-chessboard-view' ],
+			[ 'roi-admin-fen-editor' ],
 			ROI_VERSION,
 			true
 		);

@@ -1,9 +1,7 @@
 import { BoardCore } from 'eg-chessboard';
 import { ChessClock } from './classes/ChessClock';
 import { StockfishManager } from './classes/stockfishManager';
-import RoiFenEditor from '../../components/FenEditor';
 
-window.RoiFenEditor = RoiFenEditor;
 window.EgBoardCore = BoardCore;
 
 document.addEventListener('DOMContentLoaded', async () => {

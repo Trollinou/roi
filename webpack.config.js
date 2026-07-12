@@ -6,7 +6,8 @@ module.exports = {
   ...defaultConfig,
   entry: {
     'chessboard': path.resolve(__dirname, 'src/blocks/chessboard/index.jsx'),
-    'chessboard-view': path.resolve(__dirname, 'src/blocks/chessboard/view.jsx')
+    'chessboard-view': path.resolve(__dirname, 'src/blocks/chessboard/view.jsx'),
+    'admin-fen-editor': path.resolve(__dirname, 'src/admin-fen-editor.js')
   },
   output: {
     ...defaultConfig.output,
@@ -32,6 +33,10 @@ module.exports = {
         {
           from: path.resolve(__dirname, 'src/blocks/chessboard/block.json'),
           to: path.resolve(__dirname, 'build/chessboard/block.json')
+        },
+        {
+          from: path.resolve(__dirname, 'node_modules/eg-chessboard/dist/eg-chessboard.css'),
+          to: path.resolve(__dirname, 'build/chessboard/eg-chessboard.css')
         },
         {
           from: path.resolve(__dirname, 'node_modules/eg-chessboard/dist/stockfish.js'),
