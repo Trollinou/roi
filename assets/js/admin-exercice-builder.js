@@ -1,5 +1,5 @@
-(function() {
-    document.addEventListener("DOMContentLoaded", function() {
+(function () {
+    document.addEventListener("DOMContentLoaded", function () {
         var typeSelect = document.getElementById("roi_exercice_type");
         var container = document.querySelector(".roi-exercice-visual-builder-container");
         var textarea = document.getElementById("roi_config_json");
@@ -21,9 +21,9 @@
         var reactRoot = document.getElementById("roi_fen_react_root");
 
         if (openEditorBtn && modalOverlay && modalCloseBtn && reactRoot) {
-            openEditorBtn.addEventListener("click", function() {
+            openEditorBtn.addEventListener("click", function () {
                 var initialFen = fenInput.value.trim() || "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-                
+
                 // Afficher la modale
                 modalOverlay.style.display = "flex";
 
@@ -32,21 +32,21 @@
                     var editorComponent = window.RoiFenEditor.default || window.RoiFenEditor;
                     var element = window.wp.element.createElement(editorComponent, {
                         initialFen: initialFen,
-                        onSave: function(nouvelleFen, nouvelleOrientation) {
+                        onSave: function (nouvelleFen, nouvelleOrientation) {
                             // Mettre à jour la valeur de l'input FEN
                             fenInput.value = nouvelleFen;
-                            
+
                             // Mettre à jour l'orientation si fournie
                             if (nouvelleOrientation && colorInput) {
                                 colorInput.value = nouvelleOrientation;
                             }
-                            
+
                             // Démonter proprement le composant React
                             window.wp.element.unmountComponentAtNode(reactRoot);
-                            
+
                             // Cacher la modale
                             modalOverlay.style.display = "none";
-                            
+
                             // Régénérer le plateau de travail
                             if (generateBtn) {
                                 generateBtn.click();
@@ -58,7 +58,7 @@
             });
 
             // Fermer au clic sur la croix
-            modalCloseBtn.addEventListener("click", function() {
+            modalCloseBtn.addEventListener("click", function () {
                 if (window.wp && window.wp.element) {
                     window.wp.element.unmountComponentAtNode(reactRoot);
                 }
@@ -66,7 +66,7 @@
             });
 
             // Fermer au clic à l'extérieur
-            modalOverlay.addEventListener("click", function(e) {
+            modalOverlay.addEventListener("click", function (e) {
                 if (e.target === modalOverlay) {
                     if (window.wp && window.wp.element) {
                         window.wp.element.unmountComponentAtNode(reactRoot);
@@ -76,17 +76,503 @@
             });
         }
 
-        // Tâche 1 : Initialisation
-        // Afficher le constructeur uniquement pour le type 3 (ABCDaire Tactique)
+        // Tâche 1 : Initialisation Type 1 & Type 3
+        var builderType1 = document.getElementById("roi_builder_type_1");
+        var t1Question = document.getElementById("roi_t1_question");
+        var t1Reponses = [
+            document.getElementById("roi_t1_reponse_0"),
+            document.getElementById("roi_t1_reponse_1"),
+            document.getElementById("roi_t1_reponse_2")
+        ];
+        var t1CorrectRadios = document.getElementsByName("roi_t1_correct");
+
+        // Références DOM pour le Type 2 (Pop'Echecs)
+        var builderType2 = document.getElementById("roi_builder_type_2");
+        var t2Consigne = document.getElementById("roi_t2_consigne");
+        var t2FenFinale = document.getElementById("roi_t2_fen_finale");
+        var t2GenerateBtn = document.getElementById("roi_t2_generate_btn");
+        var t2ChessboardContainer = document.getElementById("roi_t2_chessboard_container");
+        var t2Feedback = document.getElementById("roi_t2_feedback");
+        var t2CancelBtn = document.getElementById("roi_t2_cancel_btn");
+        var t2EditorBtn = document.getElementById("btn_open_fen_editor_t2");
+
         function toggleVisibility() {
+            // Type 3 (ABCDaire Tactique)
             if (typeSelect.value === "3") {
                 container.style.display = "";
             } else {
                 container.style.display = "none";
             }
+
+            // Type 1 (100 Commandements)
+            if (builderType1) {
+                if (typeSelect.value === "1") {
+                    builderType1.style.display = "";
+                } else {
+                    builderType1.style.display = "none";
+                }
+            }
+
+            // Type 2 (Pop'Echecs)
+            if (builderType2) {
+                if (typeSelect.value === "2") {
+                    builderType2.style.display = "";
+                } else {
+                    builderType2.style.display = "none";
+                }
+            }
         }
         typeSelect.addEventListener("change", toggleVisibility);
         toggleVisibility();
+
+        // Initialisation des données Type 1 si le type est 1
+        if (typeSelect.value === "1" && textarea.value.trim() !== "") {
+            try {
+                var parsedT1 = JSON.parse(textarea.value);
+                if (parsedT1 && typeof parsedT1 === "object") {
+                    if (t1Question && typeof parsedT1.question === "string") {
+                        t1Question.value = parsedT1.question;
+                    }
+                    if (parsedT1.reponses && Array.isArray(parsedT1.reponses)) {
+                        for (var r = 0; r < 3; r++) {
+                            if (t1Reponses[r] && typeof parsedT1.reponses[r] !== "undefined") {
+                                t1Reponses[r].value = parsedT1.reponses[r];
+                            }
+                        }
+                    }
+                    if (typeof parsedT1.bonne_reponse !== "undefined" && parsedT1.bonne_reponse !== null) {
+                        var brIndex = parseInt(parsedT1.bonne_reponse, 10);
+                        for (var rb = 0; rb < t1CorrectRadios.length; rb++) {
+                            if (parseInt(t1CorrectRadios[rb].value, 10) === brIndex) {
+                                t1CorrectRadios[rb].checked = true;
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.log("Erreur parsing JSON Type 1 initial :", e);
+            }
+        }
+
+        // Logic de mise à jour pour Type 1
+        function updateT1Config() {
+            var reponsesArr = [];
+            for (var r = 0; r < 3; r++) {
+                reponsesArr.push(t1Reponses[r] ? t1Reponses[r].value : "");
+            }
+
+            var bonneReponseVal = null;
+            for (var rb = 0; rb < t1CorrectRadios.length; rb++) {
+                if (t1CorrectRadios[rb].checked) {
+                    bonneReponseVal = parseInt(t1CorrectRadios[rb].value, 10);
+                    break;
+                }
+            }
+
+            var t1Config = {
+                question: t1Question ? t1Question.value : "",
+                reponses: reponsesArr,
+                bonne_reponse: bonneReponseVal
+            };
+
+            textarea.value = JSON.stringify(t1Config, null, 4);
+        }
+
+        if (builderType1) {
+            if (t1Question) {
+                t1Question.addEventListener("input", updateT1Config);
+            }
+            t1Reponses.forEach(function (inputField) {
+                if (inputField) {
+                    inputField.addEventListener("input", updateT1Config);
+                }
+            });
+            for (var rb = 0; rb < t1CorrectRadios.length; rb++) {
+                t1CorrectRadios[rb].addEventListener("change", updateT1Config);
+            }
+        }
+
+        // ============================================================
+        // Type 2 — Pop'Echecs : Logique de sélection de pièce
+        // ============================================================
+
+        // Traduction des types de pièces (notation FEN -> nom français)
+        var pieceNames = {
+            p: { white: "Pion Blanc", black: "Pion Noir" },
+            r: { white: "Tour Blanche", black: "Tour Noire" },
+            n: { white: "Cavalier Blanc", black: "Cavalier Noir" },
+            b: { white: "Fou Blanc", black: "Fou Noir" },
+            q: { white: "Dame Blanche", black: "Dame Noire" },
+            k: { white: "Roi Blanc", black: "Roi Noir" }
+        };
+
+        /**
+         * Retourne le nom lisible d'une pièce (ex: "Cavalier Blanc").
+         * @param {string} pieceType - Type FEN (p, r, n, b, q, k).
+         * @param {string} pieceColor - "white" ou "black".
+         * @returns {string}
+         */
+        function getPieceName(pieceType, pieceColor) {
+            var entry = pieceNames[pieceType];
+            if (entry && entry[pieceColor]) {
+                return entry[pieceColor];
+            }
+            return pieceType.toUpperCase() + " (" + pieceColor + ")";
+        }
+
+        // État interne du builder Type 2
+        var t2BoardAPI = null;
+        var t2BoardEl = null;
+        var t2SelectedData = null; // { piece_type, piece_color, case_cible }
+
+        /**
+         * Met à jour le JSON de configuration pour le Type 2.
+         * Construit l'objet : { consigne, fen_depart, fen_finale, piece_type, piece_color, case_cible }
+         */
+        function updateT2Config() {
+            if (!t2Consigne || !t2FenFinale) {
+                return;
+            }
+
+            var t2Config = {
+                consigne: t2Consigne.value,
+                fen_finale: t2FenFinale.value.trim()
+            };
+
+            // Si une pièce a été sélectionnée, ajouter les données de la pièce
+            if (t2SelectedData) {
+                t2Config.fen_depart = t2SelectedData.fen_depart;
+                t2Config.piece_type = t2SelectedData.piece_type;
+                t2Config.piece_color = t2SelectedData.piece_color;
+                t2Config.case_cible = t2SelectedData.case_cible;
+            }
+
+            textarea.value = JSON.stringify(t2Config, null, 4);
+        }
+
+        /**
+         * Gestion du clic sur une case de l'échiquier Type 2.
+         * Retire visuellement la pièce, affiche la case vide et dessine un cercle vert.
+         */
+        function handleT2SquareClick(square) {
+            if (!t2BoardAPI) {
+                return;
+            }
+
+            var fenFinale = t2FenFinale.value.trim();
+
+            // 1. Toujours réinitialiser le plateau à la FEN finale complète avant une nouvelle sélection
+            t2BoardAPI.setPosition(fenFinale);
+
+            // Nettoyer les formes (cercles) précédentes
+            if (typeof t2BoardAPI.hideMoves === "function") {
+                t2BoardAPI.hideMoves();
+            } else if (typeof t2BoardAPI.setShapes === "function") {
+                t2BoardAPI.setShapes([]);
+            }
+
+            var pieceOnSquare = findPieceOnSquare(fenFinale, square);
+
+            if (!pieceOnSquare) {
+                // Si on clique sur une case vide, on annule la sélection en cours
+                if (t2CancelBtn) t2CancelBtn.click();
+                return;
+            }
+
+            // 2. Retirer visuellement la pièce
+            t2BoardAPI.removePiece(square);
+
+            // 3. Récupérer la FEN sans cette pièce (notre vraie FEN de départ)
+            var fenDepart = t2BoardAPI.getFen();
+
+            // 4. Dessiner un cercle vert sur la case vide pour marquer la cible
+            if (typeof t2BoardAPI.drawCircle === "function") {
+                t2BoardAPI.drawCircle(square, 'green');
+            } else if (typeof t2BoardAPI.setShapes === "function") {
+                t2BoardAPI.setShapes([{ orig: square, brush: 'green' }]);
+            }
+
+            // Sauvegarder les données sélectionnées
+            t2SelectedData = {
+                piece_type: pieceOnSquare.type,
+                piece_color: pieceOnSquare.color,
+                case_cible: square,
+                fen_depart: fenDepart
+            };
+
+            // Mettre à jour le feedback visuel + afficher le bouton d'annulation
+            var nomPiece = getPieceName(pieceOnSquare.type, pieceOnSquare.color);
+            updateT2Feedback("Pièce retirée : " + nomPiece + " sur " + square + " (Position de départ générée)", "#00a32a", true);
+
+            // Mettre à jour le JSON
+            updateT2Config();
+        }
+        /**
+         * Cherche quelle pièce est sur une case donnée à partir d'une FEN.
+         * @param {string} fen - La FEN complète.
+         * @param {string} square - La case (ex: "e4").
+         * @returns {{ type: string, color: string }|null}
+         */
+        function findPieceOnSquare(fen, square) {
+            // Parser la partie placement de la FEN
+            var placement = fen.split(" ")[0];
+            var rows = placement.split("/");
+            var files = "abcdefgh";
+
+            // Convertir la case en coordonnées (file = colonne, rank = rangée)
+            var fileIndex = files.indexOf(square[0]);
+            var rankIndex = 8 - parseInt(square[1], 10);
+
+            if (fileIndex < 0 || rankIndex < 0 || rankIndex > 7) {
+                return null;
+            }
+
+            var row = rows[rankIndex];
+            if (!row) {
+                return null;
+            }
+
+            // Parcourir la rangée caractère par caractère
+            var currentFile = 0;
+            for (var c = 0; c < row.length; c++) {
+                var ch = row[c];
+                if (ch >= "1" && ch <= "8") {
+                    currentFile += parseInt(ch, 10);
+                } else {
+                    if (currentFile === fileIndex) {
+                        // Trouvé la pièce
+                        var isWhite = ch === ch.toUpperCase();
+                        return {
+                            type: ch.toLowerCase(),
+                            color: isWhite ? "white" : "black"
+                        };
+                    }
+                    currentFile++;
+                }
+            }
+
+            return null;
+        }
+
+        // Gestion de la modale FenEditor pour le Type 2
+        if (t2EditorBtn && modalOverlay && modalCloseBtn && reactRoot) {
+            t2EditorBtn.addEventListener("click", function () {
+                var initialFen = (t2FenFinale ? t2FenFinale.value.trim() : "") || "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+                // Afficher la modale
+                modalOverlay.style.display = "flex";
+
+                // Monter le composant React FenEditor
+                if (window.RoiFenEditor && window.wp && window.wp.element) {
+                    var editorComponent = window.RoiFenEditor.default || window.RoiFenEditor;
+                    var element = window.wp.element.createElement(editorComponent, {
+                        initialFen: initialFen,
+                        onSave: function (nouvelleFen) {
+                            // Mettre à jour l'input FEN finale
+                            if (t2FenFinale) {
+                                t2FenFinale.value = nouvelleFen;
+                            }
+
+                            // Démonter le composant React
+                            window.wp.element.unmountComponentAtNode(reactRoot);
+
+                            // Cacher la modale
+                            modalOverlay.style.display = "none";
+
+                            // Régénérer le plateau si visible
+                            if (t2GenerateBtn && typeSelect.value === "2") {
+                                t2GenerateBtn.click();
+                            }
+                        }
+                    });
+                    window.wp.element.render(element, reactRoot);
+                }
+            });
+        }
+
+        /**
+         * Réinitialise l'état visuel du feedback et du bouton d'annulation.
+         * @param {string} message - Le texte à afficher.
+         * @param {string} color - La couleur de la barre latérale.
+         * @param {boolean} showCancel - Afficher le bouton d'annulation.
+         */
+        function updateT2Feedback(message, color, showCancel) {
+            if (t2Feedback) {
+                t2Feedback.textContent = message;
+                t2Feedback.style.borderLeftColor = color;
+            }
+            if (t2CancelBtn) {
+                t2CancelBtn.style.display = showCancel ? "" : "none";
+            }
+        }
+
+        // Génération du plateau de sélection (Type 2)
+        if (t2GenerateBtn && t2ChessboardContainer) {
+            t2GenerateBtn.addEventListener("click", function (e) {
+                var fen = t2FenFinale ? t2FenFinale.value.trim() : "";
+                if (!fen) {
+                    updateT2Feedback("Erreur : veuillez saisir une FEN valide.", "#d63638", false);
+                    return;
+                }
+
+                // Vérifier si c'est un rechargement automatique depuis la base de données
+                var isAutoLoad = t2GenerateBtn.getAttribute("data-autoload") === "true";
+                t2GenerateBtn.removeAttribute("data-autoload"); // On nettoie pour les prochains vrais clics
+
+                // Ne réinitialiser la sélection QUE si c'est un vrai clic de l'entraîneur
+                if (!isAutoLoad) {
+                    t2SelectedData = null;
+                    updateT2Feedback("Cliquez sur une pièce de l'échiquier pour la retirer.", "#72aee6", false);
+                }
+
+                // Nettoyer l'ancien échiquier s'il existe
+                if (t2BoardAPI && typeof t2BoardAPI.destroy === "function") {
+                    t2BoardAPI.destroy();
+                    t2BoardAPI = null;
+                }
+
+                // Créer un nouvel élément pour le plateau
+                t2ChessboardContainer.innerHTML = "";
+                t2BoardEl = document.createElement("div");
+                t2BoardEl.id = "roi-t2-chessboard";
+                t2BoardEl.className = "roi-clean-admin-board";
+                t2BoardEl.style.width = "100%";
+                t2BoardEl.style.aspectRatio = "1";
+                t2BoardEl.style.position = "relative";
+                t2ChessboardContainer.appendChild(t2BoardEl);
+
+                // Attendre que EgBoardCore soit disponible
+                var t2CheckInterval = setInterval(function () {
+                    if (window.EgBoardCore) {
+                        clearInterval(t2CheckInterval);
+
+                        var boardConfig = {
+                            fen: fen,
+                            orientation: "white",
+                            coordinates: true,
+                            viewOnly: false,
+                            movable: {
+                                free: false,
+                                color: "both"
+                            },
+                            events: {
+                                select: function (square) {
+                                    handleT2SquareClick(square);
+                                }
+                            }
+                        };
+
+                        var boardState = {
+                            showThreats: false,
+                            freeMode: false,
+                            promotionDialogState: { isEnabled: false },
+                            historyViewerState: { isEnabled: false }
+                        };
+
+                        t2BoardAPI = new window.EgBoardCore(
+                            t2BoardEl,
+                            boardState,
+                            function () { },
+                            function () { },
+                            boardConfig,
+                            { workerUrl: "" }
+                        );
+
+                        // Si une sélection existait déjà (chargée depuis la base de données)
+                        if (isAutoLoad && t2SelectedData && t2SelectedData.fen_depart) {
+                            t2BoardAPI.setPosition(t2SelectedData.fen_depart);
+                            if (typeof t2BoardAPI.drawCircle === "function") {
+                                t2BoardAPI.drawCircle(t2SelectedData.case_cible, 'green');
+                            } else if (typeof t2BoardAPI.setShapes === "function") {
+                                t2BoardAPI.setShapes([{ orig: t2SelectedData.case_cible, brush: 'green' }]);
+                            }
+                        }
+
+                        // Désactiver Stockfish
+                        if (typeof t2BoardAPI.updateStockfishConfig === "function") {
+                            t2BoardAPI.updateStockfishConfig({
+                                whiteMode: "disabled",
+                                blackMode: "disabled"
+                            });
+                        }
+
+                        // Mettre à jour le config JSON initial
+                        updateT2Config();
+                    }
+                }, 50);
+            });
+        }
+
+        // Annulation de la sélection de pièce (Type 2)
+        if (t2CancelBtn) {
+            t2CancelBtn.addEventListener("click", function () {
+                // Réinitialiser les données de sélection
+                t2SelectedData = null;
+
+                // Recharger la position finale complète sur l'échiquier
+                if (t2BoardAPI && t2FenFinale) {
+                    t2BoardAPI.setPosition(t2FenFinale.value.trim());
+
+                    // Effacer le cercle vert
+                    if (typeof t2BoardAPI.hideMoves === "function") {
+                        t2BoardAPI.hideMoves();
+                    } else if (typeof t2BoardAPI.setShapes === "function") {
+                        t2BoardAPI.setShapes([]);
+                    }
+                }
+
+                // Remettre le feedback à l'état initial
+                updateT2Feedback("Sélection annulée. Cliquez sur une pièce pour la retirer.", "#72aee6", false);
+
+                // Mettre à jour le JSON (sans pièce sélectionnée)
+                updateT2Config();
+            });
+        }
+
+        // Écoute des changements sur la consigne (Type 2) pour mettre à jour le JSON
+        if (t2Consigne) {
+            t2Consigne.addEventListener("input", function () {
+                if (typeSelect.value === "2") {
+                    updateT2Config();
+                }
+            });
+        }
+
+        // Initialisation des données Type 2 depuis le JSON existant
+        if (typeSelect.value === "2" && textarea.value.trim() !== "") {
+            try {
+                var parsedT2 = JSON.parse(textarea.value);
+                if (parsedT2 && typeof parsedT2 === "object") {
+                    if (t2Consigne && typeof parsedT2.consigne === "string") {
+                        t2Consigne.value = parsedT2.consigne;
+                    }
+                    if (t2FenFinale && typeof parsedT2.fen_finale === "string") {
+                        t2FenFinale.value = parsedT2.fen_finale;
+                    }
+                    // Restaurer la sélection de pièce si elle existait
+                    if (parsedT2.piece_type && parsedT2.piece_color && parsedT2.case_cible && parsedT2.fen_depart) {
+                        t2SelectedData = {
+                            piece_type: parsedT2.piece_type,
+                            piece_color: parsedT2.piece_color,
+                            case_cible: parsedT2.case_cible,
+                            fen_depart: parsedT2.fen_depart
+                        };
+                        var nomPiece = getPieceName(parsedT2.piece_type, parsedT2.piece_color);
+                        updateT2Feedback("Pièce retirée : " + nomPiece + " sur " + parsedT2.case_cible + " (Position de départ générée)", "#00a32a", true);
+                    }
+                    // Régénérer le plateau automatiquement si une FEN finale est présente
+                    if (parsedT2.fen_finale && t2GenerateBtn) {
+                        setTimeout(function () {
+                            // On ajoute un marqueur pour avertir le bouton que c'est un rechargement
+                            t2GenerateBtn.setAttribute("data-autoload", "true");
+                            t2GenerateBtn.click();
+                        }, 200);
+                    }
+                }
+            } catch (e) {
+                console.log("Erreur parsing JSON Type 2 initial :", e);
+            }
+        }
 
         // État local de la configuration
         let configData = { fen: "", couleur_joueur: "white", solution: [] };
@@ -115,35 +601,35 @@
 
         // Initialisation propre et directe de BoardCore (sans passer par view.jsx)
         var boardAPI;
-        var checkInterval = setInterval(function() {
+        var checkInterval = setInterval(function () {
             if (window.EgBoardCore) {
                 clearInterval(checkInterval);
-                
+
                 var boardConfig = {
                     fen: configData.fen || fenInput.value.trim() || "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
                     orientation: configData.couleur_joueur || colorInput.value || "white",
                     coordinates: true,
                     viewOnly: false,
                 };
-                
+
                 var boardState = {
                     showThreats: false,
                     freeMode: false,
                     promotionDialogState: { isEnabled: false },
                     historyViewerState: { isEnabled: false },
                 };
-                
+
                 boardAPI = new window.EgBoardCore(
                     block,
                     boardState,
-                    function() {},
-                    function() {},
+                    function () { },
+                    function () { },
                     boardConfig,
                     {
                         workerUrl: "" // Pas de Stockfish requis pour l'exercice builder
                     }
                 );
-                
+
                 initBuilder();
             }
         }, 50);
@@ -168,9 +654,9 @@
                     movable: {
                         color: 'both', // Permet aux deux camps (Blancs & Noirs) d'être joués
                         events: {
-                            after: function(orig, dest, metadata) {
+                            after: function (orig, dest, metadata) {
                                 var history = boardAPI.getHistory(true) || [];
-                                configData.solution = history.map(function(m) {
+                                configData.solution = history.map(function (m) {
                                     return m.san;
                                 });
                                 updateConfigAndUI();
@@ -184,7 +670,7 @@
             updateBoardConfig();
 
             // Tâche 2 : Intégration de eg-chessboard (Générer l'échiquier de travail)
-            generateBtn.addEventListener("click", function() {
+            generateBtn.addEventListener("click", function () {
                 configData.fen = fenInput.value.trim();
                 configData.couleur_joueur = colorInput.value;
                 configData.solution = []; // Vider la solution lors d'une nouvelle génération
@@ -196,10 +682,10 @@
             });
 
             // Tâche 4 : Annulation du dernier coup
-            undoBtn.addEventListener("click", function() {
+            undoBtn.addEventListener("click", function () {
                 boardAPI.undoLastMove();
                 var history = boardAPI.getHistory(true) || [];
-                configData.solution = history.map(function(m) {
+                configData.solution = history.map(function (m) {
                     return m.san;
                 });
                 updateConfigAndUI();
@@ -224,11 +710,11 @@
             for (var i = 0; i < configData.solution.length; i++) {
                 var li = document.createElement("li");
                 li.style.padding = "2px 0";
-                
+
                 var moveNum = Math.ceil((i + 1) / 2);
                 var isWhite = (i % 2 === 0);
                 var prefix = moveNum + (isWhite ? ". " : "... ");
-                
+
                 li.textContent = prefix + configData.solution[i];
                 solutionList.appendChild(li);
             }
