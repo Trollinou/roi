@@ -240,7 +240,7 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {} }) {
         .fen-editor-board-col {
           flex: 1.2;
           min-width: 320px;
-          max-width: 380px;
+          max-width: 440px;
         }
 
         .main-wrap {
@@ -276,8 +276,8 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {} }) {
           flex: 1;
           display: flex;
           flex-direction: column;
-          gap: 20px;
-          justify-content: space-between;
+          gap: 16px;
+          justify-content: flex-start;
         }
 
         .fen-editor-section-title {
@@ -533,34 +533,37 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {} }) {
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <div className="fen-editor-section-title">Options de position</div>
 
-          {/* Orientation */}
-          <div className="fen-editor-option-field">
-            <label className="fen-editor-checkbox-label" style={{ fontWeight: "500" }}>
-              Orientation de l'échiquier
-            </label>
-            <select
-              className="fen-editor-select"
-              value={orientation}
-              onChange={(e) => setOrientation(e.target.value)}
-            >
-              <option value="white">Blancs</option>
-              <option value="black">Noirs</option>
-            </select>
-          </div>
+          {/* Grille pour Orientation et Trait */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            {/* Orientation */}
+            <div className="fen-editor-option-field">
+              <label className="fen-editor-checkbox-label" style={{ fontWeight: "500" }}>
+                Orientation
+              </label>
+              <select
+                className="fen-editor-select"
+                value={orientation}
+                onChange={(e) => setOrientation(e.target.value)}
+              >
+                <option value="white">Blancs</option>
+                <option value="black">Noirs</option>
+              </select>
+            </div>
 
-          {/* Trait aux */}
-          <div className="fen-editor-option-field">
-            <label className="fen-editor-checkbox-label" style={{ fontWeight: "500" }}>
-              Trait au tour de
-            </label>
-            <select
-              className="fen-editor-select"
-              value={turn}
-              onChange={(e) => setTurn(e.target.value)}
-            >
-              <option value="w">Blancs</option>
-              <option value="b">Noirs</option>
-            </select>
+            {/* Trait aux */}
+            <div className="fen-editor-option-field">
+              <label className="fen-editor-checkbox-label" style={{ fontWeight: "500" }}>
+                Trait au tour de
+              </label>
+              <select
+                className="fen-editor-select"
+                value={turn}
+                onChange={(e) => setTurn(e.target.value)}
+              >
+                <option value="w">Blancs</option>
+                <option value="b">Noirs</option>
+              </select>
+            </div>
           </div>
 
           {/* Droits de roque */}
