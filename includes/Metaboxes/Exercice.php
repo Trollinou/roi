@@ -169,6 +169,18 @@ class Exercice {
 				</div>
 			</div>
 		</div>
+		<?php /* ======= Type 4 — La Partie dont tu es le Héros ======= */ ?>
+		<div id="roi_builder_type_4" class="roi-builder-section" style="display:none; margin-top: 15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
+			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur de Scénario (La Partie dont tu es le Héros)", "roi" ); ?></h4>
+			<p class="description"><?php esc_html_e( "Créez un scénario interactif en ajoutant des séquences de jeu PGN et des questions à choix multiples (QCM).", "roi" ); ?></p>
+			
+			<div id="roi_t4_etapes_container" style="margin-top: 15px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 15px;"></div>
+			
+			<div style="display: flex; gap: 10px;">
+				<button type="button" id="roi_t4_add_pgn" class="button button-secondary"><?php esc_html_e( "Ajouter une séquence PGN", "roi" ); ?></button>
+				<button type="button" id="roi_t4_add_qcm" class="button button-secondary"><?php esc_html_e( "Ajouter un QCM", "roi" ); ?></button>
+			</div>
+		</div>
 		<div class="roi-exercice-visual-builder-container" style="margin-top: 15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
 			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice visuel (ABCDaire Tactique)", "roi" ); ?></h4>
 			
@@ -228,6 +240,20 @@ class Exercice {
 				</div>
 			</div>
 		</div>
+
+		<!-- Fenêtre Modale Éditeur PGN -->
+		<div id="roi_pgn_modal_overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100000; align-items: center; justify-content: center;">
+			<div style="position: relative; background: #fff; border-radius: 12px; max-width: 1000px; width: 95%; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.25); animation: roiModalFadeIn 0.3s ease;">
+				<div style="padding: 20px 25px 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; position: relative;">
+					<h3 style="margin: 0; font-size: 18px; font-weight: 600;">Éditeur de Séquence PGN</h3>
+					<button type="button" id="roi_pgn_modal_close" style="position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 24px; cursor: pointer; color: #aaa; transition: color 0.2s;" onmouseover="this.style.color='#000'" onmouseout="this.style.color='#aaa'">&times;</button>
+				</div>
+				<div style="padding: 25px; overflow: visible !important; overflow-y: visible !important; flex: 1; box-sizing: border-box;">
+					<div id="roi_pgn_react_root"></div>
+				</div>
+			</div>
+		</div>
+
 		<style>
 			@keyframes roiModalFadeIn {
 				from { opacity: 0; transform: translateY(-20px); }
