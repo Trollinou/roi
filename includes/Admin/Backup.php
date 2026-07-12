@@ -47,7 +47,7 @@ class Backup {
 	/**
 	 * Gathers all learning content data for export.
 	 *
-	 * @return array The complete export data.
+	 * @return array<string, mixed> The complete export data.
 	 */
 	public function get_apprentissage_export_data(): array {
 		$post_types = [ 'roi_lecon', 'roi_exercice', 'roi_cours' ];

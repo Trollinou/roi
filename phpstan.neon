@@ -8,3 +8,5 @@ parameters:
     paths:
         - roi.php
         - includes/
+    bootstrapFiles:
+        - tests/phpstan/bootstrap.php

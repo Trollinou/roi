@@ -21,11 +21,8 @@ if ( ! defined( 'WPINC' ) ) {
  * @return string|WP_Error The full path to the backup file on success, or a WP_Error object on failure.
  */
 function roi_generate_apprentissage_backup_file() {
-    if ( ! function_exists( 'roi_get_apprentissage_export_data' ) ) {
-        require_once ROI_PLUGIN_DIR . 'admin/backup-restore.php';
-    }
-
-    $export_data = roi_get_apprentissage_export_data();
+    $backup = new \ROI\Admin\Backup();
+    $export_data = $backup->get_apprentissage_export_data();
     $data_to_compress = json_encode( $export_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
     $compressed_data = gzcompress( $data_to_compress );
 

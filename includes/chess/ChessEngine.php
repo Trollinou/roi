@@ -83,7 +83,7 @@ class ChessEngine {
 	/**
 	 * Render Gutenberg block callback.
 	 *
-	 * @param array $attributes Block attributes.
+	 * @param array<string, mixed> $attributes Block attributes.
 	 * @return string HTML output.
 	 */
 	public function render_block( array $attributes ): string {
@@ -117,7 +117,7 @@ class ChessEngine {
 	/**
 	 * Render chessboard layout.
 	 *
-	 * @param array|string $atts Shortcode / block attributes.
+	 * @param array<string, mixed>|string $atts Shortcode / block attributes.
 	 * @return string HTML output.
 	 */
 	public function render_chessboard( $atts ): string {

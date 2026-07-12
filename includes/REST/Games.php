@@ -146,7 +146,7 @@ class Games {
 			'post_content' => $pgn, // Stockage du PGN dans le contenu également
 			'post_author'  => $current_user->ID,
 			'post_date'    => $post_date,
-		] );
+		], true );
 
 		if ( is_wp_error( $post_id ) || 0 === $post_id ) {
 			return new WP_Error( 'db_error', __( 'Erreur lors de l\'enregistrement en base de données.', 'roi' ), [ 'status' => 500 ] );

@@ -14,6 +14,68 @@
             return;
         }
 
+        // Gestion de la modale d'édition FEN avec React
+        var openEditorBtn = document.getElementById("btn_open_fen_editor");
+        var modalOverlay = document.getElementById("roi_fen_modal_overlay");
+        var modalCloseBtn = document.getElementById("roi_fen_modal_close");
+        var reactRoot = document.getElementById("roi_fen_react_root");
+
+        if (openEditorBtn && modalOverlay && modalCloseBtn && reactRoot) {
+            openEditorBtn.addEventListener("click", function() {
+                var initialFen = fenInput.value.trim() || "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+                
+                // Afficher la modale
+                modalOverlay.style.display = "flex";
+
+                // Monter le composant React autonome
+                if (window.RoiFenEditor && window.wp && window.wp.element) {
+                    var editorComponent = window.RoiFenEditor.default || window.RoiFenEditor;
+                    var element = window.wp.element.createElement(editorComponent, {
+                        initialFen: initialFen,
+                        onSave: function(nouvelleFen, nouvelleOrientation) {
+                            // Mettre à jour la valeur de l'input FEN
+                            fenInput.value = nouvelleFen;
+                            
+                            // Mettre à jour l'orientation si fournie
+                            if (nouvelleOrientation && colorInput) {
+                                colorInput.value = nouvelleOrientation;
+                            }
+                            
+                            // Démonter proprement le composant React
+                            window.wp.element.unmountComponentAtNode(reactRoot);
+                            
+                            // Cacher la modale
+                            modalOverlay.style.display = "none";
+                            
+                            // Régénérer le plateau de travail
+                            if (generateBtn) {
+                                generateBtn.click();
+                            }
+                        }
+                    });
+                    window.wp.element.render(element, reactRoot);
+                }
+            });
+
+            // Fermer au clic sur la croix
+            modalCloseBtn.addEventListener("click", function() {
+                if (window.wp && window.wp.element) {
+                    window.wp.element.unmountComponentAtNode(reactRoot);
+                }
+                modalOverlay.style.display = "none";
+            });
+
+            // Fermer au clic à l'extérieur
+            modalOverlay.addEventListener("click", function(e) {
+                if (e.target === modalOverlay) {
+                    if (window.wp && window.wp.element) {
+                        window.wp.element.unmountComponentAtNode(reactRoot);
+                    }
+                    modalOverlay.style.display = "none";
+                }
+            });
+        }
+
         // Tâche 1 : Initialisation
         // Afficher le constructeur uniquement pour le type 3 (ABCDaire Tactique)
         function toggleVisibility() {
@@ -51,12 +113,37 @@
             colorInput.value = configData.couleur_joueur;
         }
 
-        // Récupération de l'API de l'échiquier eg-chessboard
+        // Initialisation propre et directe de BoardCore (sans passer par view.jsx)
         var boardAPI;
         var checkInterval = setInterval(function() {
-            if (block.boardAPI) {
+            if (window.EgBoardCore) {
                 clearInterval(checkInterval);
-                boardAPI = block.boardAPI;
+                
+                var boardConfig = {
+                    fen: configData.fen || fenInput.value.trim() || "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+                    orientation: configData.couleur_joueur || colorInput.value || "white",
+                    coordinates: true,
+                    viewOnly: false,
+                };
+                
+                var boardState = {
+                    showThreats: false,
+                    freeMode: false,
+                    promotionDialogState: { isEnabled: false },
+                    historyViewerState: { isEnabled: false },
+                };
+                
+                boardAPI = new window.EgBoardCore(
+                    block,
+                    boardState,
+                    function() {},
+                    function() {},
+                    boardConfig,
+                    {
+                        workerUrl: "" // Pas de Stockfish requis pour l'exercice builder
+                    }
+                );
+                
                 initBuilder();
             }
         }, 50);

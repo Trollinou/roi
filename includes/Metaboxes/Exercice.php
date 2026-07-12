@@ -122,10 +122,10 @@ class Exercice {
 			<div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-end;">
 				<div style="flex: 1;">
 					<label for="roi_fen_input"><strong>FEN de départ :</strong></label><br>
-					<input type="text" id="roi_fen_input" value="<?php echo esc_attr( $initial_fen ); ?>" placeholder="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" style="width: 100%;">
+					<input type="text" id="roi_fen_input" value="<?php echo esc_attr( $initial_fen ); ?>" placeholder="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" style="width: 100%; height: 30px;">
 				</div>
 				<div>
-					<label for="roi_color_input"><strong>Couleur à jouer :</strong></label><br>
+					<label for="roi_color_input"><strong>Orientation :</strong></label><br>
 					<select id="roi_color_input" style="width: 100px;">
 						<option value="white" <?php selected( $initial_color, 'white' ); ?>>Blancs</option>
 						<option value="black" <?php selected( $initial_color, 'black' ); ?>>Noirs</option>
@@ -138,21 +138,14 @@ class Exercice {
 
 			<div style="display: flex; gap: 20px; align-items: flex-start;">
 				<div id="roi_admin_chessboard_container" style="width: 350px; flex-shrink: 0; position: relative;">
+					<button type="button" id="btn_open_fen_editor" class="button" title="Éditer la position visuellement" style="position: absolute; top: 8px; right: 8px; z-index: 10; padding: 0; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); border: 1px solid #ccd0d4; background: #ffffff; cursor: pointer;">
+						<span class="dashicons dashicons-edit" style="width: auto; height: auto; font-size: 18px; line-height: 1; margin: 0; color: #1e1e1e;"></span>
+					</button>
 					<div id="roi-exercice-builder-chessboard" 
-					     class="chessboard-block"
+					     class="roi-clean-admin-board"
 					     data-fen="<?php echo esc_attr( $initial_fen ); ?>"
 					     data-orientation="<?php echo esc_attr( $initial_color ); ?>"
-					     data-coordinates="true"
-					     data-view-only="false"
-					     data-player-color="both"
-					     data-show-threats="false"
-					     data-use-stockfish="false"
-					     data-free-mode="false">
-						<section class="main-wrap">
-							<div class="main-board">
-								<div class="chessboard-mount-element"></div>
-							</div>
-						</section>
+					     style="width: 100%; aspect-ratio: 1; position: relative;">
 					</div>
 				</div>
 				
@@ -169,6 +162,23 @@ class Exercice {
 		</div>
 
 		<textarea name="roi_exercice_config" id="roi_config_json" style="display:none;"><?php echo esc_textarea( $config ); ?></textarea>
+
+		<!-- Fenêtre Modale Éditeur FEN -->
+		<div id="roi_fen_modal_overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100000; align-items: center; justify-content: center;">
+			<div style="position: relative; background: #fff; border-radius: 12px; max-width: 950px; width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.25); animation: roiModalFadeIn 0.3s ease;">
+				<button type="button" id="roi_fen_modal_close" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: #aaa; transition: color 0.2s;" onmouseover="this.style.color='#000'" onmouseout="this.style.color='#aaa'">&times;</button>
+				<div style="padding: 25px;">
+					<h3 style="margin-top: 0; margin-bottom: 20px; font-size: 18px; border-bottom: 1px solid #eee; padding-bottom: 12px; font-weight: 600;">Éditeur de Position FEN</h3>
+					<div id="roi_fen_react_root"></div>
+				</div>
+			</div>
+		</div>
+		<style>
+			@keyframes roiModalFadeIn {
+				from { opacity: 0; transform: translateY(-20px); }
+				to { opacity: 1; transform: translateY(0); }
+			}
+		</style>
 		<?php
 	}
 
