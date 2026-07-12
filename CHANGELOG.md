@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+*   **Éditeur de position FEN (Administration) :** Intégration d'un éditeur graphique React autonome pour configurer la FEN de départ d'un exercice directement depuis la metabox via une fenêtre modale.
+*   **Découplage complet de Gutenberg :** Création d'un point d'entrée webpack isolé (`src/admin-fen-editor.js` et `eg-chessboard.css`) pour l'administration. L'éditeur FEN et `eg-chessboard` sont 100% indépendants du bloc Gutenberg `chessboard`, permettant de modifier ou supprimer le bloc sans casser l'administration.
+*   **Plateau de travail épuré :** Remplacement de l'ancien plateau d'exercice par une instanciation directe et propre de `EgBoardCore` sans les surcharges Gutenberg (pendules, captures matérielles, etc.).
+*   **Optimisation de l'agencement responsive :** Restructuration fixe de la modale (flexbox) et adaptation automatique de l'échiquier sur les écrans de faible hauteur (`@media (max-height: 750px)`) pour éliminer définitivement les barres de défilement et libérer de l'espace.
+*   **Synchronisation de l'orientation :** Répercussion automatique de l'orientation sélectionnée dans la modale vers le champ d'orientation principal de l'exercice lors de la sauvegarde.
+*   **Correctifs d'Assurance Qualité (QA) :** Résolution complète de 9 avertissements PHPStan et mise en place d'un linter ESLint (conforme à `AGENTS.md`).
 *   **16 Types d'exercices :** Configuration complète de la liste avec 16 types d'exercices distincts.
 *   **Champs de niveau et de chapitre :** Ajout des métadonnées de niveau (1 à 6), chapitre et couleur de chapitre dans la Metabox de l'exercice et sauvegarde sécurisée.
 *   **Ordonnancement :** Ajout d'un champ numérique pour l'ordre d'affichage dans le chapitre.
