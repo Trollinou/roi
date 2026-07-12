@@ -57,8 +57,15 @@ class Exercice {
 		$config   = get_post_meta( $post->ID, '_roi_exercice_config', true );
 
 		if ( empty( $config ) ) {
-			$config = '{"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "pgn": ""}';
+			$config = '{"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "color": "white", "solution": []}';
 		}
+
+		$config_data = json_decode( $config, true );
+		if ( ! is_array( $config_data ) ) {
+			$config_data = [];
+		}
+		$initial_fen   = $config_data['fen'] ?? 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+		$initial_color = $config_data['color'] ?? 'white';
 
 		$ordre_val = ( '' === $ordre ) ? 0 : (int) $ordre;
 		?>
@@ -109,11 +116,59 @@ class Exercice {
 			<label for="roi_exercice_ordre"><strong>Ordre d'affichage dans le chapitre :</strong></label><br>
 			<input type="number" name="roi_exercice_ordre" id="roi_exercice_ordre" value="<?php echo (int) $ordre_val; ?>" min="0" step="1">
 		</p>
-		<p>
-			<label for="roi_exercice_config"><strong>Configuration JSON (Données brutes de l'exercice) :</strong></label><br>
-			<textarea name="roi_exercice_config" id="roi_exercice_config" rows="12" style="width:100%; font-family: monospace; background:#f9f9f9;"><?php echo esc_textarea( $config ); ?></textarea>
-			<br><small><em>Note : Ce champ est actuellement manuel pour les tests, mais il sera alimenté automatiquement par le bloc Gutenberg React par la suite.</em></small>
-		</p>
+		<div class="roi-exercice-visual-builder-container" style="margin-top: 15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
+			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice visuel (ABCDaire Tactique)", "roi" ); ?></h4>
+			
+			<div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-end;">
+				<div style="flex: 1;">
+					<label for="roi_fen_input"><strong>FEN de départ :</strong></label><br>
+					<input type="text" id="roi_fen_input" value="<?php echo esc_attr( $initial_fen ); ?>" placeholder="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" style="width: 100%;">
+				</div>
+				<div>
+					<label for="roi_color_input"><strong>Couleur à jouer :</strong></label><br>
+					<select id="roi_color_input" style="width: 100px;">
+						<option value="white" <?php selected( $initial_color, 'white' ); ?>>Blancs</option>
+						<option value="black" <?php selected( $initial_color, 'black' ); ?>>Noirs</option>
+					</select>
+				</div>
+				<div>
+					<button type="button" id="roi_generate_board_btn" class="button button-secondary">Générer l'échiquier de travail</button>
+				</div>
+			</div>
+
+			<div style="display: flex; gap: 20px; align-items: flex-start;">
+				<div id="roi_admin_chessboard_container" style="width: 350px; flex-shrink: 0; position: relative;">
+					<div id="roi-exercice-builder-chessboard" 
+					     class="chessboard-block"
+					     data-fen="<?php echo esc_attr( $initial_fen ); ?>"
+					     data-orientation="<?php echo esc_attr( $initial_color ); ?>"
+					     data-coordinates="true"
+					     data-view-only="false"
+					     data-player-color="both"
+					     data-show-threats="false"
+					     data-use-stockfish="false"
+					     data-free-mode="false">
+						<section class="main-wrap">
+							<div class="main-board">
+								<div class="chessboard-mount-element"></div>
+							</div>
+						</section>
+					</div>
+				</div>
+				
+				<div style="flex: 1;">
+					<strong>Coups enregistrés (Solution) :</strong>
+					<ul id="roi_solution_list" style="margin-top: 10px; padding-left: 20px; list-style-type: decimal;">
+						<!-- Rempli par JS -->
+					</ul>
+					<div style="margin-top: 15px;">
+						<button type="button" id="roi_undo_move_btn" class="button button-link-delete" style="color: #b32d2e;">Annuler le dernier coup</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<textarea name="roi_exercice_config" id="roi_config_json" style="display:none;"><?php echo esc_textarea( $config ); ?></textarea>
 		<?php
 	}
 

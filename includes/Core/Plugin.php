@@ -65,6 +65,8 @@ class Plugin {
 		if ( is_admin() ) {
 			$admin_menu = new \ROI\Admin\Menu();
 			$admin_menu->init();
+			$admin_assets = new \ROI\Admin\Assets();
+			$admin_assets->init();
 			new \ROI\Metaboxes\Exercice();
 			( new \ROI\Metaboxes\Partie() )->init();
 			$backup = new \ROI\Admin\Backup();
