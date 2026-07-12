@@ -251,6 +251,7 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {} }) {
         .main-board {
           position: relative;
           width: 100%;
+          height: 0;
           padding-bottom: 100%;
         }
 
