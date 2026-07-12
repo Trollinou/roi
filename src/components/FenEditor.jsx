@@ -240,6 +240,7 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {} }) {
         .fen-editor-board-col {
           flex: 1.2;
           min-width: 320px;
+          max-width: 380px;
         }
 
         .main-wrap {
