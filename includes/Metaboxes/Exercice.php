@@ -170,7 +170,7 @@ class Exercice {
 					<h3 style="margin: 0; font-size: 18px; font-weight: 600;">Éditeur de Position FEN</h3>
 					<button type="button" id="roi_fen_modal_close" style="position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 24px; cursor: pointer; color: #aaa; transition: color 0.2s;" onmouseover="this.style.color='#000'" onmouseout="this.style.color='#aaa'">&times;</button>
 				</div>
-				<div style="padding: 25px; overflow-y: auto; flex: 1;">
+				<div style="padding: 25px; overflow: visible !important; overflow-y: visible !important; flex: 1; box-sizing: border-box;">
 					<div id="roi_fen_react_root"></div>
 				</div>
 			</div>
