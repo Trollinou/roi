@@ -238,21 +238,21 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {} }) {
         }
 
         .fen-editor-board-col {
-          flex: 1.2;
-          min-width: 320px;
-          max-width: 440px;
+          flex: 0 0 400px;
+          width: 400px;
         }
 
         .main-wrap {
           position: relative;
           width: 100%;
+          display: flex;
+          justify-content: center;
         }
 
         .main-board {
           position: relative;
-          width: 100%;
-          height: 0;
-          padding-bottom: 100%;
+          width: 400px;
+          height: 400px;
         }
 
         .main-board > div {
