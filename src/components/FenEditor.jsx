@@ -242,20 +242,20 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {} }) {
           width: 400px;
         }
 
-        .main-wrap {
+        .fen-editor-main-wrap {
           position: relative;
           width: 100%;
           display: flex;
           justify-content: center;
         }
 
-        .main-board {
+        .fen-editor-main-board {
           position: relative;
           width: 400px;
           height: 400px;
         }
 
-        .main-board > div {
+        .fen-editor-main-board > div {
           position: absolute;
           top: 0;
           left: 0;
@@ -269,7 +269,7 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {} }) {
           height: 100% !important;
         }
 
-        .main-board svg {
+        .fen-editor-main-board svg {
           pointer-events: none !important;
         }
 
@@ -440,8 +440,11 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {} }) {
           margin-top: 10px;
         }
 
-        .fen-editor-btn {
+        .fen-editor-actions .fen-editor-btn {
           flex: 1;
+        }
+
+        .fen-editor-btn {
           padding: 10px 16px;
           border: none;
           border-radius: 6px;
@@ -483,8 +486,8 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {} }) {
 
       {/* Colonne Gauche - L'échiquier */}
       <div className="fen-editor-board-col">
-        <section className="main-wrap">
-          <div className="main-board">
+        <section className="fen-editor-main-wrap">
+          <div className="fen-editor-main-board">
             <div ref={boardElRef} />
           </div>
         </section>
