@@ -165,10 +165,12 @@ class Exercice {
 
 		<!-- Fenêtre Modale Éditeur FEN -->
 		<div id="roi_fen_modal_overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100000; align-items: center; justify-content: center;">
-			<div style="position: relative; background: #fff; border-radius: 12px; max-width: 800px; width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.25); animation: roiModalFadeIn 0.3s ease;">
-				<button type="button" id="roi_fen_modal_close" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: #aaa; transition: color 0.2s;" onmouseover="this.style.color='#000'" onmouseout="this.style.color='#aaa'">&times;</button>
-				<div style="padding: 25px;">
-					<h3 style="margin-top: 0; margin-bottom: 20px; font-size: 18px; border-bottom: 1px solid #eee; padding-bottom: 12px; font-weight: 600;">Éditeur de Position FEN</h3>
+			<div style="position: relative; background: #fff; border-radius: 12px; max-width: 800px; width: 95%; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.25); animation: roiModalFadeIn 0.3s ease;">
+				<div style="padding: 20px 25px 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; position: relative;">
+					<h3 style="margin: 0; font-size: 18px; font-weight: 600;">Éditeur de Position FEN</h3>
+					<button type="button" id="roi_fen_modal_close" style="position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 24px; cursor: pointer; color: #aaa; transition: color 0.2s;" onmouseover="this.style.color='#000'" onmouseout="this.style.color='#aaa'">&times;</button>
+				</div>
+				<div style="padding: 25px; overflow-y: auto; flex: 1;">
 					<div id="roi_fen_react_root"></div>
 				</div>
 			</div>
