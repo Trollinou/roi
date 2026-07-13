@@ -182,7 +182,7 @@ class Exercice {
 			</div>
 		</div>
 		<div class="roi-exercice-visual-builder-container" style="margin-top: 15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
-			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice visuel (ABCDaire Tactique)", "roi" ); ?></h4>
+			<h4 id="roi_visual_builder_title" style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice visuel (ABCDaire Tactique)", "roi" ); ?></h4>
 			
 			<div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-end;">
 				<div style="flex: 1;">

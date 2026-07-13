@@ -105,11 +105,19 @@
         var pgnModalCloseBtn = document.getElementById("roi_pgn_modal_close");
         var pgnReactRoot = document.getElementById("roi_pgn_react_root");
         var t4Etapes = [];
+        var builderTitle = document.getElementById("roi_visual_builder_title");
 
         function toggleVisibility() {
-            // Type 3 (ABCDaire Tactique)
-            if (typeSelect.value === "3") {
+            // Types utilisant l'échiquier visuel générique (tous sauf 1, 2, 4)
+            var visualTypes = ["3", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"];
+            if (visualTypes.includes(typeSelect.value)) {
                 container.style.display = "";
+                if (builderTitle) {
+                    var selectedOption = typeSelect.options[typeSelect.selectedIndex];
+                    var selectedText = selectedOption ? selectedOption.text : "ABCDaire Tactique";
+                    var cleanTitle = selectedText.replace(/^\d+\s*-\s*/, "");
+                    builderTitle.textContent = "Constructeur d'exercice visuel (" + cleanTitle + ")";
+                }
             } else {
                 container.style.display = "none";
             }
