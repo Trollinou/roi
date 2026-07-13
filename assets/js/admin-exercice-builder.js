@@ -172,9 +172,6 @@
             } catch (e) {
                 console.log("Erreur parsing JSON Type 1 initial :", e);
             }
-            } catch (e) {
-                console.log("Erreur parsing JSON Type 1 initial :", e);
-            }
         }
 
         // Initialisation des données Type 4 si le type est 4
