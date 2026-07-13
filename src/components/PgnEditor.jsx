@@ -343,6 +343,7 @@ export default function PgnEditor({
           height: 400px;
           position: relative;
           cursor: pointer;
+          overflow: hidden;
         }
 
         .pgn-editor-board-wrapper > div {
