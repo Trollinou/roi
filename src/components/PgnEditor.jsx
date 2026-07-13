@@ -306,7 +306,16 @@ export default function PgnEditor({
   // Validation
   const handleValidate = () => {
     if (onSave && boardApi) {
-      onSave(boardApi.getPgn());
+      let finalFen = "";
+      try {
+        const ChessClass = boardApi.game.constructor;
+        const tempGame = new ChessClass();
+        tempGame.loadPgn(boardApi.getPgn() || "");
+        finalFen = tempGame.fen();
+      } catch (e) {
+        console.warn("Échec du calcul de la FEN finale", e);
+      }
+      onSave(boardApi.getPgn(), finalFen);
     }
   };
 

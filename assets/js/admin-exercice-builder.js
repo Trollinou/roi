@@ -327,8 +327,11 @@
 									editorComponent,
 									{
 										initialPgn: etape.pgn_data || '',
-										onSave( nouveauPgn ) {
+										onSave( nouveauPgn, finalFen ) {
 											t4Etapes[ i ].pgn_data = nouveauPgn;
+											if ( finalFen ) {
+												t4Etapes[ i ].final_fen = finalFen;
+											}
 											window.wp.element.unmountComponentAtNode(
 												pgnReactRoot
 											);
@@ -525,15 +528,20 @@
 				// Parcourir à l'envers pour trouver le PGN le plus proche
 				if ( t4Etapes.length > 0 ) {
 					for ( let i = t4Etapes.length - 1; i >= 0; i-- ) {
-						if ( t4Etapes[ i ].type === 'pgn' && t4Etapes[ i ].pgn_data ) {
-							try {
-								if ( typeof window.Chess === 'function' ) {
-									const tempChess = new window.Chess();
-									tempChess.loadPgn( t4Etapes[ i ].pgn_data );
-									initialQcmFen = tempChess.fen();
+						if ( t4Etapes[ i ].type === 'pgn' ) {
+							if ( t4Etapes[ i ].final_fen ) {
+								initialQcmFen = t4Etapes[ i ].final_fen;
+							} else if ( t4Etapes[ i ].pgn_data ) {
+								// Repli (fallback) si la FEN finale n'a pas encore été calculée/enregistrée
+								try {
+									if ( typeof window.Chess === 'function' ) {
+										const tempChess = new window.Chess();
+										tempChess.loadPgn( t4Etapes[ i ].pgn_data );
+										initialQcmFen = tempChess.fen();
+									}
+								} catch ( e ) {
+									console.warn( 'Impossible de lire le PGN précédent pour la FEN du QCM', e );
 								}
-							} catch ( e ) {
-								console.warn( 'Impossible de lire le PGN précédent pour la FEN du QCM', e );
 							}
 							break;
 						}
