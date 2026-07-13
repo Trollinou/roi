@@ -116,6 +116,15 @@ class Exercice {
 			<label for="roi_exercice_ordre"><strong>Ordre d'affichage dans le chapitre :</strong></label><br>
 			<input type="number" name="roi_exercice_ordre" id="roi_exercice_ordre" value="<?php echo (int) $ordre_val; ?>" min="0" step="1">
 		</p>
+		
+		<!-- Diagnostic section -->
+		<div style="background: #f0f0f1; border-left: 4px solid #3858e9; padding: 12px; margin: 15px 0; border-radius: 4px;">
+			<strong>Debug Diagnostic :</strong><br>
+			- Longueur JSON brut dans la base : <code><?php echo strlen( $config ); ?></code> caractères.<br>
+			- JSON valide en PHP ? <code><?php echo ( json_last_error() === JSON_ERROR_NONE ) ? 'OUI' : 'NON (Erreur: ' . json_last_error_msg() . ')'; ?></code><br>
+			- Nombre d'étapes détectées en PHP : <code><?php echo isset($config_data['etapes']) ? count($config_data['etapes']) : 'Aucune (clé "etapes" absente)'; ?></code>
+		</div>
+
 		<div id="roi_builder_type_1" class="roi-builder-section" style="display:none; margin-top: 15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
 			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice (100 Commandements)", "roi" ); ?></h4>
 			<p>
@@ -321,8 +330,16 @@ class Exercice {
 		if ( isset( $_POST['roi_exercice_config'] ) ) {
 			$json_raw = wp_unslash( $_POST['roi_exercice_config'] );
 			
-			// Validate JSON structure
+			// Log to scratch file for debugging
+			$log_file = '/Users/etienne/Developments/roi/scratch/php_debug.log';
+			$log_data = "--- SAVE METABOX ---\n";
+			$log_data .= "RAW POST: " . $_POST['roi_exercice_config'] . "\n";
+			$log_data .= "UNSLASHED: " . $json_raw . "\n";
 			json_decode( $json_raw );
+			$log_data .= "JSON DECODE ERROR: " . json_last_error_msg() . "\n\n";
+			file_put_contents( $log_file, $log_data, FILE_APPEND );
+			
+			// Validate JSON structure
 			if ( json_last_error() === JSON_ERROR_NONE ) {
 				update_post_meta( $post_id, '_roi_exercice_config', $json_raw );
 			} else {
