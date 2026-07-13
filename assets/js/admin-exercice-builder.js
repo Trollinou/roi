@@ -150,8 +150,6 @@
                 }
             }
         }
-        typeSelect.addEventListener("change", toggleVisibility);
-        toggleVisibility();
 
         // Initialisation des données Type 1 si le type est 1
         if (typeSelect.value === "1" && textarea.value.trim() !== "") {
@@ -855,6 +853,10 @@
         if (configData.couleur_joueur) {
             colorInput.value = configData.couleur_joueur;
         }
+
+        // Enregistrer l'écouteur et initialiser la visibilité
+        typeSelect.addEventListener("change", toggleVisibility);
+        toggleVisibility();
 
         // Initialisation propre et directe de BoardCore (sans passer par view.jsx)
         var boardAPI;
