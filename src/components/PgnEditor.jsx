@@ -323,35 +323,24 @@ export default function PgnEditor({
       <style>{`
         .pgn-editor-container {
           display: flex;
-          gap: 20px;
+          gap: 24px;
           width: 100%;
-          max-width: 1000px;
+          max-width: 800px;
           margin: 0 auto;
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-          background: #ffffff;
-          padding: 16px;
-          border-radius: 12px;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
           box-sizing: border-box;
         }
 
         .pgn-editor-left-col {
-          width: 500px;
-          height: 500px;
+          width: 400px;
           display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #f8f9fa;
-          border-radius: 8px;
-          padding: 10px;
-          border: 1px solid #e9ecef;
-          box-sizing: border-box;
+          flex-direction: column;
           flex-shrink: 0;
         }
 
         .pgn-editor-board-wrapper {
-          width: 100%;
-          aspect-ratio: 1;
+          width: 400px;
+          height: 400px;
           position: relative;
           cursor: pointer;
         }
@@ -373,7 +362,7 @@ export default function PgnEditor({
           width: 350px;
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 12px;
         }
 
         .pgn-editor-section {
@@ -557,23 +546,19 @@ export default function PgnEditor({
         }
       `}</style>
 
-      {/* Colonne de Gauche : Échiquier */}
+      {/* Colonne de Gauche : Échiquier & Import PGN */}
       <div className="pgn-editor-left-col">
         <div className="pgn-editor-board-wrapper" onClick={handleBoardClick}>
           <div ref={boardElRef} />
         </div>
-      </div>
-
-      {/* Colonne de Droite : Outils d'édition */}
-      <div className="pgn-editor-right-col">
         
-        {/* 1. Importer un PGN existant */}
-        <div className="pgn-editor-section">
+        {/* Importer un PGN placé sous l'échiquier */}
+        <div className="pgn-editor-section" style={{ marginTop: "12px" }}>
           <div className="pgn-editor-title">Importer un PGN</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <div style={{ display: "flex", gap: "8px" }}>
             <textarea
               className="pgn-comment-textarea"
-              style={{ height: "45px" }}
+              style={{ height: "32px", flex: 1, padding: "6px" }}
               placeholder="Collez un PGN existant ici..."
               value={importPgnText}
               onChange={(e) => setImportPgnText(e.target.value)}
@@ -581,7 +566,7 @@ export default function PgnEditor({
             <button
               type="button"
               className="pgn-nav-btn"
-              style={{ padding: "6px", fontSize: "12px" }}
+              style={{ padding: "0 12px", height: "32px", fontSize: "12px" }}
               onClick={() => {
                 if (boardApi && importPgnText.trim()) {
                   try {
@@ -598,6 +583,10 @@ export default function PgnEditor({
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Colonne de Droite : Outils d'édition */}
+      <div className="pgn-editor-right-col">
 
         {/* 2. Affichage du PGN en direct */}
         <div className="pgn-editor-section">
