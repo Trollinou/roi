@@ -116,17 +116,6 @@ class Exercice {
 			<label for="roi_exercice_ordre"><strong>Ordre d'affichage dans le chapitre :</strong></label><br>
 			<input type="number" name="roi_exercice_ordre" id="roi_exercice_ordre" value="<?php echo (int) $ordre_val; ?>" min="0" step="1">
 		</p>
-		
-		<!-- Diagnostic section -->
-		<div style="background: #f0f0f1; border-left: 4px solid #3858e9; padding: 12px; margin: 15px 0; border-radius: 4px;">
-			<strong>Debug Diagnostic :</strong><br>
-			- Longueur JSON brut dans la base : <code><?php echo strlen( $config ); ?></code> caractères.<br>
-			- JSON valide en PHP ? <code><?php echo ( json_last_error() === JSON_ERROR_NONE ) ? 'OUI' : 'NON (Erreur: ' . json_last_error_msg() . ')'; ?></code><br>
-			- Nombre d'étapes détectées en PHP : <code><?php echo isset($config_data['etapes']) ? count($config_data['etapes']) : 'Aucune (clé "etapes" absente)'; ?></code><br>
-			- Contenu brut dans la base :
-			<pre style="background: #fff; padding: 10px; border: 1px solid #ccc; max-height: 200px; overflow: auto; font-family: monospace; font-size: 11px; margin-top: 5px; white-space: pre-wrap; word-break: break-all;"><?php echo esc_html( $config ); ?></pre>
-		</div>
-
 		<div id="roi_builder_type_1" class="roi-builder-section" style="display:none; margin-top: 15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
 			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice (100 Commandements)", "roi" ); ?></h4>
 			<p>
