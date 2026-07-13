@@ -520,10 +520,30 @@
 
 		if ( t4AddQcmBtn ) {
 			t4AddQcmBtn.addEventListener( 'click', function () {
+				let initialQcmFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+
+				// Parcourir à l'envers pour trouver le PGN le plus proche
+				if ( t4Etapes.length > 0 ) {
+					for ( let i = t4Etapes.length - 1; i >= 0; i-- ) {
+						if ( t4Etapes[ i ].type === 'pgn' && t4Etapes[ i ].pgn_data ) {
+							try {
+								if ( typeof window.Chess === 'function' ) {
+									const tempChess = new window.Chess();
+									tempChess.loadPgn( t4Etapes[ i ].pgn_data );
+									initialQcmFen = tempChess.fen();
+								}
+							} catch ( e ) {
+								console.warn( 'Impossible de lire le PGN précédent pour la FEN du QCM', e );
+							}
+							break;
+						}
+					}
+				}
+
 				t4Etapes.push( {
 					type: 'qcm',
 					question: '',
-					fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+					fen: initialQcmFen,
 					choix: [ '', '', '' ],
 					bonne_reponse: 0,
 				} );
