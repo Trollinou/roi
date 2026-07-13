@@ -324,6 +324,7 @@ export default function PgnEditor({
         .pgn-editor-container {
           display: flex;
           gap: 20px;
+          width: 100%;
           max-width: 1000px;
           margin: 0 auto;
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -331,11 +332,14 @@ export default function PgnEditor({
           padding: 16px;
           border-radius: 12px;
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+          box-sizing: border-box;
         }
 
         .pgn-editor-left-col {
-          width: 450px;
-          height: 450px;
+          flex: 1;
+          max-width: 580px;
+          max-height: 580px;
+          aspect-ratio: 1;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -344,7 +348,6 @@ export default function PgnEditor({
           padding: 10px;
           border: 1px solid #e9ecef;
           box-sizing: border-box;
-          flex-shrink: 0;
         }
 
         .pgn-editor-board-wrapper {
@@ -624,60 +627,61 @@ export default function PgnEditor({
           />
         </div>
 
-        {/* 5. Barre d'outils Cercles */}
+        {/* 5. Outils de dessin */}
         <div className="pgn-editor-section">
-          <div className="pgn-editor-title">Cercles</div>
-          <div className="pgn-toolbar-row">
-            {colors.map((c) => {
-              const isActive = selectedTool?.type === "circle" && selectedTool?.color === c.name;
-              return (
-                <button
-                  key={`circle-${c.name}`}
-                  type="button"
-                  className={`pgn-color-btn ${isActive ? "active" : ""}`}
-                  style={{ backgroundColor: c.hex }}
-                  onClick={() => setSelectedTool(isActive ? null : { type: "circle", color: c.name })}
-                  title={`Cercle ${c.label}`}
-                />
-              );
-            })}
-            <button
-              type="button"
-              className={`pgn-eraser-btn ${selectedTool?.type === "eraser" && selectedTool?.mode === "circle" ? "active" : ""}`}
-              onClick={() => setSelectedTool(selectedTool?.type === "eraser" && selectedTool?.mode === "circle" ? null : { type: "eraser", mode: "circle" })}
-              title="Gomme Cercles"
-            >
-              ⃠ Gomme
-            </button>
-          </div>
-        </div>
+          <div className="pgn-editor-title">Outils de dessin</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            {/* Cercles */}
+            <div>
+              <div style={{ fontSize: "11px", fontWeight: "600", color: "#6c757d", marginBottom: "6px" }}>Cercles</div>
+              <div className="pgn-toolbar-row">
+                {colors.map((c) => {
+                  const isActive = selectedTool?.type === "circle" && selectedTool?.color === c.name;
+                  return (
+                    <button
+                      key={`circle-${c.name}`}
+                      type="button"
+                      className={`pgn-color-btn ${isActive ? "active" : ""}`}
+                      style={{ backgroundColor: c.hex }}
+                      onClick={() => setSelectedTool(isActive ? null : { type: "circle", color: c.name })}
+                      title={`Cercle ${c.label}`}
+                    />
+                  );
+                })}
+              </div>
+            </div>
 
-        {/* 6. Barre d'outils Flèches */}
-        <div className="pgn-editor-section">
-          <div className="pgn-editor-title">Flèches</div>
-          <div className="pgn-toolbar-row">
-            {colors.map((c) => {
-              const isActive = selectedTool?.type === "arrow" && selectedTool?.color === c.name;
-              return (
-                <button
-                  key={`arrow-${c.name}`}
-                  type="button"
-                  className={`pgn-arrow-btn ${isActive ? "active" : ""}`}
-                  style={{ color: c.hex }}
-                  onClick={() => setSelectedTool(isActive ? null : { type: "arrow", color: c.name })}
-                  title={`Flèche ${c.label}`}
-                >
-                  ↗
-                </button>
-              );
-            })}
+            {/* Flèches */}
+            <div>
+              <div style={{ fontSize: "11px", fontWeight: "600", color: "#6c757d", marginBottom: "6px" }}>Flèches</div>
+              <div className="pgn-toolbar-row">
+                {colors.map((c) => {
+                  const isActive = selectedTool?.type === "arrow" && selectedTool?.color === c.name;
+                  return (
+                    <button
+                      key={`arrow-${c.name}`}
+                      type="button"
+                      className={`pgn-arrow-btn ${isActive ? "active" : ""}`}
+                      style={{ color: c.hex }}
+                      onClick={() => setSelectedTool(isActive ? null : { type: "arrow", color: c.name })}
+                      title={`Flèche ${c.label}`}
+                    >
+                      ↗
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Gomme commune */}
             <button
               type="button"
-              className={`pgn-eraser-btn ${selectedTool?.type === "eraser" && selectedTool?.mode === "arrow" ? "active" : ""}`}
-              onClick={() => setSelectedTool(selectedTool?.type === "eraser" && selectedTool?.mode === "arrow" ? null : { type: "eraser", mode: "arrow" })}
-              title="Gomme Flèches"
+              className={`pgn-eraser-btn ${selectedTool?.type === "eraser" ? "active" : ""}`}
+              style={{ width: "100%", height: "32px", fontSize: "12px" }}
+              onClick={() => setSelectedTool(selectedTool?.type === "eraser" ? null : { type: "eraser" })}
+              title="Gomme annotations"
             >
-              ⃠ Gomme
+              ⃠ Gomme (cliquez sur une case ou flèche à effacer)
             </button>
           </div>
         </div>
