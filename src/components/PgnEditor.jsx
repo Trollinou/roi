@@ -334,7 +334,8 @@ export default function PgnEditor({
         }
 
         .pgn-editor-left-col {
-          flex: 1;
+          width: 450px;
+          height: 450px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -342,11 +343,13 @@ export default function PgnEditor({
           border-radius: 8px;
           padding: 10px;
           border: 1px solid #e9ecef;
+          box-sizing: border-box;
+          flex-shrink: 0;
         }
 
         .pgn-editor-board-wrapper {
           width: 100%;
-          aspect-ratio: 1;
+          height: 100%;
           position: relative;
           cursor: pointer;
         }
