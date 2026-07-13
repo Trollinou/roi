@@ -18,6 +18,7 @@ export default function PgnEditor({
 }) {
   const [boardApi, setBoardApi] = useState(null);
   const [pgn, setPgn] = useState(initialPgn);
+  const [importPgnText, setImportPgnText] = useState("");
   const [selectedTool, setSelectedTool] = useState(null); // { type: 'circle'|'arrow'|'eraser', color?: string, mode?: string }
   const [arrowStart, setArrowStart] = useState(null);
   const [currentComment, setCurrentComment] = useState("");
@@ -63,6 +64,40 @@ export default function PgnEditor({
       boardApiRef.current.setComment(comment, shapes);
       boardApiRef.current.setShapes(shapes);
       setPgn(boardApiRef.current.getPgn() || "");
+    }
+  };
+
+  // Calculer la case sous le clic en fonction des coordonnées de l'événement
+  const getSquareFromClick = (e) => {
+    const boardEl = boardElRef.current;
+    if (!boardEl) return null;
+    const rect = boardEl.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const isBlack = boardApiRef.current && boardApiRef.current.getOrientation() === "black";
+    
+    const fileIdx = Math.floor((x / rect.width) * 8);
+    const rankIdx = Math.floor((y / rect.height) * 8);
+    
+    if (fileIdx < 0 || fileIdx > 7 || rankIdx < 0 || rankIdx > 7) return null;
+    
+    const files = ["a", "b", "c", "d", "e", "f", "g", "h"];
+    const ranks = ["8", "7", "6", "5", "4", "3", "2", "1"];
+    
+    const file = files[isBlack ? 7 - fileIdx : fileIdx];
+    const rank = ranks[isBlack ? 7 - rankIdx : rankIdx];
+    
+    return file + rank;
+  };
+
+  const handleBoardClick = (e) => {
+    if (!selectedToolRef.current) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const square = getSquareFromClick(e);
+    if (square) {
+      handleSquareClick(square);
     }
   };
 
@@ -171,6 +206,56 @@ export default function PgnEditor({
           blackMode: "disabled",
         });
       }
+
+      // Monkey-patch setCommentAtPly pour préserver les commentaires des autres demi-coups
+      api.setCommentAtPly = function (ply, text, shapes = []) {
+        const history = this.getHistory(true);
+        if (ply < 0 || ply > history.length) return;
+
+        const existingComments = this.game.getComments();
+        const ChessClass = this.game.constructor;
+        const tempGame = new ChessClass();
+
+        const normalizeFen = (f) => f.split(" ").slice(0, 4).join(" ");
+        
+        const setCommentIfExist = (fen) => {
+          const norm = normalizeFen(fen);
+          const match = existingComments.find(c => normalizeFen(c.fen) === norm);
+          if (match && match.comment) {
+            tempGame.setComment(match.comment);
+          }
+        };
+
+        setCommentIfExist(tempGame.fen());
+
+        for (let i = 0; i < ply; i++) {
+          tempGame.move(history[i]);
+          setCommentIfExist(tempGame.fen());
+        }
+
+        const shapesAnnotation = this.shapesToPgnComment(shapes);
+        const combined = `${shapesAnnotation} ${text}`.trim();
+        tempGame.setComment(combined);
+
+        for (let i = ply; i < history.length; i++) {
+          tempGame.move(history[i]);
+          if (i + 1 !== ply) {
+            setCommentIfExist(tempGame.fen());
+          }
+        }
+
+        this.game = tempGame;
+
+        const isViewingThisPly = this.state.historyViewerState.isEnabled
+          ? this.state.historyViewerState.plyViewing === ply
+          : ply === history.length;
+
+        if (isViewingThisPly) {
+          this.state.currentComment = text;
+          this.board.setShapes(shapes);
+          this.onStateChange();
+        }
+      };
 
       // Charger le PGN initial si fourni
       if (initialPgn) {
@@ -313,6 +398,7 @@ export default function PgnEditor({
           width: 100%;
           aspect-ratio: 1;
           position: relative;
+          cursor: pointer;
         }
 
         .pgn-editor-board-wrapper > div {
@@ -352,7 +438,7 @@ export default function PgnEditor({
         }
 
         .pgn-display-area {
-          max-height: 150px;
+          max-height: 120px;
           overflow-y: auto;
           font-family: "Courier New", Courier, monospace;
           font-size: 13px;
@@ -518,7 +604,7 @@ export default function PgnEditor({
 
       {/* Colonne de Gauche : Échiquier */}
       <div className="pgn-editor-left-col">
-        <div className="pgn-editor-board-wrapper" onSquareClick={(square) => handleSquareClick(square)}>
+        <div className="pgn-editor-board-wrapper" onClick={handleBoardClick}>
           <div ref={boardElRef} />
         </div>
       </div>
@@ -526,7 +612,39 @@ export default function PgnEditor({
       {/* Colonne de Droite : Outils d'édition */}
       <div className="pgn-editor-right-col">
         
-        {/* 1. Affichage du PGN */}
+        {/* 1. Importer un PGN existant */}
+        <div className="pgn-editor-section">
+          <div className="pgn-editor-title">Importer un PGN</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <textarea
+              className="pgn-comment-textarea"
+              style={{ height: "45px" }}
+              placeholder="Collez un PGN existant ici..."
+              value={importPgnText}
+              onChange={(e) => setImportPgnText(e.target.value)}
+            />
+            <button
+              type="button"
+              className="pgn-nav-btn"
+              style={{ padding: "6px", fontSize: "12px" }}
+              onClick={() => {
+                if (boardApi && importPgnText.trim()) {
+                  try {
+                    boardApi.loadPgn(importPgnText);
+                    syncPositionData(boardApi);
+                    setImportPgnText("");
+                  } catch (err) {
+                    alert("Erreur lors du chargement du PGN : " + err.message);
+                  }
+                }
+              }}
+            >
+              Charger
+            </button>
+          </div>
+        </div>
+
+        {/* 2. Affichage du PGN en direct */}
         <div className="pgn-editor-section">
           <div className="pgn-editor-title">PGN en direct</div>
           <div className="pgn-display-area">
@@ -534,7 +652,7 @@ export default function PgnEditor({
           </div>
         </div>
 
-        {/* 2. Navigation */}
+        {/* 3. Navigation */}
         <div className="pgn-navigation-bar">
           <button type="button" className="pgn-nav-btn" onClick={handleViewStart} title="Début">|&lt;</button>
           <button type="button" className="pgn-nav-btn" onClick={handleViewPrevious} title="Précédent">&lt;</button>
@@ -542,7 +660,7 @@ export default function PgnEditor({
           <button type="button" className="pgn-nav-btn" onClick={handleViewEnd} title="Fin">&gt;|</button>
         </div>
 
-        {/* 3. Commentaire */}
+        {/* 4. Commentaire */}
         <div className="pgn-editor-section">
           <div className="pgn-editor-title">Commentaire du coup</div>
           <textarea
@@ -553,7 +671,7 @@ export default function PgnEditor({
           />
         </div>
 
-        {/* 4. Barre d'outils Cercles */}
+        {/* 5. Barre d'outils Cercles */}
         <div className="pgn-editor-section">
           <div className="pgn-editor-title">Cercles</div>
           <div className="pgn-toolbar-row">
@@ -581,7 +699,7 @@ export default function PgnEditor({
           </div>
         </div>
 
-        {/* 5. Barre d'outils Flèches */}
+        {/* 6. Barre d'outils Flèches */}
         <div className="pgn-editor-section">
           <div className="pgn-editor-title">Flèches</div>
           <div className="pgn-toolbar-row">
@@ -611,7 +729,7 @@ export default function PgnEditor({
           </div>
         </div>
 
-        {/* 6. Validation */}
+        {/* 7. Validation */}
         <button
           type="button"
           className="pgn-validate-btn"
