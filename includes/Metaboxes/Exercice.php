@@ -122,7 +122,9 @@ class Exercice {
 			<strong>Debug Diagnostic :</strong><br>
 			- Longueur JSON brut dans la base : <code><?php echo strlen( $config ); ?></code> caractères.<br>
 			- JSON valide en PHP ? <code><?php echo ( json_last_error() === JSON_ERROR_NONE ) ? 'OUI' : 'NON (Erreur: ' . json_last_error_msg() . ')'; ?></code><br>
-			- Nombre d'étapes détectées en PHP : <code><?php echo isset($config_data['etapes']) ? count($config_data['etapes']) : 'Aucune (clé "etapes" absente)'; ?></code>
+			- Nombre d'étapes détectées en PHP : <code><?php echo isset($config_data['etapes']) ? count($config_data['etapes']) : 'Aucune (clé "etapes" absente)'; ?></code><br>
+			- Contenu brut dans la base :
+			<pre style="background: #fff; padding: 10px; border: 1px solid #ccc; max-height: 200px; overflow: auto; font-family: monospace; font-size: 11px; margin-top: 5px; white-space: pre-wrap; word-break: break-all;"><?php echo esc_html( $config ); ?></pre>
 		</div>
 
 		<div id="roi_builder_type_1" class="roi-builder-section" style="display:none; margin-top: 15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
@@ -330,21 +332,13 @@ class Exercice {
 		if ( isset( $_POST['roi_exercice_config'] ) ) {
 			$json_raw = wp_unslash( $_POST['roi_exercice_config'] );
 			
-			// Log to scratch file for debugging
-			$log_file = '/Users/etienne/Developments/roi/scratch/php_debug.log';
-			$log_data = "--- SAVE METABOX ---\n";
-			$log_data .= "RAW POST: " . $_POST['roi_exercice_config'] . "\n";
-			$log_data .= "UNSLASHED: " . $json_raw . "\n";
-			json_decode( $json_raw );
-			$log_data .= "JSON DECODE ERROR: " . json_last_error_msg() . "\n\n";
-			file_put_contents( $log_file, $log_data, FILE_APPEND );
-			
 			// Validate JSON structure
+			json_decode( $json_raw );
 			if ( json_last_error() === JSON_ERROR_NONE ) {
-				update_post_meta( $post_id, '_roi_exercice_config', $json_raw );
+				update_post_meta( $post_id, '_roi_exercice_config', wp_slash( $json_raw ) );
 			} else {
 				// Save anyway but avoid corruption by preserving raw layout
-				update_post_meta( $post_id, '_roi_exercice_config', $json_raw );
+				update_post_meta( $post_id, '_roi_exercice_config', wp_slash( $json_raw ) );
 			}
 		}
 	}
