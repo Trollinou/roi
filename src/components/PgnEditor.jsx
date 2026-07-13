@@ -207,56 +207,6 @@ export default function PgnEditor({
         });
       }
 
-      // Monkey-patch setCommentAtPly pour préserver les commentaires des autres demi-coups
-      api.setCommentAtPly = function (ply, text, shapes = []) {
-        const history = this.getHistory(true);
-        if (ply < 0 || ply > history.length) return;
-
-        const existingComments = this.game.getComments();
-        const ChessClass = this.game.constructor;
-        const tempGame = new ChessClass();
-
-        const normalizeFen = (f) => f.split(" ").slice(0, 4).join(" ");
-        
-        const setCommentIfExist = (fen) => {
-          const norm = normalizeFen(fen);
-          const match = existingComments.find(c => normalizeFen(c.fen) === norm);
-          if (match && match.comment) {
-            tempGame.setComment(match.comment);
-          }
-        };
-
-        setCommentIfExist(tempGame.fen());
-
-        for (let i = 0; i < ply; i++) {
-          tempGame.move(history[i]);
-          setCommentIfExist(tempGame.fen());
-        }
-
-        const shapesAnnotation = this.shapesToPgnComment(shapes);
-        const combined = `${shapesAnnotation} ${text}`.trim();
-        tempGame.setComment(combined);
-
-        for (let i = ply; i < history.length; i++) {
-          tempGame.move(history[i]);
-          if (i + 1 !== ply) {
-            setCommentIfExist(tempGame.fen());
-          }
-        }
-
-        this.game = tempGame;
-
-        const isViewingThisPly = this.state.historyViewerState.isEnabled
-          ? this.state.historyViewerState.plyViewing === ply
-          : ply === history.length;
-
-        if (isViewingThisPly) {
-          this.state.currentComment = text;
-          this.board.setShapes(shapes);
-          this.onStateChange();
-        }
-      };
-
       // Charger le PGN initial si fourni
       if (initialPgn) {
         try {
