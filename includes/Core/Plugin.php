@@ -72,6 +72,7 @@ class Plugin {
 			( new \ROI\Metaboxes\Partie() )->init();
 			$backup = new \ROI\Admin\Backup();
 			$backup->init();
+			( new \ROI\Admin\Columns() )->init();
 		}
 	}
 }

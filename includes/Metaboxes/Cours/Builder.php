@@ -130,15 +130,23 @@ class Builder {
 								if ( $post_obj && in_array( $post_obj->post_type, [ 'roi_lecon', 'roi_exercice' ], true ) ) {
 									$title = get_the_title( $post_obj );
 
-									// Get color
-									$color = 'primary';
-									$terms = get_the_terms( $item_id, 'roi_chapitre' );
+									// Get color and ID
+									$color      = 'primary';
+									$chapter_id = 0;
+									$terms      = get_the_terms( $item_id, 'roi_chapitre' );
 									if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
-										$term = reset( $terms );
+										$term       = reset( $terms );
+										$chapter_id = $term->term_id;
 										$term_color = get_term_meta( $term->term_id, '_roi_chapitre_couleur', true );
 										if ( ! empty( $term_color ) ) {
 											$color = $term_color;
 										}
+									}
+
+									$meta_key = ( 'roi_lecon' === $item_type ) ? '_roi_lecon_niveau' : '_roi_exercice_niveau';
+									$level    = (int) get_post_meta( $item_id, $meta_key, true );
+									if ( 0 === $level ) {
+										$level = 1;
 									}
 
 									$type_label = ( 'roi_lecon' === $item_type ) ? 'Leçon' : 'Exercice';
@@ -161,6 +169,8 @@ class Builder {
 										data-type="<?php echo esc_attr( $item_type ); ?>" 
 										data-title="<?php echo esc_attr( $title ); ?>" 
 										data-color="<?php echo esc_attr( $color ); ?>" 
+										data-level="<?php echo $level; ?>" 
+										data-chapter-id="<?php echo $chapter_id; ?>" 
 										style="padding: 10px; border: 1px solid <?php echo esc_attr( $styles['border'] ); ?>; background: #fff; color: #333; border-radius: 4px; cursor: move; font-size: 13px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
 										<div style="display: flex; align-items: center; gap: 8px;">
 											<span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: <?php echo esc_attr( $styles['border'] ); ?>;"></span>
@@ -203,9 +213,30 @@ class Builder {
 		if ( isset( $_POST['roi_cours_playlist_json'] ) ) {
 			$json_raw = wp_unslash( $_POST['roi_cours_playlist_json'] );
 
-			json_decode( $json_raw );
-			if ( json_last_error() === JSON_ERROR_NONE ) {
+			$playlist_data = json_decode( $json_raw, true );
+			if ( json_last_error() === JSON_ERROR_NONE && is_array( $playlist_data ) ) {
 				update_post_meta( $post_id, '_roi_cours_playlist', wp_slash( $json_raw ) );
+
+				if ( ! empty( $playlist_data ) ) {
+					$first_item = reset( $playlist_data );
+					$first_id   = (int) $first_item['id'];
+					$first_type = sanitize_text_field( $first_item['type'] );
+
+					$meta_key = ( 'roi_lecon' === $first_type ) ? '_roi_lecon_niveau' : '_roi_exercice_niveau';
+					$niveau   = (int) get_post_meta( $first_id, $meta_key, true );
+					if ( $niveau > 0 ) {
+						update_post_meta( $post_id, '_roi_cours_niveau', $niveau );
+					}
+
+					$terms = get_the_terms( $first_id, 'roi_chapitre' );
+					if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
+						$term_ids = wp_list_pluck( $terms, 'term_id' );
+						wp_set_object_terms( $post_id, array_map( 'intval', $term_ids ), 'roi_chapitre' );
+					}
+				} else {
+					delete_post_meta( $post_id, '_roi_cours_niveau' );
+					wp_set_object_terms( $post_id, [], 'roi_chapitre' );
+				}
 			} else {
 				update_post_meta( $post_id, '_roi_cours_playlist', wp_slash( $json_raw ) );
 			}
@@ -268,11 +299,13 @@ class Builder {
 				$post_id = get_the_ID();
 				$post_type = get_post_type();
 
-				// Get associated chapter color
-				$color = 'primary';
-				$terms = get_the_terms( $post_id, 'roi_chapitre' );
+				// Get associated chapter color and ID
+				$color      = 'primary';
+				$chapter_id = 0;
+				$terms      = get_the_terms( $post_id, 'roi_chapitre' );
 				if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
-					$term = reset( $terms );
+					$term       = reset( $terms );
+					$chapter_id = $term->term_id;
 					$term_color = get_term_meta( $term->term_id, '_roi_chapitre_couleur', true );
 					if ( ! empty( $term_color ) ) {
 						$color = $term_color;
@@ -287,11 +320,12 @@ class Builder {
 				}
 
 				$results[] = [
-					'id'     => $post_id,
-					'titre'  => get_the_title(),
-					'type'   => $post_type,
-					'color'  => $color,
-					'niveau' => $level,
+					'id'         => $post_id,
+					'titre'      => get_the_title(),
+					'type'       => $post_type,
+					'color'      => $color,
+					'niveau'     => $level,
+					'chapter_id' => $chapter_id,
 				];
 			}
 			wp_reset_postdata();

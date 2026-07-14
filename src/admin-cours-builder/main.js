@@ -92,6 +92,8 @@ document.addEventListener( 'DOMContentLoaded', () => {
 			el.setAttribute( 'data-type', item.type );
 			el.setAttribute( 'data-title', item.titre );
 			el.setAttribute( 'data-color', item.color );
+			el.setAttribute( 'data-level', item.niveau );
+			el.setAttribute( 'data-chapter-id', item.chapter_id );
 
 			el.style.padding = '10px';
 			el.style.border = `1px solid ${ styles.border }`;
@@ -125,6 +127,8 @@ document.addEventListener( 'DOMContentLoaded', () => {
 					type: item.type,
 					title: item.titre,
 					color: item.color,
+					level: item.niveau,
+					chapterId: item.chapter_id,
 				};
 				e.dataTransfer.effectAllowed = 'copy';
 			} );
@@ -134,7 +138,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 	};
 
 	// Create Playlist Item Element
-	const createPlaylistItem = ( id, title, type, color ) => {
+	const createPlaylistItem = ( id, title, type, color, level, chapterId ) => {
 		const styles = getColorStyle( color );
 		const el = document.createElement( 'div' );
 		el.classList.add( 'roi-playlist-item' );
@@ -144,6 +148,8 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		el.setAttribute( 'data-type', type );
 		el.setAttribute( 'data-title', title );
 		el.setAttribute( 'data-color', color );
+		el.setAttribute( 'data-level', level );
+		el.setAttribute( 'data-chapter-id', chapterId );
 
 		el.style.padding = '10px';
 		el.style.border = `1px solid ${ styles.border }`;
@@ -173,6 +179,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 			() => {
 				el.remove();
 				updatePlaylistJson();
+				enforceSameChapterAndLevelConstraints();
 			}
 		);
 
@@ -217,7 +224,9 @@ document.addEventListener( 'DOMContentLoaded', () => {
 				draggedData.id,
 				draggedData.title,
 				draggedData.type,
-				draggedData.color
+				draggedData.color,
+				draggedData.level,
+				draggedData.chapterId
 			);
 
 			const afterElement = getDragAfterElement(
@@ -230,8 +239,10 @@ document.addEventListener( 'DOMContentLoaded', () => {
 				playlistContainer.insertBefore( newItem, afterElement );
 			}
 			updatePlaylistJson();
+			enforceSameChapterAndLevelConstraints();
 		} else if ( draggedSource === 'playlist' ) {
 			updatePlaylistJson();
+			enforceSameChapterAndLevelConstraints();
 		}
 	} );
 
@@ -271,6 +282,31 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		playlistJsonInput.value = JSON.stringify( items );
 	};
 
+	// Enforce same chapter and level constraints by disabling dropdowns
+	const enforceSameChapterAndLevelConstraints = () => {
+		const firstItem = playlistContainer.querySelector(
+			'[data-playlist-item]'
+		);
+		if ( firstItem ) {
+			const lockedChapterId = firstItem.getAttribute( 'data-chapter-id' );
+			const lockedLevel = firstItem.getAttribute( 'data-level' );
+
+			catalogFilter.value = lockedChapterId;
+			catalogFilter.disabled = true;
+
+			if ( catalogLevelFilter ) {
+				catalogLevelFilter.value = lockedLevel;
+				catalogLevelFilter.disabled = true;
+			}
+		} else {
+			catalogFilter.disabled = false;
+			if ( catalogLevelFilter ) {
+				catalogLevelFilter.disabled = false;
+			}
+		}
+		searchCatalog();
+	};
+
 	// Search actions
 	catalogSearch.addEventListener( 'input', debounce( searchCatalog, 300 ) );
 	catalogFilter.addEventListener( 'change', searchCatalog );
@@ -278,8 +314,8 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		catalogLevelFilter.addEventListener( 'change', searchCatalog );
 	}
 
-	// Initialize items list
-	searchCatalog();
+	// Initialize items list with constraint checks
+	enforceSameChapterAndLevelConstraints();
 
 	// Bind initial events to any existing DOM elements if any
 	const bindExistingItems = () => {
@@ -291,6 +327,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 				).addEventListener( 'click', () => {
 					el.remove();
 					updatePlaylistJson();
+					enforceSameChapterAndLevelConstraints();
 				} );
 
 				el.addEventListener( 'dragstart', () => {
