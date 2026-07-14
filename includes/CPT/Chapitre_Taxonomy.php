@@ -129,16 +129,10 @@ class Chapitre_Taxonomy {
 		return $terms;
 	}
 
-	/**
-	 * Configures checklist arguments to avoid checked terms moving to the top.
-	 *
-	 * @param array $args Checklist args.
-	 * @param int $post_id Post ID.
-	 * @return array Updated checklist args.
-	 */
 	public function args_checklist_chapitre( array $args, int $post_id ): array {
 		if ( isset( $args['taxonomy'] ) && 'roi_chapitre' === $args['taxonomy'] ) {
 			$args['checked_ontop'] = false;
+			$args['walker']        = new \ROI\Admin\Walker_Category_Radio();
 		}
 		return $args;
 	}
