@@ -59,6 +59,21 @@ class Builder {
 			'taxonomy'   => 'roi_chapitre',
 			'hide_empty' => false,
 		] );
+
+		if ( ! is_wp_error( $chapitres ) && ! empty( $chapitres ) ) {
+			$order_map = [
+				'Matérialité'         => 1,
+				'Activité des Pièces' => 2,
+				'Sécurité du Roi'     => 3,
+				'Structure de Pions'  => 4,
+				'Combination'         => 5,
+			];
+			usort( $chapitres, function( $a, $b ) use ( $order_map ) {
+				$pos_a = $order_map[ $a->name ] ?? 99;
+				$pos_b = $order_map[ $b->name ] ?? 99;
+				return $pos_a <=> $pos_b;
+			} );
+		}
 		?>
 		<div class="roi-cours-builder-container">
 			<input type="hidden" name="roi_cours_playlist_json" id="roi_cours_playlist_json" value="<?php echo esc_attr( $playlist ); ?>">
