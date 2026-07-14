@@ -139,12 +139,30 @@
 			'roi_visual_builder_title'
 		);
 
+		// Références et variables pour le Type 5 (Posi'Plan)
+		const builderType5 = document.getElementById( 'roi_builder_type_5' );
+		const t5FenDepart = document.getElementById( 'roi_t5_fen_depart' );
+		const t5Couleur = document.getElementById( 'roi_t5_couleur' );
+		const t5EtapesContainer = document.getElementById(
+			'roi_t5_etapes_container'
+		);
+		const t5AddEtapeBtn = document.getElementById( 'roi_t5_add_etape' );
+		const t5EditorBtn = document.getElementById( 'btn_open_fen_editor_t5' );
+		let t5Etapes = [];
+
+		// Références et variables pour le Type 6 (Associ'Plan)
+		const builderType6 = document.getElementById( 'roi_builder_type_6' );
+		let t6Paires = [
+			{ fen: '', couleur_joueur: 'white', description: '', pgn_data: '' },
+			{ fen: '', couleur_joueur: 'white', description: '', pgn_data: '' },
+			{ fen: '', couleur_joueur: 'white', description: '', pgn_data: '' },
+			{ fen: '', couleur_joueur: 'white', description: '', pgn_data: '' }
+		];
+
 		function toggleVisibility() {
-			// Types utilisant l'échiquier visuel générique (tous sauf 1, 2, 4)
+			// Types utilisant l'échiquier visuel générique (tous sauf 1, 2, 4, 5, 6)
 			const visualTypes = [
 				'3',
-				'5',
-				'6',
 				'7',
 				'8',
 				'9',
@@ -202,6 +220,25 @@
 					builderType4.style.display = 'none';
 				}
 			}
+
+			// Type 5 (Posi'Plan)
+			if ( builderType5 ) {
+				if ( typeSelect.value === '5' ) {
+					builderType5.style.display = '';
+					renderT5Etapes();
+				} else {
+					builderType5.style.display = 'none';
+				}
+			}
+
+			// Type 6 (Associ'Plan)
+			if ( builderType6 ) {
+				if ( typeSelect.value === '6' ) {
+					builderType6.style.display = '';
+				} else {
+					builderType6.style.display = 'none';
+				}
+			}
 		}
 
 		// Initialisation des données Type 1 si le type est 1
@@ -257,12 +294,432 @@
 			}
 		}
 
+		// Initialisation des données Type 5 si le type est 5
+		if ( typeSelect.value === '5' && textarea.value.trim() !== '' ) {
+			try {
+				const parsedT5 = JSON.parse( textarea.value );
+				if ( parsedT5 && typeof parsedT5 === 'object' ) {
+					if ( t5FenDepart && typeof parsedT5.fen_depart === 'string' ) {
+						t5FenDepart.value = parsedT5.fen_depart;
+					}
+					if ( t5Couleur && typeof parsedT5.couleur_joueur === 'string' ) {
+						t5Couleur.value = parsedT5.couleur_joueur;
+					}
+					if ( Array.isArray( parsedT5.etapes ) ) {
+						t5Etapes = parsedT5.etapes;
+					}
+				}
+			} catch ( e ) {
+				console.log( 'Erreur parsing JSON Type 5 initial :', e );
+			}
+		}
+
+		// Initialisation des données Type 6
+		if ( textarea.value.trim() !== '' ) {
+			try {
+				const parsedT6 = JSON.parse( textarea.value );
+				if ( parsedT6 && typeof parsedT6 === 'object' && Array.isArray( parsedT6.paires ) ) {
+					for ( let idx = 0; idx < 4; idx++ ) {
+						if ( parsedT6.paires[ idx ] ) {
+							t6Paires[ idx ] = {
+								fen: parsedT6.paires[ idx ].fen || '',
+								couleur_joueur: parsedT6.paires[ idx ].couleur_joueur || 'white',
+								description: parsedT6.paires[ idx ].description || '',
+								pgn_data: parsedT6.paires[ idx ].pgn_data || ''
+							};
+						}
+					}
+				}
+			} catch ( e ) {
+				console.log( 'Erreur parsing JSON Type 6 initial :', e );
+			}
+		}
+
+		// Remplissage HTML et initialisation des événements Type 6
+		fillT6HTML();
+		initT6Events();
+
 		// Logic de mise à jour pour Type 4
 		function updateT4Config() {
 			const t4Config = {
 				etapes: t4Etapes,
 			};
 			textarea.value = JSON.stringify( t4Config, null, 4 );
+		}
+
+		// Logic de mise à jour pour Type 5
+		function updateT5Config() {
+			if ( ! t5FenDepart || ! t5Couleur ) {
+				return;
+			}
+			const t5Config = {
+				fen_depart: t5FenDepart.value.trim(),
+				couleur_joueur: t5Couleur.value,
+				etapes: t5Etapes,
+			};
+			textarea.value = JSON.stringify( t5Config, null, 4 );
+		}
+
+		// Logic de mise à jour pour Type 6
+		function updateT6Config() {
+			if ( ! builderType6 ) {
+				return;
+			}
+			const fenInputs = builderType6.querySelectorAll( '.roi_t6_fen' );
+			const colorSelects = builderType6.querySelectorAll( '.roi_t6_couleur' );
+			const descTextareas = builderType6.querySelectorAll( '.roi_t6_desc' );
+			const pgnTextareas = builderType6.querySelectorAll( '.roi_t6_pgn' );
+
+			const config = {
+				paires: t6Paires.map( function ( paire, idx ) {
+					return {
+						fen: fenInputs[ idx ] ? fenInputs[ idx ].value.trim() : paire.fen,
+						couleur_joueur: colorSelects[ idx ] ? colorSelects[ idx ].value : paire.couleur_joueur,
+						description: descTextareas[ idx ] ? descTextareas[ idx ].value : paire.description,
+						pgn_data: pgnTextareas[ idx ] ? pgnTextareas[ idx ].value : paire.pgn_data
+					};
+				} )
+			};
+			t6Paires = config.paires;
+			textarea.value = JSON.stringify( config, null, 4 );
+		}
+
+		function fillT6HTML() {
+			if ( ! builderType6 ) {
+				return;
+			}
+			const fenInputs = builderType6.querySelectorAll( '.roi_t6_fen' );
+			const colorSelects = builderType6.querySelectorAll( '.roi_t6_couleur' );
+			const descTextareas = builderType6.querySelectorAll( '.roi_t6_desc' );
+			const pgnTextareas = builderType6.querySelectorAll( '.roi_t6_pgn' );
+
+			for ( let idx = 0; idx < 4; idx++ ) {
+				if ( fenInputs[ idx ] ) {
+					fenInputs[ idx ].value = t6Paires[ idx ].fen || '';
+				}
+				if ( colorSelects[ idx ] ) {
+					colorSelects[ idx ].value = t6Paires[ idx ].couleur_joueur || 'white';
+				}
+				if ( descTextareas[ idx ] ) {
+					descTextareas[ idx ].value = t6Paires[ idx ].description || '';
+				}
+				if ( pgnTextareas[ idx ] ) {
+					pgnTextareas[ idx ].value = t6Paires[ idx ].pgn_data || '';
+				}
+			}
+		}
+
+		function initT6Events() {
+			if ( ! builderType6 ) {
+				return;
+			}
+			const fenInputs = builderType6.querySelectorAll( '.roi_t6_fen' );
+			const colorSelects = builderType6.querySelectorAll( '.roi_t6_couleur' );
+			const descTextareas = builderType6.querySelectorAll( '.roi_t6_desc' );
+			const pgnTextareas = builderType6.querySelectorAll( '.roi_t6_pgn' );
+
+			fenInputs.forEach( function ( input, idx ) {
+				input.addEventListener( 'input', function () {
+					t6Paires[ idx ].fen = input.value.trim();
+					updateT6Config();
+				} );
+			} );
+
+			colorSelects.forEach( function ( select, idx ) {
+				select.addEventListener( 'change', function () {
+					t6Paires[ idx ].couleur_joueur = select.value;
+					updateT6Config();
+				} );
+			} );
+
+			descTextareas.forEach( function ( textareaEl, idx ) {
+				textareaEl.addEventListener( 'input', function () {
+					t6Paires[ idx ].description = textareaEl.value;
+					updateT6Config();
+				} );
+			} );
+
+			const fenButtons = builderType6.querySelectorAll( '.btn_open_fen_editor' );
+			fenButtons.forEach( function ( btn ) {
+				btn.addEventListener( 'click', function () {
+					const idx = parseInt( btn.getAttribute( 'data-index' ), 10 );
+					if ( isNaN( idx ) ) return;
+
+					const currentFenInput = fenInputs[ idx ];
+					const initialFen = ( currentFenInput ? currentFenInput.value.trim() : '' ) ||
+						'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+
+					if ( modalOverlay && reactRoot ) {
+						modalOverlay.style.display = 'flex';
+
+						if ( window.RoiFenEditor && window.wp && window.wp.element ) {
+							const editorComponent = window.RoiFenEditor.default || window.RoiFenEditor;
+							const element = window.wp.element.createElement(
+								editorComponent,
+								{
+									initialFen: initialFen,
+									onSave: function ( nouvelleFen ) {
+										if ( currentFenInput ) {
+											currentFenInput.value = nouvelleFen;
+										}
+										t6Paires[ idx ].fen = nouvelleFen;
+										window.wp.element.unmountComponentAtNode( reactRoot );
+										modalOverlay.style.display = 'none';
+										updateT6Config();
+									}
+								}
+							);
+							window.wp.element.render( element, reactRoot );
+						}
+					}
+				} );
+			} );
+
+			const pgnButtons = builderType6.querySelectorAll( '.btn_open_pgn_editor' );
+			pgnButtons.forEach( function ( btn ) {
+				btn.addEventListener( 'click', function () {
+					const idx = parseInt( btn.getAttribute( 'data-index' ), 10 );
+					if ( isNaN( idx ) ) return;
+
+					const currentPgnTextarea = pgnTextareas[ idx ];
+					const initialPgn = ( currentPgnTextarea ? currentPgnTextarea.value.trim() : '' );
+
+					if ( pgnModalOverlay && pgnReactRoot ) {
+						pgnModalOverlay.style.display = 'flex';
+
+						if ( window.RoiPgnEditor && window.wp && window.wp.element ) {
+							const editorComponent = window.RoiPgnEditor.default || window.RoiPgnEditor;
+							const element = window.wp.element.createElement(
+								editorComponent,
+								{
+									initialPgn: initialPgn,
+									onSave: function ( nouveauPgn ) {
+										if ( currentPgnTextarea ) {
+											currentPgnTextarea.value = nouveauPgn;
+										}
+										t6Paires[ idx ].pgn_data = nouveauPgn;
+										window.wp.element.unmountComponentAtNode( pgnReactRoot );
+										pgnModalOverlay.style.display = 'none';
+										updateT6Config();
+									}
+								}
+							);
+							window.wp.element.render( element, pgnReactRoot );
+						}
+					}
+				} );
+			} );
+		}
+
+		// Rendu visuel des étapes du Type 5
+		function renderT5Etapes() {
+			if ( ! t5EtapesContainer ) {
+				return;
+			}
+			t5EtapesContainer.innerHTML = '';
+
+			if ( t5Etapes.length === 0 ) {
+				t5EtapesContainer.innerHTML =
+					'<p style="color: #646970; font-style: italic; text-align: center; padding: 15px 0;">Aucune étape ajoutée pour le moment.</p>';
+				return;
+			}
+
+			t5Etapes.forEach( function ( etape, i ) {
+				const div = document.createElement( 'div' );
+				div.className = 'roi-t5-etape-card';
+				div.setAttribute( 'data-index', i );
+				div.style.border = '1px solid #ccd0d4';
+				div.style.padding = '15px';
+				div.style.marginBottom = '15px';
+				div.style.background = '#fafafa';
+				div.style.borderRadius = '6px';
+				div.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
+
+				div.innerHTML = `
+					<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+						<strong style="font-size: 14px; color: #1e1e1e;">Étape ${ i + 1 }</strong>
+						<span style="font-size: 11px; padding: 3px 8px; background: #e8f0fe; color: #3858e9; border-radius: 12px; font-weight: 600; text-transform: uppercase;">Posi'Plan</span>
+					</div>
+					<div style="display: flex; flex-direction: column; gap: 12px;">
+						<div>
+							<label style="font-weight: 600; display: block; margin-bottom: 4px;">Question :</label>
+							<input type="text" class="t5-question-input" style="width: 100%; height: 30px;" value="${ etape.question || '' }">
+						</div>
+						<div>
+							<label style="font-weight: 600; display: block; margin-bottom: 4px;">Réponse ordinateur (coup suivant de l'adversaire, ex: Nf6) :</label>
+							<input type="text" class="t5-reponse-ordinateur-input" style="width: 100%; height: 30px;" value="${ etape.reponse_ordinateur || '' }" placeholder="Laissez vide s'il s'agit du coup final">
+						</div>
+						<div>
+							<label style="font-weight: 600; display: block; margin-bottom: 6px;">Choix de réponse (sélectionnez la bonne réponse) :</label>
+							<div style="display: flex; flex-direction: column; gap: 12px;">
+								${ [ 0, 1, 2 ].map( function ( idx ) {
+									const choixObj = etape.choix && etape.choix[ idx ] ? etape.choix[ idx ] : { texte: '', san: '', explication: '' };
+									const isChecked = parseInt( etape.bonne_reponse, 10 ) === idx ? 'checked' : '';
+									return `
+										<div style="border: 1px dashed #ccc; padding: 10px; border-radius: 4px; background: #fff; display: flex; flex-direction: column; gap: 8px;">
+											<div style="display: flex; align-items: center; gap: 8px;">
+												<input type="radio" name="roi_t5_correct_${ i }" class="t5-correct-radio" value="${ idx }" ${ isChecked }>
+												<strong style="font-size: 12px;">Choix ${ idx + 1 } :</strong>
+											</div>
+											<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+												<div>
+													<label style="font-size: 11px; display: block;">Texte du bouton :</label>
+													<input type="text" class="t5-choix-texte" data-choice-index="${ idx }" style="width: 100%; height: 28px;" value="${ choixObj.texte || '' }" placeholder="Ex: Fou c4">
+												</div>
+												<div>
+													<label style="font-size: 11px; display: block;">Coup SAN (ex: Bc4) :</label>
+													<input type="text" class="t5-choix-san" data-choice-index="${ idx }" style="width: 100%; height: 28px;" value="${ choixObj.san || '' }" placeholder="Ex: Bc4">
+												</div>
+											</div>
+											<div>
+												<label style="font-size: 11px; display: block;">Explication si erreur :</label>
+												<input type="text" class="t5-choix-explication" data-choice-index="${ idx }" style="width: 100%; height: 28px;" value="${ choixObj.explication || '' }" placeholder="Explication affichée si mauvais choix">
+											</div>
+										</div>
+									`;
+								} ).join( '' ) }
+							</div>
+						</div>
+						<div style="margin-top: 5px;">
+							<button type="button" class="button button-link-delete btn-delete-t5-step" style="color: #b32d2e;">Supprimer l'étape</button>
+						</div>
+					</div>
+				`;
+
+				// Écouteurs d'événements
+				const questionInput = div.querySelector( '.t5-question-input' );
+				questionInput.addEventListener( 'input', function ( e ) {
+					t5Etapes[ i ].question = e.target.value;
+					updateT5Config();
+				} );
+
+				const reponseOrdiInput = div.querySelector( '.t5-reponse-ordinateur-input' );
+				reponseOrdiInput.addEventListener( 'input', function ( e ) {
+					t5Etapes[ i ].reponse_ordinateur = e.target.value;
+					updateT5Config();
+				} );
+
+				const radioButtons = div.querySelectorAll( '.t5-correct-radio' );
+				radioButtons.forEach( function ( rb ) {
+					rb.addEventListener( 'change', function ( e ) {
+						if ( e.target.checked ) {
+							t5Etapes[ i ].bonne_reponse = parseInt( e.target.value, 10 );
+							updateT5Config();
+						}
+					} );
+				} );
+
+				const choiceTexts = div.querySelectorAll( '.t5-choix-texte' );
+				choiceTexts.forEach( function ( input ) {
+					input.addEventListener( 'input', function ( e ) {
+						const idx = parseInt( e.target.getAttribute( 'data-choice-index' ), 10 );
+						if ( ! t5Etapes[ i ].choix ) {
+							t5Etapes[ i ].choix = [ {}, {}, {} ];
+						}
+						if ( ! t5Etapes[ i ].choix[ idx ] ) {
+							t5Etapes[ i ].choix[ idx ] = {};
+						}
+						t5Etapes[ i ].choix[ idx ].texte = e.target.value;
+						updateT5Config();
+					} );
+				} );
+
+				const choiceSans = div.querySelectorAll( '.t5-choix-san' );
+				choiceSans.forEach( function ( input ) {
+					input.addEventListener( 'input', function ( e ) {
+						const idx = parseInt( e.target.getAttribute( 'data-choice-index' ), 10 );
+						if ( ! t5Etapes[ i ].choix ) {
+							t5Etapes[ i ].choix = [ {}, {}, {} ];
+						}
+						if ( ! t5Etapes[ i ].choix[ idx ] ) {
+							t5Etapes[ i ].choix[ idx ] = {};
+						}
+						t5Etapes[ i ].choix[ idx ].san = e.target.value;
+						updateT5Config();
+					} );
+				} );
+
+				const choiceExps = div.querySelectorAll( '.t5-choix-explication' );
+				choiceExps.forEach( function ( input ) {
+					input.addEventListener( 'input', function ( e ) {
+						const idx = parseInt( e.target.getAttribute( 'data-choice-index' ), 10 );
+						if ( ! t5Etapes[ i ].choix ) {
+							t5Etapes[ i ].choix = [ {}, {}, {} ];
+						}
+						if ( ! t5Etapes[ i ].choix[ idx ] ) {
+							t5Etapes[ i ].choix[ idx ] = {};
+						}
+						t5Etapes[ i ].choix[ idx ].explication = e.target.value;
+						updateT5Config();
+					} );
+				} );
+
+				div.querySelector( '.btn-delete-t5-step' ).addEventListener( 'click', function () {
+					t5Etapes.splice( i, 1 );
+					renderT5Etapes();
+					updateT5Config();
+				} );
+
+				t5EtapesContainer.appendChild( div );
+			} );
+		}
+
+		// Câblage du bouton d'ajout d'étape Type 5
+		if ( t5AddEtapeBtn ) {
+			t5AddEtapeBtn.addEventListener( 'click', function () {
+				t5Etapes.push( {
+					question: '',
+					choix: [
+						{ texte: '', san: '', explication: '' },
+						{ texte: '', san: '', explication: '' },
+						{ texte: '', san: '', explication: '' }
+					],
+					bonne_reponse: 0,
+					reponse_ordinateur: ''
+				} );
+				renderT5Etapes();
+				updateT5Config();
+			} );
+		}
+
+		if ( t5FenDepart ) {
+			t5FenDepart.addEventListener( 'input', updateT5Config );
+		}
+		if ( t5Couleur ) {
+			t5Couleur.addEventListener( 'change', updateT5Config );
+		}
+
+		// Gestion de la modale FenEditor pour le Type 5
+		if ( t5EditorBtn && modalOverlay && modalCloseBtn && reactRoot ) {
+			t5EditorBtn.addEventListener( 'click', function () {
+				const initialFen =
+					( t5FenDepart ? t5FenDepart.value.trim() : '' ) ||
+					'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+
+				modalOverlay.style.display = 'flex';
+
+				if ( window.RoiFenEditor && window.wp && window.wp.element ) {
+					const editorComponent =
+						window.RoiFenEditor.default || window.RoiFenEditor;
+					const element = window.wp.element.createElement(
+						editorComponent,
+						{
+							initialFen,
+							onSave( nouvelleFen ) {
+								if ( t5FenDepart ) {
+									t5FenDepart.value = nouvelleFen;
+								}
+								window.wp.element.unmountComponentAtNode(
+									reactRoot
+								);
+								modalOverlay.style.display = 'none';
+								updateT5Config();
+							},
+						}
+					);
+					window.wp.element.render( element, reactRoot );
+				}
+			} );
 		}
 
 		// Rendu visuel des étapes du Type 4

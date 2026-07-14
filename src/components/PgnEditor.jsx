@@ -303,6 +303,8 @@ export default function PgnEditor({
     applyAnnotations(text, currentShapes);
   };
 
+  const [copied, setCopied] = useState(false);
+
   // Validation
   const handleValidate = () => {
     if (onSave && boardApi) {
@@ -607,11 +609,64 @@ export default function PgnEditor({
         </div>
 
         {/* 3. Navigation */}
-        <div className="pgn-navigation-bar">
-          <button type="button" className="pgn-nav-btn" onClick={handleViewStart} title="Début">|&lt;</button>
-          <button type="button" className="pgn-nav-btn" onClick={handleViewPrevious} title="Précédent">&lt;</button>
-          <button type="button" className="pgn-nav-btn" onClick={handleViewNext} title="Suivant">&gt;</button>
-          <button type="button" className="pgn-nav-btn" onClick={handleViewEnd} title="Fin">&gt;|</button>
+        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+          <div className="pgn-navigation-bar">
+            <button type="button" className="pgn-nav-btn" onClick={handleViewStart} title="Début">|&lt;</button>
+            <button type="button" className="pgn-nav-btn" onClick={handleViewPrevious} title="Précédent">&lt;</button>
+            <button type="button" className="pgn-nav-btn" onClick={handleViewNext} title="Suivant">&gt;</button>
+            <button type="button" className="pgn-nav-btn" onClick={handleViewEnd} title="Fin">&gt;|</button>
+          </div>
+          <button
+            type="button"
+            className="pgn-nav-btn"
+            style={{ fontSize: "12px", padding: "6px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
+            onClick={() => {
+              if (boardApi && boardApi.game) {
+                const currentFen = (boardApi.board && boardApi.board.state && boardApi.board.state.fen)
+                  ? boardApi.board.state.fen
+                  : boardApi.game.fen();
+                const copyWithFallback = () => {
+                  if (navigator.clipboard && navigator.clipboard.writeText) {
+                    return navigator.clipboard.writeText(currentFen);
+                  }
+                  // Fallback for non-secure HTTP contexts
+                  const textarea = document.createElement("textarea");
+                  textarea.value = currentFen;
+                  textarea.style.fontSize = "12pt";
+                  textarea.style.position = "fixed";
+                  textarea.style.top = "0";
+                  textarea.style.left = "0";
+                  textarea.style.width = "2em";
+                  textarea.style.height = "2em";
+                  textarea.style.padding = "0";
+                  textarea.style.border = "none";
+                  textarea.style.outline = "none";
+                  textarea.style.boxShadow = "none";
+                  textarea.style.background = "transparent";
+                  document.body.appendChild(textarea);
+                  textarea.focus();
+                  textarea.select();
+                  try {
+                    document.execCommand("copy");
+                    document.body.removeChild(textarea);
+                    return Promise.resolve();
+                  } catch (err) {
+                    document.body.removeChild(textarea);
+                    return Promise.reject(err);
+                  }
+                };
+
+                copyWithFallback()
+                  .then(() => {
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 1500);
+                  })
+                  .catch((err) => console.error("Erreur copie FEN :", err));
+              }
+            }}
+          >
+            {copied ? "✓ FEN copiée !" : "📋 Copier la FEN actuelle"}
+          </button>
         </div>
 
         {/* 4. Commentaire */}
