@@ -66,7 +66,7 @@ class Lecon {
 			'labels'              => $labels,
 			'supports'            => [ 'title', 'editor', 'thumbnail', 'page-attributes' ],
 			'taxonomies'          => [ 'roi_chapitre' ],
-			'hierarchical'        => false,
+			'hierarchical'        => true,
 			'public'              => true,
 			'show_ui'             => true,
 			'show_in_menu'        => 'roi-apprentissage',
