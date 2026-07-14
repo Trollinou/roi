@@ -53,8 +53,8 @@ class Cours {
 			'label'               => __( 'Cours', 'roi' ),
 			'description'         => __( 'Cours constitués de leçons et d\'exercices', 'roi' ),
 			'labels'              => $labels,
-			'supports'            => [ 'title', 'author' ],
-			'taxonomies'          => [ 'roi_chess_category' ],
+			'supports'            => [ 'title', 'thumbnail' ],
+			'taxonomies'          => [ 'roi_chapitre' ],
 			'hierarchical'        => false,
 			'public'              => true,
 			'show_ui'             => true,
@@ -66,17 +66,9 @@ class Cours {
 			'exclude_from_search' => false,
 			'publicly_queryable'  => true,
 			'capability_type'     => 'post',
-			'capabilities'        => [
-				'edit_post'          => 'edit_cours_item',
-				'read_post'          => 'read_cours_item',
-				'delete_post'        => 'delete_cours_item',
-				'edit_posts'         => 'edit_cours',
-				'edit_others_posts'  => 'edit_others_cours',
-				'publish_posts'      => 'publish_cours',
-				'read_private_posts' => 'read_private_cours',
-			],
 			'map_meta_cap'        => true,
 			'show_in_rest'        => true,
+			'menu_icon'           => 'dashicons-book-alt',
 		];
 
 		register_post_type( 'roi_cours', $args );

@@ -21,6 +21,10 @@ module.exports = {
 			__dirname,
 			'src/admin-exercice-builder/main.js'
 		),
+		'admin-cours-builder': path.resolve(
+			__dirname,
+			'src/admin-cours-builder/main.js'
+		),
 	},
 	output: {
 		...defaultConfig.output,

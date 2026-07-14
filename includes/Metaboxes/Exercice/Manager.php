@@ -58,9 +58,6 @@ class Manager {
 
 		$type     = get_post_meta( $post->ID, '_roi_exercice_type', true );
 		$niveau   = get_post_meta( $post->ID, '_roi_exercice_niveau', true );
-		$chapitre = get_post_meta( $post->ID, '_roi_exercice_chapitre', true );
-		$couleur  = get_post_meta( $post->ID, '_roi_exercice_couleur', true );
-		$ordre    = get_post_meta( $post->ID, '_roi_exercice_ordre', true );
 		$config   = get_post_meta( $post->ID, '_roi_exercice_config', true );
 
 		if ( empty( $config ) ) {
@@ -71,8 +68,6 @@ class Manager {
 		if ( ! is_array( $config_data ) ) {
 			$config_data = [];
 		}
-
-		$ordre_val = ( '' === $ordre ) ? 0 : (int) $ordre;
 		?>
 		<p>
 			<label for="roi_exercice_type"><strong>Type d'exercice :</strong></label><br>
@@ -102,24 +97,6 @@ class Manager {
 					<option value="<?php echo $i; ?>" <?php selected( $niveau, (string) $i ); ?>><?php echo $i; ?></option>
 				<?php endfor; ?>
 			</select>
-		</p>
-		<p>
-			<label for="roi_exercice_chapitre"><strong>Chapitre :</strong></label><br>
-			<input type="text" name="roi_exercice_chapitre" id="roi_exercice_chapitre" value="<?php echo esc_attr( $chapitre ); ?>" style="width: 100%; max-width: 400px;">
-		</p>
-		<p>
-			<label for="roi_exercice_couleur"><strong>Couleur du chapitre :</strong></label><br>
-			<select name="roi_exercice_couleur" id="roi_exercice_couleur">
-				<option value="primary" <?php selected( $couleur, "primary" ); ?>>Bleu (primary)</option>
-				<option value="warning" <?php selected( $couleur, "warning" ); ?>>Orange (warning)</option>
-				<option value="danger" <?php selected( $couleur, "danger" ); ?>>Rouge (danger)</option>
-				<option value="success" <?php selected( $couleur, "success" ); ?>>Vert (success)</option>
-				<option value="tertiary" <?php selected( $couleur, "tertiary" ); ?>>Violet (tertiary)</option>
-			</select>
-		</p>
-		<p>
-			<label for="roi_exercice_ordre"><strong>Ordre d'affichage dans le chapitre :</strong></label><br>
-			<input type="number" name="roi_exercice_ordre" id="roi_exercice_ordre" value="<?php echo (int) $ordre_val; ?>" min="0" step="1">
 		</p>
 
 		<?php
@@ -202,25 +179,6 @@ class Manager {
 			if ( $niveau >= 1 && $niveau <= 6 ) {
 				update_post_meta( $post_id, '_roi_exercice_niveau', $niveau );
 			}
-		}
-
-		// Save exercise chapter (string)
-		if ( isset( $_POST['roi_exercice_chapitre'] ) ) {
-			update_post_meta( $post_id, '_roi_exercice_chapitre', sanitize_text_field( wp_unslash( $_POST['roi_exercice_chapitre'] ) ) );
-		}
-
-		// Save exercise color (string)
-		if ( isset( $_POST['roi_exercice_couleur'] ) ) {
-			$couleur        = sanitize_text_field( wp_unslash( $_POST['roi_exercice_couleur'] ) );
-			$allowed_colors = [ 'primary', 'warning', 'danger', 'success', 'tertiary' ];
-			if ( in_array( $couleur, $allowed_colors, true ) ) {
-				update_post_meta( $post_id, '_roi_exercice_couleur', $couleur );
-			}
-		}
-
-		// Save exercise order (integer value)
-		if ( isset( $_POST['roi_exercice_ordre'] ) ) {
-			update_post_meta( $post_id, '_roi_exercice_ordre', intval( $_POST['roi_exercice_ordre'] ) );
 		}
 
 		// Save raw JSON config

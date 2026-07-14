@@ -34,8 +34,7 @@ class Plugin {
 
 
 		// Taxonomies
-		$taxonomies = new \ROI\CPT\Taxonomies();
-		$taxonomies->init();
+		( new \ROI\CPT\Chapitre_Taxonomy() )->init();
 
 		// Roles & capabilities
 		$roles = new Roles();
@@ -68,6 +67,8 @@ class Plugin {
 			$admin_assets = new \ROI\Admin\Assets();
 			$admin_assets->init();
 			new \ROI\Metaboxes\Exercice\Manager();
+			new \ROI\Metaboxes\Cours\Builder();
+			new \ROI\Metaboxes\Lecon\Settings();
 			( new \ROI\Metaboxes\Partie() )->init();
 			$backup = new \ROI\Admin\Backup();
 			$backup->init();

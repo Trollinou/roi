@@ -51,7 +51,7 @@ class Backup {
 	 */
 	public function get_apprentissage_export_data(): array {
 		$post_types = [ 'roi_lecon', 'roi_exercice', 'roi_cours' ];
-		$taxonomy   = 'roi_chess_category';
+		$taxonomy   = 'roi_chapitre';
 
 		$export_data = [
 			'posts' => [],
@@ -204,7 +204,7 @@ class Backup {
 
 		// Clear existing data
 		$post_types = [ 'roi_lecon', 'roi_exercice', 'roi_cours' ];
-		$taxonomy   = 'roi_chess_category';
+		$taxonomy   = 'roi_chapitre';
 
 		$existing_posts = get_posts( [
 			'post_type'      => $post_types,
