@@ -56,7 +56,7 @@ class Settings {
 		?>
 		<p>
 			<label for="roi_lecon_niveau"><strong><?php esc_html_e( 'Niveau de difficulté :', 'roi' ); ?></strong></label><br>
-			<select name="roi_lecon_niveau" id="roi_lecon_niveau" style="width: 100%; margin-top: 5px;">
+			<select name="roi_lecon_niveau" id="roi_lecon_niveau" style="width: 100%; max-width: 120px; box-sizing: border-box; margin-top: 5px;">
 				<?php for ( $i = 1; $i <= 6; $i++ ) : ?>
 					<option value="<?php echo $i; ?>" <?php selected( $niveau, (string) $i ); ?>><?php echo $i; ?></option>
 				<?php endfor; ?>
