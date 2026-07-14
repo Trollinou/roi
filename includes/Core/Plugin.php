@@ -67,7 +67,7 @@ class Plugin {
 			$admin_menu->init();
 			$admin_assets = new \ROI\Admin\Assets();
 			$admin_assets->init();
-			new \ROI\Metaboxes\Exercice();
+			new \ROI\Metaboxes\Exercice\Manager();
 			( new \ROI\Metaboxes\Partie() )->init();
 			$backup = new \ROI\Admin\Backup();
 			$backup->init();

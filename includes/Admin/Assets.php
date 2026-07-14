@@ -60,7 +60,7 @@ class Assets {
 		// Enqueue admin-exercice-builder.js
 		wp_enqueue_script(
 			'roi-admin-exercice-builder',
-			$plugin_url . 'assets/js/admin-exercice-builder.js',
+			$chess_url . 'admin-exercice-builder.js',
 			[ 'roi-admin-fen-editor' ],
 			ROI_VERSION,
 			true
