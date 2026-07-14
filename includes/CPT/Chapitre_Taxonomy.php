@@ -22,6 +22,8 @@ class Chapitre_Taxonomy {
 	 */
 	public function init(): void {
 		add_action( 'init', [ $this, 'register' ], 0 );
+		add_filter( 'get_terms', [ $this, 'trier_termes_chapitre' ], 10, 3 );
+		add_filter( 'wp_terms_checklist_args', [ $this, 'args_checklist_chapitre' ], 10, 2 );
 	}
 
 	/**
@@ -91,5 +93,53 @@ class Chapitre_Taxonomy {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Sorts terms of roi_chapitre to follow the strict predefined order.
+	 *
+	 * @param array|\WP_Error $terms Array of terms.
+	 * @param array $taxonomies Taxonomies being queried.
+	 * @param array $args Arguments.
+	 * @return array Sorted terms.
+	 */
+	public function trier_termes_chapitre( $terms, $taxonomies, $args ) {
+		if ( is_wp_error( $terms ) || empty( $terms ) ) {
+			return $terms;
+		}
+
+		if ( is_array( $taxonomies ) && in_array( 'roi_chapitre', $taxonomies, true ) ) {
+			$order_map = [
+				'Matérialité'         => 1,
+				'Activité des Pièces' => 2,
+				'Sécurité du Roi'     => 3,
+				'Structure de Pions'  => 4,
+				'Combination'         => 5,
+			];
+
+			usort( $terms, function( $a, $b ) use ( $order_map ) {
+				$name_a = is_object( $a ) ? $a->name : ( is_array( $a ) ? ( $a['name'] ?? '' ) : '' );
+				$name_b = is_object( $b ) ? $b->name : ( is_array( $b ) ? ( $b['name'] ?? '' ) : '' );
+				$pos_a  = $order_map[ $name_a ] ?? 99;
+				$pos_b  = $order_map[ $name_b ] ?? 99;
+				return $pos_a <=> $pos_b;
+			} );
+		}
+
+		return $terms;
+	}
+
+	/**
+	 * Configures checklist arguments to avoid checked terms moving to the top.
+	 *
+	 * @param array $args Checklist args.
+	 * @param int $post_id Post ID.
+	 * @return array Updated checklist args.
+	 */
+	public function args_checklist_chapitre( array $args, int $post_id ): array {
+		if ( isset( $args['taxonomy'] ) && 'roi_chapitre' === $args['taxonomy'] ) {
+			$args['checked_ontop'] = false;
+		}
+		return $args;
 	}
 }
