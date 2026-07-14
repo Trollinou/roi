@@ -51,7 +51,7 @@ class Chapitre_Taxonomy {
 			'labels'            => $labels,
 			'show_ui'           => true,
 			'show_in_menu'      => false,
-			'show_admin_column' => true,
+			'show_admin_column' => false,
 			'query_var'         => true,
 			'rewrite'           => [ 'slug' => 'roi-chapitre' ],
 			'show_in_rest'      => true,

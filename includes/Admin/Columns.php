@@ -36,11 +36,15 @@ class Columns {
 	 * @return array<string, string> Customized columns.
 	 */
 	public function ajouter_colonnes( array $columns ): array {
+		global $post_type;
 		$new_columns = [];
 		foreach ( $columns as $key => $value ) {
 			if ( 'date' === $key ) {
 				$new_columns['roi_niveau']   = __( 'Niveau', 'roi' );
 				$new_columns['roi_chapitre'] = __( 'Chapitre', 'roi' );
+				if ( 'roi_cours' === $post_type ) {
+					$new_columns['roi_ordre'] = __( 'Ordre', 'roi' );
+				}
 			}
 			$new_columns[ $key ] = $value;
 		}
@@ -94,6 +98,11 @@ class Columns {
 				echo '—';
 			}
 		}
+
+		if ( 'roi_ordre' === $column ) {
+			$post = get_post( $post_id );
+			echo $post ? (int) $post->menu_order : 0;
+		}
 	}
 
 	/**
@@ -103,7 +112,11 @@ class Columns {
 	 * @return array<string, string> Updated sortable columns.
 	 */
 	public function colonnes_triables( array $columns ): array {
+		global $post_type;
 		$columns['roi_niveau'] = 'roi_niveau';
+		if ( 'roi_cours' === $post_type ) {
+			$columns['roi_ordre'] = 'menu_order';
+		}
 		return $columns;
 	}
 
