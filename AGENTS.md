@@ -106,7 +106,8 @@ wp-content/plugins/[SLUG]/
 │  │  └─ Elo/           # Calculs de points Elo
 │  │     ├─ Calculator.php
 │  │     └─ Rules.php
-│  ├─ API/              # Endpoints REST ou Intégrations externes
+│  ├─ API/              # Intégrations externes & Endpoints
+│  │  ├─ REST/          # Contrôleurs API REST internes (ex: Contenu_Controller.php)
 │  ├─ lib/              # Dépendances externes sans Composer
 │  └─ Utils/            # Helpers statiques
 ├─ languages/           # [PROD] .pot, .po, .mo

@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace ROI\REST;
+namespace ROI\API\REST;
 
 use WP_REST_Request;
 use WP_REST_Response;
@@ -15,10 +15,10 @@ use WP_REST_Server;
 use WP_Error;
 
 /**
- * Class Games
+ * Class Games_Controller
  * Handles saving chess games played in the PWA.
  */
-class Games {
+class Games_Controller {
 
 	/**
 	 * Namespace for the API.
@@ -36,6 +36,8 @@ class Games {
 
 	/**
 	 * Initialize the class and register hooks.
+	 *
+	 * @return void
 	 */
 	public function init(): void {
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
@@ -43,6 +45,8 @@ class Games {
 
 	/**
 	 * Register the REST API routes.
+	 *
+	 * @return void
 	 */
 	public function register_routes(): void {
 		register_rest_route(

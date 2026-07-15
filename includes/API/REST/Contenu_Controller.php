@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace ROI\API;
+namespace ROI\API\REST;
 
 use WP_REST_Request;
 use WP_REST_Response;

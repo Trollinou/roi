@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace ROI\REST;
+namespace ROI\API\REST;
 
 use WP_REST_Request;
 use WP_REST_Response;
@@ -15,10 +15,10 @@ use WP_REST_Server;
 use WP_Error;
 
 /**
- * Class Stockfish
+ * Class Stockfish_Controller
  * Serves stockfish.wasm with the correct Content-Type header to bypass Nginx limitations.
  */
-class Stockfish {
+class Stockfish_Controller {
 
 	/**
 	 * Namespace for the API.
@@ -36,6 +36,8 @@ class Stockfish {
 
 	/**
 	 * Initialize the class and register hooks.
+	 *
+	 * @return void
 	 */
 	public function init(): void {
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
@@ -43,6 +45,8 @@ class Stockfish {
 
 	/**
 	 * Register the REST API routes.
+	 *
+	 * @return void
 	 */
 	public function register_routes(): void {
 		register_rest_route(
@@ -65,7 +69,7 @@ class Stockfish {
 	 * @return WP_REST_Response|WP_Error|void
 	 */
 	public function serve_wasm( WP_REST_Request $request ): mixed {
-		$file_path = plugin_dir_path( dirname( __DIR__, 2 ) . '/roi.php' ) . 'assets/js/stockfish.wasm';
+		$file_path = ROI_PLUGIN_DIR . 'assets/js/stockfish.wasm';
 
 		if ( ! file_exists( $file_path ) ) {
 			return new WP_Error( 'file_not_found', __( 'Fichier non trouvé.', 'roi' ), [ 'status' => 404 ] );

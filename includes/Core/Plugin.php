@@ -42,13 +42,13 @@ class Plugin {
 
 		// REST API endpoints
 		add_action( 'init', function() {
-			$games_rest = new \ROI\REST\Games();
+			$games_rest = new \ROI\API\REST\Games_Controller();
 			$games_rest->init();
-			$stockfish_rest = new \ROI\REST\Stockfish();
+			$stockfish_rest = new \ROI\API\REST\Stockfish_Controller();
 			$stockfish_rest->init();
-			$contenu_rest = new \ROI\API\Contenu_Controller();
+			$contenu_rest = new \ROI\API\REST\Contenu_Controller();
 			$contenu_rest->init();
-			$progression_rest = new \ROI\API\Progression_Controller();
+			$progression_rest = new \ROI\API\REST\Progression_Controller();
 			$progression_rest->init();
 		} );
 
