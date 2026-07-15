@@ -46,9 +46,9 @@ class Plugin {
 			$games_rest->init();
 			$stockfish_rest = new \ROI\REST\Stockfish();
 			$stockfish_rest->init();
-			$exercices_rest = new \ROI\REST\Exercices();
-			$exercices_rest->init();
-			$progression_rest = new \ROI\REST\Progression();
+			$contenu_rest = new \ROI\API\Contenu_Controller();
+			$contenu_rest->init();
+			$progression_rest = new \ROI\API\Progression_Controller();
 			$progression_rest->init();
 		} );
 
