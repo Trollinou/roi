@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "roi/pgn",
+  "version": "1.0.0",
+  "title": "Partie PGN ROI",
+  "category": "widgets",
+  "icon": "book-alt",
+  "description": "Affichage d'une partie d'échecs au format PGN.",
+  "attributes": {
+    "pgn": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "editorScript": "file:./index.js"
+}

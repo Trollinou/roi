@@ -5,30 +5,38 @@ const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 module.exports = {
 	...defaultConfig,
 	entry: {
-		chessboard: path.resolve(
+		'chessboard/chessboard': path.resolve(
 			__dirname,
 			'src/blocks/chessboard/index.jsx'
 		),
-		'chessboard-view': path.resolve(
+		'chessboard/chessboard-view': path.resolve(
 			__dirname,
 			'src/blocks/chessboard/view.jsx'
 		),
-		'admin-fen-editor': path.resolve(
+		'chessboard/admin-fen-editor': path.resolve(
 			__dirname,
 			'src/admin-fen-editor.js'
 		),
-		'admin-exercice-builder': path.resolve(
+		'chessboard/admin-exercice-builder': path.resolve(
 			__dirname,
 			'src/admin-exercice-builder/main.js'
 		),
-		'admin-cours-builder': path.resolve(
+		'chessboard/admin-cours-builder': path.resolve(
 			__dirname,
 			'src/admin-cours-builder/main.js'
+		),
+		'diagramme/index': path.resolve(
+			__dirname,
+			'src/blocks/diagramme/index.js'
+		),
+		'pgn/index': path.resolve(
+			__dirname,
+			'src/blocks/pgn/index.js'
 		),
 	},
 	output: {
 		...defaultConfig.output,
-		path: path.resolve( __dirname, 'build/chessboard' ),
+		path: path.resolve( __dirname, 'build' ),
 		filename: '[name].js',
 	},
 	performance: {
@@ -58,6 +66,26 @@ module.exports = {
 					to: path.resolve(
 						__dirname,
 						'build/chessboard/block.json'
+					),
+				},
+				{
+					from: path.resolve(
+						__dirname,
+						'src/blocks/diagramme/block.json'
+					),
+					to: path.resolve(
+						__dirname,
+						'build/diagramme/block.json'
+					),
+				},
+				{
+					from: path.resolve(
+						__dirname,
+						'src/blocks/pgn/block.json'
+					),
+					to: path.resolve(
+						__dirname,
+						'build/pgn/block.json'
 					),
 				},
 				{

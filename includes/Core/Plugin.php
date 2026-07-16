@@ -26,6 +26,9 @@ class Plugin {
 		$assets = new Assets();
 		$assets->init();
 
+		// Gutenberg Blocks
+		( new \ROI\Blocks\Manager() )->init();
+
 		// Custom Post Types
 		( new \ROI\CPT\Lecon() )->init();
 		( new \ROI\CPT\Exercice() )->init();
