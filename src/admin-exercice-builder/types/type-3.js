@@ -14,7 +14,7 @@ const block = document.getElementById( 'roi-exercice-builder-chessboard' );
 const openEditorBtn = document.getElementById( 'btn_open_fen_editor' );
 
 let boardAPI = null;
-const configData = { fen: '', couleur_joueur: 'white', solution: [] };
+const configData = { fen: '', couleur_joueur: 'white', solution: [], shapes: [] };
 
 export function updateConfig() {
 	if ( ! textarea ) {
@@ -95,11 +95,13 @@ export function init() {
 			configData.couleur_joueur =
 				parsed.couleur_joueur || parsed.color || 'white';
 			configData.solution = parsed.solution || [];
+			configData.shapes = parsed.shapes || [];
 		}
 	} catch ( e ) {
 		configData.fen = fenInput ? fenInput.value.trim() : '';
 		configData.couleur_joueur = colorInput ? colorInput.value : 'white';
 		configData.solution = [];
+		configData.shapes = [];
 	}
 
 	if ( fenInput && configData.fen ) {
@@ -135,6 +137,7 @@ export function init() {
 					( colorInput ? colorInput.value : 'white' ),
 				coordinates: true,
 				viewOnly: false,
+				drawable: { shapes: configData.shapes },
 			};
 
 			const boardState = {
@@ -194,17 +197,17 @@ export function init() {
 				'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
 			openFenEditor(
-				initialFen,
-				function ( nouvelleFen, nouvelleOrientation ) {
-					if ( fenInput ) {
-						fenInput.value = nouvelleFen;
+				{ fen: initialFen, shapes: configData.shapes },
+				function ( result ) {
+					if ( fenInput ) fenInput.value = result.fen;
+					if ( colorInput && result.orientation ) colorInput.value = result.orientation;
+					configData.fen = result.fen;
+					configData.couleur_joueur = result.orientation;
+					configData.shapes = result.shapes || [];
+					if (boardAPI && typeof boardAPI.setShapes === 'function') {
+						boardAPI.setShapes(configData.shapes);
 					}
-					if ( nouvelleOrientation && colorInput ) {
-						colorInput.value = nouvelleOrientation;
-					}
-					if ( generateBtn ) {
-						generateBtn.click();
-					}
+					updateConfig();
 				}
 			);
 		} );

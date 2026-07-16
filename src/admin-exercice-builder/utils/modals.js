@@ -2,7 +2,7 @@
  * Modals management for FEN and PGN editors.
  */
 
-export function openFenEditor( initialFen, onSaveCallback ) {
+export function openFenEditor( initialData, onSaveCallback ) {
 	const modalOverlay = document.getElementById( 'roi_fen_modal_overlay' );
 	const reactRoot = document.getElementById( 'roi_fen_react_root' );
 
@@ -11,9 +11,8 @@ export function openFenEditor( initialFen, onSaveCallback ) {
 	}
 
 	const modalCloseBtn = document.getElementById( 'roi_fen_modal_close' );
-	const cleanedFen =
-		initialFen.trim() ||
-		'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+	const cleanedFen = typeof initialData === 'string' ? initialData.trim() : (initialData?.fen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+	const initialShapes = typeof initialData === 'object' && initialData.shapes ? initialData.shapes : [];
 
 	// Afficher la modale
 	modalOverlay.style.display = 'flex';
@@ -46,8 +45,9 @@ export function openFenEditor( initialFen, onSaveCallback ) {
 			window.RoiFenEditor.default || window.RoiFenEditor;
 		const element = window.wp.element.createElement( editorComponent, {
 			initialFen: cleanedFen,
-			onSave( nouvelleFen, nouvelleOrientation ) {
-				onSaveCallback( nouvelleFen, nouvelleOrientation );
+			initialShapes: initialShapes,
+			onSave( result ) {
+				onSaveCallback( result );
 				cleanClose();
 			},
 		} );

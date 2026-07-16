@@ -178,11 +178,15 @@ export function renderT4Etapes() {
 					const currentFen =
 						etape.fen ||
 						'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-					openFenEditor( currentFen, function ( nouvelleFen ) {
-						t4Etapes[ i ].fen = nouvelleFen;
-						fenInputQcm.value = nouvelleFen;
-						updateConfig();
-					} );
+					openFenEditor(
+						{ fen: currentFen, shapes: etape.shapes || [] },
+						function ( result ) {
+							t4Etapes[ i ].fen = result.fen;
+							t4Etapes[ i ].shapes = result.shapes;
+							fenInputQcm.value = result.fen;
+							updateConfig();
+						}
+					);
 				}
 			);
 		}
@@ -210,7 +214,12 @@ export function init() {
 		try {
 			const parsedT4 = JSON.parse( textarea.value );
 			if ( parsedT4 && Array.isArray( parsedT4.etapes ) ) {
-				t4Etapes = parsedT4.etapes;
+				t4Etapes = parsedT4.etapes.map( function ( etape ) {
+					if ( etape.type === 'qcm' ) {
+						etape.shapes = etape.shapes || [];
+					}
+					return etape;
+				} );
 			}
 		} catch ( e ) {
 			console.log( 'Erreur parsing JSON Type 4 initial :', e );
@@ -265,6 +274,7 @@ export function init() {
 				fen: initialQcmFen,
 				choix: [ '', '', '' ],
 				bonne_reponse: 0,
+				shapes: [],
 			} );
 			renderT4Etapes();
 			updateConfig();

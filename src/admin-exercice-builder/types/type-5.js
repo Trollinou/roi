@@ -12,6 +12,7 @@ const t5AddEtapeBtn = document.getElementById( 'roi_t5_add_etape' );
 const t5EditorBtn = document.getElementById( 'btn_open_fen_editor_t5' );
 
 let t5Etapes = [];
+let t5Shapes = [];
 
 export function updateConfig() {
 	if ( ! t5FenDepart || ! t5Couleur || ! textarea ) {
@@ -20,6 +21,7 @@ export function updateConfig() {
 	const t5Config = {
 		fen_depart: t5FenDepart.value.trim(),
 		couleur_joueur: t5Couleur.value,
+		shapes: t5Shapes,
 		etapes: t5Etapes,
 	};
 	textarea.value = JSON.stringify( t5Config, null, 4 );
@@ -228,6 +230,7 @@ export function init() {
 				if ( Array.isArray( parsedT5.etapes ) ) {
 					t5Etapes = parsedT5.etapes;
 				}
+				t5Shapes = parsedT5.shapes || [];
 			}
 		} catch ( e ) {
 			console.log( 'Erreur parsing JSON Type 5 initial :', e );
@@ -266,10 +269,11 @@ export function init() {
 				( t5FenDepart ? t5FenDepart.value.trim() : '' ) ||
 				'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
-			openFenEditor( initialFen, function ( nouvelleFen ) {
+			openFenEditor( { fen: initialFen, shapes: t5Shapes }, function ( result ) {
 				if ( t5FenDepart ) {
-					t5FenDepart.value = nouvelleFen;
+					t5FenDepart.value = result.fen;
 				}
+				t5Shapes = result.shapes;
 				updateConfig();
 			} );
 		} );

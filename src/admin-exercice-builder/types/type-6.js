@@ -8,10 +8,10 @@ const textarea = document.getElementById( 'roi_config_json' );
 const builderType6 = document.getElementById( 'roi_builder_type_6' );
 
 let t6Paires = [
-	{ fen: '', couleur_joueur: 'white', description: '', pgn_data: '' },
-	{ fen: '', couleur_joueur: 'white', description: '', pgn_data: '' },
-	{ fen: '', couleur_joueur: 'white', description: '', pgn_data: '' },
-	{ fen: '', couleur_joueur: 'white', description: '', pgn_data: '' },
+	{ fen: '', couleur_joueur: 'white', description: '', pgn_data: '', shapes: [] },
+	{ fen: '', couleur_joueur: 'white', description: '', pgn_data: '', shapes: [] },
+	{ fen: '', couleur_joueur: 'white', description: '', pgn_data: '', shapes: [] },
+	{ fen: '', couleur_joueur: 'white', description: '', pgn_data: '', shapes: [] },
 ];
 
 export function updateConfig() {
@@ -38,6 +38,7 @@ export function updateConfig() {
 				pgn_data: pgnTextareas[ idx ]
 					? pgnTextareas[ idx ].value
 					: paire.pgn_data,
+				shapes: paire.shapes || [],
 			};
 		} ),
 	};
@@ -95,6 +96,7 @@ export function init() {
 							description:
 								parsedT6.paires[ idx ].description || '',
 							pgn_data: parsedT6.paires[ idx ].pgn_data || '',
+							shapes: parsedT6.paires[ idx ].shapes || [],
 						};
 					}
 				}
@@ -145,11 +147,12 @@ export function init() {
 				( currentFenInput ? currentFenInput.value.trim() : '' ) ||
 				'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
-			openFenEditor( initialFen, function ( nouvelleFen ) {
+			openFenEditor( { fen: initialFen, shapes: t6Paires[ idx ].shapes || [] }, function ( result ) {
 				if ( currentFenInput ) {
-					currentFenInput.value = nouvelleFen;
+					currentFenInput.value = result.fen;
 				}
-				t6Paires[ idx ].fen = nouvelleFen;
+				t6Paires[ idx ].fen = result.fen;
+				t6Paires[ idx ].shapes = result.shapes;
 				updateConfig();
 			} );
 		} );

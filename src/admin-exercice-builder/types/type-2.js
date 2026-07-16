@@ -365,9 +365,9 @@ export function init() {
 				( t2FenFinale ? t2FenFinale.value.trim() : '' ) ||
 				'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
-			openFenEditor( initialFen, function ( nouvelleFen ) {
+			openFenEditor( { fen: initialFen }, function ( result ) {
 				if ( t2FenFinale ) {
-					t2FenFinale.value = nouvelleFen;
+					t2FenFinale.value = result.fen;
 				}
 				if ( t2GenerateBtn ) {
 					t2GenerateBtn.click();
