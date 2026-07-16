@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.0 - 2026-07-16
+
+*   **Blocs Gutenberg Diagramme & PGN :** Création et intégration de deux nouveaux blocs natifs :
+    *   **Diagramme ROI (`roi/diagramme`)** : permettant d'intégrer des échiquiers statiques configurés via une position FEN et une orientation données, avec l'éditeur `window.RoiFenEditor`.
+    *   **Partie PGN ROI (`roi/pgn`)** : pour l'affichage de parties complètes au format PGN à l'aide de l'éditeur `window.RoiPgnEditor`.
+*   **Enregistrement PHP standardisé :** Création de `\ROI\Blocks\Manager` pour l'enregistrement propre et natif des configurations `block.json` depuis le dossier de build.
+*   **Mise à jour Webpack :** Intégration des points d'entrée et gestion des copies des métadonnées de blocs.
+
 ## 1.2.0 - 2026-06-15
 
 *   **Migration vers `eg-chessboard` :** Remplacement complet de l'ancien dépôt `gutemberg-chessboard` par la bibliothèque partagée moderne `eg-chessboard` (basée sur Chessground et chess.js), déclarée comme dépendance locale (`file:`).
