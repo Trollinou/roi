@@ -613,15 +613,15 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
             </div>
             <div className="legend-item">
               <span className="legend-color-dot" style={{ backgroundColor: "#e22222" }} />
-              <span><strong>Rouge</strong> : Alt + Clic dr.</span>
+              <span><strong>Rouge</strong> : Shift + Clic dr.</span>
             </div>
             <div className="legend-item">
               <span className="legend-color-dot" style={{ backgroundColor: "#2072e2" }} />
-              <span><strong>Bleu</strong> : Shift + Clic dr.</span>
+              <span><strong>Bleu</strong> : Alt + Clic dr.</span>
             </div>
             <div className="legend-item">
               <span className="legend-color-dot" style={{ backgroundColor: "#e8c005" }} />
-              <span><strong>Jaune</strong> : Ctrl + Clic dr.</span>
+              <span><strong>Jaune</strong> : Shift + Alt + Clic dr.</span>
             </div>
           </div>
           <div className="legend-tip">
