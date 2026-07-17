@@ -205,6 +205,10 @@ Pour les fonctionnalités à multiples facettes (ex: une page d'options à ongle
   - `save.js` (Composant Front - ou `render.php` pour les blocs dynamiques)
   - `style.scss` (Styles Front & Back)
   - `editor.scss` (Styles Éditeur uniquement)
+- **iFrame & Compatibilité (IMPORTANT)** : Pour tout bloc intégrant `Chessground` (ou `eg-chessboard`), il est **strictement obligatoire** d'utiliser `"apiVersion": 2` dans le `block.json`.
+  - L'API v3 enferme le bloc dans une iFrame Gutenberg (React Portal).
+  - Chessground attache certains événements (`mousemove`) au `document` global (fenêtre parente), tandis que les éléments du DOM vivent dans l'iFrame. Cela crée un décalage massif de coordonnées lors du glisser-déposer.
+  - Tant qu'une solution robuste pour l'API v3 n'est pas trouvée, rester en v2 pour ces blocs spécifiques.
 
 ### JS & CSS : Compilation Obligatoire
 
