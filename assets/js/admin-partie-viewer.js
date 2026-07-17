@@ -9,7 +9,7 @@
 
 		let boardAPI;
 		// Poll for boardAPI initialization on the block element
-		var checkInterval = setInterval( function () {
+		const checkInterval = setInterval( function () {
 			if ( block.boardAPI ) {
 				clearInterval( checkInterval );
 				boardAPI = block.boardAPI;

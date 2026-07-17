@@ -34,12 +34,17 @@ module.exports = [
 				confirm: 'readonly',
 				alert: 'readonly',
 				process: 'readonly',
+				roi_course_builder_data: 'readonly',
 			},
 		},
 		rules: {
 			'no-console': [ 'warn', { allow: [ 'warn', 'error' ] } ],
 			'no-unused-vars': 'warn',
-			'eqeqeq': 'warn',
+			eqeqeq: 'warn',
+			'import/no-unresolved': 'off',
+			'import/no-extraneous-dependencies': 'off',
+			'no-alert': 'off',
+			camelcase: 'off',
 		},
 	},
 ];

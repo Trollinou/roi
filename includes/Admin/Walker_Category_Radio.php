@@ -21,7 +21,7 @@ class Walker_Category_Radio extends \Walker_Category_Checklist {
 	 * @param string $output Used to append additional content (passed by reference).
 	 * @param \WP_Term $category The current term object.
 	 * @param int $depth Depth of category. Used for tab indentation.
-	 * @param array $args An array of arguments.
+	 * @param array<string, mixed> $args An array of arguments.
 	 * @param int $id Current category ID.
 	 * @return void
 	 */

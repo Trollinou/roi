@@ -1,5 +1,5 @@
 /**
- * @param $
+ * @param {jQuery} $
  * @file Manages the dual-list interface for the Course Builder meta box in the WordPress admin.
  * @author Your Name
  * @version 1.0.0
@@ -119,7 +119,6 @@
 			} )
 			.on( 'change', function () {
 				const previousValue = $( this ).data( 'previous-value' );
-				const currentValue = $( this ).val();
 
 				if ( courseList.find( 'option' ).length > 0 ) {
 					if (
@@ -142,7 +141,7 @@
 				}
 
 				// Update the previous value for the next change event
-				$( this ).data( 'previous-value', currentValue );
+				$( this ).data( 'previous-value', $( this ).val() );
 			} );
 
 		// Initial load if a difficulty is already selected

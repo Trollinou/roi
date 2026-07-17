@@ -269,13 +269,16 @@ export function init() {
 				( t5FenDepart ? t5FenDepart.value.trim() : '' ) ||
 				'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
-			openFenEditor( { fen: initialFen, shapes: t5Shapes }, function ( result ) {
-				if ( t5FenDepart ) {
-					t5FenDepart.value = result.fen;
+			openFenEditor(
+				{ fen: initialFen, shapes: t5Shapes },
+				function ( result ) {
+					if ( t5FenDepart ) {
+						t5FenDepart.value = result.fen;
+					}
+					t5Shapes = result.shapes;
+					updateConfig();
 				}
-				t5Shapes = result.shapes;
-				updateConfig();
-			} );
+			);
 		} );
 	}
 }

@@ -98,10 +98,10 @@ class Chapitre_Taxonomy {
 	/**
 	 * Sorts terms of roi_chapitre to follow the strict predefined order.
 	 *
-	 * @param array|\WP_Error $terms Array of terms.
-	 * @param array $taxonomies Taxonomies being queried.
-	 * @param array $args Arguments.
-	 * @return array Sorted terms.
+	 * @param array<int, mixed>|\WP_Error $terms Array of terms.
+	 * @param array<int, string> $taxonomies Taxonomies being queried.
+	 * @param array<string, mixed> $args Arguments.
+	 * @return array<int, mixed>|\WP_Error Sorted terms.
 	 */
 	public function trier_termes_chapitre( $terms, $taxonomies, $args ) {
 		if ( is_wp_error( $terms ) || empty( $terms ) ) {
@@ -129,6 +129,13 @@ class Chapitre_Taxonomy {
 		return $terms;
 	}
 
+	/**
+	 * Configure arguments for checklist chapitre.
+	 *
+	 * @param array<string, mixed> $args Arguments.
+	 * @param int $post_id Post ID.
+	 * @return array<string, mixed>
+	 */
 	public function args_checklist_chapitre( array $args, int $post_id ): array {
 		if ( isset( $args['taxonomy'] ) && 'roi_chapitre' === $args['taxonomy'] ) {
 			$args['checked_ontop'] = false;

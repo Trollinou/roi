@@ -29,10 +29,7 @@ module.exports = {
 			__dirname,
 			'src/blocks/diagramme/index.js'
 		),
-		'pgn/index': path.resolve(
-			__dirname,
-			'src/blocks/pgn/index.js'
-		),
+		'pgn/index': path.resolve( __dirname, 'src/blocks/pgn/index.js' ),
 	},
 	output: {
 		...defaultConfig.output,
@@ -73,20 +70,14 @@ module.exports = {
 						__dirname,
 						'src/blocks/diagramme/block.json'
 					),
-					to: path.resolve(
-						__dirname,
-						'build/diagramme/block.json'
-					),
+					to: path.resolve( __dirname, 'build/diagramme/block.json' ),
 				},
 				{
 					from: path.resolve(
 						__dirname,
 						'src/blocks/pgn/block.json'
 					),
-					to: path.resolve(
-						__dirname,
-						'build/pgn/block.json'
-					),
+					to: path.resolve( __dirname, 'build/pgn/block.json' ),
 				},
 				{
 					from: path.resolve(

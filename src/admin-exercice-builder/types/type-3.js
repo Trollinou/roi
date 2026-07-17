@@ -14,7 +14,12 @@ const block = document.getElementById( 'roi-exercice-builder-chessboard' );
 const openEditorBtn = document.getElementById( 'btn_open_fen_editor' );
 
 let boardAPI = null;
-const configData = { fen: '', couleur_joueur: 'white', solution: [], shapes: [] };
+const configData = {
+	fen: '',
+	couleur_joueur: 'white',
+	solution: [],
+	shapes: [],
+};
 
 export function updateConfig() {
 	if ( ! textarea ) {
@@ -199,13 +204,20 @@ export function init() {
 			openFenEditor(
 				{ fen: initialFen, shapes: configData.shapes },
 				function ( result ) {
-					if ( fenInput ) fenInput.value = result.fen;
-					if ( colorInput && result.orientation ) colorInput.value = result.orientation;
+					if ( fenInput ) {
+						fenInput.value = result.fen;
+					}
+					if ( colorInput && result.orientation ) {
+						colorInput.value = result.orientation;
+					}
 					configData.fen = result.fen;
 					configData.couleur_joueur = result.orientation;
 					configData.shapes = result.shapes || [];
-					if (boardAPI && typeof boardAPI.setShapes === 'function') {
-						boardAPI.setShapes(configData.shapes);
+					if (
+						boardAPI &&
+						typeof boardAPI.setShapes === 'function'
+					) {
+						boardAPI.setShapes( configData.shapes );
 					}
 					updateConfig();
 				}

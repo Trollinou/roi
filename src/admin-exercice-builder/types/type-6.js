@@ -8,10 +8,34 @@ const textarea = document.getElementById( 'roi_config_json' );
 const builderType6 = document.getElementById( 'roi_builder_type_6' );
 
 let t6Paires = [
-	{ fen: '', couleur_joueur: 'white', description: '', pgn_data: '', shapes: [] },
-	{ fen: '', couleur_joueur: 'white', description: '', pgn_data: '', shapes: [] },
-	{ fen: '', couleur_joueur: 'white', description: '', pgn_data: '', shapes: [] },
-	{ fen: '', couleur_joueur: 'white', description: '', pgn_data: '', shapes: [] },
+	{
+		fen: '',
+		couleur_joueur: 'white',
+		description: '',
+		pgn_data: '',
+		shapes: [],
+	},
+	{
+		fen: '',
+		couleur_joueur: 'white',
+		description: '',
+		pgn_data: '',
+		shapes: [],
+	},
+	{
+		fen: '',
+		couleur_joueur: 'white',
+		description: '',
+		pgn_data: '',
+		shapes: [],
+	},
+	{
+		fen: '',
+		couleur_joueur: 'white',
+		description: '',
+		pgn_data: '',
+		shapes: [],
+	},
 ];
 
 export function updateConfig() {
@@ -147,14 +171,17 @@ export function init() {
 				( currentFenInput ? currentFenInput.value.trim() : '' ) ||
 				'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
-			openFenEditor( { fen: initialFen, shapes: t6Paires[ idx ].shapes || [] }, function ( result ) {
-				if ( currentFenInput ) {
-					currentFenInput.value = result.fen;
+			openFenEditor(
+				{ fen: initialFen, shapes: t6Paires[ idx ].shapes || [] },
+				function ( result ) {
+					if ( currentFenInput ) {
+						currentFenInput.value = result.fen;
+					}
+					t6Paires[ idx ].fen = result.fen;
+					t6Paires[ idx ].shapes = result.shapes;
+					updateConfig();
 				}
-				t6Paires[ idx ].fen = result.fen;
-				t6Paires[ idx ].shapes = result.shapes;
-				updateConfig();
-			} );
+			);
 		} );
 	} );
 

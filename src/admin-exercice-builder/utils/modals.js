@@ -11,8 +11,15 @@ export function openFenEditor( initialData, onSaveCallback ) {
 	}
 
 	const modalCloseBtn = document.getElementById( 'roi_fen_modal_close' );
-	const cleanedFen = typeof initialData === 'string' ? initialData.trim() : (initialData?.fen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
-	const initialShapes = typeof initialData === 'object' && initialData.shapes ? initialData.shapes : [];
+	const cleanedFen =
+		typeof initialData === 'string'
+			? initialData.trim()
+			: initialData?.fen ||
+			  'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+	const initialShapes =
+		typeof initialData === 'object' && initialData.shapes
+			? initialData.shapes
+			: [];
 
 	// Afficher la modale
 	modalOverlay.style.display = 'flex';
@@ -45,7 +52,7 @@ export function openFenEditor( initialData, onSaveCallback ) {
 			window.RoiFenEditor.default || window.RoiFenEditor;
 		const element = window.wp.element.createElement( editorComponent, {
 			initialFen: cleanedFen,
-			initialShapes: initialShapes,
+			initialShapes,
 			onSave( result ) {
 				onSaveCallback( result );
 				cleanClose();

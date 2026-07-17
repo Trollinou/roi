@@ -123,8 +123,8 @@ class Columns {
 	/**
 	 * Configures custom sorting queries for difficulty level.
 	 *
-	 * @param array $vars Query variables.
-	 * @return array Query variables.
+	 * @param array<string, mixed> $vars Query variables.
+	 * @return array<string, mixed> Query variables.
 	 */
 	public function trier_colonnes( array $vars ): array {
 		if ( isset( $vars['orderby'] ) && 'roi_niveau' === $vars['orderby'] ) {

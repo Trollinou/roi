@@ -168,14 +168,15 @@ export class ChessClock {
 			return '00:00';
 		}
 		const totalSeconds = timeMs / 1000;
-		const minutes = Math.floor( totalSeconds / 60 );
-		const seconds = Math.floor( totalSeconds % 60 );
 
 		if ( totalSeconds < 10 ) {
+			const seconds = Math.floor( totalSeconds % 60 );
 			const tenths = Math.floor( ( timeMs % 1000 ) / 100 );
 			return `${ seconds }.${ tenths }`;
 		}
 
+		const minutes = Math.floor( totalSeconds / 60 );
+		const seconds = Math.floor( totalSeconds % 60 );
 		return `${ minutes.toString().padStart( 2, '0' ) }:${ seconds
 			.toString()
 			.padStart( 2, '0' ) }`;
