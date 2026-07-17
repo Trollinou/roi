@@ -2,6 +2,19 @@
 
 ## 1.3.0 - 2026-07-16
 
+*   **Alignement Visuel & UX des Éditeurs :** 
+    *   Uniformisation de `PgnEditor` avec `FenEditor` : retrait de la barre d'outils de dessin au clic gauche au profit du dessin au clic droit/drag natif.
+    *   Ajout d'un encart d'information "Annotations" explicatif sous l'échiquier (sans aide textuelle superflue).
+    *   Désélection automatique et sortie du mode édition vers le mode prévisualisation lors du clic sur le bouton "Appliquer" ou "Valider" pour les deux blocs Gutenberg (`roi/diagramme` et `roi/pgn`).
+*   **Ajustements de l'Éditeur PGN (`roi/pgn`) :**
+    *   Déplacement du bloc "Importer un PGN" vers la colonne de droite, au-dessus du PGN en direct.
+    *   Déplacement de la barre de navigation sous l'échiquier (dans les deux modes d'édition et de prévisualisation).
+    *   Déplacement du bouton "Copier la FEN actuelle" juste au-dessus du bouton de validation.
+    *   Boîte d'importation améliorée pour auto-détecter et charger aussi bien une FEN (créant un SetUp = 1) qu'un PGN standard.
+    *   Épuration de la prévisualisation Gutenberg du bloc (plus de texte superflu, affichage uniquement de l'échiquier et de la barre de boutons).
+*   **Corrections de bugs de navigation et d'entêtes (Upstream/BoardCore) :**
+    *   Correction de la perte des entêtes PGN (headers) et de la FEN initiale lors des ajouts de commentaires ou tracés de formes dans `BoardCore`.
+    *   Correction du bug empêchant la navigation en arrière dans l'historique d'un PGN basé sur une FEN personnalisée.
 *   **Blocs Gutenberg Diagramme & PGN :** Création et intégration de deux nouveaux blocs natifs :
     *   **Diagramme ROI (`roi/diagramme`)** : permettant d'intégrer des échiquiers statiques configurés via une position FEN et une orientation données, avec l'éditeur `window.RoiFenEditor`.
     *   **Partie PGN ROI (`roi/pgn`)** : pour l'affichage de parties complètes au format PGN à l'aide de l'éditeur `window.RoiPgnEditor`.

@@ -31,6 +31,11 @@ export default function Edit({ attributes, setAttributes, isSelected, clientId }
     } else if (typeof data === 'string') {
       setAttributes({ fen: data });
     }
+
+    // Sortir du mode édition en désélectionnant le bloc dans Gutenberg
+    if (window.wp?.data?.dispatch) {
+      window.wp.data.dispatch('core/block-editor').clearSelectedBlock();
+    }
   };
 
   // Preview Board Initialization (when not selected)
@@ -93,8 +98,8 @@ export default function Edit({ attributes, setAttributes, isSelected, clientId }
   }, [isSelected, attributes.fen, attributes.orientation, attributes.shapes]);
 
   const blockProps = useBlockProps({
-    className: isSelected ? '' : 'roi-bloc-diagramme-placeholder',
-    style: isSelected ? {} : { padding: '15px', border: '1px dashed #ccc', background: '#f9f9f9', textAlign: 'center', cursor: 'pointer' }
+    className: isSelected ? '' : 'roi-bloc-diagramme-preview',
+    style: isSelected ? {} : { cursor: 'pointer', background: 'transparent', display: 'flex', justifyContent: 'center' }
   });
 
   if (isSelected && RoiFenEditor) {
@@ -111,27 +116,13 @@ export default function Edit({ attributes, setAttributes, isSelected, clientId }
     );
   }
 
-  // Preview Mode
+  // Preview Mode - Only displays the board, clean and centered
   return (
     <div {...blockProps} onMouseDownCapture={handleMouseDownCapture}>
-      <div style={{ pointerEvents: 'none' }}>
-        <h4 style={{ margin: '0 0 10px 0' }}>{__('Diagramme ROI (Prévisualisation)', 'roi')}</h4>
-
-        <div style={{ width: '320px', height: '320px', margin: '0 auto 10px auto', position: 'relative' }}>
+      <div style={{ pointerEvents: 'none', display: 'flex', justifyContent: 'center', width: '100%' }}>
+        <div style={{ width: '320px', height: '320px', position: 'relative' }}>
           <div ref={previewBoardRef} style={{ width: '100%', height: '100%' }} />
         </div>
-
-        <p style={{ fontSize: '11px', color: '#888', margin: '0' }}>
-          <strong>{__('FEN :', 'roi')}</strong> {attributes.fen}
-        </p>
-        <p style={{ fontSize: '11px', color: '#888', margin: '2px 0 0 0' }}>
-          <strong>{__('Orientation :', 'roi')}</strong> {attributes.orientation}
-        </p>
-        {!RoiFenEditor && (
-          <p style={{ color: 'red', fontSize: '11px', margin: '5px 0 0 0' }}>
-            {__('Attention : window.RoiFenEditor non disponible.', 'roi')}
-          </p>
-        )}
       </div>
     </div>
   );
