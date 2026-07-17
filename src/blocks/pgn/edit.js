@@ -23,6 +23,11 @@ export default function Edit( { attributes, setAttributes, isSelected, clientId 
 
   const handleSave = ( newPgn ) => {
     setAttributes( { pgn: newPgn } );
+
+    // Sortir du mode édition en désélectionnant le bloc dans Gutenberg
+    if ( window.wp?.data?.dispatch ) {
+      window.wp.data.dispatch( 'core/block-editor' ).clearSelectedBlock();
+    }
   };
 
   // Preview Board Initialization (when not selected)
@@ -47,7 +52,7 @@ export default function Edit( { attributes, setAttributes, isSelected, clientId 
           enabled: false,
         },
         drawable: {
-          enabled: true,
+          enabled: false,
         },
       };
 
@@ -108,25 +113,24 @@ export default function Edit( { attributes, setAttributes, isSelected, clientId 
   // Preview Mode
   return (
     <div { ...blockProps } onMouseDownCapture={ handleMouseDownCapture }>
-      <div style={ { pointerEvents: 'none' } }>
-        <h4 style={ { margin: '0 0 10px 0' } }>{ __( 'Partie PGN ROI (Prévisualisation)', 'roi' ) }</h4>
-        
+      <div style={ { display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' } }>
         { attributes.pgn ? (
-          <div style={ { width: '320px', height: '320px', margin: '0 auto 10px auto', position: 'relative' } }>
-            <div ref={ previewBoardRef } style={ { width: '100%', height: '100%' } } />
-          </div>
+          <>
+            <div style={ { width: '320px', height: '320px', position: 'relative' } }>
+              <div ref={ previewBoardRef } style={ { width: '100%', height: '100%' } } />
+            </div>
+
+            {/* Boutons de navigation (visuels uniquement pour marquer le type PGN) */}
+            <div className="pgn-navigation-bar" style={ { width: '320px', marginTop: '10px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' } }>
+              <button type="button" className="pgn-nav-btn" title="Début" style={ { cursor: 'pointer', color: '#495057', borderColor: '#ced4da', background: '#ffffff' } }>|&lt;</button>
+              <button type="button" className="pgn-nav-btn" title="Précédent" style={ { cursor: 'pointer', color: '#495057', borderColor: '#ced4da', background: '#ffffff' } }>&lt;</button>
+              <button type="button" className="pgn-nav-btn" title="Suivant" style={ { cursor: 'pointer', color: '#495057', borderColor: '#ced4da', background: '#ffffff' } }>&gt;</button>
+              <button type="button" className="pgn-nav-btn" title="Fin" style={ { cursor: 'pointer', color: '#495057', borderColor: '#ced4da', background: '#ffffff' } }>&gt;|</button>
+            </div>
+          </>
         ) : (
           <p style={ { fontSize: '12px', color: '#666', fontStyle: 'italic', margin: '15px 0' } }>
             { __( 'Aucune partie chargée.', 'roi' ) }
-          </p>
-        ) }
-
-        <p style={ { fontSize: '11px', color: '#888', margin: '0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' } }>
-          <strong>{ __( 'PGN :', 'roi' ) }</strong> { attributes.pgn || __( 'Vide', 'roi' ) }
-        </p>
-        { ! RoiPgnEditor && (
-          <p style={ { color: 'red', fontSize: '11px', margin: '5px 0 0 0' } }>
-            { __( 'Attention : window.RoiPgnEditor non disponible.', 'roi' ) }
           </p>
         ) }
       </div>
