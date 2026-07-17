@@ -62,6 +62,43 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
     setArrowStart(null);
   }, [selectedTool]);
 
+  // Synchronise manuellement l'instance interne de chess.js avec la FEN (notamment pour les FEN invalides ou vides sans rois)
+  const syncChessJsFromFen = (fenStr) => {
+    if (!boardApiRef.current || !boardApiRef.current.game) return;
+    const game = boardApiRef.current.game;
+    
+    try {
+      game.load(fenStr);
+      return;
+    } catch (e) {
+      // Si load() échoue (ex: pas de rois), on utilise clear() + put() qui ne valide pas la présence des rois
+    }
+
+    game.clear();
+    const parts = fenStr.split(" ");
+    const placement = parts[0];
+    
+    const rows = placement.split("/");
+    const ranks = ["8", "7", "6", "5", "4", "3", "2", "1"];
+    const files = ["a", "b", "c", "d", "e", "f", "g", "h"];
+    
+    for (let r = 0; r < rows.length; r++) {
+      const row = rows[r];
+      let fileIdx = 0;
+      for (let c = 0; c < row.length; c++) {
+        const char = row[c];
+        if (isNaN(parseInt(char, 10))) {
+          const isWhite = char === char.toUpperCase();
+          const square = files[fileIdx] + ranks[r];
+          game.put({ type: char.toLowerCase(), color: isWhite ? "w" : "b" }, square);
+          fileIdx++;
+        } else {
+          fileIdx += parseInt(char, 10);
+        }
+      }
+    }
+  };
+
   // Met à jour la position FEN à partir de l'état actuel de l'échiquier
   const syncPositionFromBoard = () => {
     if (boardApiRef.current && typeof boardApiRef.current.getPlacementFen === "function") {
@@ -232,6 +269,7 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
     );
 
     boardApiRef.current = boardAPI;
+    syncChessJsFromFen(currentFen);
 
     if (initialShapes && initialShapes.length > 0) {
       boardAPI.setShapes(initialShapes);
@@ -261,6 +299,7 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
       setCastling(cast);
 
       boardApiRef.current.setPosition(initialFen);
+      syncChessJsFromFen(initialFen);
     }
   }, [initialFen]);
 
@@ -275,6 +314,7 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
   const handleReset = () => {
     if (boardApiRef.current) {
       boardApiRef.current.setPosition(defaultFen);
+      syncChessJsFromFen(defaultFen);
       setPosition("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
       setTurn("w");
       setCastling("KQkq");
@@ -286,6 +326,7 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
     const emptyFen = "8/8/8/8/8/8/8/8 w - - 0 1";
     if (boardApiRef.current) {
       boardApiRef.current.setPosition(emptyFen);
+      syncChessJsFromFen(emptyFen);
       setPosition("8/8/8/8/8/8/8/8");
       setTurn("w");
       setCastling("-");
