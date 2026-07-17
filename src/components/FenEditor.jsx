@@ -138,6 +138,40 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
     }
   };
 
+  // Calculer la case sous le clic en fonction des coordonnées de l'événement
+  const getSquareFromClick = (e) => {
+    const boardEl = boardElRef.current;
+    if (!boardEl) return null;
+    const rect = boardEl.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const isBlack = boardApiRef.current && boardApiRef.current.getOrientation() === "black";
+    
+    const fileIdx = Math.floor((x / rect.width) * 8);
+    const rankIdx = Math.floor((y / rect.height) * 8);
+    
+    if (fileIdx < 0 || fileIdx > 7 || rankIdx < 0 || rankIdx > 7) return null;
+    
+    const files = ["a", "b", "c", "d", "e", "f", "g", "h"];
+    const ranks = ["8", "7", "6", "5", "4", "3", "2", "1"];
+    
+    const file = files[isBlack ? 7 - fileIdx : fileIdx];
+    const rank = ranks[isBlack ? 7 - rankIdx : rankIdx];
+    
+    return file + rank;
+  };
+
+  const handleBoardClick = (e) => {
+    if (!selectedToolRef.current) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const square = getSquareFromClick(e);
+    if (square) {
+      handleSquareClick(square);
+    }
+  };
+
   // Initialisation et cycle de vie de BoardCore
   useEffect(() => {
     if (!boardElRef.current) return;
@@ -241,7 +275,7 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
   const handleReset = () => {
     if (boardApiRef.current) {
       boardApiRef.current.setPosition(defaultFen);
-      syncPositionFromBoard();
+      setPosition("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
       setTurn("w");
       setCastling("KQkq");
     }
@@ -252,7 +286,7 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
     const emptyFen = "8/8/8/8/8/8/8/8 w - - 0 1";
     if (boardApiRef.current) {
       boardApiRef.current.setPosition(emptyFen);
-      syncPositionFromBoard();
+      setPosition("8/8/8/8/8/8/8/8");
       setTurn("w");
       setCastling("-");
     }
@@ -669,7 +703,7 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
       {/* Colonne Gauche - L'échiquier */}
       <div className="fen-editor-board-col">
         <section className="fen-editor-main-wrap">
-          <div className="fen-editor-main-board">
+          <div className="fen-editor-main-board" onClick={handleBoardClick}>
             <div ref={boardElRef} />
           </div>
         </section>
