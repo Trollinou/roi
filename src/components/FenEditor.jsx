@@ -385,6 +385,7 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
           position: relative;
           width: 400px;
           height: 400px;
+          overflow: hidden;
         }
 
         .fen-editor-main-board > div {
@@ -427,6 +428,8 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
           padding: 12px;
           border-radius: 8px;
           border: 1px solid #e9ecef;
+          position: relative;
+          z-index: 5;
         }
 
         .fen-editor-palette-row {
@@ -570,6 +573,8 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
           display: flex;
           gap: 8px;
           margin-top: 10px;
+          position: relative;
+          z-index: 5;
         }
 
         .fen-editor-actions .fen-editor-btn {
@@ -585,6 +590,8 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
           cursor: pointer;
           transition: all 0.2s ease;
           text-align: center;
+          position: relative;
+          z-index: 5;
         }
 
         .fen-editor-btn-secondary {
@@ -635,6 +642,7 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
           cursor: pointer;
           transition: all 0.2s ease;
           position: relative;
+          z-index: 5;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
@@ -659,6 +667,8 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
           justify-content: center;
           font-size: 18px;
           transition: all 0.2s ease;
+          position: relative;
+          z-index: 5;
           box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
@@ -687,6 +697,8 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
           justify-content: center;
           gap: 6px;
           transition: all 0.2s ease;
+          position: relative;
+          z-index: 5;
         }
 
         .pgn-eraser-btn:hover {
