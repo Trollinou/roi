@@ -149,12 +149,12 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
   };
 
   const handleClear = () => {
-    boardApiRef.current.setFen("8/8/8/8/8/8/8/8");
+    boardApiRef.current.setPosition("8/8/8/8/8/8/8/8 w - - 0 1");
     syncPositionFromBoard();
   };
 
   const handleReset = () => {
-    boardApiRef.current.setFen(defaultFen);
+    boardApiRef.current.setPosition(defaultFen);
     syncPositionFromBoard();
     setTurn("w");
     setCastling("KQkq");
