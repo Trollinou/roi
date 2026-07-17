@@ -18,10 +18,6 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
   const [castling, setCastling] = useState("KQkq");
   const [orientation, setOrientation] = useState(boardConfig.orientation || "white");
   const [selectedPiece, setSelectedPiece] = useState(null); // { role, color } ou "eraser" ou null
-
-  // États des dessins (flèches et cercles)
-  const [selectedTool, setSelectedTool] = useState(null); // { type: 'circle'|'arrow'|'eraser', color?: string }
-  const [arrowStart, setArrowStart] = useState(null);
   const [currentShapes, setCurrentShapes] = useState(initialShapes);
 
   const boardElRef = useRef(null);
@@ -33,36 +29,6 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
     selectedPieceRef.current = selectedPiece;
   }, [selectedPiece]);
 
-  const selectedToolRef = useRef(selectedTool);
-  useEffect(() => {
-    selectedToolRef.current = selectedTool;
-  }, [selectedTool]);
-
-  const arrowStartRef = useRef(arrowStart);
-  useEffect(() => {
-    arrowStartRef.current = arrowStart;
-  }, [arrowStart]);
-
-  const currentShapesRef = useRef(currentShapes);
-  useEffect(() => {
-    currentShapesRef.current = currentShapes;
-  }, [currentShapes]);
-
-  // Désactiver les mouvements de pièces si un outil de dessin est sélectionné
-  useEffect(() => {
-    if (boardApiRef.current) {
-      const isDrawing = selectedTool !== null;
-      boardApiRef.current.setConfig({
-        viewOnly: isDrawing,
-        movable: {
-          color: isDrawing ? "none" : "both",
-        }
-      });
-    }
-    setArrowStart(null);
-  }, [selectedTool]);
-
-
   // Met à jour la position FEN à partir de l'état actuel de l'échiquier
   const syncPositionFromBoard = () => {
     if (boardApiRef.current && typeof boardApiRef.current.getPlacementFen === "function") {
@@ -71,12 +37,11 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
     }
   };
 
-  // Gestion du clic sur une case (mode édition ou dessin)
+  // Gestion du clic sur une case (mode édition)
   const handleSquareClick = (square) => {
     if (!boardApiRef.current) return;
 
     const activePiece = selectedPieceRef.current;
-    const tool = selectedToolRef.current;
 
     if (activePiece) {
       if (activePiece === "eraser") {
@@ -88,88 +53,6 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
         boardApiRef.current.putPiece({ type, color }, square);
         syncPositionFromBoard();
       }
-      // Après la modification, redessiner les formes si la FEN change
-      boardApiRef.current.setShapes(currentShapesRef.current);
-    } else if (tool) {
-      let newShapes = [...currentShapesRef.current];
-
-      if (tool.type === "circle") {
-        const color = tool.color;
-        // Toggle du cercle
-        const exists = newShapes.some(s => s.orig === square && !s.dest && s.brush === color);
-        newShapes = newShapes.filter(s => !(s.orig === square && !s.dest));
-        if (!exists) {
-          newShapes.push({ orig: square, brush: color });
-        }
-        setArrowStart(null);
-        setCurrentShapes(newShapes);
-        boardApiRef.current.setShapes(newShapes);
-      } else if (tool.type === "arrow") {
-        const color = tool.color;
-        if (!arrowStartRef.current) {
-          setArrowStart(square);
-          // Mettre la case en surbrillance temporaire
-          const tempShapes = [...newShapes, { orig: square, brush: color }];
-          boardApiRef.current.setShapes(tempShapes);
-        } else {
-          const start = arrowStartRef.current;
-          setArrowStart(null);
-          if (start === square) {
-            boardApiRef.current.setShapes(currentShapesRef.current);
-            return;
-          }
-
-          // Toggle de la flèche
-          const exists = newShapes.some(s => s.orig === start && s.dest === square && s.brush === color);
-          newShapes = newShapes.filter(s => !(s.orig === start && s.dest === square));
-          if (!exists) {
-            newShapes.push({ orig: start, dest: square, brush: color });
-          }
-
-          setCurrentShapes(newShapes);
-          boardApiRef.current.setShapes(newShapes);
-        }
-      } else if (tool.type === "eraser") {
-        // Retirer toute forme liée à cette case
-        newShapes = newShapes.filter(s => s.orig !== square && s.dest !== square);
-        setArrowStart(null);
-        setCurrentShapes(newShapes);
-        boardApiRef.current.setShapes(newShapes);
-      }
-    }
-  };
-
-  // Calculer la case sous le clic en fonction des coordonnées de l'événement
-  const getSquareFromClick = (e) => {
-    const boardEl = boardElRef.current;
-    if (!boardEl) return null;
-    const rect = boardEl.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    const isBlack = boardApiRef.current && boardApiRef.current.getOrientation() === "black";
-    
-    const fileIdx = Math.floor((x / rect.width) * 8);
-    const rankIdx = Math.floor((y / rect.height) * 8);
-    
-    if (fileIdx < 0 || fileIdx > 7 || rankIdx < 0 || rankIdx > 7) return null;
-    
-    const files = ["a", "b", "c", "d", "e", "f", "g", "h"];
-    const ranks = ["8", "7", "6", "5", "4", "3", "2", "1"];
-    
-    const file = files[isBlack ? 7 - fileIdx : fileIdx];
-    const rank = ranks[isBlack ? 7 - rankIdx : rankIdx];
-    
-    return file + rank;
-  };
-
-  const handleBoardClick = (e) => {
-    if (!selectedToolRef.current) return;
-    e.preventDefault();
-    e.stopPropagation();
-    const square = getSquareFromClick(e);
-    if (square) {
-      handleSquareClick(square);
     }
   };
 
@@ -198,6 +81,11 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
       },
       draggable: {
         deleteOnDropOff: true,
+      },
+      drawable: {
+        onChange: (shapes) => {
+          setCurrentShapes(shapes);
+        }
       },
       events: {
         select: (key) => {
@@ -249,51 +137,28 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
     };
   }, []);
 
-  // Synchronisation de la FEN lors des changements de prop initialFen externe
-  useEffect(() => {
-    if (boardApiRef.current && initialFen) {
-      const parts = initialFen.split(" ");
-      const pos = parts[0] || "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
-      const t = parts[1] || "w";
-      const cast = parts[2] || "KQkq";
+  // Assemblage et sauvegarde de la FEN
 
-      setPosition(pos);
-      setTurn(t);
-      setCastling(cast);
-
-      boardApiRef.current.setPosition(initialFen);
-    }
-  }, [initialFen]);
-
-  // Synchronisation de l'orientation avec l'échiquier
-  useEffect(() => {
-    if (boardApiRef.current) {
-      boardApiRef.current.setConfig({ orientation });
-    }
-  }, [orientation]);
-
-  // Réinitialisation de l'échiquier
-  const handleReset = () => {
-    if (boardApiRef.current) {
-      boardApiRef.current.setPosition(defaultFen);
-      setPosition("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
-      setTurn("w");
-      setCastling("KQkq");
+  // Assemblage et sauvegarde de la FEN
+  const handleApply = () => {
+    if (onSave) {
+      const finalFen = `${position} ${turn} ${castling} - 0 1`;
+      onSave({ fen: finalFen, orientation, shapes: currentShapes });
     }
   };
 
-  // Vider l'échiquier
   const handleClear = () => {
-    const emptyFen = "8/8/8/8/8/8/8/8 w - - 0 1";
-    if (boardApiRef.current) {
-      boardApiRef.current.setPosition(emptyFen);
-      setPosition("8/8/8/8/8/8/8/8");
-      setTurn("w");
-      setCastling("-");
-    }
+    boardApiRef.current.setFen("8/8/8/8/8/8/8/8");
+    syncPositionFromBoard();
   };
 
-  // Mise à jour des roques
+  const handleReset = () => {
+    boardApiRef.current.setFen(defaultFen);
+    syncPositionFromBoard();
+    setTurn("w");
+    setCastling("KQkq");
+  };
+
   const handleCastlingChange = (flag, checked) => {
     let current = castling === "-" ? "" : castling;
     if (checked) {
@@ -312,21 +177,6 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
     setCastling(current);
   };
 
-  // Assemblage et sauvegarde de la FEN
-  const handleApply = () => {
-    if (onSave) {
-      const finalFen = `${position} ${turn} ${castling} - 0 1`;
-      onSave({ fen: finalFen, orientation, shapes: currentShapes });
-    }
-  };
-
-  const colors = [
-    { name: "green", label: "Vert", hex: "#2ecc71" },
-    { name: "red", label: "Rouge", hex: "#e74c3c" },
-    { name: "blue", label: "Bleu", hex: "#3498db" },
-    { name: "yellow", label: "Jaune", hex: "#f1c40f" },
-  ];
-
   const roles = ["pawn", "knight", "bishop", "rook", "queen", "king"];
 
   // Pièce de palette cliquable réutilisant les composants et le CSS natif de Chessground/Wikipedia
@@ -338,7 +188,6 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
         type="button"
         className={`editor-palette-piece ${isActive ? "active" : ""}`}
         onClick={() => {
-          setSelectedTool(null);
           if (isActive) {
             setSelectedPiece(null);
           } else {
@@ -614,6 +463,55 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
           background: #2b45be;
         }
 
+        .fen-editor-drawing-legend {
+          margin-top: 16px;
+          background: #f8f9fa;
+          border: 1px solid #e9ecef;
+          border-radius: 8px;
+          padding: 12px 16px;
+          font-size: 12px;
+          color: #495057;
+          line-height: 1.5;
+        }
+
+        .fen-editor-drawing-legend .legend-title {
+          font-weight: 600;
+          color: #2c3e50;
+          margin-bottom: 8px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .fen-editor-drawing-legend .legend-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 6px 12px;
+          margin-bottom: 8px;
+        }
+
+        .fen-editor-drawing-legend .legend-item {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .fen-editor-drawing-legend .legend-color-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          display: inline-block;
+          flex-shrink: 0;
+        }
+
+        .fen-editor-drawing-legend .legend-tip {
+          font-size: 11px;
+          color: #868e96;
+          border-top: 1px dashed #dee2e6;
+          padding-top: 6px;
+          margin-top: 4px;
+        }
+
         /* Réduction de la taille de l'échiquier sur les écrans de faible hauteur */
         @media (max-height: 750px) {
           .fen-editor-board-col {
@@ -634,89 +532,12 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
             min-width: 100%;
           }
         }
-
-        .pgn-color-btn {
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
-          border: 2px solid transparent;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          position: relative;
-          z-index: 5;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .pgn-color-btn:hover {
-          transform: scale(1.1);
-        }
-
-        .pgn-color-btn.active {
-          border-color: #212529;
-          box-shadow: 0 0 0 2px #fff, 0 2px 8px rgba(0,0,0,0.25);
-        }
-
-        .pgn-arrow-btn {
-          width: 36px;
-          height: 36px;
-          border-radius: 6px;
-          border: 1px solid #dee2e6;
-          background: #ffffff;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 18px;
-          transition: all 0.2s ease;
-          position: relative;
-          z-index: 5;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .pgn-arrow-btn:hover {
-          background: #f1f3f5;
-        }
-
-        .pgn-arrow-btn.active {
-          background: #e8f0fe;
-          border-color: #3858e9;
-          color: #3858e9;
-        }
-
-        .pgn-eraser-btn {
-          flex: 1;
-          height: 32px;
-          border-radius: 6px;
-          border: 1px solid #ffccd5;
-          background: #fff5f5;
-          color: #e53e3e;
-          font-size: 12px;
-          font-weight: 600;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 6px;
-          transition: all 0.2s ease;
-          position: relative;
-          z-index: 5;
-        }
-
-        .pgn-eraser-btn:hover {
-          background: #ffe3e6;
-        }
-
-        .pgn-eraser-btn.active {
-          background: #e53e3e;
-          color: #ffffff;
-          border-color: #e53e3e;
-        }
       `}</style>
 
       {/* Colonne Gauche - L'échiquier */}
       <div className="fen-editor-board-col">
         <section className="fen-editor-main-wrap">
-          <div className="fen-editor-main-board" onClick={handleBoardClick}>
+          <div className="fen-editor-main-board">
             <div ref={boardElRef} />
           </div>
         </section>
@@ -738,6 +559,32 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
             Position initiale
           </button>
         </div>
+
+        {/* Aide au dessin */}
+        <div className="fen-editor-drawing-legend">
+          <div className="legend-title">✍️ Annotations (comme Lichess)</div>
+          <div className="legend-grid">
+            <div className="legend-item">
+              <span className="legend-color-dot" style={{ backgroundColor: "#15ba3a" }} />
+              <span><strong>Vert</strong> : Clic droit</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-color-dot" style={{ backgroundColor: "#e22222" }} />
+              <span><strong>Rouge</strong> : Alt + Clic dr.</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-color-dot" style={{ backgroundColor: "#2072e2" }} />
+              <span><strong>Bleu</strong> : Shift + Clic dr.</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-color-dot" style={{ backgroundColor: "#e8c005" }} />
+              <span><strong>Jaune</strong> : Ctrl + Clic dr.</span>
+            </div>
+          </div>
+          <div className="legend-tip">
+            <em>Flèches : Glisser-déposer avec le clic droit. Clic gauche simple sur l'échiquier pour tout effacer.</em>
+          </div>
+        </div>
       </div>
 
       {/* Colonne Droite - Contrôles */}
@@ -756,80 +603,10 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
               type="button"
               className={`editor-palette-eraser ${selectedPiece === "eraser" ? "active" : ""}`}
               onClick={() => {
-                setSelectedTool(null);
                 setSelectedPiece(selectedPiece === "eraser" ? null : "eraser");
               }}
             >
               🗑️ Gomme (Effacer)
-            </button>
-          </div>
-        </div>
-
-        {/* Outils de dessin */}
-        <div>
-          <div className="fen-editor-section-title">Outils de dessin</div>
-          <div className="fen-editor-palette-group" style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-            {/* Outil (Cercle / Flèche) */}
-            <div style={{ display: "flex", gap: "4px" }}>
-              <button
-                type="button"
-                className={`pgn-arrow-btn ${selectedTool?.type === "circle" ? "active" : ""}`}
-                style={{ width: "32px", height: "32px", fontSize: "15px" }}
-                onClick={() => {
-                  setSelectedPiece(null);
-                  setSelectedTool(selectedTool?.type === "circle" ? null : { type: "circle", color: selectedTool?.color || "green" });
-                }}
-                title="Cercle"
-              >
-                ◯
-              </button>
-              <button
-                type="button"
-                className={`pgn-arrow-btn ${selectedTool?.type === "arrow" ? "active" : ""}`}
-                style={{ width: "32px", height: "32px", fontSize: "15px" }}
-                onClick={() => {
-                  setSelectedPiece(null);
-                  setSelectedTool(selectedTool?.type === "arrow" ? null : { type: "arrow", color: selectedTool?.color || "green" });
-                }}
-                title="Flèche"
-              >
-                ↗
-              </button>
-            </div>
-
-            {/* Couleurs */}
-            <div style={{ display: "flex", gap: "5px" }}>
-              {colors.map((c) => {
-                const isActive = (selectedTool?.type === "circle" || selectedTool?.type === "arrow") && selectedTool?.color === c.name;
-                return (
-                  <button
-                    key={`color-${c.name}`}
-                    type="button"
-                    className={`pgn-color-btn ${isActive ? "active" : ""}`}
-                    style={{ backgroundColor: c.hex, width: "24px", height: "24px" }}
-                    onClick={() => {
-                      setSelectedPiece(null);
-                      const currentType = selectedTool?.type === "arrow" ? "arrow" : "circle";
-                      setSelectedTool({ type: currentType, color: c.name });
-                    }}
-                    title={`Couleur ${c.label}`}
-                  />
-                );
-              })}
-            </div>
-
-            {/* Gomme */}
-            <button
-              type="button"
-              className={`pgn-eraser-btn ${selectedTool?.type === "eraser" ? "active" : ""}`}
-              style={{ height: "32px", padding: "0 8px", fontSize: "11px", flex: "none" }}
-              onClick={() => {
-                setSelectedPiece(null);
-                setSelectedTool(selectedTool?.type === "eraser" ? null : { type: "eraser" });
-              }}
-              title="Gomme"
-            >
-              ⃠ Gomme
             </button>
           </div>
         </div>
