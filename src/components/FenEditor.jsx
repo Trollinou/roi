@@ -138,12 +138,13 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
   }, []);
 
   // Assemblage et sauvegarde de la FEN
-
-  // Assemblage et sauvegarde de la FEN
   const handleApply = () => {
     if (onSave) {
       const finalFen = `${position} ${turn} ${castling} - 0 1`;
-      onSave({ fen: finalFen, orientation, shapes: currentShapes });
+      const shapes = boardApiRef.current && typeof boardApiRef.current.getShapes === "function"
+        ? boardApiRef.current.getShapes()
+        : currentShapes;
+      onSave({ fen: finalFen, orientation, shapes });
     }
   };
 
