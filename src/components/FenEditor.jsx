@@ -256,6 +256,7 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
         .fen-editor-container {
           display: flex;
           flex-direction: row;
+          justify-content: center;
           gap: 24px;
           max-width: 900px;
           margin: 0 auto;
@@ -301,6 +302,7 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
 
         .fen-editor-controls-col {
           flex: 1;
+          max-width: 400px;
           display: flex;
           flex-direction: column;
           gap: 16px;
@@ -623,9 +625,6 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
               <span className="legend-color-dot" style={{ backgroundColor: "#e8c005" }} />
               <span><strong>Jaune</strong> : Shift + Alt + Clic dr.</span>
             </div>
-          </div>
-          <div className="legend-tip">
-            <em>Flèches : Glisser-déposer avec le clic droit. Clic gauche simple sur l'échiquier pour tout effacer.</em>
           </div>
         </div>
       </div>
