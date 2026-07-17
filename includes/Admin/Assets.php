@@ -33,15 +33,15 @@ class Assets {
 	public function enqueue_admin_assets( string $hook ): void {
 		global $post_type;
 
-		// Only load on CPT Exercice or Cours post editing screen
-		if ( ! in_array( $post_type, [ 'roi_exercice', 'roi_cours' ], true ) || ( 'post.php' !== $hook && 'post-new.php' !== $hook ) ) {
+		// Only load on CPT Exercice, Lecon or Cours post editing screen
+		if ( ! in_array( $post_type, [ 'roi_exercice', 'roi_cours', 'roi_lecon' ], true ) || ( 'post.php' !== $hook && 'post-new.php' !== $hook ) ) {
 			return;
 		}
 
 		$plugin_url = plugin_dir_url( dirname( __DIR__, 2 ) . '/roi.php' );
 		$chess_url  = $plugin_url . 'build/chessboard/';
 
-		if ( 'roi_exercice' === $post_type ) {
+		if ( in_array( $post_type, [ 'roi_exercice', 'roi_lecon' ], true ) ) {
 			// Enqueue eg-chessboard styles & script
 			wp_enqueue_style(
 				'roi-chessboard-style',
@@ -58,14 +58,16 @@ class Assets {
 				true
 			);
 
-			// Enqueue admin-exercice-builder.js
-			wp_enqueue_script(
-				'roi-admin-exercice-builder',
-				$chess_url . 'admin-exercice-builder.js',
-				[ 'roi-admin-fen-editor' ],
-				ROI_VERSION,
-				true
-			);
+			if ( 'roi_exercice' === $post_type ) {
+				// Enqueue admin-exercice-builder.js
+				wp_enqueue_script(
+					'roi-admin-exercice-builder',
+					$chess_url . 'admin-exercice-builder.js',
+					[ 'roi-admin-fen-editor' ],
+					ROI_VERSION,
+					true
+				);
+			}
 		} elseif ( 'roi_cours' === $post_type ) {
 			// Enqueue admin-cours-builder.js
 			wp_enqueue_script(

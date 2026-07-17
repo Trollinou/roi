@@ -109,12 +109,151 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		}
 	}
 
+	// Validation of required fields
+	function checkRequiredFields() {
+		// Title
+		let hasTitle = false;
+		if (
+			window.wp &&
+			window.wp.data &&
+			window.wp.data.select &&
+			window.wp.data.select( 'core/editor' )
+		) {
+			const titleAttr = window.wp.data
+				.select( 'core/editor' )
+				.getEditedPostAttribute( 'title' );
+			hasTitle = titleAttr && titleAttr.trim().length > 0;
+		} else {
+			const titleField = document.getElementById( 'title' );
+			hasTitle = titleField && titleField.value.trim().length > 0;
+		}
+
+		// Chapter
+		let hasChapter = false;
+		if (
+			window.wp &&
+			window.wp.data &&
+			window.wp.data.select &&
+			window.wp.data.select( 'core/editor' )
+		) {
+			const chapitresAttr =
+				window.wp.data
+					.select( 'core/editor' )
+					.getEditedPostAttribute( 'roi_chapitre' ) || [];
+			hasChapter = Array.isArray( chapitresAttr )
+				? chapitresAttr.length > 0
+				: !! chapitresAttr;
+		} else {
+			const selectedChapters = document.querySelectorAll(
+				'input[name^="tax_input[roi_chapitre]"]:checked'
+			);
+			hasChapter = selectedChapters.length > 0;
+		}
+
+		// Type and difficulty level
+		const typeVal = typeSelect.value;
+		const niveauSelect = document.getElementById( 'roi_exercice_niveau' );
+		const niveauVal = niveauSelect ? niveauSelect.value : '';
+
+		const hasType = typeVal && typeVal.trim().length > 0;
+		const hasNiveau = niveauVal && niveauVal.trim().length > 0;
+
+		return hasTitle && hasChapter && hasType && hasNiveau;
+	}
+
+	let hasLocked = false;
+
+	function runValidation() {
+		const isGutenberg =
+			window.wp &&
+			window.wp.data &&
+			window.wp.data.select &&
+			window.wp.data.select( 'core/editor' );
+		const isValid = checkRequiredFields();
+
+		if ( isGutenberg ) {
+			const { dispatch } = window.wp.data;
+			if ( ! isValid ) {
+				if ( ! hasLocked ) {
+					dispatch( 'core/editor' ).lockPostSaving(
+						'roi_exercice_missing_fields'
+					);
+					dispatch( 'core/notices' ).createNotice(
+						'error',
+						"Veuillez renseigner tous les champs obligatoires : Titre, Niveau de difficulté, Type d'exercice et Chapitre.",
+						{
+							id: 'roi_exercice_missing_fields_notice',
+							isDismissible: false,
+						}
+					);
+					hasLocked = true;
+				}
+			} else if ( hasLocked ) {
+				dispatch( 'core/editor' ).unlockPostSaving(
+					'roi_exercice_missing_fields'
+				);
+				dispatch( 'core/notices' ).removeNotice(
+					'roi_exercice_missing_fields_notice'
+				);
+				hasLocked = false;
+			}
+		}
+	}
+
+	// Gutenberg subscriber
+	if (
+		window.wp &&
+		window.wp.data &&
+		window.wp.data.select &&
+		window.wp.data.select( 'core/editor' )
+	) {
+		const { subscribe } = window.wp.data;
+		subscribe( runValidation );
+	}
+
+	// Classic editor listener
+	const postForm = document.getElementById( 'post' );
+	const publishBtn = document.getElementById( 'publish' );
+	if ( postForm && publishBtn ) {
+		postForm.addEventListener( 'submit', function ( e ) {
+			const activeEl = e.target
+				? e.target.ownerDocument.activeElement
+				: null;
+			if (
+				activeEl &&
+				( activeEl.id === 'publish' || activeEl.value === 'Publish' )
+			) {
+				if ( ! checkRequiredFields() ) {
+					e.preventDefault();
+					// eslint-disable-next-line no-alert
+					alert(
+						"Veuillez renseigner tous les champs obligatoires : Titre, Niveau de difficulté, Type d'exercice et Chapitre."
+					);
+					const spinner = document.querySelector(
+						'#major-publishing-actions .spinner'
+					);
+					if ( spinner ) {
+						spinner.classList.remove( 'is-active' );
+					}
+					publishBtn.classList.remove( 'button-primary-disabled' );
+				}
+			}
+		} );
+	}
+
 	typeSelect.addEventListener( 'change', function () {
 		toggleVisibility();
 		initSelectedType();
+		runValidation();
 	} );
+
+	const niveauSelect = document.getElementById( 'roi_exercice_niveau' );
+	if ( niveauSelect ) {
+		niveauSelect.addEventListener( 'change', runValidation );
+	}
 
 	// Initialisation
 	toggleVisibility();
 	initSelectedType();
+	runValidation();
 } );

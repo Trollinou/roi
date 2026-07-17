@@ -29,6 +29,8 @@ class Manager {
 	public function __construct() {
 		add_action( 'add_meta_boxes', [ $this, 'ajouter_metabox' ] );
 		add_action( 'save_post', [ $this, 'sauvegarder_metabox' ] );
+		add_filter( 'wp_insert_post_data', [ $this, 'valider_exercice_donnees' ], 10, 2 );
+		add_action( 'admin_notices', [ $this, 'afficher_validation_erreurs' ] );
 	}
 
 	/**
@@ -193,6 +195,119 @@ class Manager {
 				// Save anyway but avoid corruption by preserving raw layout
 				update_post_meta( $post_id, '_roi_exercice_config', wp_slash( $json_raw ) );
 			}
+		}
+	}
+
+	/**
+	 * Validates Exercice post data before saving to database.
+	 * If mandatory fields are missing, forces status to 'draft' and stores errors.
+	 *
+	 * @param array<string, mixed> $data An array of sanitized post data.
+	 * @param array<string, mixed> $postarr An array of unsanitized post data.
+	 * @return array<string, mixed>
+	 */
+	public function valider_exercice_donnees( array $data, array $postarr ): array {
+		// Only validate 'roi_exercice' post type
+		if ( 'roi_exercice' !== ( $data['post_type'] ?? '' ) ) {
+			return $data;
+		}
+
+		// Avoid validation on autosave, revision, or trash/untrash actions
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			return $data;
+		}
+		if ( 'inherit' === $data['post_status'] ) {
+			return $data;
+		}
+
+		$is_publishing = 'publish' === $data['post_status'];
+		$errors        = [];
+
+		// 1. Title validation
+		$title = trim( $data['post_title'] ?? '' );
+		if ( empty( $title ) || 'Brouillon automatique' === $title ) {
+			$errors[] = __( "Le titre de l'exercice est obligatoire.", 'roi' );
+		}
+
+		// 2. Difficulty level validation (value between 1 and 6)
+		$niveau = isset( $_POST['roi_exercice_niveau'] ) ? (int) $_POST['roi_exercice_niveau'] : 0;
+		if ( ! isset( $_POST['roi_exercice_niveau'] ) && isset( $postarr['ID'] ) ) {
+			$niveau = (int) get_post_meta( (int) $postarr['ID'], '_roi_exercice_niveau', true );
+		}
+		if ( $niveau < 1 || $niveau > 6 ) {
+			$errors[] = __( "Le niveau de difficulté (1 à 6) est obligatoire.", 'roi' );
+		}
+
+		// 3. Exercise type validation (value between 1 and 16)
+		$type = isset( $_POST['roi_exercice_type'] ) ? (int) $_POST['roi_exercice_type'] : 0;
+		if ( ! isset( $_POST['roi_exercice_type'] ) && isset( $postarr['ID'] ) ) {
+			$type = (int) get_post_meta( (int) $postarr['ID'], '_roi_exercice_type', true );
+		}
+		if ( $type < 1 || $type > 16 ) {
+			$errors[] = __( "Le type d'exercice est obligatoire.", 'roi' );
+		}
+
+		// 4. Chapter validation (taxonomy 'roi_chapitre')
+		$has_chapitre = false;
+		if ( ! empty( $_POST['tax_input']['roi_chapitre'] ) ) {
+			$chapitres = (array) $_POST['tax_input']['roi_chapitre'];
+			$chapitres = array_filter( array_map( 'intval', $chapitres ) );
+			if ( ! empty( $chapitres ) ) {
+				$has_chapitre = true;
+			}
+		} elseif ( isset( $postarr['ID'] ) ) {
+			$terms = get_the_terms( (int) $postarr['ID'], 'roi_chapitre' );
+			if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
+				$has_chapitre = true;
+			}
+		}
+
+		if ( ! $has_chapitre && ! empty( $postarr['roi_chapitre'] ) ) {
+			$chapitres = (array) $postarr['roi_chapitre'];
+			$chapitres = array_filter( array_map( 'intval', $chapitres ) );
+			if ( ! empty( $chapitres ) ) {
+				$has_chapitre = true;
+			}
+		}
+
+		if ( ! $has_chapitre ) {
+			$errors[] = __( "Le chapitre auquel appartient l'exercice est obligatoire.", 'roi' );
+		}
+
+		if ( ! empty( $errors ) && $is_publishing ) {
+			$data['post_status'] = 'draft';
+			if ( isset( $postarr['ID'] ) ) {
+				set_transient( 'roi_exercice_errors_' . $postarr['ID'], $errors, 45 );
+			}
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Displays validation errors if any are stored in transient.
+	 *
+	 * @return void
+	 */
+	public function afficher_validation_erreurs(): void {
+		global $post, $pagenow;
+		if ( ! $post || 'post.php' !== $pagenow || 'roi_exercice' !== $post->post_type ) {
+			return;
+		}
+
+		$errors = get_transient( 'roi_exercice_errors_' . $post->ID );
+		if ( $errors ) {
+			delete_transient( 'roi_exercice_errors_' . $post->ID );
+			?>
+			<div class="notice notice-error is-dismissible">
+				<p><strong><?php _e( "Impossible de publier l'exercice. Des informations obligatoires sont manquantes :", 'roi' ); ?></strong></p>
+				<ul>
+					<?php foreach ( $errors as $error ) : ?>
+						<li><?php echo esc_html( $error ); ?></li>
+					<?php endforeach; ?>
+				</ul>
+			</div>
+			<?php
 		}
 	}
 }

@@ -1,12 +1,15 @@
 {
   "$schema": "https://schemas.wp.org/trunk/block.json",
-  "apiVersion": 3,
+  "apiVersion": 2,
   "name": "roi/diagramme",
   "version": "1.0.0",
   "title": "Diagramme ROI",
   "category": "widgets",
   "icon": "grid-view",
   "description": "Affichage d'un diagramme d'échecs (FEN).",
+  "supports": {
+    "align": ["wide", "full"]
+  },
   "attributes": {
     "fen": {
       "type": "string",
@@ -15,7 +18,12 @@
     "orientation": {
       "type": "string",
       "default": "white"
+    },
+    "shapes": {
+      "type": "array",
+      "default": []
     }
   },
+  "textdomain": "roi",
   "editorScript": "file:./index.js"
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import { BoardCore } from "eg-chessboard";
 
 /**
@@ -8,8 +8,9 @@ import { BoardCore } from "eg-chessboard";
  * @param {string} props.initialFen - FEN initiale à charger
  * @param {Function} props.onSave - Rappel appelé avec la nouvelle FEN lors de la sauvegarde : onSave(fen)
  * @param {Object} props.boardConfig - Configuration additionnelle pour l'échiquier
+ * @param {React.Ref} ref - Ref impérative exposant redrawBoard() pour forcer le recalcul des bounds
  */
-export default function FenEditor({ initialFen, onSave, boardConfig = {}, initialShapes = [] }) {
+const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfig = {}, initialShapes = [] }, ref) {
   const defaultFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
   
   // États de la FEN
@@ -22,6 +23,19 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
 
   const boardElRef = useRef(null);
   const boardApiRef = useRef(null);
+
+  // Exposer redrawBoard() au composant parent via ref
+  useImperativeHandle(ref, () => ({
+    redrawBoard() {
+      if (boardApiRef.current && boardApiRef.current.board) {
+        // La clé absolue : invalider le cache des bounds de Chessground
+        if (boardApiRef.current.board.state?.dom?.bounds?.clear) {
+          boardApiRef.current.board.state.dom.bounds.clear();
+        }
+        boardApiRef.current.board.redrawAll();
+      }
+    }
+  }));
   const selectedPieceRef = useRef(selectedPiece);
 
   // Garder les références à jour pour les callbacks asynchrones
@@ -131,7 +145,32 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
       boardConfig.onBoardCreated(boardAPI);
     }
 
+    // Recalcul fiable des bounds via ResizeObserver
+    // Dans l'iFrame Gutenberg, les dimensions se stabilisent après le premier rendu.
+    // Un simple setTimeout(200ms) n'est pas suffisant ; le ResizeObserver détecte
+    // le moment exact où le conteneur atteint ses dimensions finales et force
+    // Chessground à recalculer ses bounds (position de référence pour le drag/dessin).
+    let resizeObserver = null;
+    if (typeof ResizeObserver !== "undefined" && boardElRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        if (boardAPI.board) {
+          boardAPI.board.redrawAll();
+        }
+      });
+      resizeObserver.observe(boardElRef.current);
+    } else {
+      // Fallback si ResizeObserver n'est pas disponible
+      setTimeout(() => {
+        if (boardAPI.board) {
+          boardAPI.board.redrawAll();
+        }
+      }, 300);
+    }
+
     return () => {
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
       if (boardAPI.board) {
         boardAPI.board.destroy();
       }
@@ -712,4 +751,6 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
       </div>
     </div>
   );
-}
+});
+
+export default FenEditor;
