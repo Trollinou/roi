@@ -31,8 +31,9 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
 
   // Met à jour la position FEN à partir de l'état actuel de l'échiquier
   const syncPositionFromBoard = () => {
-    if (boardApiRef.current && typeof boardApiRef.current.getPlacementFen === "function") {
-      const posPart = boardApiRef.current.getPlacementFen();
+    if (boardApiRef.current && typeof boardApiRef.current.getFen === "function") {
+      const fullFen = boardApiRef.current.getFen();
+      const posPart = fullFen.split(" ")[0];
       setPosition(posPart);
     }
   };
@@ -151,6 +152,8 @@ export default function FenEditor({ initialFen, onSave, boardConfig = {}, initia
   const handleClear = () => {
     boardApiRef.current.setPosition("8/8/8/8/8/8/8/8 w - - 0 1");
     syncPositionFromBoard();
+    setTurn("w");
+    setCastling("-");
   };
 
   const handleReset = () => {
