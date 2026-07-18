@@ -1,5 +1,13 @@
 # Changelog
 
+## [Non publié]
+
+*   **API REST & Tableau de Suivi (Isolation par Identité) :**
+    - Prise en charge du header HTTP `X-Selected-Identity` pour stocker et lire la progression des leçons et exercices de manière étanche par profil (ex: `_roi_element_valide_{identity_id}`).
+    - Amélioration de `obtenir_progression_groupe` pour lire toutes les progressions d'identités associées à chaque utilisateur et renvoyer des lignes séparées pour le tableau de suivi.
+    - Ajout d'une clé de réponse `display_id` contenant le vrai ID adhérent (ou l'ID WP pour les profils virtuels admin) pour un affichage propre dans l'interface de suivi.
+    - Mise à jour de la réinitialisation de progression (`reset_progression_cours`) pour décoder l'ID d'identité composite et vider uniquement sa progression isolée.
+
 ## 1.4.0 - 2026-07-18
 
 *   **API REST Parcours :** Création du contrôleur `Parcours_Controller` pour exposer la route `GET /roi/v1/parcours` permettant d'obtenir l'arborescence complète des cours, playlists, chapitres, couleurs de chapitre et niveaux.

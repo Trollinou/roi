@@ -105,7 +105,13 @@ class Progression_Controller {
 		}
 
 		$user          = wp_get_current_user();
-		$allowed_roles = [ 'membre', 'administrator', 'entraineur', 'staff' ];
+		$default_roles = [ 'administrator', 'staff', 'entraineur', 'editor', 'membre' ];
+		$allowed_roles = get_option( 'roi_apprentissage_allowed_roles', $default_roles );
+
+		if ( false === $allowed_roles ) {
+			$allowed_roles = $default_roles;
+		}
+
 		$intersect     = array_intersect( $allowed_roles, (array) $user->roles );
 
 		if ( empty( $intersect ) ) {
@@ -144,7 +150,38 @@ class Progression_Controller {
 			);
 		}
 
+		$default_roles = [ 'administrator', 'staff', 'entraineur', 'editor', 'membre' ];
+		$allowed_roles = get_option( 'roi_apprentissage_allowed_roles', $default_roles );
+
+		if ( false === $allowed_roles ) {
+			$allowed_roles = $default_roles;
+		}
+
+		$intersect = array_intersect( $allowed_roles, $roles );
+
+		if ( empty( $intersect ) ) {
+			return new WP_Error(
+				'rest_forbidden',
+				__( 'Accès non autorisé.', 'roi' ),
+				[ 'status' => 403 ]
+			);
+		}
+
 		return true;
+	}
+
+	/**
+	 * Get the meta key for progression based on the request's X-Selected-Identity header.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return string The meta key.
+	 */
+	private function get_progression_meta_key( WP_REST_Request $request ): string {
+		$identity = $request->get_header( 'X-Selected-Identity' );
+		if ( is_string( $identity ) && '' !== $identity ) {
+			return '_roi_element_valide_' . sanitize_key( $identity );
+		}
+		return '_roi_element_valide';
 	}
 
 	/**
@@ -173,10 +210,11 @@ class Progression_Controller {
 			);
 		}
 
-		$user_id = get_current_user_id();
+		$user_id  = get_current_user_id();
+		$meta_key = $this->get_progression_meta_key( $request );
 
 		// On vérifie si l'adhérent a déjà validé cet élément pour éviter d'ajouter des doublons
-		$meta_entries      = get_user_meta( $user_id, '_roi_element_valide', false );
+		$meta_entries      = get_user_meta( $user_id, $meta_key, false );
 		$already_validated = false;
 		if ( is_array( $meta_entries ) ) {
 			foreach ( $meta_entries as $entry ) {
@@ -192,7 +230,7 @@ class Progression_Controller {
 				'element_id' => $element_id,
 				'date'       => current_time( 'mysql' ),
 			];
-			add_user_meta( $user_id, '_roi_element_valide', $data, false );
+			add_user_meta( $user_id, $meta_key, $data, false );
 		}
 
 		return new WP_REST_Response(
@@ -207,47 +245,102 @@ class Progression_Controller {
 	/**
 	 * Récupère les statistiques de progression pour tous les adhérents.
 	 *
+	 * @param WP_REST_Request $request The request object.
 	 * @return WP_REST_Response
 	 */
-	public function obtenir_progression_groupe(): WP_REST_Response {
+	public function obtenir_progression_groupe( WP_REST_Request $request ): WP_REST_Response {
+		$default_roles = [ 'administrator', 'staff', 'entraineur', 'editor', 'membre' ];
+		$allowed_roles = get_option( 'roi_apprentissage_allowed_roles', $default_roles );
+
+		if ( false === $allowed_roles || empty( $allowed_roles ) ) {
+			$allowed_roles = $default_roles;
+		}
+
 		$query = new WP_User_Query( [
-			'role'    => 'membre',
-			'orderby' => 'display_name',
-			'order'   => 'ASC',
+			'role__in' => $allowed_roles,
+			'orderby'  => 'display_name',
+			'order'    => 'ASC',
 		] );
 
-		$users  = $query->get_results();
-		$groupe = [];
+		$users    = $query->get_results();
+		$groupe   = [];
 
 		foreach ( $users as $user ) {
-			$meta_entries     = get_user_meta( $user->ID, '_roi_element_valide', false );
-			$elements_valides = [];
+			$user_meta = get_user_meta( $user->ID );
+			if ( ! is_array( $user_meta ) ) {
+				continue;
+			}
 
-			if ( is_array( $meta_entries ) ) {
-				foreach ( $meta_entries as $entry ) {
-					if ( is_array( $entry ) && isset( $entry['element_id'] ) ) {
-						$elements_valides[] = (int) $entry['element_id'];
-					}
+			// Trouver toutes les clés de progression pour cet utilisateur
+			$progression_keys = [];
+			foreach ( $user_meta as $key => $val ) {
+				if ( str_starts_with( $key, '_roi_element_valide' ) ) {
+					$progression_keys[] = $key;
 				}
 			}
 
-			// Garder des IDs uniques et ordonnés
-			$elements_valides = array_values( array_unique( $elements_valides ) );
-
-			$nom    = $user->last_name;
-			$prenom = $user->first_name;
-			if ( empty( $nom ) && empty( $prenom ) ) {
-				$prenom = $user->display_name;
-				$nom    = '';
+			if ( empty( $progression_keys ) ) {
+				continue;
 			}
 
-			$groupe[] = [
-				'id'               => $user->ID,
-				'nom'              => $nom,
-				'prenom'           => $prenom,
-				'display_name'     => $user->display_name,
-				'elements_valides' => $elements_valides,
-			];
+			foreach ( $progression_keys as $key ) {
+				$meta_entries = get_user_meta( $user->ID, $key, false );
+				$elements_valides = [];
+
+				if ( is_array( $meta_entries ) ) {
+					foreach ( $meta_entries as $entry ) {
+						if ( is_array( $entry ) && isset( $entry['element_id'] ) ) {
+							$elements_valides[] = (int) $entry['element_id'];
+						}
+					}
+				}
+
+				// Garder des IDs uniques et ordonnés
+				$elements_valides = array_values( array_unique( $elements_valides ) );
+
+				if ( empty( $elements_valides ) ) {
+					continue;
+				}
+
+				// Déterminer le nom et prénom en fonction de la clé d'identité
+				$nom          = $user->last_name;
+				$prenom       = $user->first_name;
+				$display_name = $user->display_name;
+				$display_id   = $user->ID;
+
+				if ( '_roi_element_valide' !== $key ) {
+					$identity = str_replace( '_roi_element_valide_', '', $key );
+					if ( str_starts_with( $identity, 'member_' ) ) {
+						$adherent_id = (int) str_replace( 'member_', '', $identity );
+						$display_id  = $adherent_id;
+						$adh_nom     = get_post_meta( $adherent_id, '_dame_nom', true );
+						$adh_prenom  = get_post_meta( $adherent_id, '_dame_prenom', true );
+						if ( ! empty( $adh_nom ) || ! empty( $adh_prenom ) ) {
+							$nom          = $adh_nom ?: '';
+							$prenom       = $adh_prenom ?: '';
+							$display_name = trim( $prenom . ' ' . $nom );
+						}
+					} elseif ( str_starts_with( $identity, 'rep_' ) ) {
+						$display_name = $user->display_name . ' (Parent)';
+					} elseif ( 'wp_virtual' === $identity ) {
+						$display_name = $user->display_name . ' (Admin)';
+					}
+				}
+
+				if ( empty( $nom ) && empty( $prenom ) ) {
+					$prenom = $display_name;
+					$nom    = '';
+				}
+
+				$groupe[] = [
+					'id'               => $user->ID . '__' . $key, // ID unique pour le tableau React (double underscore)
+					'display_id'       => $display_id,
+					'nom'              => $nom,
+					'prenom'           => $prenom,
+					'display_name'     => $display_name,
+					'elements_valides' => $elements_valides,
+				];
+			}
 		}
 
 		return new WP_REST_Response( $groupe, 200 );
@@ -256,11 +349,13 @@ class Progression_Controller {
 	/**
 	 * Récupère la liste des IDs d'éléments validés par l'adhérent connecté.
 	 *
+	 * @param WP_REST_Request $request The request object.
 	 * @return WP_REST_Response
 	 */
-	public function obtenir_progression(): WP_REST_Response {
+	public function obtenir_progression( WP_REST_Request $request ): WP_REST_Response {
 		$user_id      = get_current_user_id();
-		$meta_entries = get_user_meta( $user_id, '_roi_element_valide', false );
+		$meta_key     = $this->get_progression_meta_key( $request );
+		$meta_entries = get_user_meta( $user_id, $meta_key, false );
 		$elements     = [];
 
 		if ( is_array( $meta_entries ) ) {
@@ -283,7 +378,20 @@ class Progression_Controller {
 	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function reset_progression_cours( WP_REST_Request $request ): WP_REST_Response|\WP_Error {
-		$student_id = (int) $request->get_param( 'student_id' );
+		$student_id_raw = $request->get_param( 'student_id' );
+		$meta_key       = '_roi_element_valide';
+		$student_id     = 0;
+
+		if ( is_string( $student_id_raw ) && str_contains( $student_id_raw, '__' ) ) {
+			$parts      = explode( '__', $student_id_raw );
+			$student_id = (int) $parts[0];
+			if ( isset( $parts[1] ) ) {
+				$meta_key = $parts[1];
+			}
+		} else {
+			$student_id = (int) $student_id_raw;
+		}
+
 		$course_id  = (int) $request->get_param( 'course_id' );
 
 		if ( $student_id <= 0 || $course_id <= 0 ) {
@@ -319,10 +427,10 @@ class Progression_Controller {
 		}
 
 		// Get all entries
-		$meta_entries = get_user_meta( $student_id, '_roi_element_valide', false );
+		$meta_entries = get_user_meta( $student_id, $meta_key, false );
 
 		// Delete all entries
-		delete_user_meta( $student_id, '_roi_element_valide' );
+		delete_user_meta( $student_id, $meta_key );
 
 		// Filter and re-add entries not in the playlist
 		if ( is_array( $meta_entries ) ) {
@@ -330,7 +438,7 @@ class Progression_Controller {
 				if ( is_array( $entry ) && isset( $entry['element_id'] ) ) {
 					$elem_id = (int) $entry['element_id'];
 					if ( ! in_array( $elem_id, $playlist_ids, true ) ) {
-						add_user_meta( $student_id, '_roi_element_valide', $entry, false );
+						add_user_meta( $student_id, $meta_key, $entry, false );
 					}
 				}
 			}

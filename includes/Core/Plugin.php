@@ -55,6 +55,8 @@ class Plugin {
 			$progression_rest->init();
 			$parcours_rest = new \ROI\API\REST\Parcours_Controller();
 			$parcours_rest->init();
+			$config_rest = new \ROI\API\REST\Config_Controller();
+			$config_rest->init();
 		} );
 
 		// Chess Engine Integration
@@ -79,6 +81,7 @@ class Plugin {
 			$backup = new \ROI\Admin\Backup();
 			$backup->init();
 			( new \ROI\Admin\Columns() )->init();
+			( new \ROI\Admin\Settings\Main() )->init();
 		}
 	}
 }

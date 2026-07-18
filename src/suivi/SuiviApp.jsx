@@ -281,7 +281,7 @@ export default function SuiviApp() {
 										{ studentName }
 									</h3>
 									<span style={ { fontSize: '10px', color: '#646970', background: '#f0f0f1', padding: '2px 6px', borderRadius: '3px', fontWeight: '500' } }>
-										ID: { student.id }
+										ID: { student.display_id || student.id }
 									</span>
 								</div>
 

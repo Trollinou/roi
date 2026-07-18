@@ -59,22 +59,26 @@ Ces données sont transmises de manière sécurisée via l'API REST de sauvegard
 ### 1. Consultation de sa progression (Élève / Membre)
 * **Route :** `GET /wp-json/roi/v1/progression`
 * **Sécurité :** Authentification requise. L'utilisateur connecté doit posséder l'un des rôles : `membre`, `entraineur`, `staff` ou `administrator`.
-* **Réponse JSON :** Un tableau d'IDs d'éléments (cours, leçons, exercices) validés par l'utilisateur connecté : `[101, 105, 112]`.
+* **Header requis :** `X-Selected-Identity` contenant l'ID de l'identité active (ex: `member_123`).
+* **Réponse JSON :** Un tableau d'IDs d'éléments (cours, leçons, exercices) validés par l'identité active : `[101, 105, 112]`.
 
 ### 2. Enregistrement d'une réussite (Élève / Membre)
 * **Route :** `POST /wp-json/roi/v1/progression`
 * **Paramètres :** `element_id` (int)
 * **Sécurité :** Authentification requise. L'utilisateur connecté doit posséder l'un des rôles : `membre`, `entraineur`, `staff` ou `administrator`.
-* **Fonctionnement :** La réussite est ajoutée aux métadonnées de l'utilisateur sous la clé `_roi_element_valide` (avec la date de validation).
+* **Header requis :** `X-Selected-Identity` contenant l'ID de l'identité active (ex: `member_123`).
+* **Fonctionnement :** La réussite est ajoutée aux métadonnées de l'utilisateur sous la clé `_roi_element_valide_{identity_id}` pour isoler la progression de chaque membre de la famille.
 
 ### 3. Consultation des progressions du groupe (Entraîneur)
 * **Route :** `GET /wp-json/roi/v1/progression/groupe`
 * **Sécurité :** Authentification requise. L'utilisateur connecté doit posséder le rôle `entraineur` ou `administrator`.
-* **Réponse JSON :** Retourne un tableau de membres contenant leur ID, nom, prénom, et un tableau des ID d'éléments qu'ils ont validés :
+* **Fonctionnement :** Retourne les progressions de toutes les identités actives de manière distincte (une ligne par personne, même si elles partagent le même compte WordPress).
+* **Réponse JSON :**
   ```json
   [
     {
-      "id": 42,
+      "id": "42___roi_element_valide_member_123",
+      "display_id": 123,
       "nom": "Dupont",
       "prenom": "Jean",
       "elements_valides": [101, 105, 112]
