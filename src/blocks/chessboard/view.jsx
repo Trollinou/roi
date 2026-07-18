@@ -2,6 +2,8 @@ import { BoardCore } from 'eg-chessboard';
 import { ChessClock } from './classes/ChessClock';
 import { StockfishManager } from './classes/stockfishManager';
 
+window.EgBoardCore = BoardCore;
+
 document.addEventListener('DOMContentLoaded', async () => {
   if (window.chessboardViewInitialized) {
     return;
@@ -375,32 +377,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const updateCapturedAndMaterial = () => {
-      const orientation = boardAPI.getOrientation();
-      const captures = boardAPI.getFormattedCapturedPieces();
-      const matDiff = boardAPI.getMaterialDiffDisplay(orientation);
-
-      const oppCapturesEl = block.querySelector('.captured-pieces-clock-opp');
-      const playerCapturesEl = block.querySelector('.captured-pieces-clock-player');
-      const oppMaterialEl = block.querySelector('.opponent-material');
-      const playerMaterialEl = block.querySelector('.player-material');
-
-      if (oppCapturesEl) {
-        const oppPieces = showMaterialIndicator ? (orientation === 'white' ? captures.black : captures.white) : [];
-        oppCapturesEl.innerHTML = oppPieces.map(p => `<span class="captured-piece">${p}</span>`).join('');
-      }
-      if (playerCapturesEl) {
-        const playerPieces = showMaterialIndicator ? (orientation === 'white' ? captures.white : captures.black) : [];
-        playerCapturesEl.innerHTML = playerPieces.map(p => `<span class="captured-piece">${p}</span>`).join('');
-      }
-
-      if (oppMaterialEl) {
-        oppMaterialEl.innerHTML = (showMaterialIndicator && matDiff.opponent) ? `<div class="material-count">+${matDiff.opponent}</div>` : '';
-        oppMaterialEl.style.display = showMaterialIndicator ? '' : 'none';
-      }
-      if (playerMaterialEl) {
-        playerMaterialEl.innerHTML = (showMaterialIndicator && matDiff.player) ? `<div class="material-count">+${matDiff.player}</div>` : '';
-        playerMaterialEl.style.display = showMaterialIndicator ? '' : 'none';
-      }
+      // Fonctionnalité désactivée par demande de retrait du matériel et des captures
     };
 
     const handleTimeOut = (flaggedColor) => {

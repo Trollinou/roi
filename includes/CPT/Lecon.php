@@ -64,8 +64,8 @@ class Lecon {
 			'label'               => __( 'Leçon', 'roi' ),
 			'description'         => __( 'Leçons de la section Échecs', 'roi' ),
 			'labels'              => $labels,
-			'supports'            => [ 'title', 'editor', 'thumbnail', 'revisions', 'author' ],
-			'taxonomies'          => [ 'roi_chess_category' ],
+			'supports'            => [ 'title', 'editor', 'thumbnail' ],
+			'taxonomies'          => [ 'roi_chapitre' ],
 			'hierarchical'        => false,
 			'public'              => true,
 			'show_ui'             => true,
@@ -77,7 +77,8 @@ class Lecon {
 			'exclude_from_search' => false,
 			'publicly_queryable'  => true,
 			'capability_type'     => 'page',
-			'show_in_rest'        => false,
+			'show_in_rest'        => true,
+			'menu_icon'           => 'dashicons-welcome-learn-more',
 		];
 
 		register_post_type( 'roi_lecon', $args );

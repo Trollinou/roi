@@ -12,6 +12,8 @@ scripts/
 src/
 phpstan.neon
 vendor/
+composer.json
+composer.lock
 CHANGELOG.md
 README.md
 USING.md

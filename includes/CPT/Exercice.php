@@ -58,8 +58,8 @@ class Exercice {
 			'label'               => __( 'Exercice', 'roi' ),
 			'description'         => __( 'Exercices de la section Échecs', 'roi' ),
 			'labels'              => $labels,
-			'supports'            => [ 'title', 'editor', 'revisions', 'author' ],
-			'taxonomies'          => [ 'roi_chess_category' ],
+			'supports'            => [ 'title', 'custom-fields', 'revisions', 'author' ],
+			'taxonomies'          => [ 'roi_chapitre' ],
 			'hierarchical'        => false,
 			'public'              => true,
 			'show_ui'             => true,
@@ -81,7 +81,7 @@ class Exercice {
 				'read_private_posts' => 'read_private_exercices',
 			],
 			'map_meta_cap'        => true,
-			'show_in_rest'        => false,
+			'show_in_rest'        => true,
 		];
 
 		register_post_type( 'roi_exercice', $args );

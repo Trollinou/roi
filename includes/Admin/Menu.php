@@ -64,14 +64,6 @@ class Menu {
 			'dashicons-book',
 			22
 		);
-
-		add_submenu_page(
-			'roi-apprentissage',
-			__( 'Catégories', 'roi' ),
-			__( 'Catégories', 'roi' ),
-			'manage_options',
-			'edit-tags.php?taxonomy=roi_chess_category&post_type=roi_lecon'
-		);
 	}
 
 	/**
@@ -81,12 +73,6 @@ class Menu {
 	 * @return string The corrected parent file slug.
 	 */
 	public function apprentissage_menu_highlight( string $parent_file ): string {
-		global $current_screen;
-
-		if ( isset( $current_screen->taxonomy ) && $current_screen->taxonomy === 'roi_chess_category' ) {
-			$parent_file = 'roi-apprentissage';
-		}
-
 		return $parent_file;
 	}
 }

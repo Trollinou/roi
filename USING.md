@@ -54,3 +54,69 @@ Chaque fiche de **Partie** contient :
 
 Ces données sont transmises de manière sécurisée via l'API REST de sauvegarde (`POST /wp-json/roi/v1/games`). En cas de déconnexion réseau, la PWA stocke les parties localement et les synchronise automatiquement dès le retour en ligne.
 
+## Suivi des progressions (PWA)
+
+### 1. Consultation de sa progression (Élève / Membre)
+* **Route :** `GET /wp-json/roi/v1/progression`
+* **Sécurité :** Authentification requise. L'utilisateur connecté doit posséder l'un des rôles : `membre`, `entraineur`, `staff` ou `administrator`.
+* **Header requis :** `X-Selected-Identity` contenant l'ID de l'identité active (ex: `member_123`).
+* **Réponse JSON :** Un tableau d'IDs d'éléments (cours, leçons, exercices) validés par l'identité active : `[101, 105, 112]`.
+
+### 2. Enregistrement d'une réussite (Élève / Membre)
+* **Route :** `POST /wp-json/roi/v1/progression`
+* **Paramètres :** `element_id` (int)
+* **Sécurité :** Authentification requise. L'utilisateur connecté doit posséder l'un des rôles : `membre`, `entraineur`, `staff` ou `administrator`.
+* **Header requis :** `X-Selected-Identity` contenant l'ID de l'identité active (ex: `member_123`).
+* **Fonctionnement :** La réussite est ajoutée aux métadonnées de l'utilisateur sous la clé `_roi_element_valide_{identity_id}` pour isoler la progression de chaque membre de la famille.
+
+### 3. Consultation des progressions du groupe (Entraîneur)
+* **Route :** `GET /wp-json/roi/v1/progression/groupe`
+* **Sécurité :** Authentification requise. L'utilisateur connecté doit posséder le rôle `entraineur` ou `administrator`.
+* **Fonctionnement :** Retourne les progressions de toutes les identités actives de manière distincte (une ligne par personne, même si elles partagent le même compte WordPress).
+* **Réponse JSON :**
+  ```json
+  [
+    {
+      "id": "42___roi_element_valide_member_123",
+      "display_id": 123,
+      "nom": "Dupont",
+      "prenom": "Jean",
+      "elements_valides": [101, 105, 112]
+    }
+  ]
+  ```
+
+## Arborescence des cours (PWA)
+
+### 1. Récupération des cours et playlists
+* **Route :** `GET /wp-json/roi/v1/parcours`
+* **Sécurité :** Public.
+* **Réponse JSON :** Un tableau de cours triés par Niveau (ascendant) > Chapitre (ordre personnalisé) > Ordre (menu_order ascendant) :
+  ```json
+  [
+    {
+      "id": 12,
+      "titre": "Introduction aux pions",
+      "niveau": 1,
+      "playlist": [101, 105],
+      "chapitre_nom": "Structure de Pions",
+      "chapitre_couleur": "#FF0000",
+      "ordre": 0
+    }
+  ]
+  ```
+
+## Configuration & Restrictions d'accès
+
+### 1. Réglages du Back-office
+Les administrateurs peuvent configurer les rôles autorisés à accéder au module d'apprentissage depuis **Apprentissage > Configuration** dans l'administration WordPress.
+
+### 2. Récupération de la configuration (Public)
+* **Route :** `GET /wp-json/roi/v1/config`
+* **Sécurité :** Public.
+* **Réponse JSON :**
+  ```json
+  {
+    "apprentissage_allowed_roles": ["administrator", "staff", "entraineur", "editor", "membre"]
+  }
+  ```

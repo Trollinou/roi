@@ -2,11 +2,52 @@
 
 ## 1.3.0 - 2026-07-16
 
+*   **Alignement Visuel & UX des Éditeurs :** 
+    *   Uniformisation de `PgnEditor` avec `FenEditor` : retrait de la barre d'outils de dessin au clic gauche au profit du dessin au clic droit/drag natif.
+    *   Ajout d'un encart d'information "Annotations" explicatif sous l'échiquier (sans aide textuelle superflue).
+    *   Désélection automatique et sortie du mode édition vers le mode prévisualisation lors du clic sur le bouton "Appliquer" ou "Valider" pour les deux blocs Gutenberg (`roi/diagramme` et `roi/pgn`).
+*   **Ajustements de l'Éditeur PGN (`roi/pgn`) :**
+    *   Déplacement du bloc "Importer un PGN" vers la colonne de droite, au-dessus du PGN en direct.
+    *   Déplacement de la barre de navigation sous l'échiquier (dans les deux modes d'édition et de prévisualisation).
+    *   Déplacement du bouton "Copier la FEN actuelle" juste au-dessus du bouton de validation.
+    *   Boîte d'importation améliorée pour auto-détecter et charger aussi bien une FEN (créant un SetUp = 1) qu'un PGN standard.
+    *   Épuration de la prévisualisation Gutenberg du bloc (plus de texte superflu, affichage uniquement de l'échiquier et de la barre de boutons).
+*   **Corrections de bugs de navigation et d'entêtes (Upstream/BoardCore) :**
+    *   Correction de la perte des entêtes PGN (headers) et de la FEN initiale lors des ajouts de commentaires ou tracés de formes dans `BoardCore`.
+    *   Correction du bug empêchant la navigation en arrière dans l'historique d'un PGN basé sur une FEN personnalisée.
 *   **Blocs Gutenberg Diagramme & PGN :** Création et intégration de deux nouveaux blocs natifs :
     *   **Diagramme ROI (`roi/diagramme`)** : permettant d'intégrer des échiquiers statiques configurés via une position FEN et une orientation données, avec l'éditeur `window.RoiFenEditor`.
     *   **Partie PGN ROI (`roi/pgn`)** : pour l'affichage de parties complètes au format PGN à l'aide de l'éditeur `window.RoiPgnEditor`.
 *   **Enregistrement PHP standardisé :** Création de `\ROI\Blocks\Manager` pour l'enregistrement propre et natif des configurations `block.json` depuis le dossier de build.
 *   **Mise à jour Webpack :** Intégration des points d'entrée et gestion des copies des métadonnées de blocs.
+*   **Éditeur de position FEN (Administration) :** Intégration d'un éditeur graphique React autonome pour configurer la FEN de départ d'un exercice directement depuis la metabox via une fenêtre modale.
+*   **Découplage complet de Gutenberg :** Création d'un point d'entrée webpack isolé (`src/admin-fen-editor.js` et `eg-chessboard.css`) pour l'administration. L'éditeur FEN et `eg-chessboard` sont 100% indépendants du bloc Gutenberg `chessboard`, permettant de modifier ou supprimer le bloc sans casser l'administration.
+*   **Plateau de travail épuré :** Remplacement de l'ancien plateau d'exercice par une instanciation directe et propre de `EgBoardCore` sans les surcharges Gutenberg (pendules, captures matérielles, etc.).
+*   **Optimisation de l'agencement responsive :** Restructuration fixe de la modale (flexbox) et adaptation automatique de l'échiquier sur les écrans de faible hauteur (`@media (max-height: 750px)`) pour éliminer définitivement les barres de défilement et libérer de l'espace.
+*   **Synchronisation de l'orientation :** Répercussion automatique de l'orientation sélectionnée dans la modale vers le champ d'orientation principal de l'exercice lors de la sauvegarde.
+*   **Correctifs d'Assurance Qualité (QA) :** Résolution complète de 9 avertissements PHPStan et mise en place d'un linter ESLint (conforme à `AGENTS.md`).
+*   **16 Types d'exercices :** Configuration complète de la liste avec 16 types d'exercices distincts.
+*   **Champs de niveau et de chapitre :** Ajout des métadonnées de niveau (1 à 6), chapitre et couleur de chapitre dans la Metabox de l'exercice et sauvegarde sécurisée.
+*   **Ordonnancement :** Ajout d'un champ numérique pour l'ordre d'affichage dans le chapitre.
+*   **Triage dans l'API REST :** Les exercices retournés par l'API REST globale de listing sont triés selon l'ordre d'affichage et la réponse est allégée (sans la configuration JSON lourde).
+*   **API REST Exercice individuel :** Modification de la clé de retour `title` en `titre` pour la faire correspondre à celle de l'API de liste (`obtenir_liste_exercices`).
+*   **Suivi des progressions :** Création du contrôleur dédié `includes/REST/Progression.php` gérant la route `POST /wp-json/roi/v1/progression` (enregistrement d'une réussite par l'adhérent connecté sous la clé `_roi_exercice_reussi`) et la route `GET /wp-json/roi/v1/progression/groupe` (consultation groupée des réussites d'exercices réservée aux entraîeurs/administrateurs).
+*   **API REST Parcours :** Création du contrôleur `Parcours_Controller` pour exposer la route `GET /roi/v1/parcours` permettant d'obtenir l'arborescence complète des cours, playlists, chapitres, couleurs de chapitre et niveaux.
+*   **Tri multi-critères :** Implémentation d'un tri strict sur le parcours par Niveau (ascendant), puis par Chapitre (ordre personnalisé de progression), et enfin par Ordre (menu_order ascendant).
+*   **Correction et uniformisation de la progression :**
+    - Ajout du point d'accès `GET /roi/v1/progression` permettant à l'élève de récupérer les éléments validés.
+    - Uniformisation des rôles : Remplacement du rôle `'adherent'` obsolète par `'membre'` dans les vérifications et requêtes de progression.
+    - Élargissement des permissions : Autorisation d'accès aux profils `membre`, `administrator`, `entraineur` et `staff`.
+*   **Configuration du Plugin :**
+    - Création d'une page de configuration d'administration (sous Apprentissage > Configuration) pour sélectionner les rôles autorisés à accéder au module d'apprentissage (`roi_apprentissage_allowed_roles`).
+    - Enregistrement de l'endpoint REST public `/roi/v1/config` renvoyant les rôles autorisés.
+    - Modification de la méthode `obtenir_progression_groupe` pour récupérer tous les comptes utilisateurs ayant un rôle autorisé à la place du rôle unique `membre`.
+    - Sécurisation de tous les endpoints REST (Parcours, Contenu, Progression) pour valider l'accès selon les rôles autorisés configurés.
+*   **API REST & Tableau de Suivi (Isolation par Identité) :**
+    - Prise en charge du header HTTP `X-Selected-Identity` pour stocker et lire la progression des leçons et exercices de manière étanche par profil (ex: `_roi_element_valide_{identity_id}`).
+    - Amélioration de `obtenir_progression_groupe` pour lire toutes les progressions d'identités associées à chaque utilisateur et renvoyer des lignes séparées pour le tableau de suivi.
+    - Ajout d'une clé de réponse `display_id` contenant le vrai ID adhérent (ou l'ID WP pour les profils virtuels admin) pour un affichage propre dans l'interface de suivi.
+    - Mise à jour de la réinitialisation de progression (`reset_progression_cours`) pour décoder l'ID d'identité composite et vider uniquement sa progression isolée.
 
 ## 1.2.0 - 2026-06-15
 
@@ -49,63 +90,3 @@
     *   **Mode libre (Free Move)** : Ajout d'une option permettant aux blancs et aux noirs de jouer librement sans validation de tour stricte dans l'éditeur et sur le site (pratique pour l'élaboration de leçons).
     *   **Barre d'évaluation & Stockfish** : Intégration directe du moteur Stockfish avec barre d'évaluation dynamique.
 
-## 1.0.5 - 2025-11-01
-
-*   **Amélioration de l'interface de l'éditeur du bloc Échiquier :**
-    *   Remplacement des bandes de sélection de pièces statiques par une boîte de dialogue popup moderne et intuitive.
-    *   La popup s'affiche désormais uniquement lors d'un clic gauche sur une case vide, libérant le clic droit pour de futures fonctionnalités.
-    *   L'expérience utilisateur est plus fluide et l'interface de l'éditeur est moins encombrée.
-*   **Refonte majeure de l'interface de l'éditeur du bloc Échiquier :**
-    *   **Interface épurée :** L'éditeur n'affiche plus que l'échiquier, supprimant le titre, la notation FEN et autres textes pour un aperçu fidèle au rendu final ("What You See Is What You Get").
-    *   **Nouvelles extensions interactives :** Intégration des extensions `arrows`, `markers` et `right-click-annotator` de `cm-chessboard`, permettant de dessiner des flèches et de marquer des cases directement dans l'éditeur.
-    *   **Contrôles dans la barre latérale :**
-        *   Les boutons "Position initiale" et "Échiquier vide" sont remplacés par une liste déroulante plus compacte.
-        *   Ajout de contrôles précis (cases à cocher) pour gérer les droits de roque pour les blancs et les noirs, organisés dans un tableau pour un affichage stable et compact.
-    *   **Amélioration de l'expérience utilisateur (UX) :**
-        *   Un premier clic sur le bloc non sélectionné se contente de le sélectionner, permettant l'accès aux paramètres sans déclencher d'action sur l'échiquier.
-        *   Le menu de sélection des pièces ne s'ouvre que si le bloc est déjà sélectionné.
-        *   Le menu se ferme automatiquement lorsque le bloc perd le focus, garantissant une interface propre.
-    *   **Technique et corrections :**
-        *   L'échiquier est désormais entièrement responsive dans l'éditeur et s'adapte à la taille de son conteneur.
-        *   Correction de multiples avertissements de dépréciation des composants WordPress (`SelectControl`, `TextControl`, etc.) pour assurer la compatibilité future.
-        *   Correction de bugs liés à la fermeture et au rafraîchissement visuel du menu de sélection des pièces.
-
-## 1.0.4 - 2025-10-23
-
-*   **Amélioration majeure du bloc Échiquier :**
-    *   Intégration de la bibliothèque `chess.js` pour une gestion robuste et professionnelle de l'état de l'échiquier et de la notation FEN.
-    *   **Éditeur de position :**
-        *   Permet la création de positions personnalisées, même si elles sont "illégales" au sens des échecs (ex: 3 fous), sans faire planter l'éditeur.
-        *   Valide en temps réel la notation FEN et affiche des messages d'erreur détaillés et clairs pour aider à la correction.
-        *   L'activation du moteur Stockfish est désormais conditionnelle à la validité de la FEN, empêchant son utilisation avec des positions incompatibles.
-    *   **Visualisation (Front-end) :**
-        *   Correction d'un bug majeur qui empêchait la promotion des pions de fonctionner correctement.
-        *   Correction d'une régression où le mode "exercice" (sans moteur) n'appliquait plus les règles du jeu. Les mouvements légaux sont de nouveau validés.
-        *   Correction d'un bug visuel où les pièces se superposaient après une tentative de mouvement illégal.
-        *   Correction d'un bug où l'IA pouvait jouer le premier coup à la place du joueur si une position personnalisée commençait par le trait au joueur.
-    *   **Nouvelle fonctionnalité :**
-        *   Ajout d'un sélecteur "Trait" dans l'éditeur pour choisir qui a le prochain coup (Blancs ou Noirs), offrant un contrôle total sur la FEN.
-
-## 1.0.3 - 2025-10-22
-
-*   **Amélioration du bloc Échiquier :**
-    *   Le sélecteur de niveau du moteur Stockfish affiche désormais une estimation ELO conviviale (par exemple, "1200-1400") au lieu d'une valeur numérique (0-20), à la fois dans l'éditeur et sur la page publique.
-    *   Refonte de la structure du code du bloc pour suivre les conventions de WordPress, en séparant la logique de l'éditeur (`edit.js`) de l'enregistrement du bloc (`index.js`) pour une meilleure maintenabilité.
-
-## 1.0.2 - 2025-10-22
-
-*   **Amélioration du bloc Échiquier :**
-    *   L'option "Couleur" (orientation de l'échiquier) est désormais toujours visible, indépendamment de l'activation du moteur Stockfish.
-    *   Ajout d'une nouvelle option "Afficher les coordonnées" pour contrôler la visibilité des coordonnées sur l'échiquier.
-    *   Réorganisation des paramètres du bloc pour une expérience utilisateur plus intuitive.
-    *   Correction d'un bug où l'option "Afficher les coordonnées" n'était pas appliquée sur la page publique.
-
-## 1.0.0 - 2025-09-15
-
-*   Première version du plugin.
-*   Séparation du code LMS du plugin DAME.
-*   Création des CPTs: Leçon, Exercice, Cours.
-*   Création de la taxonomie: Catégorie d'échecs.
-*   Création des shortcodes pour afficher les exercices.
-*   Mise en place de la sauvegarde/restauration de la base de données d'apprentissage.
-*   Mise en place de la gestion des rôles et des capacités pour le LMS.

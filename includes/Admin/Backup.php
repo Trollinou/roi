@@ -47,11 +47,11 @@ class Backup {
 	/**
 	 * Gathers all learning content data for export.
 	 *
-	 * @return array The complete export data.
+	 * @return array<string, mixed> The complete export data.
 	 */
 	public function get_apprentissage_export_data(): array {
 		$post_types = [ 'roi_lecon', 'roi_exercice', 'roi_cours' ];
-		$taxonomy   = 'roi_chess_category';
+		$taxonomy   = 'roi_chapitre';
 
 		$export_data = [
 			'posts' => [],
@@ -204,7 +204,7 @@ class Backup {
 
 		// Clear existing data
 		$post_types = [ 'roi_lecon', 'roi_exercice', 'roi_cours' ];
-		$taxonomy   = 'roi_chess_category';
+		$taxonomy   = 'roi_chapitre';
 
 		$existing_posts = get_posts( [
 			'post_type'      => $post_types,

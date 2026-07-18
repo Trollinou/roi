@@ -55,6 +55,50 @@ Ce plugin nécessite que le plugin **DAME** soit installé et activé. Le plugin
 
 *   **Sauvegarde et Restauration du Contenu :** Une page d'administration dédiée pour exporter tout le contenu pédagogique (leçons, exercices, cours, catégories) dans un fichier `.json.gz` et le restaurer, prévenant ainsi la perte de données.
 
+## API REST
+
+Le plugin expose plusieurs points de terminaison REST sous le namespace `/wp-json/roi/v1` :
+
+### 1. Exercices
+*   **Liste des exercices :** `GET /wp-json/roi/v1/exercices`
+    *   **Description :** Récupère la liste de tous les exercices publiés, triés selon leur ordre d'affichage.
+    *   **Format de réponse :**
+        ```json
+        [
+          {
+            "id": 123,
+            "titre": "Mat en 2 coups",
+            "type": 1,
+            "niveau": 2,
+            "chapitre": "Les bases",
+            "couleur": "#ff0000"
+          }
+        ]
+        ```
+*   **Exercice individuel :** `GET /wp-json/roi/v1/exercice/<id>`
+    *   **Description :** Récupère les détails d'un exercice spécifique.
+    *   **Format de réponse :**
+        ```json
+        {
+          "id": 123,
+          "titre": "Mat en 2 coups",
+          "type": 1,
+          "niveau": 2,
+          "chapitre": "Les bases",
+          "couleur": "#ff0000",
+          "config": { ... }
+        }
+        ```
+
+### 2. Parties
+*   **Enregistrer une partie :** `POST /wp-json/roi/v1/games`
+    *   **Description :** Enregistre une partie jouée depuis la PWA (authentification requise).
+    *   **Paramètres :** `member_id` (int), `difficulty_level` (int), `hints_count` (int), `takebacks_count` (int), `pgn` (string), `duration` (int), `game_date` (string).
+
+### 3. Stockfish
+*   **Servir Stockfish WASM :** `GET /wp-json/roi/v1/stockfish-wasm`
+    *   **Description :** Distribue le fichier WebAssembly de Stockfish avec le type MIME correct (`application/wasm`).
+
 ## Comment Utiliser
 
 ### Création de Contenu

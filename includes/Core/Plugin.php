@@ -37,8 +37,7 @@ class Plugin {
 
 
 		// Taxonomies
-		$taxonomies = new \ROI\CPT\Taxonomies();
-		$taxonomies->init();
+		( new \ROI\CPT\Chapitre_Taxonomy() )->init();
 
 		// Roles & capabilities
 		$roles = new Roles();
@@ -46,10 +45,18 @@ class Plugin {
 
 		// REST API endpoints
 		add_action( 'init', function() {
-			$games_rest = new \ROI\REST\Games();
+			$games_rest = new \ROI\API\REST\Games_Controller();
 			$games_rest->init();
-			$stockfish_rest = new \ROI\REST\Stockfish();
+			$stockfish_rest = new \ROI\API\REST\Stockfish_Controller();
 			$stockfish_rest->init();
+			$contenu_rest = new \ROI\API\REST\Contenu_Controller();
+			$contenu_rest->init();
+			$progression_rest = new \ROI\API\REST\Progression_Controller();
+			$progression_rest->init();
+			$parcours_rest = new \ROI\API\REST\Parcours_Controller();
+			$parcours_rest->init();
+			$config_rest = new \ROI\API\REST\Config_Controller();
+			$config_rest->init();
 		} );
 
 		// Chess Engine Integration
@@ -60,32 +67,21 @@ class Plugin {
 			);
 		}, 5 );
 
-		// Lesson Completion
-		$lesson_completion = new \ROI\Services\LessonCompletion();
-		$lesson_completion->init();
-
-		// Single Course Handler
-		$course_handler = new \ROI\Services\CourseHandler();
-		$course_handler->init();
-
-		// Single Exercice Handler
-		$exercice_handler = new \ROI\Services\ExerciceHandler();
-		$exercice_handler->init();
-
-		// Shortcodes
-		$shortcodes = new \ROI\Shortcodes\Shortcodes();
-		$shortcodes->init();
-
 		// Admin pages & functionalities
 		if ( is_admin() ) {
 			$admin_menu = new \ROI\Admin\Menu();
 			$admin_menu->init();
-			( new \ROI\Metaboxes\Lecon() )->init();
-			( new \ROI\Metaboxes\Exercice() )->init();
-			( new \ROI\Metaboxes\Cours() )->init();
+			$admin_assets = new \ROI\Admin\Assets();
+			$admin_assets->init();
+			( new \ROI\Admin\Suivi_Page() )->init();
+			new \ROI\Metaboxes\Exercice\Manager();
+			new \ROI\Metaboxes\Cours\Builder();
+			new \ROI\Metaboxes\Lecon\Settings();
 			( new \ROI\Metaboxes\Partie() )->init();
 			$backup = new \ROI\Admin\Backup();
 			$backup->init();
+			( new \ROI\Admin\Columns() )->init();
+			( new \ROI\Admin\Settings\Main() )->init();
 		}
 	}
 }

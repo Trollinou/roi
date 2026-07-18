@@ -39,8 +39,8 @@ if ( ! empty( $cours_post_ids ) ) {
     $wpdb->query( "DELETE FROM $wpdb->term_relationships WHERE object_id IN (" . implode( ',', array_map( 'absint', $cours_post_ids ) ) . ")" );
 }
 
-// Delete custom taxonomy terms for 'roi_chess_category'.
-$taxonomy = 'roi_chess_category';
+// Delete custom taxonomy terms for 'roi_chapitre'.
+$taxonomy = 'roi_chapitre';
 $term_ids = $wpdb->get_col( $wpdb->prepare( "SELECT t.term_id FROM $wpdb->terms AS t INNER JOIN $wpdb->term_taxonomy AS tt ON t.term_id = tt.term_id WHERE tt.taxonomy = %s", $taxonomy ) );
 if ( ! empty( $term_ids ) ) {
     $term_ids_str = implode( ',', array_map( 'absint', $term_ids ) );
