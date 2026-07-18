@@ -60,6 +60,11 @@ class Progression_Controller {
 					'callback'            => [ $this, 'enregistrer_progression' ],
 					'permission_callback' => [ $this, 'check_adherent_permissions' ],
 				],
+				[
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'obtenir_progression' ],
+					'permission_callback' => [ $this, 'check_adherent_permissions' ],
+				],
 			]
 		);
 
@@ -77,11 +82,6 @@ class Progression_Controller {
 		);
 	}
 
-	/**
-	 * Permission callback for students to register their progress.
-	 *
-	 * @return bool|WP_Error
-	 */
 	public function check_adherent_permissions(): bool|WP_Error {
 		if ( ! is_user_logged_in() ) {
 			return new WP_Error(
@@ -91,11 +91,14 @@ class Progression_Controller {
 			);
 		}
 
-		$user = wp_get_current_user();
-		if ( ! in_array( 'adherent', (array) $user->roles, true ) ) {
+		$user          = wp_get_current_user();
+		$allowed_roles = [ 'membre', 'administrator', 'entraineur', 'staff' ];
+		$intersect     = array_intersect( $allowed_roles, (array) $user->roles );
+
+		if ( empty( $intersect ) ) {
 			return new WP_Error(
 				'rest_forbidden',
-				__( 'Accès réservé aux adhérents.', 'roi' ),
+				__( 'Accès non autorisé.', 'roi' ),
 				[ 'status' => 403 ]
 			);
 		}
@@ -195,7 +198,7 @@ class Progression_Controller {
 	 */
 	public function obtenir_progression_groupe(): WP_REST_Response {
 		$query = new WP_User_Query( [
-			'role'    => 'adherent',
+			'role'    => 'membre',
 			'orderby' => 'display_name',
 			'order'   => 'ASC',
 		] );
@@ -227,5 +230,28 @@ class Progression_Controller {
 		}
 
 		return new WP_REST_Response( $groupe, 200 );
+	}
+
+	/**
+	 * Récupère la liste des IDs d'éléments validés par l'adhérent connecté.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function obtenir_progression(): WP_REST_Response {
+		$user_id      = get_current_user_id();
+		$meta_entries = get_user_meta( $user_id, '_roi_element_valide', false );
+		$elements     = [];
+
+		if ( is_array( $meta_entries ) ) {
+			foreach ( $meta_entries as $entry ) {
+				if ( is_array( $entry ) && isset( $entry['element_id'] ) ) {
+					$elements[] = (int) $entry['element_id'];
+				}
+			}
+		}
+
+		$elements = array_values( array_unique( $elements ) );
+
+		return new WP_REST_Response( $elements, 200 );
 	}
 }

@@ -53,6 +53,8 @@ class Plugin {
 			$contenu_rest->init();
 			$progression_rest = new \ROI\API\REST\Progression_Controller();
 			$progression_rest->init();
+			$parcours_rest = new \ROI\API\REST\Parcours_Controller();
+			$parcours_rest->init();
 		} );
 
 		// Chess Engine Integration

@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.4.0 - 2026-07-18
+
+*   **API REST Parcours :** Création du contrôleur `Parcours_Controller` pour exposer la route `GET /roi/v1/parcours` permettant d'obtenir l'arborescence complète des cours, playlists, chapitres, couleurs de chapitre et niveaux.
+*   **Tri multi-critères :** Implémentation d'un tri strict sur le parcours par Niveau (ascendant), puis par Chapitre (ordre personnalisé de progression), et enfin par Ordre (menu_order ascendant).
+*   **Correction et uniformisation de la progression :**
+    - Ajout du point d'accès `GET /roi/v1/progression` permettant à l'élève de récupérer les éléments validés.
+    - Uniformisation des rôles : Remplacement du rôle `'adherent'` obsolète par `'membre'` dans les vérifications et requêtes de progression.
+    - Élargissement des permissions : Autorisation d'accès aux profils `membre`, `administrator`, `entraineur` et `staff`.
+
 ## 1.3.1 - 2026-07-17
 
 *   **Alignement Visuel & UX des Éditeurs :** 

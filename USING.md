@@ -56,23 +56,48 @@ Ces données sont transmises de manière sécurisée via l'API REST de sauvegard
 
 ## Suivi des progressions (PWA)
 
-### 1. Enregistrement d'une réussite (Élève)
-* **Route :** `POST /wp-json/roi/v1/progression`
-* **Paramètres JSON :** `{"exercice_id": 123}`
-* **Sécurité :** Authentification requise. L'utilisateur connecté doit posséder le rôle `adherent`.
-* **Fonctionnement :** La réussite est ajoutée aux métadonnées de l'utilisateur sous la clé `_roi_exercice_reussi` (avec la date de validation).
+### 1. Consultation de sa progression (Élève / Membre)
+* **Route :** `GET /wp-json/roi/v1/progression`
+* **Sécurité :** Authentification requise. L'utilisateur connecté doit posséder l'un des rôles : `membre`, `entraineur`, `staff` ou `administrator`.
+* **Réponse JSON :** Un tableau d'IDs d'éléments (cours, leçons, exercices) validés par l'utilisateur connecté : `[101, 105, 112]`.
 
-### 2. Consultation des progressions (Entraîneur)
+### 2. Enregistrement d'une réussite (Élève / Membre)
+* **Route :** `POST /wp-json/roi/v1/progression`
+* **Paramètres :** `element_id` (int)
+* **Sécurité :** Authentification requise. L'utilisateur connecté doit posséder l'un des rôles : `membre`, `entraineur`, `staff` ou `administrator`.
+* **Fonctionnement :** La réussite est ajoutée aux métadonnées de l'utilisateur sous la clé `_roi_element_valide` (avec la date de validation).
+
+### 3. Consultation des progressions du groupe (Entraîneur)
 * **Route :** `GET /wp-json/roi/v1/progression/groupe`
 * **Sécurité :** Authentification requise. L'utilisateur connecté doit posséder le rôle `entraineur` ou `administrator`.
-* **Réponse JSON :** Retourne un tableau d'élèves (`adherent`) contenant leur ID, nom, prénom, et un tableau des ID d'exercices qu'ils ont validés :
+* **Réponse JSON :** Retourne un tableau de membres contenant leur ID, nom, prénom, et un tableau des ID d'éléments qu'ils ont validés :
   ```json
   [
     {
       "id": 42,
       "nom": "Dupont",
       "prenom": "Jean",
-      "exercices": [101, 105, 112]
+      "elements_valides": [101, 105, 112]
+    }
+  ]
+  ```
+
+## Arborescence des cours (PWA)
+
+### 1. Récupération des cours et playlists
+* **Route :** `GET /wp-json/roi/v1/parcours`
+* **Sécurité :** Public.
+* **Réponse JSON :** Un tableau de cours triés par Niveau (ascendant) > Chapitre (ordre personnalisé) > Ordre (menu_order ascendant) :
+  ```json
+  [
+    {
+      "id": 12,
+      "titre": "Introduction aux pions",
+      "niveau": 1,
+      "playlist": [101, 105],
+      "chapitre_nom": "Structure de Pions",
+      "chapitre_couleur": "#FF0000",
+      "ordre": 0
     }
   ]
   ```
