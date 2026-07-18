@@ -8,6 +8,15 @@ const CHAPTER_ORDER_MAP = {
 	'Combination': 5,
 };
 
+const CHAPTER_COLOR_MAP = {
+	primary: '#0073aa',
+	warning: '#d94f00',
+	danger: '#d63638',
+	success: '#00a32a',
+	tertiary: '#8224e3',
+};
+
+
 export default function SuiviApp() {
 	const [ students, setStudents ] = useState( [] );
 	const [ courses, setCourses ] = useState( [] );
@@ -327,7 +336,8 @@ export default function SuiviApp() {
 																const chapterCourses = chapters[ chapter ];
 																const isChapterExpanded = expandedChapters[ `${ student.id }_${ level }_${ chapter }` ] !== false; // Default expanded
 																const firstCourse = chapterCourses[ 0 ] || {};
-																const chapterColor = firstCourse.chapitre_couleur || '#8224e3';
+																const colorSlug = firstCourse.chapitre_couleur || 'tertiary';
+																const chapterColor = CHAPTER_COLOR_MAP[ colorSlug ] || colorSlug || '#8224e3';
 
 																// Sort courses within chapter by order field
 																const sortedCourses = [ ...chapterCourses ].sort( ( a, b ) => ( a.ordre || 0 ) - ( b.ordre || 0 ) );
