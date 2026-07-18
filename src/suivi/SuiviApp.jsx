@@ -268,14 +268,12 @@ export default function SuiviApp() {
 							>
 								{ /* CARD HEADER */ }
 								<div style={ { borderBottom: '1px solid #f0f0f1', paddingBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }>
-									<div>
-										<h3 style={ { margin: '0 0 5px 0', fontSize: '17px', fontWeight: 600, color: '#1d2327' } }>
-											{ studentName }
-										</h3>
-										<span style={ { fontSize: '10px', color: '#646970', background: '#f0f0f1', padding: '2px 6px', borderRadius: '3px', fontWeight: '500' } }>
-											ID: { student.id }
-										</span>
-									</div>
+									<h3 style={ { margin: 0, fontSize: '17px', fontWeight: 600, color: '#1d2327' } }>
+										{ studentName }
+									</h3>
+									<span style={ { fontSize: '10px', color: '#646970', background: '#f0f0f1', padding: '2px 6px', borderRadius: '3px', fontWeight: '500' } }>
+										ID: { student.id }
+									</span>
 								</div>
 
 								{ /* CARD CONTENT - LEVEL ACCORDIONS */ }
@@ -342,15 +340,15 @@ export default function SuiviApp() {
 																			onClick={ () => toggleChapterExpanded( student.id, level, chapter ) }
 																			style={ {
 																				width: '100%',
-																				background: `${ chapterColor }05`,
+																				background: chapterColor,
 																				border: 'none',
-																				borderBottom: isChapterExpanded ? `1px solid ${ chapterColor }15` : 'none',
-																				padding: '6px 10px',
+																				borderBottom: 'none',
+																				padding: '8px 12px',
 																				textAlign: 'left',
 																				fontWeight: '600',
 																				fontSize: '11px',
 																				textTransform: 'uppercase',
-																				color: chapterColor,
+																				color: '#fff',
 																				letterSpacing: '0.5px',
 																				cursor: 'pointer',
 																				display: 'flex',
