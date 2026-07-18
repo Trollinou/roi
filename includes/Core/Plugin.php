@@ -71,6 +71,7 @@ class Plugin {
 			$admin_menu->init();
 			$admin_assets = new \ROI\Admin\Assets();
 			$admin_assets->init();
+			( new \ROI\Admin\Suivi_Page() )->init();
 			new \ROI\Metaboxes\Exercice\Manager();
 			new \ROI\Metaboxes\Cours\Builder();
 			new \ROI\Metaboxes\Lecon\Settings();

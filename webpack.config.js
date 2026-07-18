@@ -30,6 +30,7 @@ module.exports = {
 			'src/blocks/diagramme/index.js'
 		),
 		'pgn/index': path.resolve( __dirname, 'src/blocks/pgn/index.js' ),
+		'suivi/index': path.resolve( __dirname, 'src/suivi/index.js' ),
 	},
 	output: {
 		...defaultConfig.output,

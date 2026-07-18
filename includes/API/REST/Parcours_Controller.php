@@ -95,6 +95,12 @@ class Parcours_Controller {
 				if ( is_string( $playlist_meta ) && '' !== $playlist_meta ) {
 					$decoded = json_decode( $playlist_meta, true );
 					if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
+						foreach ( $decoded as &$item ) {
+							if ( isset( $item['id'] ) ) {
+								$item['titre'] = get_the_title( (int) $item['id'] );
+							}
+						}
+						unset( $item );
 						$playlist = $decoded;
 					}
 				}
