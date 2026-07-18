@@ -225,7 +225,6 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			) {
 				if ( ! checkRequiredFields() ) {
 					e.preventDefault();
-					// eslint-disable-next-line no-alert
 					alert(
 						"Veuillez renseigner tous les champs obligatoires : Titre, Niveau de difficulté, Type d'exercice et Chapitre."
 					);

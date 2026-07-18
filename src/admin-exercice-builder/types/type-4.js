@@ -222,7 +222,7 @@ export function init() {
 				} );
 			}
 		} catch ( e ) {
-			console.log( 'Erreur parsing JSON Type 4 initial :', e );
+			console.warn( 'Erreur parsing JSON Type 4 initial :', e );
 		}
 	}
 

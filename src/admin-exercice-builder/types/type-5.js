@@ -233,7 +233,7 @@ export function init() {
 				t5Shapes = parsedT5.shapes || [];
 			}
 		} catch ( e ) {
-			console.log( 'Erreur parsing JSON Type 5 initial :', e );
+			console.warn( 'Erreur parsing JSON Type 5 initial :', e );
 		}
 	}
 

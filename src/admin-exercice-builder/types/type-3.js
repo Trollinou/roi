@@ -103,6 +103,7 @@ export function init() {
 			configData.shapes = parsed.shapes || [];
 		}
 	} catch ( e ) {
+		console.warn( 'Erreur parsing JSON Type 3 initial :', e );
 		configData.fen = fenInput ? fenInput.value.trim() : '';
 		configData.couleur_joueur = colorInput ? colorInput.value : 'white';
 		configData.solution = [];

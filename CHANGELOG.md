@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.3.0 - 2026-07-16
+## 1.3.0 - 2026-07-18
 
 *   **Alignement Visuel & UX des Éditeurs :** 
     *   Uniformisation de `PgnEditor` avec `FenEditor` : retrait de la barre d'outils de dessin au clic gauche au profit du dessin au clic droit/drag natif.

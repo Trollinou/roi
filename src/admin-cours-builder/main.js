@@ -1,5 +1,4 @@
 /* global ajaxurl, roi_cours_builder */
-/* eslint-disable camelcase */
 
 document.addEventListener( 'DOMContentLoaded', () => {
 	const playlistJsonInput = document.getElementById(

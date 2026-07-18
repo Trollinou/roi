@@ -26,20 +26,20 @@
 		function initViewer() {
 			// Load the PGN initially
 			let pgn = pgnTextarea.value.trim();
-			console.log( 'ROI PGN Viewer - Raw PGN from textarea:', pgn );
+			console.warn( 'ROI PGN Viewer - Raw PGN from textarea:', pgn );
 			if ( pgn ) {
 				pgn = decodeHTMLEntities( pgn );
 				// Replace all types of whitespaces (newlines, tabs, non-breaking spaces) with a single space
 				pgn = pgn.replace( /[\s\u00a0]+/g, ' ' );
-				console.log( 'ROI PGN Viewer - Normalized PGN:', pgn );
+				console.warn( 'ROI PGN Viewer - Normalized PGN:', pgn );
 				try {
 					boardAPI.loadPgn( pgn );
-					console.log( 'ROI PGN Viewer - PGN loaded successfully.' );
+					console.warn( 'ROI PGN Viewer - PGN loaded successfully.' );
 				} catch ( e ) {
 					console.error( 'ROI PGN Viewer - Error loading PGN:', e );
 				}
 			} else {
-				console.log( 'ROI PGN Viewer - PGN is empty.' );
+				console.warn( 'ROI PGN Viewer - PGN is empty.' );
 			}
 
 			renderMovesList();

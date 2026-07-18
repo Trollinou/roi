@@ -10,8 +10,8 @@ export class ChessClock {
 	public timerTenths = 0;
 	private timerInterval: any = null;
 
-	public onTick: ( ( wtime: number, btime: number ) => void ) | null = null;
-	public onTimeOut: ( ( flaggedColor: 'white' | 'black' ) => void ) | null =
+	public onTick: ( ( wtime: number, btime: number ) => void ) | null = null; // eslint-disable-line no-unused-vars
+	public onTimeOut: ( ( flaggedColor: 'white' | 'black' ) => void ) | null = // eslint-disable-line no-unused-vars
 		null;
 
 	constructor() {
