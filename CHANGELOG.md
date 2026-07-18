@@ -2,6 +2,12 @@
 
 ## [Non publié]
 
+*   **Configuration du Plugin :**
+    - Création d'une page de configuration d'administration (sous Apprentissage > Configuration) pour sélectionner les rôles autorisés à accéder au module d'apprentissage (`roi_apprentissage_allowed_roles`).
+    - Enregistrement de l'endpoint REST public `/roi/v1/config` renvoyant les rôles autorisés.
+    - Modification de la méthode `obtenir_progression_groupe` pour récupérer tous les comptes utilisateurs ayant un rôle autorisé à la place du rôle unique `membre`.
+    - Sécurisation de tous les endpoints REST (Parcours, Contenu, Progression) pour valider l'accès selon les rôles autorisés configurés.
+
 *   **API REST & Tableau de Suivi (Isolation par Identité) :**
     - Prise en charge du header HTTP `X-Selected-Identity` pour stocker et lire la progression des leçons et exercices de manière étanche par profil (ex: `_roi_element_valide_{identity_id}`).
     - Amélioration de `obtenir_progression_groupe` pour lire toutes les progressions d'identités associées à chaque utilisateur et renvoyer des lignes séparées pour le tableau de suivi.

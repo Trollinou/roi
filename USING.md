@@ -105,3 +105,18 @@ Ces données sont transmises de manière sécurisée via l'API REST de sauvegard
     }
   ]
   ```
+
+## Configuration & Restrictions d'accès
+
+### 1. Réglages du Back-office
+Les administrateurs peuvent configurer les rôles autorisés à accéder au module d'apprentissage depuis **Apprentissage > Configuration** dans l'administration WordPress.
+
+### 2. Récupération de la configuration (Public)
+* **Route :** `GET /wp-json/roi/v1/config`
+* **Sécurité :** Public.
+* **Réponse JSON :**
+  ```json
+  {
+    "apprentissage_allowed_roles": ["administrator", "staff", "entraineur", "editor", "membre"]
+  }
+  ```
