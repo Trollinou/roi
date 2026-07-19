@@ -2,14 +2,17 @@
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 2,
   "name": "roi/chessboard",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "title": "Échiquier",
   "category": "widgets",
   "icon": "games",
   "description": "A native Gutenberg chessboard block for WordPress, powered by Chessground and chess.js.",
   "supports": {
     "html": false,
-    "align": ["wide", "full"]
+    "align": [
+      "wide",
+      "full"
+    ]
   },
   "attributes": {
     "boardConfig": {

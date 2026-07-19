@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.1 - 2026-07-19
+
+*   **Nouveau Types d'Exercices :** 
+    *   Implénetation du type 7 : La MArche du Héros.
+
 ## 1.3.0 - 2026-07-18
 
 *   **Alignement Visuel & UX des Éditeurs :** 

@@ -2,13 +2,16 @@
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 2,
   "name": "roi/diagramme",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "title": "Diagramme ROI",
   "category": "widgets",
   "icon": "grid-view",
   "description": "Affichage d'un diagramme d'échecs (FEN).",
   "supports": {
-    "align": ["wide", "full"]
+    "align": [
+      "wide",
+      "full"
+    ]
   },
   "attributes": {
     "fen": {
