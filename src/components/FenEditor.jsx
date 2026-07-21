@@ -20,6 +20,12 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
   const [orientation, setOrientation] = useState(boardConfig.orientation || "white");
   const [selectedPiece, setSelectedPiece] = useState(null); // { role, color } ou "eraser" ou null
   const [currentShapes, setCurrentShapes] = useState(initialShapes);
+  const currentShapesRef = useRef(initialShapes);
+  const lastPressedButtonRef = useRef(null);
+
+  useEffect(() => {
+    currentShapesRef.current = currentShapes;
+  }, [currentShapes]);
 
   const boardElRef = useRef(null);
   const boardApiRef = useRef(null);
@@ -61,13 +67,18 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
     if (activePiece) {
       if (activePiece === "eraser") {
         boardApiRef.current.removePiece(square);
-        syncPositionFromBoard();
       } else {
         const type = activePiece.role === "knight" ? "n" : activePiece.role[0];
         const color = activePiece.color === "white" ? "w" : "b";
         boardApiRef.current.putPiece({ type, color }, square);
-        syncPositionFromBoard();
       }
+
+      // Restaurer les formes car le putPiece a pu vider l'affichage
+      if (currentShapesRef.current && currentShapesRef.current.length > 0) {
+        boardApiRef.current.setShapes(currentShapesRef.current);
+      }
+
+      syncPositionFromBoard();
     }
   };
 
@@ -98,8 +109,13 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
         deleteOnDropOff: true,
       },
       drawable: {
+        eraseOnClick: false,
         onChange: (shapes) => {
-          setCurrentShapes(shapes);
+          // Mettre à jour nos shapes uniquement si l'utilisateur dessine ou efface activement (clic droit)
+          if (lastPressedButtonRef.current === 2) {
+            setCurrentShapes(shapes);
+            currentShapesRef.current = shapes;
+          }
         }
       },
       events: {
@@ -119,6 +135,13 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
     const emit = (event) => {
       if (event === "move") {
         syncPositionFromBoard();
+        // Restaurer les formes après le déplacement d'une pièce
+        if (currentShapesRef.current && currentShapesRef.current.length > 0) {
+          const shapesToRestore = [...currentShapesRef.current];
+          if (boardApiRef.current && typeof boardApiRef.current.setShapes === "function") {
+            boardApiRef.current.setShapes(shapesToRestore);
+          }
+        }
       }
     };
 
@@ -135,6 +158,9 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
       }
     );
 
+    // Court-circuiter updateCommentAndShapes pour empêcher BoardCore d'effacer les shapes dessinées
+    boardAPI.updateCommentAndShapes = () => {};
+
     boardApiRef.current = boardAPI;
 
     if (initialShapes && initialShapes.length > 0) {
@@ -145,6 +171,15 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
       boardConfig.onBoardCreated(boardAPI);
     }
 
+    // Suivre quel bouton de la souris est enfoncé pour filtrer onChange
+    const handleMouseDown = (e) => {
+      lastPressedButtonRef.current = e.button;
+    };
+
+    if (boardElRef.current) {
+      boardElRef.current.addEventListener("mousedown", handleMouseDown, true);
+    }
+
     // Recalcul fiable des bounds via ResizeObserver
     // Dans l'iFrame Gutenberg, les dimensions se stabilisent après le premier rendu.
     // Un simple setTimeout(200ms) n'est pas suffisant ; le ResizeObserver détecte
@@ -153,9 +188,11 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
     let resizeObserver = null;
     if (typeof ResizeObserver !== "undefined" && boardElRef.current) {
       resizeObserver = new ResizeObserver(() => {
-        if (boardAPI.board) {
-          boardAPI.board.redrawAll();
-        }
+        requestAnimationFrame(() => {
+          if (boardAPI.board) {
+            boardAPI.board.redrawAll();
+          }
+        });
       });
       resizeObserver.observe(boardElRef.current);
     } else {
@@ -168,6 +205,9 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
     }
 
     return () => {
+      if (boardElRef.current) {
+        boardElRef.current.removeEventListener("mousedown", handleMouseDown, true);
+      }
       if (resizeObserver) {
         resizeObserver.disconnect();
       }
@@ -190,6 +230,11 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
 
   const handleClear = () => {
     boardApiRef.current.setPosition("8/8/8/8/8/8/8/8 w - - 0 1");
+    if (boardApiRef.current && typeof boardApiRef.current.setShapes === "function") {
+      boardApiRef.current.setShapes([]);
+    }
+    setCurrentShapes([]);
+    currentShapesRef.current = [];
     syncPositionFromBoard();
     setTurn("w");
     setCastling("-");
@@ -197,6 +242,11 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
 
   const handleReset = () => {
     boardApiRef.current.setPosition(defaultFen);
+    if (boardApiRef.current && typeof boardApiRef.current.setShapes === "function") {
+      boardApiRef.current.setShapes([]);
+    }
+    setCurrentShapes([]);
+    currentShapesRef.current = [];
     syncPositionFromBoard();
     setTurn("w");
     setCastling("KQkq");

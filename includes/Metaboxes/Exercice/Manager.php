@@ -16,6 +16,8 @@ use ROI\Metaboxes\Exercice\Types\TypePartieHeros;
 use ROI\Metaboxes\Exercice\Types\TypePosiPlan;
 use ROI\Metaboxes\Exercice\Types\TypeAssociPlan;
 use ROI\Metaboxes\Exercice\Types\TypeMarcheHeros;
+use ROI\Metaboxes\Exercice\Types\TypeVisionChecs;
+use ROI\Metaboxes\Exercice\Types\TypeParcours;
 
 /**
  * Class Manager
@@ -111,6 +113,8 @@ class Manager {
 		( new TypeAssociPlan() )->render( $post, $config_data );
 		( new TypeABCDaire() )->render( $post, $config_data );
 		( new TypeMarcheHeros() )->render( $post, $config_data );
+		( new TypeVisionChecs() )->render( $post, $config_data );
+		( new TypeParcours() )->render( $post, $config_data );
 		?>
 
 		<textarea name="roi_exercice_config" id="roi_config_json" style="display:none;"><?php echo esc_textarea( $config ); ?></textarea>
