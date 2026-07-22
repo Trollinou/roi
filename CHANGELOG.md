@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.2 - 2026-07-22
+
+*   **Nouveaux Types d'Exercices :**
+    *   Implémentation du type 9 : Parcours (avec variante standard, pacman et stealth).
+    *   Intégration du type 8 : Vision'checs dans l'éditeur de position.
+*   **Persistance de l'Éditeur FEN (`FenEditor`) :**
+    *   Correction du bug de perte des annotations / tracés de formes (shapes) lors de la pose d'une pièce ou d'un déplacement (drag-and-drop) en ignorant l'effacement automatique de Chessground via le suivi du bouton de souris pressé.
+
 ## 1.3.1 - 2026-07-19
 
 *   **Nouveau Types d'Exercices :** 
