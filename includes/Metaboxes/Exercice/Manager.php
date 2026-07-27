@@ -22,6 +22,8 @@ use ROI\Metaboxes\Exercice\Types\TypeClassEchecs;
 use ROI\Metaboxes\Exercice\Types\TypeQuiSuisJe;
 use ROI\Metaboxes\Exercice\Types\TypeOuvreBoite;
 use ROI\Metaboxes\Exercice\Types\TypeCapOuPasCap;
+use ROI\Metaboxes\Exercice\Types\TypeJugementFinal;
+use ROI\Metaboxes\Exercice\Types\TypeDestinationFinale;
 
 /**
  * Class Manager
@@ -123,6 +125,8 @@ class Manager {
 		( new TypeQuiSuisJe() )->render( $post, $config_data );
 		( new TypeOuvreBoite() )->render( $post, $config_data );
 		( new TypeCapOuPasCap() )->render( $post, $config_data );
+		( new TypeJugementFinal() )->render( $post, $config_data );
+		( new TypeDestinationFinale() )->render( $post, $config_data );
 		?>
 
 		<textarea name="roi_exercice_config" id="roi_config_json" style="display:none;"><?php echo esc_textarea( $config ); ?></textarea>

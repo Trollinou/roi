@@ -2,6 +2,14 @@
 
 ## [Unreleased] - NON PUBLIÉ
 
+*   **Nouveau Type d'Exercice (Type 16 : Destination finale) :**
+    *   **Back-office PHP :** Création de `TypeDestinationFinale.php` (`ROI\Metaboxes\Exercice\Types\TypeDestinationFinale`) et enregistrement dans `Manager.php` pour la saisie de la consigne, de la position FEN de départ, de la couleur du joueur, de la liste ordonnée des étapes textuelles et de la solution PGN finale.
+    *   **Administration JS :** Création de `type-16.js` pour la gestion dynamique du tableau d'étapes textuelles, l'interaction avec la modale FEN `openFenEditor` et la synchronisation en temps réel du contrat JSON. Retrait de `'16'` de `visualTypes`, mise à jour de `main.js` et compilation du bundle d'assets.
+
+*   **Nouveau Type d'Exercice (Type 15 : Jugement final) :**
+    *   **Back-office PHP :** Création de `TypeJugementFinal.php` (`ROI\Metaboxes\Exercice\Types\TypeJugementFinal`) et enregistrement dans `Manager.php` pour la saisie de la consigne, de la position FEN, de la couleur du joueur, des 3 scénarios PGN (avec sélection de la bonne réponse) et de la solution PGN finale.
+    *   **Administration JS :** Création de `type-15.js` pour la gestion des 3 scénarios, l'interaction avec la modale FEN `openFenEditor` et la synchronisation du contrat JSON. Intégration dans `main.js` et compilation des assets.
+
 *   **Nouveau Type d'Exercice (Type 14 : Cap ou pas cap ?) :**
     *   **Back-office PHP :** Création de `TypeCapOuPasCap.php` (`ROI\Metaboxes\Exercice\Types\TypeCapOuPasCap`) et enregistrement dans `Manager.php` pour la saisie de la consigne, du type de réponse (`qcm` ou `move`) et de 5 diagrammes (FEN, couleur du joueur, options QCM avec boutons radio et explications, coup SAN et explication d'erreur).
     *   **Administration JS :** Création de `type-14.js` pour la gestion de l'état local des 5 diagrammes (`{ fen, couleur_joueur, shapes, qcm_choix, qcm_bonne_reponse, move_san, move_explication }`), l'interaction avec la modale FEN `openFenEditor`, la bascule dynamique d'affichage des blocs QCM / Move et la synchronisation en temps réel du JSON de configuration. Mise à jour de `main.js` et compilation du bundle d'assets.
