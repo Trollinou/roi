@@ -29,13 +29,7 @@ const PgnEditor = forwardRef(function PgnEditor({
   // Exposer redrawBoard() au composant parent via ref
   useImperativeHandle(ref, () => ({
     redrawBoard() {
-      if (boardApiRef.current && boardApiRef.current.board) {
-        // La clé absolue : invalider le cache des bounds de Chessground
-        if (boardApiRef.current.board.state?.dom?.bounds?.clear) {
-          boardApiRef.current.board.state.dom.bounds.clear();
-        }
-        boardApiRef.current.board.redrawAll();
-      }
+      boardApiRef.current?.redraw(true);
     }
   }));
 
@@ -53,8 +47,8 @@ const PgnEditor = forwardRef(function PgnEditor({
   // Synchronise les données de la position actuelle
   const syncPositionData = (api = boardApiRef.current) => {
     if (!api) return;
-    const comment = api.state.currentComment || "";
-    const shapes = api.board.state.drawable.shapes || [];
+    const comment = api.getCurrentComment();
+    const shapes = api.getShapes();
     setCurrentComment(comment);
     setCurrentShapes(shapes);
     setPgn(api.getPgn() || "");
@@ -110,13 +104,11 @@ const PgnEditor = forwardRef(function PgnEditor({
     // Callback onBoardCreated local pour gérer l'initialisation
     const onBoardCreated = (api) => {
       // Désactiver Stockfish
-      if (typeof api.updateStockfishConfig === "function") {
-        api.updateStockfishConfig({
-          workerUrl: "",
-          whiteMode: "disabled",
-          blackMode: "disabled",
-        });
-      }
+      api.updateStockfishConfig({
+        workerUrl: "",
+        whiteMode: "disabled",
+        blackMode: "disabled",
+      });
 
       // Charger le PGN initial si fourni
       if (initialPgn) {
@@ -165,17 +157,13 @@ const PgnEditor = forwardRef(function PgnEditor({
     let resizeObserver = null;
     if (typeof ResizeObserver !== "undefined" && boardElRef.current) {
       resizeObserver = new ResizeObserver(() => {
-        if (boardAPI.board) {
-          boardAPI.board.redrawAll();
-        }
+        boardAPI.redraw(true);
       });
       resizeObserver.observe(boardElRef.current);
     } else {
       // Fallback si ResizeObserver n'est pas disponible
       setTimeout(() => {
-        if (boardAPI.board) {
-          boardAPI.board.redrawAll();
-        }
+        boardAPI.redraw(true);
       }, 300);
     }
 
@@ -183,9 +171,7 @@ const PgnEditor = forwardRef(function PgnEditor({
       if (resizeObserver) {
         resizeObserver.disconnect();
       }
-      if (boardAPI.board) {
-        boardAPI.board.destroy();
-      }
+      boardAPI.destroy();
     };
   }, []);
 
@@ -233,10 +219,7 @@ const PgnEditor = forwardRef(function PgnEditor({
     if (onSave && boardApi) {
       let finalFen = "";
       try {
-        const ChessClass = boardApi.game.constructor;
-        const tempGame = new ChessClass();
-        tempGame.loadPgn(boardApi.getPgn() || "");
-        finalFen = tempGame.fen();
+        finalFen = boardApi.getFinalFenFromPgn(boardApi.getPgn() || "");
       } catch (e) {
         console.warn("Échec du calcul de la FEN finale", e);
       }

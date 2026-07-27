@@ -33,13 +33,7 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
   // Exposer redrawBoard() au composant parent via ref
   useImperativeHandle(ref, () => ({
     redrawBoard() {
-      if (boardApiRef.current && boardApiRef.current.board) {
-        // La clé absolue : invalider le cache des bounds de Chessground
-        if (boardApiRef.current.board.state?.dom?.bounds?.clear) {
-          boardApiRef.current.board.state.dom.bounds.clear();
-        }
-        boardApiRef.current.board.redrawAll();
-      }
+      boardApiRef.current?.redraw(true);
     }
   }));
   const selectedPieceRef = useRef(selectedPiece);
@@ -51,10 +45,8 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
 
   // Met à jour la position FEN à partir de l'état actuel de l'échiquier
   const syncPositionFromBoard = () => {
-    if (boardApiRef.current && typeof boardApiRef.current.getFen === "function") {
-      const fullFen = boardApiRef.current.getFen();
-      const posPart = fullFen.split(" ")[0];
-      setPosition(posPart);
+    if (boardApiRef.current) {
+      setPosition(boardApiRef.current.getPlacementFen());
     }
   };
 
@@ -71,11 +63,6 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
         const type = activePiece.role === "knight" ? "n" : activePiece.role[0];
         const color = activePiece.color === "white" ? "w" : "b";
         boardApiRef.current.putPiece({ type, color }, square);
-      }
-
-      // Restaurer les formes car le putPiece a pu vider l'affichage
-      if (currentShapesRef.current && currentShapesRef.current.length > 0) {
-        boardApiRef.current.setShapes(currentShapesRef.current);
       }
 
       syncPositionFromBoard();
@@ -111,11 +98,8 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
       drawable: {
         eraseOnClick: false,
         onChange: (shapes) => {
-          // Mettre à jour nos shapes uniquement si l'utilisateur dessine ou efface activement (clic droit)
-          if (lastPressedButtonRef.current === 2) {
-            setCurrentShapes(shapes);
-            currentShapesRef.current = shapes;
-          }
+          setCurrentShapes(shapes);
+          currentShapesRef.current = shapes;
         }
       },
       events: {
@@ -128,6 +112,7 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
     const boardState = {
       showThreats: false,
       freeMode: true,
+      preserveShapesOnPositionChange: true,
       promotionDialogState: { isEnabled: false },
       historyViewerState: { isEnabled: false },
     };
@@ -135,13 +120,6 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
     const emit = (event) => {
       if (event === "move") {
         syncPositionFromBoard();
-        // Restaurer les formes après le déplacement d'une pièce
-        if (currentShapesRef.current && currentShapesRef.current.length > 0) {
-          const shapesToRestore = [...currentShapesRef.current];
-          if (boardApiRef.current && typeof boardApiRef.current.setShapes === "function") {
-            boardApiRef.current.setShapes(shapesToRestore);
-          }
-        }
       }
     };
 
@@ -158,9 +136,6 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
       }
     );
 
-    // Court-circuiter updateCommentAndShapes pour empêcher BoardCore d'effacer les shapes dessinées
-    boardAPI.updateCommentAndShapes = () => {};
-
     boardApiRef.current = boardAPI;
 
     if (initialShapes && initialShapes.length > 0) {
@@ -169,15 +144,6 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
 
     if (boardConfig.onBoardCreated) {
       boardConfig.onBoardCreated(boardAPI);
-    }
-
-    // Suivre quel bouton de la souris est enfoncé pour filtrer onChange
-    const handleMouseDown = (e) => {
-      lastPressedButtonRef.current = e.button;
-    };
-
-    if (boardElRef.current) {
-      boardElRef.current.addEventListener("mousedown", handleMouseDown, true);
     }
 
     // Recalcul fiable des bounds via ResizeObserver
@@ -189,31 +155,22 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
     if (typeof ResizeObserver !== "undefined" && boardElRef.current) {
       resizeObserver = new ResizeObserver(() => {
         requestAnimationFrame(() => {
-          if (boardAPI.board) {
-            boardAPI.board.redrawAll();
-          }
+          boardAPI.redraw(true);
         });
       });
       resizeObserver.observe(boardElRef.current);
     } else {
       // Fallback si ResizeObserver n'est pas disponible
       setTimeout(() => {
-        if (boardAPI.board) {
-          boardAPI.board.redrawAll();
-        }
+        boardAPI.redraw(true);
       }, 300);
     }
 
     return () => {
-      if (boardElRef.current) {
-        boardElRef.current.removeEventListener("mousedown", handleMouseDown, true);
-      }
       if (resizeObserver) {
         resizeObserver.disconnect();
       }
-      if (boardAPI.board) {
-        boardAPI.board.destroy();
-      }
+      boardAPI.destroy();
     };
   }, []);
 
@@ -221,18 +178,14 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
   const handleApply = () => {
     if (onSave) {
       const finalFen = `${position} ${turn} ${castling} - 0 1`;
-      const shapes = boardApiRef.current && typeof boardApiRef.current.getShapes === "function"
-        ? boardApiRef.current.getShapes()
-        : currentShapes;
+      const shapes = boardApiRef.current ? boardApiRef.current.getShapes() : currentShapes;
       onSave({ fen: finalFen, orientation, shapes });
     }
   };
 
   const handleClear = () => {
-    boardApiRef.current.setPosition("8/8/8/8/8/8/8/8 w - - 0 1");
-    if (boardApiRef.current && typeof boardApiRef.current.setShapes === "function") {
-      boardApiRef.current.setShapes([]);
-    }
+    boardApiRef.current?.setPosition("8/8/8/8/8/8/8/8 w - - 0 1");
+    boardApiRef.current?.setShapes([]);
     setCurrentShapes([]);
     currentShapesRef.current = [];
     syncPositionFromBoard();
@@ -241,10 +194,8 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
   };
 
   const handleReset = () => {
-    boardApiRef.current.setPosition(defaultFen);
-    if (boardApiRef.current && typeof boardApiRef.current.setShapes === "function") {
-      boardApiRef.current.setShapes([]);
-    }
+    boardApiRef.current?.setPosition(defaultFen);
+    boardApiRef.current?.setShapes([]);
     setCurrentShapes([]);
     currentShapesRef.current = [];
     syncPositionFromBoard();

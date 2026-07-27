@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.3 - 2026-07-27
+
+*   **Intégration Native & Refactoring `eg-chessboard` v1.2.0 :**
+    *   Élimination complète de tous les hacks, contournements de typage et accès aux membres privés (`board.state`, `game.constructor`, `drawable.shapes`).
+    *   Suppression du monkey-patching `updateCommentAndShapes` au profit de l'option native `preserveShapesOnPositionChange: true`.
+    *   Utilisation directe des méthodes publiques officielles `redraw(true)`, `getPlacementFen()`, `getFinalFenFromPgn()`, `getCurrentComment()`, `getShapes()` et `destroy()`.
+
 ## 1.3.2 - 2026-07-22
 
 *   **Nouveaux Types d'Exercices :**

@@ -122,7 +122,7 @@ export function init() {
 				return;
 			}
 
-			if ( boardAPI && typeof boardAPI.destroy === 'function' ) {
+			if ( boardAPI ) {
 				boardAPI.destroy();
 				boardAPI = null;
 			}
@@ -206,10 +206,7 @@ export function init() {
 						: '';
 					if ( startSq && endSq ) {
 						setTimeout( function () {
-							if (
-								boardAPI &&
-								typeof boardAPI.setShapes === 'function'
-							) {
+							if ( boardAPI ) {
 								boardAPI.setShapes( [
 									{
 										orig: startSq,

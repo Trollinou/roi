@@ -55,11 +55,8 @@ export default function Edit( {
 	useEffect( () => {
 		if ( ! isSelected && previewBoardRef.current && EgBoardCore ) {
 			// Clean up previous preview if any
-			if (
-				previewInstanceRef.current &&
-				previewInstanceRef.current.board
-			) {
-				previewInstanceRef.current.board.destroy();
+			if ( previewInstanceRef.current ) {
+				previewInstanceRef.current.destroy();
 				previewInstanceRef.current = null;
 			}
 
@@ -106,9 +103,7 @@ export default function Edit( {
 			}
 
 			return () => {
-				if ( boardAPI.board ) {
-					boardAPI.board.destroy();
-				}
+				boardAPI?.destroy();
 			};
 		}
 	}, [

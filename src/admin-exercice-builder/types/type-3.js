@@ -62,12 +62,10 @@ function updateBoardConfig() {
 		return;
 	}
 
-	if ( typeof boardAPI.updateStockfishConfig === 'function' ) {
-		boardAPI.updateStockfishConfig( {
-			whiteMode: 'disabled',
-			blackMode: 'disabled',
-		} );
-	}
+	boardAPI.updateStockfishConfig( {
+		whiteMode: 'disabled',
+		blackMode: 'disabled',
+	} );
 
 	boardAPI.setConfig( {
 		orientation: configData.couleur_joueur,
@@ -214,10 +212,7 @@ export function init() {
 					configData.fen = result.fen;
 					configData.couleur_joueur = result.orientation;
 					configData.shapes = result.shapes || [];
-					if (
-						boardAPI &&
-						typeof boardAPI.setShapes === 'function'
-					) {
+					if ( boardAPI ) {
 						boardAPI.setShapes( configData.shapes );
 					}
 					updateConfig();

@@ -123,9 +123,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
     }
 
     return () => {
-      if (boardAPI.board) {
-        boardAPI.board.destroy();
-      }
+      boardAPI?.destroy();
     };
   }, []);
 

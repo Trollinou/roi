@@ -259,7 +259,7 @@ export function init() {
 			);
 		}
 
-		if ( t2BoardAPI && typeof t2BoardAPI.destroy === 'function' ) {
+		if ( t2BoardAPI ) {
 			t2BoardAPI.destroy();
 			t2BoardAPI = null;
 		}
