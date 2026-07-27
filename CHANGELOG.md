@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased] - NON PUBLIÉ
+
+*   **Nouveau Type d'Exercice (Type 11 : Class'échecs) :**
+    *   **Back-office PHP :** Création de `TypeClassEchecs.php` (`ROI\Metaboxes\Exercice\Types\TypeClassEchecs`) et enregistrement dans `Manager.php` pour la saisie de la consigne et de 5 positions ordonnées.
+    *   **Administration JS :** Création de `type-11.js` pour la gestion de l'état local des 5 positions (`{ fen, couleur_joueur, shapes }`), l'interaction avec la modale FEN `openFenEditor` et la synchronisation automatique du champ JSON de configuration. Mise à jour de `main.js` pour intégrer l'initialisation et la visibilité du Type 11.
+
 ## 1.3.3 - 2026-07-27
 
 *   **Intégration Native & Refactoring `eg-chessboard` v1.2.0 :**
