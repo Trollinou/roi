@@ -2,6 +2,10 @@
 
 ## [Unreleased] - NON PUBLIÉ
 
+*   **Nouveau Type d'Exercice (Type 14 : Cap ou pas cap ?) :**
+    *   **Back-office PHP :** Création de `TypeCapOuPasCap.php` (`ROI\Metaboxes\Exercice\Types\TypeCapOuPasCap`) et enregistrement dans `Manager.php` pour la saisie de la consigne, du type de réponse (`qcm` ou `move`) et de 5 diagrammes (FEN, couleur du joueur, options QCM avec boutons radio et explications, coup SAN et explication d'erreur).
+    *   **Administration JS :** Création de `type-14.js` pour la gestion de l'état local des 5 diagrammes (`{ fen, couleur_joueur, shapes, qcm_choix, qcm_bonne_reponse, move_san, move_explication }`), l'interaction avec la modale FEN `openFenEditor`, la bascule dynamique d'affichage des blocs QCM / Move et la synchronisation en temps réel du JSON de configuration. Mise à jour de `main.js` et compilation du bundle d'assets.
+
 *   **Nouveau Type d'Exercice (Type 13 : Ouvre'boîte) :**
     *   **Back-office PHP :** Création de `TypeOuvreBoite.php` (`ROI\Metaboxes\Exercice\Types\TypeOuvreBoite`) et enregistrement dans `Manager.php` pour la saisie d'une position FEN, de la couleur du joueur, de la question, de 3 choix de réponses (texte, coup SAN, explication) et de l'index de la bonne réponse.
     *   **Administration JS :** Création de `type-13.js` pour la gestion de la position FEN et des tracés `shapes`, l'interaction avec la modale FEN `openFenEditor` et la synchronisation en temps réel du contrat JSON de configuration. Retrait de `'13'` du tableau `visualTypes`, mise à jour de `main.js` et compilation du bundle d'assets.
