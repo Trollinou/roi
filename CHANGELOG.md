@@ -2,6 +2,10 @@
 
 ## [Unreleased] - NON PUBLIÉ
 
+*   **Nouveau Type d'Exercice (Type 12 : Qui-suis-je ?) :**
+    *   **Back-office PHP :** Création de `TypeQuiSuisJe.php` (`ROI\Metaboxes\Exercice\Types\TypeQuiSuisJe`) et enregistrement dans `Manager.php` pour la saisie des indices et la configuration des 3 types de réponse (Pièce, Case, QCM).
+    *   **Administration JS :** Création de `type-12.js` pour la gestion dynamique des indices, la bascule d'affichage des blocs de réponse, la sélection interactive sur échiquier vide (`EgBoardCore`) et la synchronisation automatique de la configuration JSON. Intégration dans `main.js` et compilation du bundle d'assets.
+
 *   **Nouveau Type d'Exercice (Type 11 : Class'échecs) :**
     *   **Back-office PHP :** Création de `TypeClassEchecs.php` (`ROI\Metaboxes\Exercice\Types\TypeClassEchecs`) et enregistrement dans `Manager.php` pour la saisie de la consigne et de 5 positions ordonnées.
     *   **Administration JS :** Création de `type-11.js` pour la gestion de l'état local des 5 positions (`{ fen, couleur_joueur, shapes }`), l'interaction avec la modale FEN `openFenEditor` et la synchronisation automatique du champ JSON de configuration. Mise à jour de `main.js` pour intégrer l'initialisation et la visibilité du Type 11.
