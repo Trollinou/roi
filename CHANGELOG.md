@@ -2,6 +2,10 @@
 
 ## [Unreleased] - NON PUBLIÉ
 
+*   **Nouveau Type d'Exercice (Type 13 : Ouvre'boîte) :**
+    *   **Back-office PHP :** Création de `TypeOuvreBoite.php` (`ROI\Metaboxes\Exercice\Types\TypeOuvreBoite`) et enregistrement dans `Manager.php` pour la saisie d'une position FEN, de la couleur du joueur, de la question, de 3 choix de réponses (texte, coup SAN, explication) et de l'index de la bonne réponse.
+    *   **Administration JS :** Création de `type-13.js` pour la gestion de la position FEN et des tracés `shapes`, l'interaction avec la modale FEN `openFenEditor` et la synchronisation en temps réel du contrat JSON de configuration. Retrait de `'13'` du tableau `visualTypes`, mise à jour de `main.js` et compilation du bundle d'assets.
+
 *   **Nouveau Type d'Exercice (Type 12 : Qui-suis-je ?) :**
     *   **Back-office PHP :** Création de `TypeQuiSuisJe.php` (`ROI\Metaboxes\Exercice\Types\TypeQuiSuisJe`) et enregistrement dans `Manager.php` pour la saisie des indices et la configuration des 3 types de réponse (Pièce, Case, QCM).
     *   **Administration JS :** Création de `type-12.js` pour la gestion dynamique des indices, la bascule d'affichage des blocs de réponse, la sélection interactive sur échiquier vide (`EgBoardCore`) et la synchronisation automatique de la configuration JSON. Intégration dans `main.js` et compilation du bundle d'assets.

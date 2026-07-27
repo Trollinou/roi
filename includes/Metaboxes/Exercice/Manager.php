@@ -20,6 +20,7 @@ use ROI\Metaboxes\Exercice\Types\TypeVisionChecs;
 use ROI\Metaboxes\Exercice\Types\TypeParcours;
 use ROI\Metaboxes\Exercice\Types\TypeClassEchecs;
 use ROI\Metaboxes\Exercice\Types\TypeQuiSuisJe;
+use ROI\Metaboxes\Exercice\Types\TypeOuvreBoite;
 
 /**
  * Class Manager
@@ -119,6 +120,7 @@ class Manager {
 		( new TypeParcours() )->render( $post, $config_data );
 		( new TypeClassEchecs() )->render( $post, $config_data );
 		( new TypeQuiSuisJe() )->render( $post, $config_data );
+		( new TypeOuvreBoite() )->render( $post, $config_data );
 		?>
 
 		<textarea name="roi_exercice_config" id="roi_config_json" style="display:none;"><?php echo esc_textarea( $config ); ?></textarea>
