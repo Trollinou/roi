@@ -20,6 +20,11 @@ document.addEventListener( 'DOMContentLoaded', () => {
 	);
 	const playlistContainer = document.getElementById( 'roi_playlist_items' );
 
+	const availableCountBadge = document.getElementById(
+		'roi_available_count'
+	);
+	const playlistCountBadge = document.getElementById( 'roi_playlist_count' );
+
 	let draggedSource = null;
 	let draggedData = null;
 	let draggedElement = null;
@@ -46,6 +51,32 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		};
 	};
 
+	// Helper: Get set of item keys currently in playlist
+	const getPlaylistItemKeys = () => {
+		const keys = new Set();
+		const playlistItems = playlistContainer.querySelectorAll(
+			'[data-playlist-item]'
+		);
+		playlistItems.forEach( ( el ) => {
+			const type = el.getAttribute( 'data-type' );
+			const id = el.getAttribute( 'data-id' );
+			if ( type && id ) {
+				keys.add( `${ type }_${ id }` );
+			}
+		} );
+		return keys;
+	};
+
+	// Update playlist item counter
+	const updatePlaylistCount = () => {
+		const count = playlistContainer.querySelectorAll(
+			'[data-playlist-item]'
+		).length;
+		if ( playlistCountBadge ) {
+			playlistCountBadge.textContent = String( count );
+		}
+	};
+
 	// Search function
 	const searchCatalog = async () => {
 		const query = catalogSearch.value.trim();
@@ -68,10 +99,16 @@ document.addEventListener( 'DOMContentLoaded', () => {
 				renderCatalog( resJson.data );
 			} else {
 				availableItemsContainer.innerHTML = `<div style="padding: 10px; color: #d63638;">Erreur lors de la recherche.</div>`;
+				if ( availableCountBadge ) {
+					availableCountBadge.textContent = '0';
+				}
 			}
 		} catch ( err ) {
 			console.error( 'Search error', err );
 			availableItemsContainer.innerHTML = `<div style="padding: 10px; color: #d63638;">Erreur réseau.</div>`;
+			if ( availableCountBadge ) {
+				availableCountBadge.textContent = '0';
+			}
 		}
 	};
 
@@ -79,10 +116,27 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		availableItemsContainer.innerHTML = '';
 		if ( ! items || items.length === 0 ) {
 			availableItemsContainer.innerHTML = `<div style="padding: 10px; color: #888;">Aucun élément trouvé.</div>`;
+			if ( availableCountBadge ) {
+				availableCountBadge.textContent = '0';
+			}
 			return;
 		}
 
-		items.forEach( ( item ) => {
+		const playlistKeys = getPlaylistItemKeys();
+		const filteredItems = items.filter(
+			( item ) => ! playlistKeys.has( `${ item.type }_${ item.id }` )
+		);
+
+		if ( availableCountBadge ) {
+			availableCountBadge.textContent = String( filteredItems.length );
+		}
+
+		if ( filteredItems.length === 0 ) {
+			availableItemsContainer.innerHTML = `<div style="padding: 10px; color: #888;">Tous les éléments correspondant à vos critères sont déjà dans le cours.</div>`;
+			return;
+		}
+
+		filteredItems.forEach( ( item ) => {
 			const styles = getColorStyle( item.color );
 			const el = document.createElement( 'div' );
 			el.classList.add( 'roi-catalog-item' );
@@ -266,7 +320,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		).element;
 	};
 
-	// Generate JSON String
+	// Generate JSON String and update counters
 	const updatePlaylistJson = () => {
 		const items = [];
 		const playlistItems = playlistContainer.querySelectorAll(
@@ -279,6 +333,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 			} );
 		} );
 		playlistJsonInput.value = JSON.stringify( items );
+		updatePlaylistCount();
 	};
 
 	// Enforce same chapter and level constraints by disabling dropdowns
@@ -313,7 +368,8 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		catalogLevelFilter.addEventListener( 'change', searchCatalog );
 	}
 
-	// Initialize items list with constraint checks
+	// Initialize items list with constraint checks and initial count
+	updatePlaylistCount();
 	enforceSameChapterAndLevelConstraints();
 
 	// Bind initial events to any existing DOM elements if any

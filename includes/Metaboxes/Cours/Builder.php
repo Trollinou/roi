@@ -75,14 +75,48 @@ class Builder {
 			} );
 		}
 		?>
+		<style>
+			.roi-builder-badge {
+				display: inline-block;
+				background: #2271b1;
+				color: #fff;
+				font-size: 11px;
+				font-weight: 600;
+				padding: 2px 7px;
+				border-radius: 10px;
+				margin-left: 6px;
+				vertical-align: middle;
+			}
+			.roi-scrollable-container {
+				max-height: 450px;
+				overflow-y: auto;
+				scrollbar-width: thin;
+				scrollbar-color: #c1c1c1 #f1f1f1;
+			}
+			.roi-scrollable-container::-webkit-scrollbar {
+				width: 6px;
+			}
+			.roi-scrollable-container::-webkit-scrollbar-track {
+				background: #f1f1f1;
+				border-radius: 3px;
+			}
+			.roi-scrollable-container::-webkit-scrollbar-thumb {
+				background: #c1c1c1;
+				border-radius: 3px;
+			}
+			.roi-scrollable-container::-webkit-scrollbar-thumb:hover {
+				background: #a8a8a8;
+			}
+		</style>
 		<div class="roi-cours-builder-container">
 			<input type="hidden" name="roi_cours_playlist_json" id="roi_cours_playlist_json" value="<?php echo esc_attr( $playlist ); ?>">
 
 			<div style="display: flex; gap: 20px; margin-top: 15px;">
 				<!-- Colonne Gauche : Catalogue -->
 				<div style="flex: 1; border: 1px solid #ccc; border-radius: 6px; padding: 15px; background: #fafafa;">
-					<h3 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;">
-						<?php esc_html_e( 'Catalogue des leçons & exercices', 'roi' ); ?>
+					<h3 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+						<span><?php esc_html_e( 'Catalogue des leçons & exercices', 'roi' ); ?></span>
+						<span id="roi_available_count" class="roi-builder-badge">0</span>
 					</h3>
 
 					<div style="display: flex; gap: 10px; margin-bottom: 15px;">
@@ -107,18 +141,19 @@ class Builder {
 						</select>
 					</div>
 
-					<div id="roi_available_items" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+					<div id="roi_available_items" class="roi-scrollable-container" style="display: flex; flex-direction: column; gap: 8px; padding-right: 4px;">
 						<!-- Rempli par JS -->
 					</div>
 				</div>
 
 				<!-- Colonne Droite : Playlist -->
 				<div style="flex: 1; border: 1px solid #ccc; border-radius: 6px; padding: 15px; background: #fff;">
-					<h3 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;">
-						<?php esc_html_e( 'Contenu du cours (Playlist)', 'roi' ); ?>
+					<h3 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+						<span><?php esc_html_e( 'Contenu du cours (Playlist)', 'roi' ); ?></span>
+						<span id="roi_playlist_count" class="roi-builder-badge">0</span>
 					</h3>
 
-					<div id="roi_playlist_items" style="min-height: 350px; max-height: 400px; overflow-y: auto; border: 2px dashed #bbb; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+					<div id="roi_playlist_items" class="roi-scrollable-container" style="min-height: 350px; border: 2px dashed #bbb; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
 						<?php
 						$playlist_items = json_decode( $playlist, true );
 						if ( is_array( $playlist_items ) ) {
