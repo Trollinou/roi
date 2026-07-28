@@ -2,6 +2,11 @@
 
 ## [Unreleased] - NON PUBLIÉ
 
+*   **Migration de `chess.js` vers `chessops` :**
+    *   Remplacement complet de la dépendance `chess.js` par `chessops` dans tout le plugin.
+    *   Utilisation de la fonction utilitaire native `getFinalFenFromPgn` exposée par `eg-chessboard` v1.2.0+.
+    *   Mise à jour des scripts d'administration (`admin-fen-editor.js`, `type-4.js`), des métadonnées du bloc `roi/chessboard` (`block.json`) et de la documentation.
+
 *   **Nouveau Type d'Exercice (Type 10 : Echec'éval) :**
     *   **Back-office PHP :** Création de `TypeEchecEval.php` (`ROI\Metaboxes\Exercice\Types\TypeEchecEval`) et enregistrement dans `Manager.php` pour la configuration de la FEN de départ, la couleur du joueur, le thème, les questions dynamiques (types `yesno` et `evaluation`, réponses attendues et explications), la séquence de coups à jouer et l'explication PGN finale.
     *   **Administration JS :** Création de `type-10.js` pour la gestion dynamique des questions d'évaluation, la sélection réactive du type de réponse et des options attendues, l'interaction avec la modale FEN `openFenEditor` (FEN et `shapes`) et la synchronisation temps réel du contrat JSON. Retrait de `'10'` de `visualTypes`, mise à jour de `main.js` et compilation du bundle d'assets.

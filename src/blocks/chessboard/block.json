@@ -6,7 +6,7 @@
   "title": "Échiquier",
   "category": "widgets",
   "icon": "games",
-  "description": "A native Gutenberg chessboard block for WordPress, powered by Chessground and chess.js.",
+  "description": "A native Gutenberg chessboard block for WordPress, powered by Chessground and chessops.",
   "supports": {
     "html": false,
     "align": [

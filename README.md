@@ -8,7 +8,7 @@
 
 ## Description
 
-Le plugin "ROI - Ressources et Organisation pour l’Initiation aux échecs" est un système de gestion de l'apprentissage (LMS) complet, conçu pour l'enseignement des échecs dans un environnement WordPress. Il fournit un cadre robuste pour la création, la gestion et la diffusion de leçons, d'exercices et de cours d'échecs. Le plugin inclut un bloc d'échiquier interactif sophistiqué, alimenté par Stockfish, `chess.js` et **Chessground** (l'échiquier Lichess), permettant des démonstrations, des exercices libres et des parties joueur contre IA.
+Le plugin "ROI - Ressources et Organisation pour l’Initiation aux échecs" est un système de gestion de l'apprentissage (LMS) complet, conçu pour l'enseignement des échecs dans un environnement WordPress. Il fournit un cadre robuste pour la création, la gestion et la diffusion de leçons, d'exercices et de cours d'échecs. Le plugin inclut un bloc d'échiquier interactif sophistiqué, alimenté par Stockfish, `chessops` et **Chessground** (l'échiquier Lichess), permettant des démonstrations, des exercices libres et des parties joueur contre IA.
 
 Ce plugin a été développé en suivant les meilleures pratiques de WordPress en matière de sécurité, de performance et de maintenabilité, et dispose d'une architecture orientée objet (POO) complète.
 
@@ -49,7 +49,7 @@ Ce plugin nécessite que le plugin **DAME** soit installé et activé. Le plugin
     *   **Partie vs IA :** Jouez contre le moteur Stockfish intégré avec une force ELO réglable, une boîte de dialogue de démarrage et une barre d'évaluation dynamique.
 *   **Éditeur de FEN Visuel :** Un outil puissant dans l'éditeur pour créer visuellement n'importe quelle position sur l'échiquier. L'éditeur fournit une validation FEN en temps réel.
 *   **Haute Personnalisation :** Contrôlez l'orientation de l'échiquier, les coordonnées et les menaces.
-*   **Moteur Robuste :** Propulsé par `chess.js` pour la logique de jeu et `Chessground` pour le rendu, garantissant un comportement moderne, tactile et fiable.
+*   **Moteur Robuste :** Propulsé par `chessops` pour la logique de jeu et `Chessground` pour le rendu, garantissant un comportement moderne, tactile et fiable.
 
 ### Administration
 
