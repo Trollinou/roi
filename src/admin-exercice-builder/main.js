@@ -11,6 +11,7 @@ import * as type6 from './types/type-6';
 import * as type7 from './types/type-7';
 import * as type8 from './types/type-8';
 import * as type9 from './types/type-9';
+import * as type10 from './types/type-10';
 import * as type11 from './types/type-11';
 import * as type12 from './types/type-12';
 import * as type13 from './types/type-13';
@@ -36,6 +37,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	const builderType7 = document.getElementById( 'roi_builder_type_7' );
 	const builderType8 = document.getElementById( 'roi_builder_type_8' );
 	const builderType9 = document.getElementById( 'roi_builder_type_9' );
+	const builderType10 = document.getElementById( 'roi_builder_type_10' );
 	const builderType11 = document.getElementById( 'roi_builder_type_11' );
 	const builderType12 = document.getElementById( 'roi_builder_type_12' );
 	const builderType13 = document.getElementById( 'roi_builder_type_13' );
@@ -44,7 +46,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	const builderType16 = document.getElementById( 'roi_builder_type_16' );
 	const builderTitle = document.getElementById( 'roi_visual_builder_title' );
 
-	const visualTypes = [ '3', '10' ];
+	const visualTypes = [ '3' ];
 
 	function toggleVisibility() {
 		const val = typeSelect.value;
@@ -111,6 +113,11 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			builderType9.style.display = val === '9' ? '' : 'none';
 		}
 
+		// Type 10
+		if ( builderType10 ) {
+			builderType10.style.display = val === '10' ? '' : 'none';
+		}
+
 		// Type 11
 		if ( builderType11 ) {
 			builderType11.style.display = val === '11' ? '' : 'none';
@@ -161,6 +168,8 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			type8.init();
 		} else if ( val === '9' ) {
 			type9.init();
+		} else if ( val === '10' ) {
+			type10.init();
 		} else if ( val === '11' ) {
 			type11.init();
 		} else if ( val === '12' ) {

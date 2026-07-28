@@ -18,6 +18,7 @@ use ROI\Metaboxes\Exercice\Types\TypeAssociPlan;
 use ROI\Metaboxes\Exercice\Types\TypeMarcheHeros;
 use ROI\Metaboxes\Exercice\Types\TypeVisionChecs;
 use ROI\Metaboxes\Exercice\Types\TypeParcours;
+use ROI\Metaboxes\Exercice\Types\TypeEchecEval;
 use ROI\Metaboxes\Exercice\Types\TypeClassEchecs;
 use ROI\Metaboxes\Exercice\Types\TypeQuiSuisJe;
 use ROI\Metaboxes\Exercice\Types\TypeOuvreBoite;
@@ -121,6 +122,7 @@ class Manager {
 		( new TypeMarcheHeros() )->render( $post, $config_data );
 		( new TypeVisionChecs() )->render( $post, $config_data );
 		( new TypeParcours() )->render( $post, $config_data );
+		( new TypeEchecEval() )->render( $post, $config_data );
 		( new TypeClassEchecs() )->render( $post, $config_data );
 		( new TypeQuiSuisJe() )->render( $post, $config_data );
 		( new TypeOuvreBoite() )->render( $post, $config_data );

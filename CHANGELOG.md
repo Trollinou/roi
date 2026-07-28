@@ -2,6 +2,11 @@
 
 ## [Unreleased] - NON PUBLIÉ
 
+*   **Nouveau Type d'Exercice (Type 10 : Echec'éval) :**
+    *   **Back-office PHP :** Création de `TypeEchecEval.php` (`ROI\Metaboxes\Exercice\Types\TypeEchecEval`) et enregistrement dans `Manager.php` pour la configuration de la FEN de départ, la couleur du joueur, le thème, les questions dynamiques (types `yesno` et `evaluation`, réponses attendues et explications), la séquence de coups à jouer et l'explication PGN finale.
+    *   **Administration JS :** Création de `type-10.js` pour la gestion dynamique des questions d'évaluation, la sélection réactive du type de réponse et des options attendues, l'interaction avec la modale FEN `openFenEditor` (FEN et `shapes`) et la synchronisation temps réel du contrat JSON. Retrait de `'10'` de `visualTypes`, mise à jour de `main.js` et compilation du bundle d'assets.
+
+
 *   **Nouveau Type d'Exercice (Type 16 : Destination finale) :**
     *   **Back-office PHP :** Création de `TypeDestinationFinale.php` (`ROI\Metaboxes\Exercice\Types\TypeDestinationFinale`) et enregistrement dans `Manager.php` pour la saisie de la consigne, de la position FEN de départ, de la couleur du joueur, de la liste ordonnée des étapes textuelles et de la solution PGN finale.
     *   **Administration JS :** Création de `type-16.js` pour la gestion dynamique du tableau d'étapes textuelles, l'interaction avec la modale FEN `openFenEditor` et la synchronisation en temps réel du contrat JSON. Retrait de `'16'` de `visualTypes`, mise à jour de `main.js` et compilation du bundle d'assets.
