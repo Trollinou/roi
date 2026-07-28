@@ -85,6 +85,7 @@ class TypeDestinationFinale implements TypeInterface {
 			<div style="margin-top: 15px;">
 				<h3 style="margin-top: 0; font-size: 14px; font-weight: 600; margin-bottom: 8px;"><?php esc_html_e( 'Solution & Explications', 'roi' ); ?></h3>
 				<textarea id="roi_t16_pgn_explication" rows="6" placeholder="<?php esc_attr_e( 'Saisir le PGN de la solution...', 'roi' ); ?>" style="width: 100%;"><?php echo esc_textarea( $pgn_explication ); ?></textarea>
+				<button type="button" id="btn_open_pgn_editor_t16_explication" class="button" style="display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;"><span class="dashicons dashicons-edit" style="font-size: 16px; width: 16px; height: 16px; line-height: 1;"></span> <?php esc_html_e( 'Éditer le PGN', 'roi' ); ?></button>
 			</div>
 		</div>
 		<?php

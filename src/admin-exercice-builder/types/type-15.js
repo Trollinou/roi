@@ -2,7 +2,7 @@
  * Handler for Type 15: Jugement final.
  */
 
-import { openFenEditor } from '../utils/modals';
+import { openFenEditor, openPgnEditor } from '../utils/modals';
 
 const textarea = document.getElementById( 'roi_config_json' );
 
@@ -86,7 +86,10 @@ export function init() {
 				if ( typeof parsed.fen_depart === 'string' && fenInput ) {
 					fenInput.value = parsed.fen_depart;
 				}
-				if ( typeof parsed.couleur_joueur === 'string' && couleurSelect ) {
+				if (
+					typeof parsed.couleur_joueur === 'string' &&
+					couleurSelect
+				) {
 					couleurSelect.value = parsed.couleur_joueur;
 				}
 				if (
@@ -151,6 +154,68 @@ export function init() {
 						updateConfig();
 					}
 				}
+			);
+		} );
+	}
+
+	// PGN Modal Trigger Listener for Scenarios
+	const scenarioPgnButtons = document.querySelectorAll(
+		'.btn_open_pgn_editor_t15_scenario'
+	);
+	scenarioPgnButtons.forEach( function ( btn ) {
+		btn.addEventListener( 'click', function () {
+			const idx = parseInt( btn.getAttribute( 'data-index' ), 10 );
+			if ( isNaN( idx ) ) {
+				return;
+			}
+
+			const scenarioPgnArea = document.querySelector(
+				`.roi_t15_scenario_pgn[data-index="${ idx }"]`
+			);
+			const initialPgn = scenarioPgnArea
+				? scenarioPgnArea.value.trim()
+				: '';
+			const currentFen = fenInput
+				? fenInput.value ||
+				  'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+				: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+
+			openPgnEditor(
+				initialPgn,
+				function ( nouveauPgn ) {
+					if ( scenarioPgnArea ) {
+						scenarioPgnArea.value = nouveauPgn;
+					}
+					updateConfig();
+				},
+				currentFen
+			);
+		} );
+	} );
+
+	// PGN Modal Trigger Listener for Explication Finale
+	const btnPgnExplication = document.getElementById(
+		'btn_open_pgn_editor_t15_explication'
+	);
+	if ( btnPgnExplication ) {
+		btnPgnExplication.addEventListener( 'click', function () {
+			const initialPgn = pgnExplicationInput
+				? pgnExplicationInput.value.trim()
+				: '';
+			const currentFen = fenInput
+				? fenInput.value ||
+				  'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+				: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+
+			openPgnEditor(
+				initialPgn,
+				function ( nouveauPgn ) {
+					if ( pgnExplicationInput ) {
+						pgnExplicationInput.value = nouveauPgn;
+					}
+					updateConfig();
+				},
+				currentFen
 			);
 		} );
 	}

@@ -2,7 +2,7 @@
  * Handler for Type 10: Echec'éval.
  */
 
-import { openFenEditor } from '../utils/modals';
+import { openFenEditor, openPgnEditor } from '../utils/modals';
 
 const textarea = document.getElementById( 'roi_config_json' );
 
@@ -89,7 +89,8 @@ function renderT10Questions() {
 
 		const deleteBtn = document.createElement( 'button' );
 		deleteBtn.type = 'button';
-		deleteBtn.className = 'button button-link-delete roi_t10_remove_question';
+		deleteBtn.className =
+			'button button-link-delete roi_t10_remove_question';
 		deleteBtn.style.cssText = 'color: #b32d2e; text-decoration: none;';
 		deleteBtn.textContent = 'Supprimer';
 		deleteBtn.addEventListener( 'click', () => {
@@ -103,7 +104,8 @@ function renderT10Questions() {
 
 		// Body Container
 		const bodyDiv = document.createElement( 'div' );
-		bodyDiv.style.cssText = 'display: flex; flex-direction: column; gap: 10px;';
+		bodyDiv.style.cssText =
+			'display: flex; flex-direction: column; gap: 10px;';
 
 		// Question Text Input
 		const textGroup = document.createElement( 'div' );
@@ -228,7 +230,7 @@ function renderT10Questions() {
 		explInput.type = 'text';
 		explInput.className = 'roi_t10_q_explication';
 		explInput.style.cssText = 'width: 100%; height: 30px;';
-		explInput.placeholder = 'Ex: Le centre va s\'ouvrir dangereusement.';
+		explInput.placeholder = "Ex: Le centre va s'ouvrir dangereusement.";
 		explInput.value = q.explication || '';
 		explInput.addEventListener( 'input', ( e ) => {
 			q.explication = e.target.value;
@@ -277,7 +279,10 @@ export function init() {
 				if ( typeof parsed.fen_depart === 'string' && fenInput ) {
 					fenInput.value = parsed.fen_depart;
 				}
-				if ( typeof parsed.couleur_joueur === 'string' && couleurSelect ) {
+				if (
+					typeof parsed.couleur_joueur === 'string' &&
+					couleurSelect
+				) {
 					couleurSelect.value = parsed.couleur_joueur;
 				}
 				if ( Array.isArray( parsed.shapes ) ) {
@@ -307,7 +312,8 @@ export function init() {
 					Array.isArray( parsed.solution_moves ) &&
 					solutionMovesInput
 				) {
-					solutionMovesInput.value = parsed.solution_moves.join( ', ' );
+					solutionMovesInput.value =
+						parsed.solution_moves.join( ', ' );
 				} else if (
 					typeof parsed.solution_moves === 'string' &&
 					solutionMovesInput
@@ -369,6 +375,33 @@ export function init() {
 						updateConfig();
 					}
 				}
+			);
+		} );
+	}
+
+	// PGN Modal Trigger Listener for Explication Finale
+	const btnPgnExplication = document.getElementById(
+		'btn_open_pgn_editor_t10_explication'
+	);
+	if ( btnPgnExplication ) {
+		btnPgnExplication.addEventListener( 'click', function () {
+			const initialPgn = pgnExplicationInput
+				? pgnExplicationInput.value.trim()
+				: '';
+			const currentFen = fenInput
+				? fenInput.value ||
+				  'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 4 5'
+				: 'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 4 5';
+
+			openPgnEditor(
+				initialPgn,
+				function ( nouveauPgn ) {
+					if ( pgnExplicationInput ) {
+						pgnExplicationInput.value = nouveauPgn;
+					}
+					updateConfig();
+				},
+				currentFen
 			);
 		} );
 	}

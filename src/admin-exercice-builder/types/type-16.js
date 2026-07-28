@@ -2,7 +2,7 @@
  * Handler for Type 16: Destination finale.
  */
 
-import { openFenEditor } from '../utils/modals';
+import { openFenEditor, openPgnEditor } from '../utils/modals';
 
 const textarea = document.getElementById( 'roi_config_json' );
 let t16Etapes = [];
@@ -214,6 +214,33 @@ export function init() {
 						updateConfig();
 					}
 				}
+			);
+		} );
+	}
+
+	// PGN Modal Trigger Listener for Explication Finale
+	const btnPgnExplication = document.getElementById(
+		'btn_open_pgn_editor_t16_explication'
+	);
+	if ( btnPgnExplication ) {
+		btnPgnExplication.addEventListener( 'click', function () {
+			const initialPgn = pgnExplicationInput
+				? pgnExplicationInput.value.trim()
+				: '';
+			const currentFen = fenInput
+				? fenInput.value ||
+				  'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 4 5'
+				: 'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 4 5';
+
+			openPgnEditor(
+				initialPgn,
+				function ( nouveauPgn ) {
+					if ( pgnExplicationInput ) {
+						pgnExplicationInput.value = nouveauPgn;
+					}
+					updateConfig();
+				},
+				currentFen
 			);
 		} );
 	}

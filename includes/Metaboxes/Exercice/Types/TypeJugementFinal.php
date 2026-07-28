@@ -77,6 +77,7 @@ class TypeJugementFinal implements TypeInterface {
 							</h4>
 							<div style="margin-bottom: 8px;">
 								<textarea class="roi_t15_scenario_pgn" data-index="<?php echo $i; ?>" rows="3" placeholder="<?php esc_attr_e( 'Saisir le PGN brut sans commentaires...', 'roi' ); ?>" style="width: 100%;"><?php echo esc_textarea( $sc_pgn ); ?></textarea>
+								<button type="button" class="button btn_open_pgn_editor_t15_scenario" data-index="<?php echo $i; ?>" style="display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;"><span class="dashicons dashicons-edit" style="font-size: 16px; width: 16px; height: 16px; line-height: 1;"></span> <?php esc_html_e( 'Éditer le PGN', 'roi' ); ?></button>
 							</div>
 							<div>
 								<label style="font-weight: 600; font-size: 13px;">
@@ -94,6 +95,7 @@ class TypeJugementFinal implements TypeInterface {
 			<div style="margin-top: 15px;">
 				<h3 style="margin-top: 0; font-size: 14px; font-weight: 600; margin-bottom: 8px;"><?php esc_html_e( 'Explication Finale', 'roi' ); ?></h3>
 				<textarea id="roi_t15_pgn_explication" rows="6" placeholder="<?php esc_attr_e( 'Saisir le PGN complet et commenté de la solution...', 'roi' ); ?>" style="width: 100%;"><?php echo esc_textarea( $pgn_explication ); ?></textarea>
+				<button type="button" id="btn_open_pgn_editor_t15_explication" class="button" style="display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;"><span class="dashicons dashicons-edit" style="font-size: 16px; width: 16px; height: 16px; line-height: 1;"></span> <?php esc_html_e( 'Éditer le PGN', 'roi' ); ?></button>
 			</div>
 		</div>
 		<?php

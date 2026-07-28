@@ -62,7 +62,7 @@ export function openFenEditor( initialData, onSaveCallback ) {
 	}
 }
 
-export function openPgnEditor( initialPgn, onSaveCallback ) {
+export function openPgnEditor( initialPgn, onSaveCallback, initialFen = '' ) {
 	const pgnModalOverlay = document.getElementById( 'roi_pgn_modal_overlay' );
 	const pgnReactRoot = document.getElementById( 'roi_pgn_react_root' );
 
@@ -71,7 +71,8 @@ export function openPgnEditor( initialPgn, onSaveCallback ) {
 	}
 
 	const pgnModalCloseBtn = document.getElementById( 'roi_pgn_modal_close' );
-	const cleanedPgn = initialPgn.trim();
+	const cleanedPgn = typeof initialPgn === 'string' ? initialPgn.trim() : '';
+	const cleanedFen = typeof initialFen === 'string' ? initialFen.trim() : '';
 
 	// Afficher la modale
 	pgnModalOverlay.style.display = 'flex';
@@ -102,13 +103,20 @@ export function openPgnEditor( initialPgn, onSaveCallback ) {
 	if ( window.RoiPgnEditor && window.wp && window.wp.element ) {
 		const editorComponent =
 			window.RoiPgnEditor.default || window.RoiPgnEditor;
-		const element = window.wp.element.createElement( editorComponent, {
+		const elementProps = {
 			initialPgn: cleanedPgn,
 			onSave( nouveauPgn, finalFen ) {
 				onSaveCallback( nouveauPgn, finalFen );
 				cleanClose();
 			},
-		} );
+		};
+		if ( cleanedFen ) {
+			elementProps.initialFen = cleanedFen;
+		}
+		const element = window.wp.element.createElement(
+			editorComponent,
+			elementProps
+		);
 		window.wp.element.render( element, pgnReactRoot );
 	}
 }

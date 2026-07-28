@@ -197,14 +197,21 @@ export function init() {
 			const initialPgn = currentPgnTextarea
 				? currentPgnTextarea.value.trim()
 				: '';
+			const currentFen = fenInputs[ idx ]
+				? fenInputs[ idx ].value.trim()
+				: '';
 
-			openPgnEditor( initialPgn, function ( nouveauPgn ) {
-				if ( currentPgnTextarea ) {
-					currentPgnTextarea.value = nouveauPgn;
-				}
-				t6Paires[ idx ].pgn_data = nouveauPgn;
-				updateConfig();
-			} );
+			openPgnEditor(
+				initialPgn,
+				function ( nouveauPgn ) {
+					if ( currentPgnTextarea ) {
+						currentPgnTextarea.value = nouveauPgn;
+					}
+					t6Paires[ idx ].pgn_data = nouveauPgn;
+					updateConfig();
+				},
+				currentFen
+			);
 		} );
 	} );
 }
