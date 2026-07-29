@@ -18,6 +18,7 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
   const [turn, setTurn] = useState("w");
   const [castling, setCastling] = useState("KQkq");
   const [orientation, setOrientation] = useState(boardConfig.orientation || "white");
+  const [importFenText, setImportFenText] = useState("");
   const [selectedPiece, setSelectedPiece] = useState(null); // { role, color } ou "eraser" ou null
   const [currentShapes, setCurrentShapes] = useState(initialShapes);
   const currentShapesRef = useRef(initialShapes);
@@ -26,6 +27,13 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
   useEffect(() => {
     currentShapesRef.current = currentShapes;
   }, [currentShapes]);
+
+  // Synchronisation dynamique de l'orientation sur l'échiquier
+  useEffect(() => {
+    if (boardApiRef.current) {
+      boardApiRef.current.setConfig({ orientation });
+    }
+  }, [orientation]);
 
   const boardElRef = useRef(null);
   const boardApiRef = useRef(null);
@@ -47,6 +55,26 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
   const syncPositionFromBoard = () => {
     if (boardApiRef.current) {
       setPosition(boardApiRef.current.getPlacementFen());
+    }
+  };
+
+  // Chargement d'une FEN personnalisée
+  const handleLoadFen = () => {
+    const input = importFenText.trim();
+    if (!input) return;
+
+    try {
+      if (boardApiRef.current) {
+        boardApiRef.current.setPosition(input);
+      }
+      const parts = input.split(/\s+/);
+      if (parts[0]) setPosition(parts[0]);
+      if (parts[1] && (parts[1] === "w" || parts[1] === "b")) setTurn(parts[1]);
+      if (parts[2]) setCastling(parts[2]);
+      syncPositionFromBoard();
+      setImportFenText("");
+    } catch (err) {
+      alert("Erreur lors du chargement de la FEN : " + err.message);
     }
   };
 
@@ -632,6 +660,35 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
 
       {/* Colonne Droite - Contrôles */}
       <div className="fen-editor-controls-col">
+        {/* Importer une FEN */}
+        <div>
+          <div className="fen-editor-section-title">Importer une FEN</div>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <input
+              type="text"
+              className="fen-editor-select"
+              style={{ flex: 1 }}
+              placeholder="Collez une position FEN..."
+              value={importFenText}
+              onChange={(e) => setImportFenText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleLoadFen();
+                }
+              }}
+            />
+            <button
+              type="button"
+              className="fen-editor-btn fen-editor-btn-secondary"
+              style={{ padding: "8px 14px", whiteSpace: "nowrap" }}
+              onClick={handleLoadFen}
+            >
+              Charger
+            </button>
+          </div>
+        </div>
+
         <div>
           {/* Palette de pièces */}
           <div className="fen-editor-section-title">Palette de pièces</div>

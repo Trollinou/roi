@@ -70,6 +70,7 @@ function updateBoardConfig() {
 	boardAPI.setConfig( {
 		orientation: configData.couleur_joueur,
 		viewOnly: false,
+		lastMove: undefined,
 		movable: {
 			color: 'both',
 			events: {

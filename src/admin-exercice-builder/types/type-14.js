@@ -5,7 +5,7 @@
 import { openFenEditor } from '../utils/modals';
 
 const textarea = document.getElementById( 'roi_config_json' );
-let diagramShapes = [ [], [], [], [], [] ];
+const diagramShapes = [ [], [], [], [], [] ];
 
 /**
  * Updates visibility of QCM / Move blocks depending on type_reponse.
@@ -129,10 +129,7 @@ export function init() {
 		try {
 			const parsed = JSON.parse( textarea.value );
 			if ( parsed && typeof parsed === 'object' ) {
-				if (
-					typeof parsed.consigne === 'string' &&
-					consigneInput
-				) {
+				if ( typeof parsed.consigne === 'string' && consigneInput ) {
 					consigneInput.value = parsed.consigne;
 				}
 
@@ -174,11 +171,21 @@ export function init() {
 								const opt0ExpInput = document.querySelector(
 									`.roi_t14_qcm_explication[data-index="${ i }"][data-opt="0"]`
 								);
-								if ( opt0TexteInput && typeof diag.qcm_choix[ 0 ].texte === 'string' ) {
-									opt0TexteInput.value = diag.qcm_choix[ 0 ].texte;
+								if (
+									opt0TexteInput &&
+									typeof diag.qcm_choix[ 0 ].texte ===
+										'string'
+								) {
+									opt0TexteInput.value =
+										diag.qcm_choix[ 0 ].texte;
 								}
-								if ( opt0ExpInput && typeof diag.qcm_choix[ 0 ].explication === 'string' ) {
-									opt0ExpInput.value = diag.qcm_choix[ 0 ].explication;
+								if (
+									opt0ExpInput &&
+									typeof diag.qcm_choix[ 0 ].explication ===
+										'string'
+								) {
+									opt0ExpInput.value =
+										diag.qcm_choix[ 0 ].explication;
 								}
 							}
 
@@ -189,11 +196,21 @@ export function init() {
 								const opt1ExpInput = document.querySelector(
 									`.roi_t14_qcm_explication[data-index="${ i }"][data-opt="1"]`
 								);
-								if ( opt1TexteInput && typeof diag.qcm_choix[ 1 ].texte === 'string' ) {
-									opt1TexteInput.value = diag.qcm_choix[ 1 ].texte;
+								if (
+									opt1TexteInput &&
+									typeof diag.qcm_choix[ 1 ].texte ===
+										'string'
+								) {
+									opt1TexteInput.value =
+										diag.qcm_choix[ 1 ].texte;
 								}
-								if ( opt1ExpInput && typeof diag.qcm_choix[ 1 ].explication === 'string' ) {
-									opt1ExpInput.value = diag.qcm_choix[ 1 ].explication;
+								if (
+									opt1ExpInput &&
+									typeof diag.qcm_choix[ 1 ].explication ===
+										'string'
+								) {
+									opt1ExpInput.value =
+										diag.qcm_choix[ 1 ].explication;
 								}
 							}
 						}
@@ -214,10 +231,16 @@ export function init() {
 							`.roi_t14_move_explication[data-index="${ i }"]`
 						);
 
-						if ( moveSanInput && typeof diag.move_san === 'string' ) {
+						if (
+							moveSanInput &&
+							typeof diag.move_san === 'string'
+						) {
 							moveSanInput.value = diag.move_san;
 						}
-						if ( moveExpInput && typeof diag.move_explication === 'string' ) {
+						if (
+							moveExpInput &&
+							typeof diag.move_explication === 'string'
+						) {
 							moveExpInput.value = diag.move_explication;
 						}
 					} );

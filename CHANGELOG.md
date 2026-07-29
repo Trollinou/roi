@@ -2,6 +2,10 @@
 
 ## [Unreleased] - NON PUBLIÉ
 
+*   **Améliorations Éditeur FEN (`FenEditor`) :**
+    *   **Orientation dynamique :** Rotation réactive de l'échiquier lors du changement d'orientation (Blancs / Noirs) afin d'afficher la couleur sélectionnée en bas de l'écran.
+    *   **Zone d'importation FEN :** Ajout d'un champ de saisie et d'un bouton de chargement placés au-dessus de la palette de pièces.
+
 *   **Migration de `chess.js` vers `chessops` :**
     *   Remplacement complet de la dépendance `chess.js` par `chessops` dans tout le plugin.
     *   Utilisation de la fonction utilitaire native `getFinalFenFromPgn` exposée par `eg-chessboard` v1.2.0+.

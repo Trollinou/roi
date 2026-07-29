@@ -7,7 +7,7 @@ import { openFenEditor } from '../utils/modals';
 const textarea = document.getElementById( 'roi_config_json' );
 const consigneInput = document.getElementById( 'roi_t11_consigne' );
 
-let t11Positions = [
+const t11Positions = [
 	{ fen: '', couleur_joueur: 'white', shapes: [] },
 	{ fen: '', couleur_joueur: 'white', shapes: [] },
 	{ fen: '', couleur_joueur: 'white', shapes: [] },

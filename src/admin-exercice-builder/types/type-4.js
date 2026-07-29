@@ -251,10 +251,16 @@ export function init() {
 						if ( t4Etapes[ i ].final_fen ) {
 							initialQcmFen = t4Etapes[ i ].final_fen;
 						} else if ( t4Etapes[ i ].pgn_data ) {
-							if ( typeof window.getFinalFenFromPgn === 'function' ) {
-								initialQcmFen = window.getFinalFenFromPgn( t4Etapes[ i ].pgn_data );
+							if (
+								typeof window.getFinalFenFromPgn === 'function'
+							) {
+								initialQcmFen = window.getFinalFenFromPgn(
+									t4Etapes[ i ].pgn_data
+								);
 							} else {
-								initialQcmFen = getFinalFenFromPgn( t4Etapes[ i ].pgn_data );
+								initialQcmFen = getFinalFenFromPgn(
+									t4Etapes[ i ].pgn_data
+								);
 							}
 						}
 						break;

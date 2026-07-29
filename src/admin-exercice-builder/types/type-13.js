@@ -60,14 +60,14 @@ export function updateConfig() {
 }
 
 export function init() {
+	if ( ! textarea ) {
+		return;
+	}
+
 	const fenInput = document.getElementById( 'roi_t13_fen_depart' );
 	const couleurSelect = document.getElementById( 'roi_t13_couleur' );
 	const questionInput = document.getElementById( 'roi_t13_question' );
 	const btnFenEditor = document.getElementById( 'btn_open_fen_editor_t13' );
-
-	if ( ! textarea ) {
-		return;
-	}
 
 	// Restauration des données JSON si présent
 	if ( textarea.value.trim() !== '' ) {
@@ -100,7 +100,10 @@ export function init() {
 								`.t13-choix-explication[data-index="${ i }"]`
 							);
 
-							if ( texteInput && typeof item.texte === 'string' ) {
+							if (
+								texteInput &&
+								typeof item.texte === 'string'
+							) {
 								texteInput.value = item.texte;
 							}
 							if ( sanInput && typeof item.san === 'string' ) {
