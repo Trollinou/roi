@@ -30,7 +30,8 @@ class Manager {
 	 * @return void
 	 */
 	public function register_blocks(): void {
-		register_block_type( plugin_dir_path( dirname( __DIR__ ) ) . 'build/diagramme' );
-		register_block_type( plugin_dir_path( dirname( __DIR__ ) ) . 'build/pgn' );
+		$build_dir = plugin_dir_path( dirname( __DIR__ ) ) . 'build/';
+		register_block_type( $build_dir . 'diagramme' );
+		register_block_type( $build_dir . 'pgn' );
 	}
 }

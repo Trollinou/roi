@@ -58,16 +58,15 @@ class Chapitre_Taxonomy {
 		];
 
 		register_taxonomy( 'roi_chapitre', [ 'roi_exercice', 'roi_lecon', 'roi_cours' ], $args );
-
-		$this->seed_terms();
 	}
 
 	/**
 	 * Seed initial terms for the 'roi_chapitre' taxonomy.
+	 * Called during plugin activation.
 	 *
 	 * @return void
 	 */
-	public function seed_terms(): void {
+	public static function seed_terms(): void {
 		$terms = [
 			'Matérialité'         => 'primary',
 			'Activité des Pièces' => 'warning',

@@ -44,23 +44,17 @@ class Plugin {
 		$roles->init();
 
 		// REST API endpoints
-		add_action( 'init', function() {
-			$games_rest = new \ROI\API\REST\Games_Controller();
-			$games_rest->init();
-			$stockfish_rest = new \ROI\API\REST\Stockfish_Controller();
-			$stockfish_rest->init();
-			$contenu_rest = new \ROI\API\REST\Contenu_Controller();
-			$contenu_rest->init();
-			$progression_rest = new \ROI\API\REST\Progression_Controller();
-			$progression_rest->init();
-			$parcours_rest = new \ROI\API\REST\Parcours_Controller();
-			$parcours_rest->init();
-			$config_rest = new \ROI\API\REST\Config_Controller();
-			$config_rest->init();
+		add_action( 'rest_api_init', function(): void {
+			( new \ROI\API\REST\Games_Controller() )->register_routes();
+			( new \ROI\API\REST\Stockfish_Controller() )->register_routes();
+			( new \ROI\API\REST\Contenu_Controller() )->register_routes();
+			( new \ROI\API\REST\Progression_Controller() )->register_routes();
+			( new \ROI\API\REST\Parcours_Controller() )->register_routes();
+			( new \ROI\API\REST\Config_Controller() )->register_routes();
 		} );
 
 		// Chess Engine Integration
-		add_action( 'init', function() {
+		add_action( 'init', function(): void {
 			\ROI\Chess\ChessEngine::get_instance(
 				plugin_dir_url( ROI_PLUGIN_DIR . 'roi.php' ),
 				ROI_PLUGIN_DIR

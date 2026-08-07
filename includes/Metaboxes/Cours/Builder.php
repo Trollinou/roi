@@ -135,7 +135,7 @@ class Builder {
 
 						<select id="roi_catalog_level_filter">
 							<option value=""><?php esc_html_e( 'Tous les niveaux', 'roi' ); ?></option>
-							<?php for ( $i = 1; $i <= 6; $i++ ) : ?>
+							<?php for ( $i = 1; $i <= 4; $i++ ) : ?>
 								<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
 							<?php endfor; ?>
 						</select>

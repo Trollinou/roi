@@ -57,7 +57,7 @@ class Settings {
 		<p>
 			<label for="roi_lecon_niveau"><strong><?php esc_html_e( 'Niveau de difficulté :', 'roi' ); ?></strong></label><br>
 			<select name="roi_lecon_niveau" id="roi_lecon_niveau" style="width: 100%; max-width: 120px; box-sizing: border-box; margin-top: 5px;">
-				<?php for ( $i = 1; $i <= 6; $i++ ) : ?>
+				<?php for ( $i = 1; $i <= 4; $i++ ) : ?>
 					<option value="<?php echo $i; ?>" <?php selected( $niveau, (string) $i ); ?>><?php echo $i; ?></option>
 				<?php endfor; ?>
 			</select>
@@ -86,7 +86,7 @@ class Settings {
 
 		if ( isset( $_POST['roi_lecon_niveau'] ) ) {
 			$niveau = (int) $_POST['roi_lecon_niveau'];
-			if ( $niveau >= 1 && $niveau <= 6 ) {
+			if ( $niveau >= 1 && $niveau <= 4 ) {
 				update_post_meta( $post_id, '_roi_lecon_niveau', $niveau );
 			}
 		}

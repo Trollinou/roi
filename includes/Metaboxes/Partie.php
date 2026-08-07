@@ -253,14 +253,14 @@ class Partie {
 			$chess_url = $plugin_url . 'build/chessboard/';
 
 			wp_enqueue_style(
-				'chessboard-style',
+				'roi-public-chessboard-style',
 				$chess_url . 'style.css',
 				[],
 				ROI_VERSION
 			);
 
 			wp_enqueue_script(
-				'chessboard-view',
+				'roi-public-chessboard-view',
 				$chess_url . 'chessboard-view.js',
 				[ 'wp-element' ],
 				ROI_VERSION,
@@ -270,7 +270,7 @@ class Partie {
 			wp_enqueue_script(
 				'roi-admin-partie-viewer',
 				$plugin_url . 'assets/js/admin-partie-viewer.js',
-				[ 'chessboard-view' ],
+				[ 'roi-public-chessboard-view' ],
 				ROI_VERSION,
 				true
 			);

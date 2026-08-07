@@ -2,6 +2,21 @@
 
 ## [Unreleased] - NON PUBLIÉ
 
+*   **Refactorisation Maintenabilité, Performances & Conformité `AGENTS.md` :**
+    *   **Optimisation des Performances SQL/Hooks :** Suppression de l'exécution en boucle des méthodes `Roles::add_capabilities_to_roles()` et `Chapitre_Taxonomy::seed_terms()` sur l'action `init` lors de chaque requête HTTP. Migration exclusive dans l'hook d'activation `Activator::activate`.
+    *   **Enregistrement des CPTs & Réécriture :** Inscription préalable des CPTs et taxonomies avant le `flush_rewrite_rules()` lors de l'activation du plugin.
+    *   **Plage des Niveaux de Difficulté (1 à 4) :** Ajustement des niveaux de difficulté de 1 à 4 (suppression des niveaux 5 et 6). Les boucles, validations et l'Enum PHP 8.4 `Exercice_Niveau` sont restreints entre 1 et 4.
+    *   **Typage Strict & Enums PHP 8.4 :** Création des Backed Enums `Exercice_Type` (16 types), `Chapitre_Couleur` (codes Hex) et `Exercice_Niveau` (1 à 4), ainsi que du DTO `readonly` `Exercice_Config_DTO`.
+    *   **Compatibilité PSR-4 & Linux :** Maintien du dossier `includes/Chess/` en PascalCase et alignement des instructions `include` dans `ChessEngine.php` (`includes/Chess/templates/chessboard.php`). Création du template d'affichage de l'échiquier.
+    *   **API REST Standardisée :** Migration de l'enregistrement des contrôleurs REST vers le hook natif `rest_api_init`. Création de `Permissions_Helper` pour la centralisation de l'autorisation d'accès au module Apprentissage et utilisation de `wp_date()`.
+    *   **Assets & Packaging :** 
+        *   Lecture dynamique des dépendances et des versions à partir des fichiers `.asset.php` générés par Webpack.
+        *   Suppression du fichier JS legacy obsolète `assets/js/admin-script.js`.
+        *   Maintien strict des noms originaux des bibliothèques Web Workers `stockfish.js` et `stockfish.wasm` dans `assets/js/`.
+        *   Normalisation des handles scripts/styles avec le préfixe `roi-`.
+        *   Création de `.eslintrc.json` (ES2021), alignement de `phpstan.neon` (PHP 8.4 Level 6) et correction de `.distignore` pour inclure la documentation de production (`README.md`, `CHANGELOG.md`, `USING.md`).
+    *   **Désinstallation Propre :** Nettoyage complet des options (`roi_plugin_version`, `roi_apprentissage_allowed_roles`) et de tous les CPTs (`roi_lecon`, `roi_exercice`, `roi_cours`, `roi_partie`) dans `uninstall.php`.
+
 *   **Nettoyage & Santé du Code (Code Health Improvement) :**
     *   **Suppression du code mort :** Retrait de la fonction obsolète `roi_chess_pieces_shortcodes_filter()` dans `roi.php` qui appelait une classe `\ROI\Shortcodes\Shortcodes` inexistante, ainsi que du bouchon de test associé dans `tests/phpstan/bootstrap.php`.
     *   **Architecture & Conformité PSR-4 :** Suppression du fichier procédural orphelin `includes/cron.php`, non inclus et non référencé dans le plugin.

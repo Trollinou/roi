@@ -79,15 +79,9 @@ class Columns {
 			$terms = get_the_terms( $post_id, 'roi_chapitre' );
 			if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
 				$term = reset( $terms );
-				$color = get_term_meta( $term->term_id, '_roi_chapitre_couleur', true );
-				$color_palette = [
-					'primary'  => '#0073aa',
-					'warning'  => '#d94f00',
-					'danger'   => '#d63638',
-					'success'  => '#00a32a',
-					'tertiary' => '#8224e3',
-				];
-				$hex = $color_palette[ $color ] ?? '#666';
+				$color_slug = (string) get_term_meta( $term->term_id, '_roi_chapitre_couleur', true );
+				$enum_color = \ROI\Enums\Chapitre_Couleur::tryFrom( $color_slug );
+				$hex = $enum_color ? $enum_color->hex() : '#666';
 
 				echo sprintf(
 					'<span style="display:inline-block; width:8px; height:8px; border-radius:50%%; background:%s; margin-right:6px;"></span>%s',

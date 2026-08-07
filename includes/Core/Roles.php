@@ -21,16 +21,7 @@ class Roles {
 	 * @return void
 	 */
 	public function init(): void {
-		add_action( 'init', [ $this, 'register_roles_caps' ] );
-	}
-
-	/**
-	 * Run hook for initial registration.
-	 *
-	 * @return void
-	 */
-	public function register_roles_caps(): void {
-		self::add_capabilities_to_roles();
+		// Capabilities are registered once during plugin activation (Activator::activate).
 	}
 
 	/**
