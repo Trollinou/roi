@@ -139,6 +139,7 @@ export function init() {
 					clearInterval( checkInterval );
 
 					const boardConfig = {
+						mode: 'game',
 						fen,
 						orientation: color,
 						coordinates: true,
@@ -149,8 +150,8 @@ export function init() {
 					};
 
 					const boardState = {
+						mode: 'game',
 						showThreats: false,
-						freeMode: false,
 						promotionDialogState: { isEnabled: false },
 						historyViewerState: { isEnabled: false },
 					};

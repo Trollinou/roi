@@ -2,6 +2,13 @@
 
 ## [Unreleased] - NON PUBLIÉ
 
+*   **Intégration & Refactoring `eg-chessboard` v1.3.1 :**
+    *   **Modes Métiers Typés (`mode`) :** Prise en charge des modes `'editor'`, `'study'` et `'game'` sur toutes les instances d'échiquiers du plugin.
+    *   **Composants Métiers (`FenEditor` & `PgnEditor`) :** Configuration de `mode: "editor"` dans `FenEditor` (déplacement libre, tolérance FEN constructeur, persistance automatique des formes et détection universelle des promotions sur 1ère/8ème rangée) et `mode: "study"` dans `PgnEditor` (synchronisation native des formes PGN `[%cal]`/`[%cpl]` et navigation dans les sous-variantes).
+    *   **Blocs Gutenberg & Admin Builder :** Attribution de `mode: 'editor'` pour le bloc diagramme et les modales FEN/sélecteurs, `mode: 'study'` pour le bloc PGN, et `mode: 'game'` pour le bloc d'affichage front-end `chessboard` et les solveurs d'exercices (`type-2`, `type-3`, `type-8`).
+    *   **Exercices Visuels (Type 3) :** Activation de `preserveShapesOnPositionChange: true` sur le Builder d'exercice Type 3 pour maintenir affichées les formes cibles/consignes pendant l'exécution des coups.
+    *   **Interface & Promotion :** Mise à jour de la modale de promotion 1:1 (`PromotionDialog`) et harmonisation de la palette CSS.
+
 *   **Améliorations Éditeur FEN (`FenEditor`) :**
     *   **Orientation dynamique :** Rotation réactive de l'échiquier lors du changement d'orientation (Blancs / Noirs) afin d'afficher la couleur sélectionnée en bas de l'écran.
     *   **Zone d'importation FEN :** Ajout d'un champ de saisie et d'un bouton de chargement placés au-dessus de la palette de pièces.

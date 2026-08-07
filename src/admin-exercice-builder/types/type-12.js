@@ -96,6 +96,7 @@ function initSquareBoard() {
 			clearInterval( checkInterval );
 
 			const boardConfig = {
+				mode: 'editor',
 				fen: '8/8/8/8/8/8/8/8 w - - 0 1',
 				orientation: 'white',
 				coordinates: true,
@@ -114,8 +115,8 @@ function initSquareBoard() {
 			};
 
 			const boardState = {
+				mode: 'editor',
 				showThreats: false,
-				freeMode: false,
 				promotionDialogState: { isEnabled: false },
 				historyViewerState: { isEnabled: false },
 			};

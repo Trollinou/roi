@@ -113,6 +113,7 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
 
     // Configuration de BoardCore
     const config = {
+      mode: "editor",
       ...boardConfig,
       fen: currentFen,
       orientation,
@@ -138,9 +139,8 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
     };
 
     const boardState = {
+      mode: "editor",
       showThreats: false,
-      freeMode: true,
-      preserveShapesOnPositionChange: true,
       promotionDialogState: { isEnabled: false },
       historyViewerState: { isEnabled: false },
     };

@@ -278,6 +278,7 @@ export function init() {
 				clearInterval( t2CheckInterval );
 
 				const boardConfig = {
+					mode: 'game',
 					fen,
 					orientation: 'white',
 					coordinates: true,
@@ -294,8 +295,8 @@ export function init() {
 				};
 
 				const boardState = {
+					mode: 'game',
 					showThreats: false,
-					freeMode: false,
 					promotionDialogState: { isEnabled: false },
 					historyViewerState: { isEnabled: false },
 				};

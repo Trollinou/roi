@@ -52,6 +52,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 
     // Force editor/setup mode configurations
     const boardConfig = {
+      mode: 'editor',
       fen: attributes.fen,
       orientation: attributes.orientation,
       coordinates: attributes.coordinates,

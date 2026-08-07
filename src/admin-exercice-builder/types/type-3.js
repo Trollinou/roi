@@ -133,6 +133,7 @@ export function init() {
 			clearInterval( checkInterval );
 
 			const boardConfig = {
+				mode: 'game',
 				fen:
 					configData.fen ||
 					( fenInput ? fenInput.value.trim() : '' ) ||
@@ -146,8 +147,9 @@ export function init() {
 			};
 
 			const boardState = {
+				mode: 'game',
+				preserveShapesOnPositionChange: true,
 				showThreats: false,
-				freeMode: false,
 				promotionDialogState: { isEnabled: false },
 				historyViewerState: { isEnabled: false },
 			};

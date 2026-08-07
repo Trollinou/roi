@@ -105,6 +105,7 @@ const PgnEditor = forwardRef(function PgnEditor({
 
     // Configuration de BoardCore
     const config = {
+      mode: "study",
       ...boardConfig,
       pgn: initialPgn,
       fen: initialFen || undefined,
@@ -116,8 +117,8 @@ const PgnEditor = forwardRef(function PgnEditor({
     };
 
     const boardState = {
+      mode: "study",
       showThreats: false,
-      freeMode: false,
       promotionDialogState: { isEnabled: false },
       historyViewerState: { isEnabled: false },
     };
