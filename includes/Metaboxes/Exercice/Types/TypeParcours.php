@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace ROI\Metaboxes\Exercice\Types;
 
+use ROI\Metaboxes\Exercice\Components\FenInput;
+
 /**
  * Class TypeParcours
  * Gère le rendu pour le Type 9 : Parcours.
@@ -48,23 +50,19 @@ class TypeParcours implements TypeInterface {
 						</select>
 					</div>
 
-					<div style="display: flex; gap: 15px; align-items: flex-end;">
-						<div style="flex: 1;">
-							<label for="roi_t9_fen_depart"><strong><?php esc_html_e( "L'Éditeur :", "roi" ); ?></strong></label><br>
-							<input type="text" id="roi_t9_fen_depart" value="<?php echo esc_attr( $fen_depart ); ?>" readonly style="width: 100%; height: 30px; background: #f0f0f1; color: #50575e; margin-top: 5px;">
-						</div>
-						<div>
-							<button type="button" id="btn_open_fen_editor_t9" class="button"><?php esc_html_e( "Éditer la position et le parcours", "roi" ); ?></button>
-						</div>
-					</div>
+					<?php
+					FenInput::render([
+						'id'             => 'roi_t9_fen_depart',
+						'value'          => $fen_depart,
+						'color'          => $couleur_joueur,
+						'orientation_id' => 'roi_t9_couleur',
+						'button_id'      => 'btn_open_fen_editor_t9',
+						'button_label'   => __( 'Éditer la position et le parcours', 'roi' ),
+						'label'          => __( 'Position & Parcours (FEN) :', 'roi' ),
+					]);
+					?>
 
-					<div>
-						<label for="roi_t9_couleur"><strong><?php esc_html_e( "Couleur :", "roi" ); ?></strong></label><br>
-						<select id="roi_t9_couleur" style="margin-top: 5px; width: 200px;">
-							<option value="white" <?php selected( $couleur_joueur, 'white' ); ?>><?php esc_html_e( "white", "roi" ); ?></option>
-							<option value="black" <?php selected( $couleur_joueur, 'black' ); ?>><?php esc_html_e( "black", "roi" ); ?></option>
-						</select>
-					</div>
+
 
 					<div style="display: flex; gap: 15px;">
 						<div style="flex: 1;">

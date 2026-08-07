@@ -2,7 +2,7 @@
  * Handler for Type 9: Parcours.
  */
 
-import { openFenEditor } from '../utils/modals';
+import { setupFenControl } from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 const varianteInput = document.getElementById( 'roi_t9_variante' );
@@ -67,47 +67,32 @@ export function init() {
 	if ( varianteInput ) {
 		varianteInput.addEventListener( 'change', updateConfig );
 	}
-	if ( colorInput ) {
-		colorInput.addEventListener( 'change', updateConfig );
-	}
+	setupFenControl( {
+		input: fenInput,
+		button: openEditorBtn,
+		colorSelect: colorInput,
+		getShapes() {
+			return t9Shapes || [];
+		},
+		onChange( fen, color, shapes ) {
+			t9Shapes = shapes || [];
 
-	if ( openEditorBtn ) {
-		openEditorBtn.addEventListener( 'click', function () {
-			const fenDepartActuelle =
-				( fenInput ? fenInput.value.trim() : '' ) ||
-				'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+			if ( caseDepartInput ) {
+				caseDepartInput.value = '';
+			}
+			if ( caseArriveeInput ) {
+				caseArriveeInput.value = '';
+			}
 
-			openFenEditor(
-				{ fen: fenDepartActuelle, shapes: t9Shapes },
-				function ( result ) {
-					if ( fenInput ) {
-						fenInput.value = result.fen;
-					}
-					t9Shapes = result.shapes || [];
-
-					// Réinitialise les inputs de départ et d'arrivée
-					if ( caseDepartInput ) {
-						caseDepartInput.value = '';
-					}
-					if ( caseArriveeInput ) {
-						caseArriveeInput.value = '';
-					}
-
-					// Parcourt les shapes pour déduire le départ et l'arrivée
-					t9Shapes.forEach( function ( shape ) {
-						if ( shape.brush === 'blue' && caseDepartInput ) {
-							caseDepartInput.value = shape.orig;
-						} else if (
-							shape.brush === 'green' &&
-							caseArriveeInput
-						) {
-							caseArriveeInput.value = shape.orig;
-						}
-					} );
-
-					updateConfig();
+			t9Shapes.forEach( function ( shape ) {
+				if ( shape.brush === 'blue' && caseDepartInput ) {
+					caseDepartInput.value = shape.orig;
+				} else if ( shape.brush === 'green' && caseArriveeInput ) {
+					caseArriveeInput.value = shape.orig;
 				}
-			);
-		} );
-	}
+			} );
+
+			updateConfig();
+		},
+	} );
 }

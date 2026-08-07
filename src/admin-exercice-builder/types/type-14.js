@@ -2,7 +2,7 @@
  * Handler for Type 14: Cap ou pas cap ?.
  */
 
-import { openFenEditor } from '../utils/modals';
+import { setupFenControl } from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 const diagramShapes = [ [], [], [], [], [] ];
@@ -262,45 +262,35 @@ export function init() {
 		} );
 	}
 
-	// FEN modal trigger listeners
-	const fenBtns = document.querySelectorAll( '.btn_open_fen_editor_t14' );
-	fenBtns.forEach( ( btn ) => {
-		btn.addEventListener( 'click', function () {
-			const index = parseInt( btn.getAttribute( 'data-index' ), 10 );
-			const fenInput = document.querySelector(
-				`.roi_t14_fen[data-index="${ index }"]`
-			);
-			const couleurSelect = document.querySelector(
-				`.roi_t14_couleur[data-index="${ index }"]`
+	// FEN control setup for all 5 diagrams
+	for ( let i = 0; i < 5; i++ ) {
+		const fenInput = document.querySelector(
+			`.roi_t14_fen[data-index="${ i }"]`
+		);
+		const couleurSelect = document.querySelector(
+			`.roi_t14_couleur[data-index="${ i }"]`
+		);
+		const btnFen =
+			document.getElementById( `btn_open_fen_editor_t14_${ i }` ) ||
+			document.querySelector(
+				`.btn_open_fen_editor_t14[data-index="${ i }"]`
 			);
 
-			const currentFen = fenInput
-				? fenInput.value ||
-				  'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
-				: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-
-			openFenEditor(
-				{
-					fen: currentFen,
-					shapes: diagramShapes[ index ] || [],
-				},
-				function ( result ) {
-					if ( result && result.fen ) {
-						if ( fenInput ) {
-							fenInput.value = result.fen;
-						}
-						if ( result.shapes ) {
-							diagramShapes[ index ] = result.shapes;
-						}
-						if ( result.orientation && couleurSelect ) {
-							couleurSelect.value = result.orientation;
-						}
-						updateConfig();
-					}
+		setupFenControl( {
+			input: fenInput,
+			button: btnFen,
+			colorSelect: couleurSelect,
+			getShapes() {
+				return diagramShapes[ i ] || [];
+			},
+			onChange( fen, color, shapes ) {
+				if ( shapes ) {
+					diagramShapes[ i ] = shapes;
 				}
-			);
+				updateConfig();
+			},
 		} );
-	} );
+	}
 
 	// Input listeners for real-time config updates
 	const inputsToWatch = document.querySelectorAll(

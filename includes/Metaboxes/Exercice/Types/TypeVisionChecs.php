@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace ROI\Metaboxes\Exercice\Types;
 
+use ROI\Metaboxes\Exercice\Components\FenInput;
+
 /**
  * Class TypeVisionChecs
  * Handles rendering for Type 8: Vision'checs.
@@ -35,26 +37,18 @@ class TypeVisionChecs implements TypeInterface {
 			
 			<div style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
 				<!-- FEN de départ & Couleur -->
-				<div style="display: flex; gap: 15px; align-items: flex-end;">
-					<div style="flex: 1;">
-						<label for="roi_t8_fen"><strong><?php esc_html_e( "FEN de départ :", "roi" ); ?></strong></label><br>
-						<input type="text" id="roi_t8_fen" value="<?php echo esc_attr( $fen_depart ); ?>" style="width: 100%; height: 30px;" placeholder="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1">
-					</div>
-					<div>
-						<button type="button" id="btn_open_fen_editor_t8" class="button" title="<?php esc_attr_e( "Éditer la position visuellement", "roi" ); ?>" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); border: 1px solid #ccd0d4; background: #ffffff; cursor: pointer; padding: 0;">
-							<span class="dashicons dashicons-edit" style="width: auto; height: auto; font-size: 18px; line-height: 1; margin: 0; color: #1e1e1e;"></span>
-						</button>
-					</div>
-					<div>
-						<label for="roi_t8_couleur"><strong><?php esc_html_e( "Couleur du joueur :", "roi" ); ?></strong></label><br>
-						<select id="roi_t8_couleur" style="width: 120px; height: 30px;">
-							<option value="white" <?php selected( $couleur_joueur, 'white' ); ?>><?php esc_html_e( "Blancs", "roi" ); ?></option>
-							<option value="black" <?php selected( $couleur_joueur, 'black' ); ?>><?php esc_html_e( "Noirs", "roi" ); ?></option>
-						</select>
-					</div>
-					<div>
-						<button type="button" id="roi_t8_generate_btn" class="button button-secondary"><?php esc_html_e( "Générer l'échiquier", "roi" ); ?></button>
-					</div>
+				<?php
+				FenInput::render([
+					'id'             => 'roi_t8_fen',
+					'value'          => $fen_depart,
+					'color'          => $couleur_joueur,
+					'orientation_id' => 'roi_t8_couleur',
+					'button_id'      => 'btn_open_fen_editor_t8',
+					'label'          => __( 'FEN de départ :', 'roi' ),
+				]);
+				?>
+				<div style="margin-bottom: 5px;">
+					<button type="button" id="roi_t8_generate_btn" class="button button-secondary"><?php esc_html_e( "Générer l'échiquier", "roi" ); ?></button>
 				</div>
 
 				<!-- Description -->

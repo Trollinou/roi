@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace ROI\Metaboxes\Exercice\Types;
 
+use ROI\Metaboxes\Exercice\Components\FenInput;
+use ROI\Metaboxes\Exercice\Components\PgnInput;
+
 /**
  * Class TypeEchecEval
  * Handles rendering for Type 10: Echec'éval.
@@ -35,22 +38,16 @@ class TypeEchecEval implements TypeInterface {
 
 			<!-- Configuration Globale -->
 			<div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
-				<div style="display: flex; gap: 15px; align-items: flex-end;">
-					<div style="flex: 1;">
-						<label for="roi_t10_fen_depart"><strong><?php esc_html_e( 'Position de départ (FEN) :', 'roi' ); ?></strong></label><br>
-						<input type="text" id="roi_t10_fen_depart" value="<?php echo esc_attr( $fen_depart ); ?>" readonly style="width: 100%; height: 30px; background: #f0f0f1; color: #50575e;">
-					</div>
-					<div>
-						<button type="button" id="btn_open_fen_editor_t10" class="button"><?php esc_html_e( 'Éditer la position', 'roi' ); ?></button>
-					</div>
-					<div>
-						<label for="roi_t10_couleur"><strong><?php esc_html_e( 'Couleur du joueur :', 'roi' ); ?></strong></label><br>
-						<select id="roi_t10_couleur" style="width: 120px; height: 30px;">
-							<option value="white" <?php selected( $couleur_joueur, 'white' ); ?>><?php esc_html_e( 'Blancs', 'roi' ); ?></option>
-							<option value="black" <?php selected( $couleur_joueur, 'black' ); ?>><?php esc_html_e( 'Noirs', 'roi' ); ?></option>
-						</select>
-					</div>
-				</div>
+				<?php
+				FenInput::render([
+					'id'             => 'roi_t10_fen_depart',
+					'value'          => $fen_depart,
+					'color'          => $couleur_joueur,
+					'orientation_id' => 'roi_t10_couleur',
+					'button_id'      => 'btn_open_fen_editor_t10',
+					'label'          => __( 'Position de départ (FEN) :', 'roi' ),
+				]);
+				?>
 
 				<div>
 					<label for="roi_t10_theme"><strong><?php esc_html_e( 'Thème :', 'roi' ); ?></strong></label><br>
@@ -133,9 +130,16 @@ class TypeEchecEval implements TypeInterface {
 				</div>
 
 				<div>
-					<h4 style="margin-top: 0; font-size: 14px; font-weight: 600; margin-bottom: 8px;"><?php esc_html_e( 'Explication Finale', 'roi' ); ?></h4>
-					<textarea id="roi_t10_pgn_explication" rows="5" style="width:100%;" placeholder="<?php esc_attr_e( 'Ex: 1. Nxe5 {Une attaque centrale forte} Nxe5 2. d4 {Récupération de la pièce}', 'roi' ); ?>"><?php echo esc_textarea( $pgn_explication ); ?></textarea>
-					<button type="button" id="btn_open_pgn_editor_t10_explication" class="button" style="display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;"><span class="dashicons dashicons-edit" style="font-size: 16px; width: 16px; height: 16px; line-height: 1;"></span> <?php esc_html_e( 'Éditer le PGN', 'roi' ); ?></button>
+					<?php
+					PgnInput::render([
+						'id'          => 'roi_t10_pgn_explication',
+						'value'       => $pgn_explication,
+						'button_id'   => 'btn_open_pgn_editor_t10_explication',
+						'label'       => __( 'Explication Finale (PGN)', 'roi' ),
+						'rows'        => 5,
+						'placeholder' => __( 'Ex: 1. Nxe5 {Une attaque centrale forte} Nxe5 2. d4 {Récupération de la pièce}', 'roi' ),
+					]);
+					?>
 				</div>
 			</div>
 		</div>

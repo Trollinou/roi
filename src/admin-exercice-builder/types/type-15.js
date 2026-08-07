@@ -2,7 +2,7 @@
  * Handler for Type 15: Jugement final.
  */
 
-import { openFenEditor, openPgnEditor } from '../utils/modals';
+import { setupFenControl, setupPgnControl } from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 
@@ -131,94 +131,50 @@ export function init() {
 		}
 	}
 
-	// FEN Modal Trigger Listener
-	if ( btnFenEditor ) {
-		btnFenEditor.addEventListener( 'click', function () {
-			const currentFen = fenInput
-				? fenInput.value ||
-				  'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
-				: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+	// FEN Control Setup
+	setupFenControl( {
+		input: fenInput,
+		button: btnFenEditor,
+		colorSelect: couleurSelect,
+		onChange() {
+			updateConfig();
+		},
+	} );
 
-			openFenEditor(
-				{
-					fen: currentFen,
-				},
-				function ( result ) {
-					if ( result && result.fen ) {
-						if ( fenInput ) {
-							fenInput.value = result.fen;
-						}
-						if ( result.orientation && couleurSelect ) {
-							couleurSelect.value = result.orientation;
-						}
-						updateConfig();
-					}
-				}
-			);
+	// PGN Control Setup for 3 Scenarios
+	for ( let i = 0; i < 3; i++ ) {
+		const scenarioPgnArea = document.querySelector(
+			`.roi_t15_scenario_pgn[data-index="${ i }"]`
+		);
+		const btnScenario = document.getElementById(
+			`btn_open_pgn_editor_t15_scenario_${ i }`
+		);
+		setupPgnControl( {
+			textarea: scenarioPgnArea,
+			button: btnScenario,
+			initialFen() {
+				return fenInput ? fenInput.value : '';
+			},
+			onChange() {
+				updateConfig();
+			},
 		} );
 	}
 
-	// PGN Modal Trigger Listener for Scenarios
-	const scenarioPgnButtons = document.querySelectorAll(
-		'.btn_open_pgn_editor_t15_scenario'
-	);
-	scenarioPgnButtons.forEach( function ( btn ) {
-		btn.addEventListener( 'click', function () {
-			const idx = parseInt( btn.getAttribute( 'data-index' ), 10 );
-			if ( isNaN( idx ) ) {
-				return;
-			}
-
-			const scenarioPgnArea = document.querySelector(
-				`.roi_t15_scenario_pgn[data-index="${ idx }"]`
-			);
-			const initialPgn = scenarioPgnArea
-				? scenarioPgnArea.value.trim()
-				: '';
-			const currentFen = fenInput
-				? fenInput.value ||
-				  'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
-				: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-
-			openPgnEditor(
-				initialPgn,
-				function ( nouveauPgn ) {
-					if ( scenarioPgnArea ) {
-						scenarioPgnArea.value = nouveauPgn;
-					}
-					updateConfig();
-				},
-				currentFen
-			);
-		} );
-	} );
-
-	// PGN Modal Trigger Listener for Explication Finale
+	// PGN Control Setup for Explication Finale
 	const btnPgnExplication = document.getElementById(
 		'btn_open_pgn_editor_t15_explication'
 	);
-	if ( btnPgnExplication ) {
-		btnPgnExplication.addEventListener( 'click', function () {
-			const initialPgn = pgnExplicationInput
-				? pgnExplicationInput.value.trim()
-				: '';
-			const currentFen = fenInput
-				? fenInput.value ||
-				  'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
-				: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-
-			openPgnEditor(
-				initialPgn,
-				function ( nouveauPgn ) {
-					if ( pgnExplicationInput ) {
-						pgnExplicationInput.value = nouveauPgn;
-					}
-					updateConfig();
-				},
-				currentFen
-			);
-		} );
-	}
+	setupPgnControl( {
+		textarea: pgnExplicationInput,
+		button: btnPgnExplication,
+		initialFen() {
+			return fenInput ? fenInput.value : '';
+		},
+		onChange() {
+			updateConfig();
+		},
+	} );
 
 	// Real-time update event listeners
 	const inputsToWatch = document.querySelectorAll(

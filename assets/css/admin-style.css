@@ -1,5 +1,5 @@
 /**
- * DAME Admin-specific styles
+ * ROI Admin-specific styles
  */
 
 /*
@@ -7,8 +7,126 @@
  * By giving the editor wrap a relative position and a z-index, we create
  * a new stacking context and force it to the front.
  */
-.post-type-dame_exercice .wp-editor-wrap {
+.post-type-dame_exercice .wp-editor-wrap,
+.post-type-roi_exercice .wp-editor-wrap {
     position: relative;
     z-index: 10;
 }
+
+/* Unified FEN and PGN Control Styles */
+.roi-control-group {
+	margin-bottom: 15px;
+}
+
+.roi-control-group .roi-control-label {
+	display: block;
+	margin-bottom: 6px;
+	font-weight: 600;
+	color: #1d2327;
+	font-size: 13px;
+}
+
+.roi-control-inline {
+	display: flex;
+	gap: 12px;
+	align-items: flex-end;
+	flex-wrap: wrap;
+}
+
+.roi-control-input-wrapper {
+	flex: 1;
+	min-width: 280px;
+	display: flex;
+	gap: 6px;
+	align-items: center;
+}
+
+.roi-control-input-wrapper input.roi-control-input {
+	flex: 1;
+	height: 34px;
+	font-family: monospace;
+	font-size: 12px;
+	border: 1px solid #8c8f94;
+	border-radius: 4px;
+	padding: 0 10px;
+	background-color: #fff;
+	color: #2c3338;
+}
+
+.roi-control-input-wrapper input.roi-control-input:focus {
+	border-color: #2271b1;
+	box-shadow: 0 0 0 1px #2271b1;
+}
+
+.roi-btn-open-fen-editor,
+.roi-btn-open-pgn-editor {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	height: 34px !important;
+	padding: 0 12px !important;
+	font-size: 13px !important;
+	font-weight: 500 !important;
+	white-space: nowrap;
+	border-radius: 4px !important;
+}
+
+.roi-btn-open-fen-editor .dashicons,
+.roi-btn-open-pgn-editor .dashicons {
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+	line-height: 1;
+	margin: 0;
+}
+
+.roi-control-orientation-wrapper {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.roi-control-sublabel {
+	font-size: 12px;
+	font-weight: 600;
+	color: #50575e;
+}
+
+.roi-control-select {
+	height: 34px !important;
+	min-width: 120px;
+	padding: 0 8px !important;
+	border-radius: 4px !important;
+	font-size: 13px !important;
+}
+
+.roi-control-textarea-wrapper {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.roi-control-textarea-wrapper textarea.roi-control-textarea {
+	width: 100%;
+	font-family: monospace;
+	font-size: 12px;
+	line-height: 1.4;
+	padding: 8px 10px;
+	border: 1px solid #8c8f94;
+	border-radius: 4px;
+	background-color: #fff;
+	color: #2c3338;
+}
+
+.roi-control-textarea-wrapper textarea.roi-control-textarea:focus {
+	border-color: #2271b1;
+	box-shadow: 0 0 0 1px #2271b1;
+}
+
+.roi-control-actions {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+}
+
 

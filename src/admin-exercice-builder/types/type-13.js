@@ -2,7 +2,7 @@
  * Handler for Type 13: Ouvre'boîte.
  */
 
-import { openFenEditor } from '../utils/modals';
+import { setupFenControl } from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 let t13Shapes = [];
@@ -132,36 +132,21 @@ export function init() {
 		}
 	}
 
-	// Écouteur Éditeur FEN Visuel
-	if ( btnFenEditor ) {
-		btnFenEditor.addEventListener( 'click', function () {
-			const currentFen = fenInput
-				? fenInput.value ||
-				  'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
-				: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-
-			openFenEditor(
-				{
-					fen: currentFen,
-					shapes: t13Shapes,
-				},
-				function ( result ) {
-					if ( result && result.fen ) {
-						if ( fenInput ) {
-							fenInput.value = result.fen;
-						}
-						if ( result.shapes ) {
-							t13Shapes = result.shapes;
-						}
-						if ( result.orientation && couleurSelect ) {
-							couleurSelect.value = result.orientation;
-						}
-						updateConfig();
-					}
-				}
-			);
-		} );
-	}
+	// FEN Control Setup
+	setupFenControl( {
+		input: fenInput,
+		button: btnFenEditor,
+		colorSelect: couleurSelect,
+		getShapes() {
+			return t13Shapes || [];
+		},
+		onChange( fen, color, shapes ) {
+			if ( shapes ) {
+				t13Shapes = shapes;
+			}
+			updateConfig();
+		},
+	} );
 
 	// Écouteurs sur les éléments d'entrée pour la mise à jour temps réel
 	const inputsToWatch = document.querySelectorAll(

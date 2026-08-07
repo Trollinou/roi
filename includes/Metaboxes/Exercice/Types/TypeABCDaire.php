@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace ROI\Metaboxes\Exercice\Types;
 
+use ROI\Metaboxes\Exercice\Components\FenInput;
+
 /**
  * Class TypeABCDaire
  * Handles rendering for Type 3: ABCDaire Tactique (Visual Builder).
@@ -29,21 +31,18 @@ class TypeABCDaire implements TypeInterface {
 		<div class="roi-exercice-visual-builder-container" style="margin-top: 15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
 			<h4 id="roi_visual_builder_title" style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice visuel (ABCDaire Tactique)", "roi" ); ?></h4>
 			
-			<div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-end;">
-				<div style="flex: 1;">
-					<label for="roi_fen_input"><strong>FEN de départ :</strong></label><br>
-					<input type="text" id="roi_fen_input" value="<?php echo esc_attr( $initial_fen ); ?>" placeholder="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" style="width: 100%; height: 30px;">
-				</div>
-				<div>
-					<label for="roi_color_input"><strong>Orientation :</strong></label><br>
-					<select id="roi_color_input" style="width: 100px;">
-						<option value="white" <?php selected( $initial_color, 'white' ); ?>>Blancs</option>
-						<option value="black" <?php selected( $initial_color, 'black' ); ?>>Noirs</option>
-					</select>
-				</div>
-				<div>
-					<button type="button" id="roi_generate_board_btn" class="button button-secondary">Générer l'échiquier de travail</button>
-				</div>
+			<?php
+			FenInput::render([
+				'id'             => 'roi_fen_input',
+				'value'          => $initial_fen,
+				'color'          => $initial_color,
+				'orientation_id' => 'roi_color_input',
+				'button_id'      => 'btn_open_fen_editor',
+				'label'          => __( 'Position de départ (FEN) :', 'roi' ),
+			]);
+			?>
+			<div style="margin-bottom: 15px;">
+				<button type="button" id="roi_generate_board_btn" class="button button-secondary"><?php esc_html_e( "Générer l'échiquier de travail", 'roi' ); ?></button>
 			</div>
 
 			<div style="display: flex; gap: 20px; align-items: flex-start;">

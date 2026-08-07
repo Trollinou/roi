@@ -7,6 +7,16 @@
 
 declare(strict_types=1);
 
+/**
+ * @var string $board_id
+ * @var array<string, mixed> $atts
+ * @var bool $coordinates
+ * @var bool $view_only
+ * @var bool $show_threats
+ * @var bool $use_stockfish
+ * @var bool $free_mode
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

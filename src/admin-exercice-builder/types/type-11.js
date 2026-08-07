@@ -2,7 +2,7 @@
  * Handler for Type 11: Class'échecs.
  */
 
-import { openFenEditor } from '../utils/modals';
+import { setupFenControl } from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 const consigneInput = document.getElementById( 'roi_t11_consigne' );
@@ -85,67 +85,37 @@ export function init() {
 	// Écouteur consigne
 	consigneInput.addEventListener( 'input', updateConfig );
 
-	// Écouteurs selects de couleur
-	couleurSelects.forEach( ( select ) => {
-		select.addEventListener( 'change', function () {
-			const index = parseInt( select.getAttribute( 'data-index' ), 10 );
-			if ( ! isNaN( index ) && t11Positions[ index ] ) {
-				t11Positions[ index ].couleur_joueur = select.value;
-				updateConfig();
-			}
-		} );
-	} );
-
-	// Écouteurs boutons d'édition FEN
-	const openEditorButtons = document.querySelectorAll(
-		'.btn_open_fen_editor_t11'
-	);
-	openEditorButtons.forEach( ( btn ) => {
-		btn.addEventListener( 'click', function () {
-			const index = parseInt( btn.getAttribute( 'data-index' ), 10 );
-			if ( isNaN( index ) || ! t11Positions[ index ] ) {
-				return;
-			}
-
-			const currentPos = t11Positions[ index ];
-
-			openFenEditor(
-				{
-					fen:
-						currentPos.fen ||
-						'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-					shapes: currentPos.shapes || [],
-				},
-				function ( result ) {
-					if ( result && result.fen ) {
-						t11Positions[ index ].fen = result.fen;
-						if ( result.shapes ) {
-							t11Positions[ index ].shapes = result.shapes;
-						}
-						if ( result.orientation ) {
-							t11Positions[ index ].couleur_joueur =
-								result.orientation;
-						}
-
-						// Mise à jour du DOM
-						const matchingFenInput = document.querySelector(
-							`.roi_t11_fen[data-index="${ index }"]`
-						);
-						if ( matchingFenInput ) {
-							matchingFenInput.value = result.fen;
-						}
-
-						const matchingCouleurSelect = document.querySelector(
-							`.roi_t11_couleur[data-index="${ index }"]`
-						);
-						if ( matchingCouleurSelect && result.orientation ) {
-							matchingCouleurSelect.value = result.orientation;
-						}
-
-						updateConfig();
-					}
-				}
+	// Configuration unifiée des 5 contrôles FEN
+	for ( let i = 0; i < 5; i++ ) {
+		const inputFen =
+			document.querySelector( `.roi_t11_fen[data-index="${ i }"]` ) ||
+			document.getElementById( `roi_t11_fen_${ i }` );
+		const selectColor =
+			document.querySelector( `.roi_t11_couleur[data-index="${ i }"]` ) ||
+			document.getElementById( `roi_t11_couleur_${ i }` );
+		const btnEditor =
+			document.getElementById( `btn_open_fen_editor_t11_${ i }` ) ||
+			document.querySelector(
+				`.btn_open_fen_editor_t11[data-index="${ i }"]`
 			);
+
+		setupFenControl( {
+			input: inputFen,
+			button: btnEditor,
+			colorSelect: selectColor,
+			getShapes() {
+				return t11Positions[ i ] ? t11Positions[ i ].shapes || [] : [];
+			},
+			onChange( fen, color, shapes ) {
+				if ( t11Positions[ i ] ) {
+					t11Positions[ i ].fen = fen;
+					t11Positions[ i ].couleur_joueur = color;
+					if ( shapes ) {
+						t11Positions[ i ].shapes = shapes;
+					}
+					updateConfig();
+				}
+			},
 		} );
-	} );
+	}
 }

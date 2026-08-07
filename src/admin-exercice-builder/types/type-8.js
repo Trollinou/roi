@@ -2,7 +2,7 @@
  * Handler for Type 8: Vision'checs.
  */
 
-import { openFenEditor } from '../utils/modals';
+import { setupFenControl } from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 const fenInput = document.getElementById( 'roi_t8_fen' );
@@ -79,39 +79,18 @@ export function init() {
 	if ( descInput ) {
 		descInput.addEventListener( 'input', updateConfig );
 	}
-	if ( colorInput ) {
-		colorInput.addEventListener( 'change', updateConfig );
-	}
-	if ( fenInput ) {
-		fenInput.addEventListener( 'input', updateConfig );
-	}
 
-	if ( openEditorBtn ) {
-		openEditorBtn.addEventListener( 'click', function () {
-			const initialFen =
-				( fenInput ? fenInput.value.trim() : '' ) ||
-				'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-
-			openFenEditor(
-				{ fen: initialFen, shapes: [] },
-				function ( result ) {
-					if ( fenInput ) {
-						fenInput.value = result.fen;
-					}
-					if ( colorInput && result.orientation ) {
-						colorInput.value = result.orientation;
-					}
-					updateConfig();
-					// Si l'échiquier est déjà généré, le rafraîchir
-					if ( boardAPI ) {
-						if ( generateBtn ) {
-							generateBtn.click();
-						}
-					}
-				}
-			);
-		} );
-	}
+	setupFenControl( {
+		input: fenInput,
+		button: openEditorBtn,
+		colorSelect: colorInput,
+		onChange() {
+			updateConfig();
+			if ( boardAPI && generateBtn ) {
+				generateBtn.click();
+			}
+		},
+	} );
 
 	if ( generateBtn ) {
 		generateBtn.addEventListener( 'click', function () {

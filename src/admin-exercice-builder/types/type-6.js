@@ -2,7 +2,7 @@
  * Handler for Type 6: Associ'Plan.
  */
 
-import { openFenEditor, openPgnEditor } from '../utils/modals';
+import { setupFenControl, setupPgnControl } from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 const builderType6 = document.getElementById( 'roi_builder_type_6' );
@@ -158,60 +158,58 @@ export function init() {
 		} );
 	} );
 
-	const fenButtons = builderType6.querySelectorAll( '.btn_open_fen_editor' );
-	fenButtons.forEach( function ( btn ) {
-		btn.addEventListener( 'click', function () {
-			const idx = parseInt( btn.getAttribute( 'data-index' ), 10 );
-			if ( isNaN( idx ) ) {
-				return;
-			}
+	// Setup 4 pairs of FEN and PGN controls
+	for ( let i = 0; i < 4; i++ ) {
+		const fenInp =
+			document.getElementById( `roi_t6_fen_${ i }` ) || fenInputs[ i ];
+		const colorSel =
+			document.getElementById( `roi_t6_couleur_${ i }` ) ||
+			colorSelects[ i ];
+		const btnFen =
+			document.getElementById( `btn_open_fen_editor_t6_${ i }` ) ||
+			builderType6.querySelector(
+				`.btn_open_fen_editor[data-index="${ i }"]`
+			);
 
-			const currentFenInput = fenInputs[ idx ];
-			const initialFen =
-				( currentFenInput ? currentFenInput.value.trim() : '' ) ||
-				'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-
-			openFenEditor(
-				{ fen: initialFen, shapes: t6Paires[ idx ].shapes || [] },
-				function ( result ) {
-					if ( currentFenInput ) {
-						currentFenInput.value = result.fen;
+		setupFenControl( {
+			input: fenInp,
+			button: btnFen,
+			colorSelect: colorSel,
+			getShapes() {
+				return t6Paires[ i ] ? t6Paires[ i ].shapes || [] : [];
+			},
+			onChange( fen, color, shapes ) {
+				if ( t6Paires[ i ] ) {
+					t6Paires[ i ].fen = fen;
+					t6Paires[ i ].couleur = color;
+					if ( shapes ) {
+						t6Paires[ i ].shapes = shapes;
 					}
-					t6Paires[ idx ].fen = result.fen;
-					t6Paires[ idx ].shapes = result.shapes;
 					updateConfig();
 				}
-			);
+			},
 		} );
-	} );
 
-	const pgnButtons = builderType6.querySelectorAll( '.btn_open_pgn_editor' );
-	pgnButtons.forEach( function ( btn ) {
-		btn.addEventListener( 'click', function () {
-			const idx = parseInt( btn.getAttribute( 'data-index' ), 10 );
-			if ( isNaN( idx ) ) {
-				return;
-			}
+		const pgnTxt =
+			document.getElementById( `roi_t6_pgn_${ i }` ) || pgnTextareas[ i ];
+		const btnPgn =
+			document.getElementById( `btn_open_pgn_editor_t6_${ i }` ) ||
+			builderType6.querySelector(
+				`.btn_open_pgn_editor[data-index="${ i }"]`
+			);
 
-			const currentPgnTextarea = pgnTextareas[ idx ];
-			const initialPgn = currentPgnTextarea
-				? currentPgnTextarea.value.trim()
-				: '';
-			const currentFen = fenInputs[ idx ]
-				? fenInputs[ idx ].value.trim()
-				: '';
-
-			openPgnEditor(
-				initialPgn,
-				function ( nouveauPgn ) {
-					if ( currentPgnTextarea ) {
-						currentPgnTextarea.value = nouveauPgn;
-					}
-					t6Paires[ idx ].pgn_data = nouveauPgn;
+		setupPgnControl( {
+			textarea: pgnTxt,
+			button: btnPgn,
+			initialFen() {
+				return fenInp ? fenInp.value : '';
+			},
+			onChange( pgn ) {
+				if ( t6Paires[ i ] ) {
+					t6Paires[ i ].pgn_data = pgn;
 					updateConfig();
-				},
-				currentFen
-			);
+				}
+			},
 		} );
-	} );
+	}
 }

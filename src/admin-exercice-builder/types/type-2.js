@@ -2,11 +2,12 @@
  * Handler for Type 2: Pop'Echecs.
  */
 
-import { openFenEditor } from '../utils/modals';
+import { setupFenControl, getActiveColorFromFen } from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 const t2Consigne = document.getElementById( 'roi_t2_consigne' );
 const t2FenFinale = document.getElementById( 'roi_t2_fen_finale' );
+const t2Couleur = document.getElementById( 'roi_t2_couleur' );
 const t2GenerateBtn = document.getElementById( 'roi_t2_generate_btn' );
 const t2ChessboardContainer = document.getElementById(
 	'roi_t2_chessboard_container'
@@ -277,10 +278,14 @@ export function init() {
 			if ( window.EgBoardCore ) {
 				clearInterval( t2CheckInterval );
 
+				const orientation = t2Couleur
+					? t2Couleur.value
+					: getActiveColorFromFen( fen );
+
 				const boardConfig = {
 					mode: 'game',
 					fen,
-					orientation: 'white',
+					orientation,
 					coordinates: true,
 					viewOnly: false,
 					movable: {
@@ -360,20 +365,14 @@ export function init() {
 		} );
 	}
 
-	if ( t2EditorBtn ) {
-		t2EditorBtn.addEventListener( 'click', function () {
-			const initialFen =
-				( t2FenFinale ? t2FenFinale.value.trim() : '' ) ||
-				'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-
-			openFenEditor( { fen: initialFen }, function ( result ) {
-				if ( t2FenFinale ) {
-					t2FenFinale.value = result.fen;
-				}
-				if ( t2GenerateBtn ) {
-					t2GenerateBtn.click();
-				}
-			} );
-		} );
-	}
+	setupFenControl( {
+		input: t2FenFinale,
+		button: t2EditorBtn,
+		colorSelect: t2Couleur,
+		onChange() {
+			if ( t2GenerateBtn ) {
+				t2GenerateBtn.click();
+			}
+		},
+	} );
 }

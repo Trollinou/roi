@@ -10,7 +10,7 @@ import { BoardCore } from "eg-chessboard";
  * @param {Object} props.boardConfig - Configuration additionnelle pour l'échiquier
  * @param {React.Ref} ref - Ref impérative exposant redrawBoard() pour forcer le recalcul des bounds
  */
-const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfig = {}, initialShapes = [] }, ref) {
+const FenEditor = forwardRef(function FenEditor({ initialFen, fen, onSave, boardConfig = {}, initialShapes = [] }, ref) {
   const defaultFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
   
   // États de la FEN
@@ -21,6 +21,7 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
   const [importFenText, setImportFenText] = useState("");
   const [selectedPiece, setSelectedPiece] = useState(null); // { role, color } ou "eraser" ou null
   const [currentShapes, setCurrentShapes] = useState(initialShapes);
+  const [promotionState, setPromotionState] = useState({ isEnabled: false });
   const currentShapesRef = useRef(initialShapes);
   const lastPressedButtonRef = useRef(null);
 
@@ -45,11 +46,16 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
     }
   }));
   const selectedPieceRef = useRef(selectedPiece);
+  const orientationRef = useRef(orientation);
 
   // Garder les références à jour pour les callbacks asynchrones
   useEffect(() => {
     selectedPieceRef.current = selectedPiece;
   }, [selectedPiece]);
+
+  useEffect(() => {
+    orientationRef.current = orientation;
+  }, [orientation]);
 
   // Met à jour la position FEN à partir de l'état actuel de l'échiquier
   const syncPositionFromBoard = () => {
@@ -101,7 +107,7 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
   useEffect(() => {
     if (!boardElRef.current) return;
 
-    const currentFen = initialFen || defaultFen;
+    const currentFen = initialFen || fen || defaultFen;
     const parts = currentFen.split(" ");
     const pos = parts[0] || "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
     const t = parts[1] || "w";
@@ -125,7 +131,7 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
         deleteOnDropOff: true,
       },
       drawable: {
-        eraseOnClick: false,
+        eraseOnClick: true,
         onChange: (shapes) => {
           setCurrentShapes(shapes);
           currentShapesRef.current = shapes;
@@ -140,6 +146,8 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
 
     const boardState = {
       mode: "editor",
+      freeMode: true,
+      preserveShapesOnPositionChange: true,
       showThreats: false,
       promotionDialogState: { isEnabled: false },
       historyViewerState: { isEnabled: false },
@@ -151,11 +159,19 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
       }
     };
 
+    const handleStateChange = () => {
+      if (boardApiRef.current) {
+        const currentState = boardApiRef.current.getState();
+        setPromotionState({ ...currentState.promotionDialogState });
+        syncPositionFromBoard();
+      }
+    };
+
     // Création de l'instance
     const boardAPI = new BoardCore(
       boardElRef.current,
       boardState,
-      () => {},
+      handleStateChange,
       emit,
       config,
       {
@@ -304,11 +320,28 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
           justify-content: center;
         }
 
+        .fen-editor-main-wrap.disabledBoard {
+          pointer-events: none;
+        }
+
+        .fen-editor-main-wrap.disabledBoard .promotion-dialog {
+          pointer-events: auto !important;
+        }
+
         .fen-editor-main-board {
           position: relative;
           width: 400px;
           height: 400px;
           overflow: hidden;
+          container-type: inline-size;
+        }
+
+        .fen-editor-main-board .promotion-piece-btn {
+          box-sizing: border-box !important;
+          min-height: unset !important;
+          max-height: unset !important;
+          padding: 0 !important;
+          margin: 0 !important;
         }
 
         .fen-editor-main-board > div {
@@ -319,13 +352,12 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
           height: 100%;
         }
 
-        /* Forcer la réactivité de cg-container et empêcher les overlays SVG de bloquer les clics */
         cg-container {
           width: 100% !important;
           height: 100% !important;
         }
 
-        .fen-editor-main-board svg {
+        .editor-palette-piece * {
           pointer-events: none !important;
         }
 
@@ -610,9 +642,36 @@ const FenEditor = forwardRef(function FenEditor({ initialFen, onSave, boardConfi
 
       {/* Colonne Gauche - L'échiquier */}
       <div className="fen-editor-board-col">
-        <section className="fen-editor-main-wrap">
+        <section className={`fen-editor-main-wrap ${promotionState && promotionState.isEnabled ? "disabledBoard" : ""}`}>
           <div className="fen-editor-main-board">
             <div ref={boardElRef} />
+            {promotionState && promotionState.isEnabled && (
+              <dialog className="promotion-dialog" open>
+                <div className="promotion-pieces">
+                  {[
+                    { name: "Queen", data: "q" },
+                    { name: "Knight", data: "n" },
+                    { name: "Rook", data: "r" },
+                    { name: "Bishop", data: "b" },
+                  ].map((piece) => (
+                    <button
+                      key={piece.name}
+                      type="button"
+                      className={`promotion-piece-btn ${piece.name.toLowerCase()} ${promotionState.color || "white"}`}
+                      aria-label={piece.name}
+                      onClick={() => {
+                        if (promotionState.callback) {
+                          promotionState.callback(piece.data);
+                        }
+                        if (boardApiRef.current) {
+                          boardApiRef.current.closePromotionDialog();
+                        }
+                      }}
+                    />
+                  ))}
+                </div>
+              </dialog>
+            )}
           </div>
         </section>
         

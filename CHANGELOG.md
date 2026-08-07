@@ -32,6 +32,9 @@
 *   **Améliorations Éditeur FEN (`FenEditor`) :**
     *   **Orientation dynamique :** Rotation réactive de l'échiquier lors du changement d'orientation (Blancs / Noirs) afin d'afficher la couleur sélectionnée en bas de l'écran.
     *   **Zone d'importation FEN :** Ajout d'un champ de saisie et d'un bouton de chargement placés au-dessus de la palette de pièces.
+    *   **Déplacement libre multi-couleurs :** Activation du mode libre (`freeMode: true`) dans l'état `BoardCore` pour permettre le déplacement sans restriction de tour de toutes les pièces blanches et noires.
+    *   **Fenêtre de promotion interactive :** Écoute de `onStateChange` et affichage de l'overlay de promotion (`PromotionDialog`) lors de la pose ou du déplacement d'un pion sur la 1ère ou 8ème rangée.
+    *   **Dimensionnement Container Queries (`cqw`) :** Ajout de `container-type: inline-size;` sur le conteneur principal de l'échiquier pour assurer l'affichage et les proportions exactes des boutons de promotion.
 
 *   **Migration de `chess.js` vers `chessops` :**
     *   Remplacement complet de la dépendance `chess.js` par `chessops` dans tout le plugin.

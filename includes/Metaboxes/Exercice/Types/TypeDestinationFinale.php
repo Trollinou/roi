@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace ROI\Metaboxes\Exercice\Types;
 
+use ROI\Metaboxes\Exercice\Components\FenInput;
+use ROI\Metaboxes\Exercice\Components\PgnInput;
+
 /**
  * Class TypeDestinationFinale
  * Handles rendering for Type 16: Destination finale.
@@ -37,22 +40,16 @@ class TypeDestinationFinale implements TypeInterface {
 				<input type="text" id="roi_t16_consigne" value="<?php echo esc_attr( $consigne ); ?>" style="width:100%; height: 30px;" placeholder="<?php esc_attr_e( "Remettez les étapes de ce plan d'attaque dans le bon ordre :", 'roi' ); ?>">
 			</div>
 
-			<div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-end;">
-				<div style="flex: 1;">
-					<label for="roi_t16_fen_depart"><strong><?php esc_html_e( 'Position de départ (FEN) :', 'roi' ); ?></strong></label><br>
-					<input type="text" id="roi_t16_fen_depart" value="<?php echo esc_attr( $fen_depart ); ?>" readonly style="width: 100%; height: 30px;">
-				</div>
-				<div>
-					<button type="button" id="btn_open_fen_editor_t16" class="button"><?php esc_html_e( 'Éditer la position', 'roi' ); ?></button>
-				</div>
-				<div>
-					<label for="roi_t16_couleur"><strong><?php esc_html_e( 'Couleur :', 'roi' ); ?></strong></label><br>
-					<select id="roi_t16_couleur" style="width: 120px; height: 30px;">
-						<option value="white" <?php selected( $couleur_joueur, 'white' ); ?>><?php esc_html_e( 'Blancs', 'roi' ); ?></option>
-						<option value="black" <?php selected( $couleur_joueur, 'black' ); ?>><?php esc_html_e( 'Noirs', 'roi' ); ?></option>
-					</select>
-				</div>
-			</div>
+			<?php
+			FenInput::render([
+				'id'             => 'roi_t16_fen_depart',
+				'value'          => $fen_depart,
+				'color'          => $couleur_joueur,
+				'orientation_id' => 'roi_t16_couleur',
+				'button_id'      => 'btn_open_fen_editor_t16',
+				'label'          => __( 'Position de départ (FEN) :', 'roi' ),
+			]);
+			?>
 
 			<hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
 
@@ -83,9 +80,16 @@ class TypeDestinationFinale implements TypeInterface {
 			<hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0 15px;">
 
 			<div style="margin-top: 15px;">
-				<h3 style="margin-top: 0; font-size: 14px; font-weight: 600; margin-bottom: 8px;"><?php esc_html_e( 'Solution & Explications', 'roi' ); ?></h3>
-				<textarea id="roi_t16_pgn_explication" rows="6" placeholder="<?php esc_attr_e( 'Saisir le PGN de la solution...', 'roi' ); ?>" style="width: 100%;"><?php echo esc_textarea( $pgn_explication ); ?></textarea>
-				<button type="button" id="btn_open_pgn_editor_t16_explication" class="button" style="display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;"><span class="dashicons dashicons-edit" style="font-size: 16px; width: 16px; height: 16px; line-height: 1;"></span> <?php esc_html_e( 'Éditer le PGN', 'roi' ); ?></button>
+				<?php
+				PgnInput::render([
+					'id'          => 'roi_t16_pgn_explication',
+					'value'       => $pgn_explication,
+					'button_id'   => 'btn_open_pgn_editor_t16_explication',
+					'label'       => __( 'Solution & Explications (PGN)', 'roi' ),
+					'rows'        => 6,
+					'placeholder' => __( 'Saisir le PGN de la solution...', 'roi' ),
+				]);
+				?>
 			</div>
 		</div>
 		<?php

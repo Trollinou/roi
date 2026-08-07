@@ -2,7 +2,7 @@
  * Handler for Type 16: Destination finale.
  */
 
-import { openFenEditor, openPgnEditor } from '../utils/modals';
+import { setupFenControl, setupPgnControl } from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 let t16Etapes = [];
@@ -191,59 +191,33 @@ export function init() {
 		} );
 	}
 
-	// FEN Modal Trigger Listener
-	if ( btnFenEditor ) {
-		btnFenEditor.addEventListener( 'click', function () {
-			const currentFen = fenInput
-				? fenInput.value ||
-				  'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 4 5'
-				: 'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 4 5';
+	// FEN Control Setup
+	setupFenControl( {
+		input: fenInput,
+		button: btnFenEditor,
+		colorSelect: couleurSelect,
+		onChange() {
+			updateConfig();
+		},
+	} );
 
-			openFenEditor(
-				{
-					fen: currentFen,
-				},
-				function ( result ) {
-					if ( result && result.fen ) {
-						if ( fenInput ) {
-							fenInput.value = result.fen;
-						}
-						if ( result.orientation && couleurSelect ) {
-							couleurSelect.value = result.orientation;
-						}
-						updateConfig();
-					}
-				}
-			);
-		} );
-	}
-
-	// PGN Modal Trigger Listener for Explication Finale
+	// PGN Control Setup for Explication Finale
 	const btnPgnExplication = document.getElementById(
 		'btn_open_pgn_editor_t16_explication'
 	);
-	if ( btnPgnExplication ) {
-		btnPgnExplication.addEventListener( 'click', function () {
-			const initialPgn = pgnExplicationInput
-				? pgnExplicationInput.value.trim()
-				: '';
-			const currentFen = fenInput
+	setupPgnControl( {
+		textarea: pgnExplicationInput,
+		button: btnPgnExplication,
+		initialFen() {
+			return fenInput
 				? fenInput.value ||
-				  'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 4 5'
-				: 'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 4 5';
-
-			openPgnEditor(
-				initialPgn,
-				function ( nouveauPgn ) {
-					if ( pgnExplicationInput ) {
-						pgnExplicationInput.value = nouveauPgn;
-					}
-					updateConfig();
-				},
-				currentFen
-			);
-		} );
-	}
+						'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 4 5'
+				: '';
+		},
+		onChange() {
+			updateConfig();
+		},
+	} );
 
 	// Real-time update event listeners for direct inputs
 	if ( consigneInput ) {

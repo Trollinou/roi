@@ -2,7 +2,7 @@
  * Handler for Type 3: ABCDaire Tactique and other visual exercises.
  */
 
-import { openFenEditor } from '../utils/modals';
+import { setupFenControl } from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 const fenInput = document.getElementById( 'roi_fen_input' );
@@ -197,30 +197,23 @@ export function init() {
 		} );
 	}
 
-	if ( openEditorBtn ) {
-		openEditorBtn.addEventListener( 'click', function () {
-			const initialFen =
-				( fenInput ? fenInput.value.trim() : '' ) ||
-				'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-
-			openFenEditor(
-				{ fen: initialFen, shapes: configData.shapes },
-				function ( result ) {
-					if ( fenInput ) {
-						fenInput.value = result.fen;
-					}
-					if ( colorInput && result.orientation ) {
-						colorInput.value = result.orientation;
-					}
-					configData.fen = result.fen;
-					configData.couleur_joueur = result.orientation;
-					configData.shapes = result.shapes || [];
-					if ( boardAPI ) {
-						boardAPI.setShapes( configData.shapes );
-					}
-					updateConfig();
-				}
-			);
-		} );
-	}
+	setupFenControl( {
+		input: fenInput,
+		button: openEditorBtn,
+		colorSelect: colorInput,
+		getShapes() {
+			return configData.shapes || [];
+		},
+		onChange( fen, color, shapes ) {
+			configData.fen = fen;
+			configData.couleur_joueur = color;
+			if ( shapes ) {
+				configData.shapes = shapes;
+			}
+			if ( boardAPI && typeof boardAPI.setShapes === 'function' ) {
+				boardAPI.setShapes( configData.shapes );
+			}
+			updateConfig();
+		},
+	} );
 }
