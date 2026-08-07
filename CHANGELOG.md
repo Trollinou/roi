@@ -2,6 +2,11 @@
 
 ## [Unreleased] - NON PUBLIÉ
 
+*   **Nettoyage & Santé du Code (Code Health Improvement) :**
+    *   **Suppression du code mort :** Retrait de la fonction obsolète `roi_chess_pieces_shortcodes_filter()` dans `roi.php` qui appelait une classe `\ROI\Shortcodes\Shortcodes` inexistante, ainsi que du bouchon de test associé dans `tests/phpstan/bootstrap.php`.
+    *   **Architecture & Conformité PSR-4 :** Suppression du fichier procédural orphelin `includes/cron.php`, non inclus et non référencé dans le plugin.
+    *   **Typage Strict :** Ajout de la déclaration `declare(strict_types=1);` dans `uninstall.php` et `tests/phpstan/bootstrap.php`.
+
 *   **Intégration & Refactoring `eg-chessboard` v1.3.1 :**
     *   **Modes Métiers Typés (`mode`) :** Prise en charge des modes `'editor'`, `'study'` et `'game'` sur toutes les instances d'échiquiers du plugin.
     *   **Composants Métiers (`FenEditor` & `PgnEditor`) :** Configuration de `mode: "editor"` dans `FenEditor` (déplacement libre, tolérance FEN constructeur, persistance automatique des formes et détection universelle des promotions sur 1ère/8ème rangée) et `mode: "study"` dans `PgnEditor` (synchronisation native des formes PGN `[%cal]`/`[%cpl]` et navigation dans les sous-variantes).

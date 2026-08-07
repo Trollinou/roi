@@ -101,12 +101,3 @@ function roi_load_textdomain() {
 }
 add_action( 'plugins_loaded', 'roi_load_textdomain' );
 
-/**
- * Backward compatibility wrapper for the chess pieces filter function.
- *
- * @param string $content Raw content.
- * @return string Filtered content.
- */
-function roi_chess_pieces_shortcodes_filter( string $content ): string {
-	return \ROI\Shortcodes\Shortcodes::chess_pieces_filter( $content );
-}
