@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased] - NON PUBLIÉ
+## 1.3.5 - 2026-08-08
 
 *   **Améliorations de l'Éditeur & du Constructeur de Cours (`roi_cours`) :**
     *   **Ordonnancement et Rendu des Metaboxes :** Renommage de la metabox `#pageparentdiv` en *"Ordre des cours"*, masquage du sous-libellé *"Ordre"* et suppression du menu déroulant hiérarchique parent par l'ajustement `'hierarchical' => false` dans `includes/CPT/Cours.php`.
