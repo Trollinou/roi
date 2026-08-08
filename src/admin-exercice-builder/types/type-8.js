@@ -2,7 +2,11 @@
  * Handler for Type 8: Vision'checs.
  */
 
-import { setupFenControl } from '../utils/controls';
+import {
+	setupFenControl,
+	updateOrientationDisplay,
+	getOrientationColor,
+} from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 const fenInput = document.getElementById( 'roi_t8_fen' );
@@ -21,9 +25,10 @@ export function updateConfig() {
 	if ( ! textarea ) {
 		return;
 	}
+	const fenVal = fenInput ? fenInput.value.trim() : '';
 	const configData = {
-		fen_depart: fenInput ? fenInput.value.trim() : '',
-		couleur_joueur: colorInput ? colorInput.value : 'white',
+		fen_depart: fenVal,
+		couleur_joueur: getOrientationColor( colorInput, fenVal ),
 		description: descInput ? descInput.value.trim() : '',
 		case_depart: caseDepartInput ? caseDepartInput.value.trim() : '',
 		case_arrivee: caseArriveeInput ? caseArriveeInput.value.trim() : '',
@@ -45,8 +50,11 @@ export function init() {
 				if ( parsed.fen_depart && fenInput ) {
 					fenInput.value = parsed.fen_depart;
 				}
-				if ( parsed.couleur_joueur && colorInput ) {
-					colorInput.value = parsed.couleur_joueur;
+				if ( colorInput ) {
+					updateOrientationDisplay(
+						colorInput,
+						parsed.couleur_joueur || parsed.fen_depart || 'white'
+					);
 				}
 				if ( parsed.description && descInput ) {
 					descInput.value = parsed.description;

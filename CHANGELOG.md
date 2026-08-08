@@ -2,6 +2,13 @@
 
 ## [Unreleased] - NON PUBLIÉ
 
+*   **Gestionnaire Unifié de Diagramme (`FenInput` & `FenEditor`) :**
+    *   **Refonte `FenInput` :** Conversion du composant en gestionnaire de Diagramme complet (`FEN + Shapes`). Remplacement du menu déroulant d'orientation par un champ non modifiable calculé dynamiquement d'après le trait de la FEN ("Blanc" ou "Noir") et ajout d'un badge de synthèse des formes (`"X ◯ - Y ➔"`). Réinitialisation automatique des formes à `"0 ◯ - 0 ➔"` lors de la saisie directe d'une FEN texte.
+    *   **Orientation Automatique `FenEditor` :** Suppression du sélecteur d'orientation dans `FenEditor`. L'échiquier pivote désormais automatiquement en fonction du trait (Blancs ou Noirs) pour offrir une vue toujours orientée côté apprenant.
+    *   **Paires d'API Diagramme (`getDiagram` / `setDiagram`) :** Prise en charge native et exposition des méthodes `getDiagram()` et `setDiagram(diagram)` sur `FenEditor` et `FenInput` pour la lecture/écriture unifiée de l'objet `{ fen, orientation, shapes }`.
+    *   **Correction de la Persistance des Formes :** Correction de l'extraction des formes dans `FenEditor` pour préserver intégralement les cercles (◯) et les flèches (➔) dessinés par l'utilisateur lors de la validation (`handleApply`) et intégration du stockage des formes dans le Builder Type 2 (`Pop'Echecs`).
+    *   **Ajustement UX/UI :** Réduction des espacements verticaux sous le titre *OPTIONS DE POSITION* dans `FenEditor`.
+
 *   **Refactorisation Maintenabilité, Performances & Conformité `AGENTS.md` :**
     *   **Optimisation des Performances SQL/Hooks :** Suppression de l'exécution en boucle des méthodes `Roles::add_capabilities_to_roles()` et `Chapitre_Taxonomy::seed_terms()` sur l'action `init` lors de chaque requête HTTP. Migration exclusive dans l'hook d'activation `Activator::activate`.
     *   **Enregistrement des CPTs & Réécriture :** Inscription préalable des CPTs et taxonomies avant le `flush_rewrite_rules()` lors de l'activation du plugin.

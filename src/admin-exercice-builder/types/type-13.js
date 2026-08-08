@@ -2,7 +2,11 @@
  * Handler for Type 13: Ouvre'boîte.
  */
 
-import { setupFenControl } from '../utils/controls';
+import {
+	setupFenControl,
+	updateOrientationDisplay,
+	getOrientationColor,
+} from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 let t13Shapes = [];
@@ -22,7 +26,7 @@ export function updateConfig() {
 	const fenDepart = fenInput
 		? fenInput.value.trim()
 		: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-	const couleurJoueur = couleurSelect ? couleurSelect.value : 'white';
+	const couleurJoueur = getOrientationColor( couleurSelect, fenDepart );
 	const questionText = questionInput ? questionInput.value.trim() : '';
 	const bonneReponseIndex = correctRadio
 		? parseInt( correctRadio.value, 10 )
@@ -77,8 +81,11 @@ export function init() {
 				if ( parsed.fen_depart && fenInput ) {
 					fenInput.value = parsed.fen_depart;
 				}
-				if ( parsed.couleur_joueur && couleurSelect ) {
-					couleurSelect.value = parsed.couleur_joueur;
+				if ( couleurSelect ) {
+					updateOrientationDisplay(
+						couleurSelect,
+						parsed.couleur_joueur || parsed.fen_depart || 'white'
+					);
 				}
 				if ( Array.isArray( parsed.shapes ) ) {
 					t13Shapes = parsed.shapes;

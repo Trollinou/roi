@@ -2,7 +2,11 @@
  * Handler for Type 3: ABCDaire Tactique and other visual exercises.
  */
 
-import { setupFenControl } from '../utils/controls';
+import {
+	setupFenControl,
+	updateOrientationDisplay,
+	getOrientationColor,
+} from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 const fenInput = document.getElementById( 'roi_fen_input' );
@@ -104,7 +108,10 @@ export function init() {
 	} catch ( e ) {
 		console.warn( 'Erreur parsing JSON Type 3 initial :', e );
 		configData.fen = fenInput ? fenInput.value.trim() : '';
-		configData.couleur_joueur = colorInput ? colorInput.value : 'white';
+		configData.couleur_joueur = getOrientationColor(
+			colorInput,
+			configData.fen
+		);
 		configData.solution = [];
 		configData.shapes = [];
 	}
@@ -113,7 +120,7 @@ export function init() {
 		fenInput.value = configData.fen;
 	}
 	if ( colorInput && configData.couleur_joueur ) {
-		colorInput.value = configData.couleur_joueur;
+		updateOrientationDisplay( colorInput, configData.couleur_joueur );
 	}
 
 	renderSolutionList();

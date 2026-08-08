@@ -2,7 +2,11 @@
  * Handler for Type 9: Parcours.
  */
 
-import { setupFenControl } from '../utils/controls';
+import {
+	setupFenControl,
+	updateOrientationDisplay,
+	getOrientationColor,
+} from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 const varianteInput = document.getElementById( 'roi_t9_variante' );
@@ -18,9 +22,10 @@ export function updateConfig() {
 	if ( ! textarea ) {
 		return;
 	}
+	const fenVal = fenInput ? fenInput.value.trim() : '';
 	const configData = {
-		fen_depart: fenInput ? fenInput.value.trim() : '',
-		couleur_joueur: colorInput ? colorInput.value : 'white',
+		fen_depart: fenVal,
+		couleur_joueur: getOrientationColor( colorInput, fenVal ),
 		variante: varianteInput ? varianteInput.value : 'standard',
 		case_depart: caseDepartInput ? caseDepartInput.value.trim() : '',
 		case_arrivee: caseArriveeInput ? caseArriveeInput.value.trim() : '',
@@ -42,8 +47,11 @@ export function init() {
 				if ( parsed.fen_depart && fenInput ) {
 					fenInput.value = parsed.fen_depart;
 				}
-				if ( parsed.couleur_joueur && colorInput ) {
-					colorInput.value = parsed.couleur_joueur;
+				if ( colorInput ) {
+					updateOrientationDisplay(
+						colorInput,
+						parsed.couleur_joueur || parsed.fen_depart || 'white'
+					);
 				}
 				if ( parsed.variante && varianteInput ) {
 					varianteInput.value = parsed.variante;

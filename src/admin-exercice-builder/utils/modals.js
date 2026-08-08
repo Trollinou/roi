@@ -53,6 +53,7 @@ export function openFenEditor( initialData, onSaveCallback ) {
 		const element = window.wp.element.createElement( editorComponent, {
 			initialFen: cleanedFen,
 			initialShapes,
+			diagram: { fen: cleanedFen, shapes: initialShapes },
 			onSave( result ) {
 				onSaveCallback( result );
 				cleanClose();

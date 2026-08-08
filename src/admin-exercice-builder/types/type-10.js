@@ -2,7 +2,12 @@
  * Handler for Type 10: Echec'éval.
  */
 
-import { setupFenControl, setupPgnControl } from '../utils/controls';
+import {
+	setupFenControl,
+	setupPgnControl,
+	updateOrientationDisplay,
+	getOrientationColor,
+} from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 
@@ -30,7 +35,7 @@ export function updateConfig() {
 	const fenDepart = fenInput
 		? fenInput.value.trim()
 		: 'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 4 5';
-	const couleurJoueur = couleurSelect ? couleurSelect.value : 'white';
+	const couleurJoueur = getOrientationColor( couleurSelect, fenDepart );
 	const themeText = themeInput ? themeInput.value.trim() : '';
 	const pgnExplicationText = pgnExplicationInput
 		? pgnExplicationInput.value.trim()
@@ -279,11 +284,11 @@ export function init() {
 				if ( typeof parsed.fen_depart === 'string' && fenInput ) {
 					fenInput.value = parsed.fen_depart;
 				}
-				if (
-					typeof parsed.couleur_joueur === 'string' &&
-					couleurSelect
-				) {
-					couleurSelect.value = parsed.couleur_joueur;
+				if ( couleurSelect ) {
+					updateOrientationDisplay(
+						couleurSelect,
+						parsed.couleur_joueur || parsed.fen_depart || 'white'
+					);
 				}
 				if ( Array.isArray( parsed.shapes ) ) {
 					t10Shapes = parsed.shapes;

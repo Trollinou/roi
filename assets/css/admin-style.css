@@ -80,10 +80,16 @@
 	margin: 0;
 }
 
-.roi-control-orientation-wrapper {
+.roi-control-orientation-wrapper,
+.roi-control-shapes-wrapper {
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
+}
+
+.roi-control-button-wrapper {
+	display: flex;
+	align-items: flex-end;
 }
 
 .roi-control-sublabel {
@@ -92,12 +98,32 @@
 	color: #50575e;
 }
 
-.roi-control-select {
+.roi-control-select,
+.roi-control-input-readonly {
 	height: 34px !important;
-	min-width: 120px;
 	padding: 0 8px !important;
 	border-radius: 4px !important;
 	font-size: 13px !important;
+	border: 1px solid #8c8f94 !important;
+	box-shadow: none !important;
+}
+
+.roi-control-input-readonly {
+	background-color: #f0f0f1 !important;
+	color: #2c3338 !important;
+	cursor: default;
+	text-align: center;
+	font-weight: 600 !important;
+}
+
+.roi-orientation-field {
+	width: 75px !important;
+	min-width: 75px;
+}
+
+.roi-shapes-summary-field {
+	width: 95px !important;
+	min-width: 95px;
 }
 
 .roi-control-textarea-wrapper {

@@ -2,7 +2,11 @@
  * Handler for Type 14: Cap ou pas cap ?.
  */
 
-import { setupFenControl } from '../utils/controls';
+import {
+	setupFenControl,
+	updateOrientationDisplay,
+	getOrientationColor,
+} from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 const diagramShapes = [ [], [], [], [], [] ];
@@ -53,7 +57,7 @@ export function updateConfig() {
 		const fen = fenInput
 			? fenInput.value.trim()
 			: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-		const couleurJoueur = couleurSelect ? couleurSelect.value : 'white';
+		const couleurJoueur = getOrientationColor( couleurSelect, fen );
 
 		// QCM inputs
 		const opt0TexteInput = document.querySelector(
@@ -156,8 +160,11 @@ export function init() {
 						if ( diag.fen && fenInput ) {
 							fenInput.value = diag.fen;
 						}
-						if ( diag.couleur_joueur && couleurSelect ) {
-							couleurSelect.value = diag.couleur_joueur;
+						if ( couleurSelect ) {
+							updateOrientationDisplay(
+								couleurSelect,
+								diag.couleur_joueur || diag.fen || 'white'
+							);
 						}
 						if ( Array.isArray( diag.shapes ) ) {
 							diagramShapes[ i ] = diag.shapes;
