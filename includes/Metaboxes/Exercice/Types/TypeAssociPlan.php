@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace ROI\Metaboxes\Exercice\Types;
 
+use ROI\Metaboxes\Exercice\Components\FenInput;
+use ROI\Metaboxes\Exercice\Components\PgnInput;
+
 /**
  * Class TypeAssociPlan
  * Handles rendering for Type 6: Associ'Plan.
@@ -36,37 +39,39 @@ class TypeAssociPlan implements TypeInterface {
 						</div>
 						
 						<div style="display: flex; flex-direction: column; gap: 12px;">
-							<div style="display: flex; gap: 10px; align-items: flex-end;">
-								<div style="flex: 1;">
-									<label style="font-weight: 600; display: block; margin-bottom: 4px;">FEN :</label>
-									<input type="text" class="roi_t6_fen" style="width: 100%; height: 30px;" placeholder="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1">
-								</div>
-								<div>
-									<button type="button" class="button btn_open_fen_editor" data-index="<?php echo $i; ?>" title="Éditer la position visuellement" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); border: 1px solid #ccd0d4; background: #ffffff; cursor: pointer; padding: 0;">
-										<span class="dashicons dashicons-edit" style="width: auto; height: auto; font-size: 18px; line-height: 1; margin: 0; color: #1e1e1e;"></span>
-									</button>
-								</div>
-								<div>
-									<label style="font-weight: 600; display: block; margin-bottom: 4px;">Couleur :</label>
-									<select class="roi_t6_couleur" style="width: 120px; height: 30px;">
-										<option value="white"><?php esc_html_e( "Blancs", "roi" ); ?></option>
-										<option value="black"><?php esc_html_e( "Noirs", "roi" ); ?></option>
-									</select>
-								</div>
-							</div>
+							<?php
+							FenInput::render([
+								'id'              => 'roi_t6_fen_' . $i,
+								'value'           => 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+								'color'           => 'white',
+								'orientation_id'  => 'roi_t6_couleur_' . $i,
+								'button_id'       => 'btn_open_fen_editor_t6_' . $i,
+								'input_class'     => 'roi_t6_fen',
+								'color_class'     => 'roi_t6_couleur',
+								'button_class'    => 'button btn_open_fen_editor',
+								'label'           => __( 'FEN :', 'roi' ),
+								'data_attributes' => [ 'index' => $i ],
+							]);
+							?>
 							
 							<div>
-								<label style="font-weight: 600; display: block; margin-bottom: 4px;">Description :</label>
-								<textarea class="roi_t6_desc" style="width: 100%; height: 60px; resize: vertical;" placeholder="Description de l'ouverture ou du schéma..."></textarea>
+								<label style="font-weight: 600; display: block; margin-bottom: 4px;"><?php esc_html_e( 'Description :', 'roi' ); ?></label>
+								<textarea class="roi_t6_desc" style="width: 100%; height: 60px; resize: vertical;" placeholder="<?php esc_attr_e( "Description de l'ouverture ou du schéma...", 'roi' ); ?>"></textarea>
 							</div>
 							
-							<div>
-								<label style="font-weight: 600; display: block; margin-bottom: 4px;">PGN :</label>
-								<div style="display: flex; gap: 10px; align-items: flex-start;">
-									<textarea class="roi_t6_pgn" readonly style="width: 100%; height: 60px; font-family: monospace; font-size: 12px; background: #f0f0f1; resize: none; border: 1px solid #ccd0d4; border-radius: 4px; padding: 8px; color: #50575e;" placeholder="Cliquez sur 'Éditer le PGN' pour définir les coups..."></textarea>
-									<button type="button" class="button btn_open_pgn_editor" data-index="<?php echo $i; ?>" style="display: inline-flex; align-items: center; gap: 4px; height: 32px;"><span class="dashicons dashicons-edit" style="font-size: 16px; width: 16px; height: 16px; line-height: 1;"></span> Éditer le PGN</button>
-								</div>
-							</div>
+							<?php
+							PgnInput::render([
+								'id'              => 'roi_t6_pgn_' . $i,
+								'value'           => '',
+								'button_id'       => 'btn_open_pgn_editor_t6_' . $i,
+								'input_class'     => 'roi_t6_pgn',
+								'button_class'    => 'button btn_open_pgn_editor',
+								'label'           => __( 'PGN :', 'roi' ),
+								'rows'            => 3,
+								'placeholder'     => __( "Cliquez sur 'Éditer le PGN' pour définir les coups...", 'roi' ),
+								'data_attributes' => [ 'index' => $i ],
+							]);
+							?>
 						</div>
 					</div>
 				<?php endfor; ?>

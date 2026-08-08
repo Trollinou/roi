@@ -2,7 +2,11 @@
  * Handler for Type 9: Parcours.
  */
 
-import { openFenEditor } from '../utils/modals';
+import {
+	setupFenControl,
+	updateOrientationDisplay,
+	getOrientationColor,
+} from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 const varianteInput = document.getElementById( 'roi_t9_variante' );
@@ -18,9 +22,10 @@ export function updateConfig() {
 	if ( ! textarea ) {
 		return;
 	}
+	const fenVal = fenInput ? fenInput.value.trim() : '';
 	const configData = {
-		fen_depart: fenInput ? fenInput.value.trim() : '',
-		couleur_joueur: colorInput ? colorInput.value : 'white',
+		fen_depart: fenVal,
+		couleur_joueur: getOrientationColor( colorInput, fenVal ),
 		variante: varianteInput ? varianteInput.value : 'standard',
 		case_depart: caseDepartInput ? caseDepartInput.value.trim() : '',
 		case_arrivee: caseArriveeInput ? caseArriveeInput.value.trim() : '',
@@ -42,8 +47,11 @@ export function init() {
 				if ( parsed.fen_depart && fenInput ) {
 					fenInput.value = parsed.fen_depart;
 				}
-				if ( parsed.couleur_joueur && colorInput ) {
-					colorInput.value = parsed.couleur_joueur;
+				if ( colorInput ) {
+					updateOrientationDisplay(
+						colorInput,
+						parsed.couleur_joueur || parsed.fen_depart || 'white'
+					);
 				}
 				if ( parsed.variante && varianteInput ) {
 					varianteInput.value = parsed.variante;
@@ -67,47 +75,32 @@ export function init() {
 	if ( varianteInput ) {
 		varianteInput.addEventListener( 'change', updateConfig );
 	}
-	if ( colorInput ) {
-		colorInput.addEventListener( 'change', updateConfig );
-	}
+	setupFenControl( {
+		input: fenInput,
+		button: openEditorBtn,
+		colorSelect: colorInput,
+		getShapes() {
+			return t9Shapes || [];
+		},
+		onChange( fen, color, shapes ) {
+			t9Shapes = shapes || [];
 
-	if ( openEditorBtn ) {
-		openEditorBtn.addEventListener( 'click', function () {
-			const fenDepartActuelle =
-				( fenInput ? fenInput.value.trim() : '' ) ||
-				'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+			if ( caseDepartInput ) {
+				caseDepartInput.value = '';
+			}
+			if ( caseArriveeInput ) {
+				caseArriveeInput.value = '';
+			}
 
-			openFenEditor(
-				{ fen: fenDepartActuelle, shapes: t9Shapes },
-				function ( result ) {
-					if ( fenInput ) {
-						fenInput.value = result.fen;
-					}
-					t9Shapes = result.shapes || [];
-
-					// Réinitialise les inputs de départ et d'arrivée
-					if ( caseDepartInput ) {
-						caseDepartInput.value = '';
-					}
-					if ( caseArriveeInput ) {
-						caseArriveeInput.value = '';
-					}
-
-					// Parcourt les shapes pour déduire le départ et l'arrivée
-					t9Shapes.forEach( function ( shape ) {
-						if ( shape.brush === 'blue' && caseDepartInput ) {
-							caseDepartInput.value = shape.orig;
-						} else if (
-							shape.brush === 'green' &&
-							caseArriveeInput
-						) {
-							caseArriveeInput.value = shape.orig;
-						}
-					} );
-
-					updateConfig();
+			t9Shapes.forEach( function ( shape ) {
+				if ( shape.brush === 'blue' && caseDepartInput ) {
+					caseDepartInput.value = shape.orig;
+				} else if ( shape.brush === 'green' && caseArriveeInput ) {
+					caseArriveeInput.value = shape.orig;
 				}
-			);
-		} );
-	}
+			} );
+
+			updateConfig();
+		},
+	} );
 }

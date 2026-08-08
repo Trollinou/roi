@@ -55,19 +55,24 @@ class Chapitre_Taxonomy {
 			'query_var'         => true,
 			'rewrite'           => [ 'slug' => 'roi-chapitre' ],
 			'show_in_rest'      => true,
+			'capabilities'      => [
+				'manage_terms' => 'do_not_allow',
+				'edit_terms'   => 'do_not_allow',
+				'delete_terms' => 'do_not_allow',
+				'assign_terms' => 'edit_posts',
+			],
 		];
 
 		register_taxonomy( 'roi_chapitre', [ 'roi_exercice', 'roi_lecon', 'roi_cours' ], $args );
-
-		$this->seed_terms();
 	}
 
 	/**
 	 * Seed initial terms for the 'roi_chapitre' taxonomy.
+	 * Called during plugin activation.
 	 *
 	 * @return void
 	 */
-	public function seed_terms(): void {
+	public static function seed_terms(): void {
 		$terms = [
 			'Matérialité'         => 'primary',
 			'Activité des Pièces' => 'warning',

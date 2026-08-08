@@ -4,8 +4,8 @@
  * Plugin URI:        https://example.com/plugins/the-basics/
  * Description:       Ressources et Organisation pour l’Initiation aux échecs.
  * Version:           1.3.3
- * Requires at least: 6.8
- * Requires PHP:      8.2
+ * Requires at least: 6.9.1
+ * Requires PHP:      8.4
  * Author:            Etienne Gagnon
  * Author URI:        
  * License:           GPL v2 or later
@@ -32,7 +32,10 @@ if ( ! defined( 'WPINC' ) ) {
  * @since 1.0.0
  * @return void
  */
-function roi_check_dame_dependency() {
+function roi_check_dame_dependency(): void {
+	if ( ! function_exists( 'is_plugin_active' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+	}
 	if ( ! is_plugin_active( 'dame/dame.php' ) ) {
 		add_action( 'admin_notices', 'roi_dame_not_active_notice' );
 		deactivate_plugins( plugin_basename( __FILE__ ) );
@@ -101,12 +104,3 @@ function roi_load_textdomain() {
 }
 add_action( 'plugins_loaded', 'roi_load_textdomain' );
 
-/**
- * Backward compatibility wrapper for the chess pieces filter function.
- *
- * @param string $content Raw content.
- * @return string Filtered content.
- */
-function roi_chess_pieces_shortcodes_filter( string $content ): string {
-	return \ROI\Shortcodes\Shortcodes::chess_pieces_filter( $content );
-}

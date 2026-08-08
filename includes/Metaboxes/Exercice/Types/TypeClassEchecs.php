@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace ROI\Metaboxes\Exercice\Types;
 
+use ROI\Metaboxes\Exercice\Components\FenInput;
+
 /**
  * Class TypeClassEchecs
  * Gère l'affichage du type 11 : Class'échecs.
@@ -47,24 +49,20 @@ class TypeClassEchecs implements TypeInterface {
 							<h4 style="margin: 0 0 10px 0;">
 								<?php echo esc_html( 'Position ' . ( $i + 1 ) . $suffix ); ?>
 							</h4>
-							<div style="display: flex; gap: 15px; align-items: flex-end;">
-								<div style="flex: 1;">
-									<label><strong><?php esc_html_e( "FEN :", "roi" ); ?></strong></label><br>
-									<input type="text" class="roi_t11_fen" data-index="<?php echo $i; ?>" value="<?php echo esc_attr( $pos_fen ); ?>" readonly style="width: 100%; height: 30px; background: #f0f0f1; color: #50575e;">
-								</div>
-								<div>
-									<label><strong><?php esc_html_e( "Couleur du joueur :", "roi" ); ?></strong></label><br>
-									<select class="roi_t11_couleur" data-index="<?php echo $i; ?>" style="width: 120px; height: 30px;">
-										<option value="white" <?php selected( $pos_couleur, 'white' ); ?>><?php esc_html_e( "Blancs", "roi" ); ?></option>
-										<option value="black" <?php selected( $pos_couleur, 'black' ); ?>><?php esc_html_e( "Noirs", "roi" ); ?></option>
-									</select>
-								</div>
-								<div>
-									<button type="button" class="button btn_open_fen_editor_t11" data-index="<?php echo $i; ?>">
-										<?php esc_html_e( "Éditer la position", "roi" ); ?>
-									</button>
-								</div>
-							</div>
+							<?php
+							FenInput::render([
+								'id'              => 'roi_t11_fen_' . $i,
+								'value'           => $pos_fen,
+								'color'           => $pos_couleur,
+								'orientation_id'  => 'roi_t11_couleur_' . $i,
+								'button_id'       => 'btn_open_fen_editor_t11_' . $i,
+								'input_class'     => 'roi_t11_fen',
+								'color_class'     => 'roi_t11_couleur',
+								'button_class'    => 'button btn_open_fen_editor_t11',
+								'label'           => __( 'FEN :', 'roi' ),
+								'data_attributes' => [ 'index' => $i ],
+							]);
+							?>
 						</div>
 					<?php endfor; ?>
 				</div>

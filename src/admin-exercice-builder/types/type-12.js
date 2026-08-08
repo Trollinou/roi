@@ -49,13 +49,17 @@ function addIndiceInput( value = '' ) {
 	if ( ! indicesContainer ) {
 		return;
 	}
-	const count = indicesContainer.querySelectorAll( '.roi-t12-indice-item' ).length;
+	const count = indicesContainer.querySelectorAll(
+		'.roi-t12-indice-item'
+	).length;
 	const itemDiv = document.createElement( 'div' );
 	itemDiv.className = 'roi-t12-indice-item';
 	itemDiv.style.cssText = 'display: flex; gap: 10px; align-items: center;';
 
 	itemDiv.innerHTML = `
-		<span style="font-weight: 600; width: 80px; color: #50575e;">Indice ${ count + 1 } :</span>
+		<span style="font-weight: 600; width: 80px; color: #50575e;">Indice ${
+			count + 1
+		} :</span>
 		<input type="text" class="roi_t12_indice_input" value="${ value }" placeholder="Saisir un indice..." style="flex: 1; height: 30px;">
 		<button type="button" class="button button-link-delete roi_t12_remove_indice" style="color: #b32d2e; text-decoration: none;" title="Supprimer l'indice">&times;</button>
 	`;
@@ -92,6 +96,7 @@ function initSquareBoard() {
 			clearInterval( checkInterval );
 
 			const boardConfig = {
+				mode: 'editor',
 				fen: '8/8/8/8/8/8/8/8 w - - 0 1',
 				orientation: 'white',
 				coordinates: true,
@@ -110,8 +115,8 @@ function initSquareBoard() {
 			};
 
 			const boardState = {
+				mode: 'editor',
 				showThreats: false,
-				freeMode: false,
 				promotionDialogState: { isEnabled: false },
 				historyViewerState: { isEnabled: false },
 			};
@@ -125,11 +130,18 @@ function initSquareBoard() {
 				{ workerUrl: '' }
 			);
 
-			const currentSquare = reponseCaseInput ? reponseCaseInput.value.trim() : '';
+			const currentSquare = reponseCaseInput
+				? reponseCaseInput.value.trim()
+				: '';
 			if ( currentSquare ) {
 				setTimeout( () => {
-					if ( boardApi && typeof boardApi.setShapes === 'function' ) {
-						boardApi.setShapes( [ { orig: currentSquare, brush: 'green' } ] );
+					if (
+						boardApi &&
+						typeof boardApi.setShapes === 'function'
+					) {
+						boardApi.setShapes( [
+							{ orig: currentSquare, brush: 'green' },
+						] );
 					}
 				}, 100 );
 			}
@@ -160,7 +172,9 @@ export function updateConfig() {
 		return;
 	}
 
-	const indices = Array.from( document.querySelectorAll( '.roi_t12_indice_input' ) )
+	const indices = Array.from(
+		document.querySelectorAll( '.roi_t12_indice_input' )
+	)
 		.map( ( input ) => input.value.trim() )
 		.filter( ( val ) => val !== '' );
 
@@ -168,13 +182,21 @@ export function updateConfig() {
 	const reponsePiece = reponsePieceSelect ? reponsePieceSelect.value : 'wN';
 	const reponseCase = reponseCaseInput ? reponseCaseInput.value.trim() : '';
 
-	const bonneReponseRadio = document.querySelector( 'input[name="roi_t12_qcm_good"]:checked' );
-	const bonneReponse = bonneReponseRadio ? parseInt( bonneReponseRadio.value, 10 ) : 0;
+	const bonneReponseRadio = document.querySelector(
+		'input[name="roi_t12_qcm_good"]:checked'
+	);
+	const bonneReponse = bonneReponseRadio
+		? parseInt( bonneReponseRadio.value, 10 )
+		: 0;
 
 	const choix = [];
 	for ( let i = 0; i < 3; i++ ) {
-		const txtEl = document.querySelector( `.roi_t12_qcm_texte[data-index="${ i }"]` );
-		const explEl = document.querySelector( `.roi_t12_qcm_explication[data-index="${ i }"]` );
+		const txtEl = document.querySelector(
+			`.roi_t12_qcm_texte[data-index="${ i }"]`
+		);
+		const explEl = document.querySelector(
+			`.roi_t12_qcm_explication[data-index="${ i }"]`
+		);
 		choix.push( {
 			texte: txtEl ? txtEl.value.trim() : '',
 			explication: explEl ? explEl.value.trim() : '',
@@ -202,7 +224,9 @@ export function init() {
 
 	// Attacher les événements sur les indices existants rendus par PHP
 	if ( indicesContainer ) {
-		const initialItems = indicesContainer.querySelectorAll( '.roi-t12-indice-item' );
+		const initialItems = indicesContainer.querySelectorAll(
+			'.roi-t12-indice-item'
+		);
 		initialItems.forEach( ( itemDiv ) => {
 			bindIndiceEvents( itemDiv );
 		} );
@@ -237,8 +261,13 @@ export function init() {
 				}
 
 				// QCM
-				if ( parsed.reponse_qcm && typeof parsed.reponse_qcm === 'object' ) {
-					if ( typeof parsed.reponse_qcm.bonne_reponse === 'number' ) {
+				if (
+					parsed.reponse_qcm &&
+					typeof parsed.reponse_qcm === 'object'
+				) {
+					if (
+						typeof parsed.reponse_qcm.bonne_reponse === 'number'
+					) {
 						const radio = document.querySelector(
 							`input[name="roi_t12_qcm_good"][value="${ parsed.reponse_qcm.bonne_reponse }"]`
 						);
@@ -249,8 +278,12 @@ export function init() {
 
 					if ( Array.isArray( parsed.reponse_qcm.choix ) ) {
 						parsed.reponse_qcm.choix.forEach( ( item, idx ) => {
-							const txtEl = document.querySelector( `.roi_t12_qcm_texte[data-index="${ idx }"]` );
-							const explEl = document.querySelector( `.roi_t12_qcm_explication[data-index="${ idx }"]` );
+							const txtEl = document.querySelector(
+								`.roi_t12_qcm_texte[data-index="${ idx }"]`
+							);
+							const explEl = document.querySelector(
+								`.roi_t12_qcm_explication[data-index="${ idx }"]`
+							);
 							if ( txtEl && item.texte ) {
 								txtEl.value = item.texte;
 							}
@@ -284,12 +317,16 @@ export function init() {
 	}
 
 	// Écouteurs QCM
-	const qcmRadios = document.querySelectorAll( 'input[name="roi_t12_qcm_good"]' );
+	const qcmRadios = document.querySelectorAll(
+		'input[name="roi_t12_qcm_good"]'
+	);
 	qcmRadios.forEach( ( radio ) => {
 		radio.addEventListener( 'change', updateConfig );
 	} );
 
-	const qcmTexts = document.querySelectorAll( '.roi_t12_qcm_texte, .roi_t12_qcm_explication' );
+	const qcmTexts = document.querySelectorAll(
+		'.roi_t12_qcm_texte, .roi_t12_qcm_explication'
+	);
 	qcmTexts.forEach( ( input ) => {
 		input.addEventListener( 'input', updateConfig );
 	} );

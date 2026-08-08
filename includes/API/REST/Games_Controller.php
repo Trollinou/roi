@@ -68,15 +68,7 @@ class Games_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function save_game_permissions_check(): bool|WP_Error {
-		if ( ! is_user_logged_in() ) {
-			return new WP_Error(
-				'rest_forbidden',
-				__( 'Vous devez être connecté.', 'roi' ),
-				[ 'status' => 401 ]
-			);
-		}
-
-		return true;
+		return Permissions_Helper::check_apprentissage_access();
 	}
 
 	/**
@@ -134,14 +126,14 @@ class Games_Controller {
 		if ( ! empty( $game_date_raw ) ) {
 			$timestamp = strtotime( $game_date_raw );
 			if ( $timestamp ) {
-				$post_date = date( 'Y-m-d H:i:s', $timestamp );
+				$post_date = wp_date( 'Y-m-d H:i:s', $timestamp );
 			}
 		}
 
 		$current_user = wp_get_current_user();
 
 		// Insérer le post roi_partie
-		$post_title = sprintf( 'Partie de %s - %s', $member->post_title, date( 'd/m/Y H:i', strtotime( $post_date ) ) );
+		$post_title = sprintf( 'Partie de %s - %s', $member->post_title, wp_date( 'd/m/Y H:i', strtotime( $post_date ) ) );
 		
 		$post_id = wp_insert_post( [
 			'post_type'    => 'roi_partie',

@@ -2,7 +2,12 @@
  * Handler for Type 10: Echec'éval.
  */
 
-import { openFenEditor } from '../utils/modals';
+import {
+	setupFenControl,
+	setupPgnControl,
+	updateOrientationDisplay,
+	getOrientationColor,
+} from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 
@@ -30,7 +35,7 @@ export function updateConfig() {
 	const fenDepart = fenInput
 		? fenInput.value.trim()
 		: 'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 4 5';
-	const couleurJoueur = couleurSelect ? couleurSelect.value : 'white';
+	const couleurJoueur = getOrientationColor( couleurSelect, fenDepart );
 	const themeText = themeInput ? themeInput.value.trim() : '';
 	const pgnExplicationText = pgnExplicationInput
 		? pgnExplicationInput.value.trim()
@@ -89,7 +94,8 @@ function renderT10Questions() {
 
 		const deleteBtn = document.createElement( 'button' );
 		deleteBtn.type = 'button';
-		deleteBtn.className = 'button button-link-delete roi_t10_remove_question';
+		deleteBtn.className =
+			'button button-link-delete roi_t10_remove_question';
 		deleteBtn.style.cssText = 'color: #b32d2e; text-decoration: none;';
 		deleteBtn.textContent = 'Supprimer';
 		deleteBtn.addEventListener( 'click', () => {
@@ -103,7 +109,8 @@ function renderT10Questions() {
 
 		// Body Container
 		const bodyDiv = document.createElement( 'div' );
-		bodyDiv.style.cssText = 'display: flex; flex-direction: column; gap: 10px;';
+		bodyDiv.style.cssText =
+			'display: flex; flex-direction: column; gap: 10px;';
 
 		// Question Text Input
 		const textGroup = document.createElement( 'div' );
@@ -228,7 +235,7 @@ function renderT10Questions() {
 		explInput.type = 'text';
 		explInput.className = 'roi_t10_q_explication';
 		explInput.style.cssText = 'width: 100%; height: 30px;';
-		explInput.placeholder = 'Ex: Le centre va s\'ouvrir dangereusement.';
+		explInput.placeholder = "Ex: Le centre va s'ouvrir dangereusement.";
 		explInput.value = q.explication || '';
 		explInput.addEventListener( 'input', ( e ) => {
 			q.explication = e.target.value;
@@ -277,8 +284,11 @@ export function init() {
 				if ( typeof parsed.fen_depart === 'string' && fenInput ) {
 					fenInput.value = parsed.fen_depart;
 				}
-				if ( typeof parsed.couleur_joueur === 'string' && couleurSelect ) {
-					couleurSelect.value = parsed.couleur_joueur;
+				if ( couleurSelect ) {
+					updateOrientationDisplay(
+						couleurSelect,
+						parsed.couleur_joueur || parsed.fen_depart || 'white'
+					);
 				}
 				if ( Array.isArray( parsed.shapes ) ) {
 					t10Shapes = parsed.shapes;
@@ -307,7 +317,8 @@ export function init() {
 					Array.isArray( parsed.solution_moves ) &&
 					solutionMovesInput
 				) {
-					solutionMovesInput.value = parsed.solution_moves.join( ', ' );
+					solutionMovesInput.value =
+						parsed.solution_moves.join( ', ' );
 				} else if (
 					typeof parsed.solution_moves === 'string' &&
 					solutionMovesInput
@@ -342,36 +353,39 @@ export function init() {
 		} );
 	}
 
-	// FEN Modal Trigger Listener
-	if ( btnFenEditor ) {
-		btnFenEditor.addEventListener( 'click', function () {
-			const currentFen = fenInput
-				? fenInput.value ||
-				  'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 4 5'
-				: 'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 4 5';
+	// FEN Control Setup
+	setupFenControl( {
+		input: fenInput,
+		button: btnFenEditor,
+		colorSelect: couleurSelect,
+		getShapes() {
+			return t10Shapes || [];
+		},
+		onChange( fen, color, shapes ) {
+			if ( shapes ) {
+				t10Shapes = shapes;
+			}
+			updateConfig();
+		},
+	} );
 
-			openFenEditor(
-				{
-					fen: currentFen,
-					shapes: t10Shapes,
-				},
-				function ( result ) {
-					if ( result ) {
-						if ( result.fen && fenInput ) {
-							fenInput.value = result.fen;
-						}
-						if ( result.shapes ) {
-							t10Shapes = result.shapes;
-						}
-						if ( result.orientation && couleurSelect ) {
-							couleurSelect.value = result.orientation;
-						}
-						updateConfig();
-					}
-				}
-			);
-		} );
-	}
+	// PGN Control Setup for Explication Finale
+	const btnPgnExplication = document.getElementById(
+		'btn_open_pgn_editor_t10_explication'
+	);
+	setupPgnControl( {
+		textarea: pgnExplicationInput,
+		button: btnPgnExplication,
+		initialFen() {
+			return fenInput
+				? fenInput.value ||
+						'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 4 5'
+				: '';
+		},
+		onChange() {
+			updateConfig();
+		},
+	} );
 
 	// Real-time update listeners for top-level inputs
 	const inputsToWatch = [

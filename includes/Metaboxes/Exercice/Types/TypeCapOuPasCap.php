@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace ROI\Metaboxes\Exercice\Types;
 
+use ROI\Metaboxes\Exercice\Components\FenInput;
+
 /**
  * Class TypeCapOuPasCap
  * Handles rendering for Type 14: Cap ou pas cap ?.
@@ -70,22 +72,20 @@ class TypeCapOuPasCap implements TypeInterface {
 							<?php printf( esc_html__( 'Diagramme %d', 'roi' ), $i + 1 ); ?>
 						</div>
 
-						<div style="display: flex; gap: 10px; align-items: flex-end; margin-bottom: 12px;">
-							<div style="flex: 1;">
-								<label style="font-weight: 600; font-size: 12px;"><?php esc_html_e( 'FEN :', 'roi' ); ?></label><br>
-								<input type="text" class="roi_t14_fen" data-index="<?php echo $i; ?>" value="<?php echo esc_attr( $fen ); ?>" readonly style="width: 100%; height: 30px; background: #fff;">
-							</div>
-							<div>
-								<button type="button" class="button btn_open_fen_editor_t14" data-index="<?php echo $i; ?>"><?php esc_html_e( 'Éditer', 'roi' ); ?></button>
-							</div>
-							<div>
-								<label style="font-weight: 600; font-size: 12px;"><?php esc_html_e( 'Couleur joueur :', 'roi' ); ?></label><br>
-								<select class="roi_t14_couleur" data-index="<?php echo $i; ?>" style="height: 30px;">
-									<option value="white" <?php selected( $couleur_joueur, 'white' ); ?>><?php esc_html_e( 'Blancs', 'roi' ); ?></option>
-									<option value="black" <?php selected( $couleur_joueur, 'black' ); ?>><?php esc_html_e( 'Noirs', 'roi' ); ?></option>
-								</select>
-							</div>
-						</div>
+						<?php
+						FenInput::render([
+							'id'              => 'roi_t14_fen_' . $i,
+							'value'           => $fen,
+							'color'           => $couleur_joueur,
+							'orientation_id'  => 'roi_t14_couleur_' . $i,
+							'button_id'       => 'btn_open_fen_editor_t14_' . $i,
+							'input_class'     => 'roi_t14_fen',
+							'color_class'     => 'roi_t14_couleur',
+							'button_class'    => 'button btn_open_fen_editor_t14',
+							'label'           => __( 'FEN :', 'roi' ),
+							'data_attributes' => [ 'index' => $i ],
+						]);
+						?>
 
 						<!-- Bloc QCM -->
 						<div class="roi_t14_bloc_qcm" data-index="<?php echo $i; ?>" style="display: <?php echo 'qcm' === $type_reponse ? 'block' : 'none'; ?>; border-top: 1px dashed #ccc; padding-top: 10px; margin-top: 10px;">

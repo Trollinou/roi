@@ -105,30 +105,36 @@ class Manager {
 		<p>
 			<label for="roi_exercice_niveau"><strong>Niveau de difficulté :</strong></label><br>
 			<select name="roi_exercice_niveau" id="roi_exercice_niveau">
-				<?php for ( $i = 1; $i <= 6; $i++ ) : ?>
+				<?php for ( $i = 1; $i <= 4; $i++ ) : ?>
 					<option value="<?php echo $i; ?>" <?php selected( $niveau, (string) $i ); ?>><?php echo $i; ?></option>
 				<?php endfor; ?>
 			</select>
 		</p>
 
 		<?php
-		// Render components
-		( new Type100Commandements() )->render( $post, $config_data );
-		( new TypePopEchecs() )->render( $post, $config_data );
-		( new TypePartieHeros() )->render( $post, $config_data );
-		( new TypePosiPlan() )->render( $post, $config_data );
-		( new TypeAssociPlan() )->render( $post, $config_data );
-		( new TypeABCDaire() )->render( $post, $config_data );
-		( new TypeMarcheHeros() )->render( $post, $config_data );
-		( new TypeVisionChecs() )->render( $post, $config_data );
-		( new TypeParcours() )->render( $post, $config_data );
-		( new TypeEchecEval() )->render( $post, $config_data );
-		( new TypeClassEchecs() )->render( $post, $config_data );
-		( new TypeQuiSuisJe() )->render( $post, $config_data );
-		( new TypeOuvreBoite() )->render( $post, $config_data );
-		( new TypeCapOuPasCap() )->render( $post, $config_data );
-		( new TypeJugementFinal() )->render( $post, $config_data );
-		( new TypeDestinationFinale() )->render( $post, $config_data );
+		// Render type sections via registry
+		$type_classes = [
+			Type100Commandements::class,
+			TypePopEchecs::class,
+			TypePartieHeros::class,
+			TypePosiPlan::class,
+			TypeAssociPlan::class,
+			TypeABCDaire::class,
+			TypeMarcheHeros::class,
+			TypeVisionChecs::class,
+			TypeParcours::class,
+			TypeEchecEval::class,
+			TypeClassEchecs::class,
+			TypeQuiSuisJe::class,
+			TypeOuvreBoite::class,
+			TypeCapOuPasCap::class,
+			TypeJugementFinal::class,
+			TypeDestinationFinale::class,
+		];
+
+		foreach ( $type_classes as $type_class ) {
+			( new $type_class() )->render( $post, $config_data );
+		}
 		?>
 
 		<textarea name="roi_exercice_config" id="roi_config_json" style="display:none;"><?php echo esc_textarea( $config ); ?></textarea>
@@ -195,10 +201,10 @@ class Manager {
 			update_post_meta( $post_id, '_roi_exercice_type', (int) $_POST['roi_exercice_type'] );
 		}
 
-		// Save exercise level (integer value between 1 and 6)
+		// Save exercise level (integer value between 1 and 4)
 		if ( isset( $_POST['roi_exercice_niveau'] ) ) {
 			$niveau = (int) $_POST['roi_exercice_niveau'];
-			if ( $niveau >= 1 && $niveau <= 6 ) {
+			if ( $niveau >= 1 && $niveau <= 4 ) {
 				update_post_meta( $post_id, '_roi_exercice_niveau', $niveau );
 			}
 		}
@@ -249,13 +255,13 @@ class Manager {
 			$errors[] = __( "Le titre de l'exercice est obligatoire.", 'roi' );
 		}
 
-		// 2. Difficulty level validation (value between 1 and 6)
+		// 2. Difficulty level validation (value between 1 and 4)
 		$niveau = isset( $_POST['roi_exercice_niveau'] ) ? (int) $_POST['roi_exercice_niveau'] : 0;
 		if ( ! isset( $_POST['roi_exercice_niveau'] ) && isset( $postarr['ID'] ) ) {
 			$niveau = (int) get_post_meta( (int) $postarr['ID'], '_roi_exercice_niveau', true );
 		}
-		if ( $niveau < 1 || $niveau > 6 ) {
-			$errors[] = __( "Le niveau de difficulté (1 à 6) est obligatoire.", 'roi' );
+		if ( $niveau < 1 || $niveau > 4 ) {
+			$errors[] = __( "Le niveau de difficulté (1 à 4) est obligatoire.", 'roi' );
 		}
 
 		// 3. Exercise type validation (value between 1 and 16)

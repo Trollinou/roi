@@ -39,8 +39,8 @@ module.exports = {
 	},
 	performance: {
 		hints: 'warning',
-		maxEntrypointSize: 350 * 1024,
-		maxAssetSize: 350 * 1024,
+		maxEntrypointSize: 500 * 1024,
+		maxAssetSize: 500 * 1024,
 		assetFilter( assetFilename ) {
 			return ! assetFilename.endsWith( '.wasm' );
 		},

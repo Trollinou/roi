@@ -1,5 +1,5 @@
 /**
- * DAME Admin-specific styles
+ * ROI Admin-specific styles
  */
 
 /*
@@ -7,8 +7,321 @@
  * By giving the editor wrap a relative position and a z-index, we create
  * a new stacking context and force it to the front.
  */
-.post-type-dame_exercice .wp-editor-wrap {
+.post-type-dame_exercice .wp-editor-wrap,
+.post-type-roi_exercice .wp-editor-wrap {
     position: relative;
     z-index: 10;
 }
+
+/* Unified FEN and PGN Control Styles */
+.roi-control-group {
+	margin-bottom: 15px;
+}
+
+.roi-control-group .roi-control-label {
+	display: block;
+	margin-bottom: 6px;
+	font-weight: 600;
+	color: #1d2327;
+	font-size: 13px;
+}
+
+.roi-control-inline {
+	display: flex;
+	gap: 12px;
+	align-items: flex-end;
+	flex-wrap: wrap;
+}
+
+.roi-control-input-wrapper {
+	flex: 1;
+	min-width: 280px;
+	display: flex;
+	gap: 6px;
+	align-items: center;
+}
+
+.roi-control-input-wrapper input.roi-control-input {
+	flex: 1;
+	height: 34px;
+	font-family: monospace;
+	font-size: 12px;
+	border: 1px solid #8c8f94;
+	border-radius: 4px;
+	padding: 0 10px;
+	background-color: #fff;
+	color: #2c3338;
+}
+
+.roi-control-input-wrapper input.roi-control-input:focus {
+	border-color: #2271b1;
+	box-shadow: 0 0 0 1px #2271b1;
+}
+
+.roi-btn-open-fen-editor,
+.roi-btn-open-pgn-editor {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	height: 34px !important;
+	padding: 0 12px !important;
+	font-size: 13px !important;
+	font-weight: 500 !important;
+	white-space: nowrap;
+	border-radius: 4px !important;
+}
+
+.roi-btn-open-fen-editor .dashicons,
+.roi-btn-open-pgn-editor .dashicons {
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+	line-height: 1;
+	margin: 0;
+}
+
+.roi-control-orientation-wrapper,
+.roi-control-shapes-wrapper {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.roi-control-button-wrapper {
+	display: flex;
+	align-items: flex-end;
+}
+
+.roi-control-sublabel {
+	font-size: 12px;
+	font-weight: 600;
+	color: #50575e;
+}
+
+.roi-control-select,
+.roi-control-input-readonly {
+	height: 34px !important;
+	padding: 0 8px !important;
+	border-radius: 4px !important;
+	font-size: 13px !important;
+	border: 1px solid #8c8f94 !important;
+	box-shadow: none !important;
+}
+
+.roi-control-input-readonly {
+	background-color: #f0f0f1 !important;
+	color: #2c3338 !important;
+	cursor: default;
+	text-align: center;
+	font-weight: 600 !important;
+}
+
+.roi-orientation-field {
+	width: 75px !important;
+	min-width: 75px;
+}
+
+.roi-shapes-summary-field {
+	width: 95px !important;
+	min-width: 95px;
+}
+
+.roi-control-textarea-wrapper {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.roi-control-textarea-wrapper textarea.roi-control-textarea {
+	width: 100%;
+	font-family: monospace;
+	font-size: 12px;
+	line-height: 1.4;
+	padding: 8px 10px;
+	border: 1px solid #8c8f94;
+	border-radius: 4px;
+	background-color: #fff;
+	color: #2c3338;
+}
+
+.roi-control-textarea-wrapper textarea.roi-control-textarea:focus {
+	border-color: #2271b1;
+	box-shadow: 0 0 0 1px #2271b1;
+}
+
+.roi-control-actions {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+}
+
+/* Style taxonomy checkboxes as radio buttons for single selection in Gutenberg sidebar */
+.editor-post-taxonomies__hierarchical-terms-choice input[type="checkbox"],
+.components-panel__body .components-checkbox-control__input[type="checkbox"] {
+	border-radius: 50% !important;
+}
+
+/* Force 'Configuration de la Leçon' and 'Chapitres' panels to remain open and non-collapsible */
+.roi-lecon-settings-panel .components-panel__arrow,
+.roi-lecon-settings-panel .components-panel__icon,
+.taxonomy-panel-roi_chapitre .components-panel__arrow,
+.taxonomy-panel-roi_chapitre .components-panel__icon,
+.components-panel__body:has(.editor-post-taxonomies__hierarchical-terms-choice) .components-panel__arrow,
+.components-panel__body:has(.editor-post-taxonomies__hierarchical-terms-choice) .components-panel__icon {
+	display: none !important;
+}
+
+.roi-lecon-settings-panel .components-panel__body-title,
+.roi-lecon-settings-panel .components-panel__body-title button,
+.taxonomy-panel-roi_chapitre .components-panel__body-title,
+.taxonomy-panel-roi_chapitre .components-panel__body-title button,
+.components-panel__body:has(.editor-post-taxonomies__hierarchical-terms-choice) .components-panel__body-title button {
+	pointer-events: none !important;
+	cursor: default !important;
+}
+
+.roi-lecon-settings-panel .components-panel__body-content,
+.taxonomy-panel-roi_chapitre .components-panel__body-content,
+.components-panel__body:has(.editor-post-taxonomies__hierarchical-terms-choice) .components-panel__body-content {
+	display: block !important;
+}
+
+/* Hide 'Ajouter un nouveau chapitre' link in Gutenberg sidebar & classic metaboxes */
+.editor-post-taxonomies__hierarchical-terms-add,
+.taxonomy-panel-roi_chapitre .editor-post-taxonomies__hierarchical-terms-add,
+.components-panel__body:has(.editor-post-taxonomies__hierarchical-terms-choice) .editor-post-taxonomies__hierarchical-terms-add,
+.components-panel__body:has(.editor-post-taxonomies__hierarchical-terms-choice) .components-button.is-link,
+#roi_chapitre-add-toggle,
+#roi_chapitre-add {
+	display: none !important;
+}
+
+/* Hide tabs bar ('Plus utilisé' / 'Tous les chapitres') in Chapitre taxonomy metabox */
+#roi_chapitrediv .category-tabs,
+#taxonomy-roi_chapitre .category-tabs,
+.categorydiv .category-tabs,
+#roi_chapitre-tabs,
+#roi_chapitre-pop,
+.tabs-panel-pop {
+	display: none !important;
+}
+
+#roi_chapitrediv .tabs-panel,
+#taxonomy-roi_chapitre .tabs-panel,
+.categorydiv .tabs-panel {
+	border: none !important;
+	background: transparent !important;
+	padding: 0 !important;
+	max-height: none !important;
+}
+
+/* Non-collapsible postboxes (Attributs du cours, Niveau du cours, Chapitres) in WP Admin */
+#pageparentdiv .handlediv,
+#pageparentdiv .toggle-indicator,
+#pageparentdiv .postbox-header .handle-actions,
+#roi_cours_level_box .handlediv,
+#roi_cours_level_box .toggle-indicator,
+#roi_cours_level_box .postbox-header .handle-actions,
+#roi_chapitrediv .handlediv,
+#roi_chapitrediv .toggle-indicator,
+#roi_chapitrediv .postbox-header .handle-actions,
+#taxonomy-roi_chapitre .handlediv,
+#taxonomy-roi_chapitre .toggle-indicator,
+#taxonomy-roi_chapitre .postbox-header .handle-actions {
+	display: none !important;
+}
+
+#pageparentdiv .postbox-header,
+#pageparentdiv h2.hndle,
+#pageparentdiv h3.hndle,
+#roi_cours_level_box .postbox-header,
+#roi_cours_level_box h2.hndle,
+#roi_cours_level_box h3.hndle,
+#roi_chapitrediv .postbox-header,
+#roi_chapitrediv h2.hndle,
+#roi_chapitrediv h3.hndle,
+#taxonomy-roi_chapitre .postbox-header,
+#taxonomy-roi_chapitre h2.hndle,
+#taxonomy-roi_chapitre h3.hndle {
+	pointer-events: none !important;
+	cursor: default !important;
+}
+
+#pageparentdiv.closed .inside,
+#roi_cours_level_box.closed .inside,
+#roi_chapitrediv.closed .inside,
+#taxonomy-roi_chapitre.closed .inside {
+	display: block !important;
+}
+
+/* Responsive Cours Builder (Playlist) */
+.roi-cours-builder-columns {
+	display: flex;
+	gap: 20px;
+	margin-top: 15px;
+	flex-wrap: wrap;
+}
+
+.roi-cours-builder-col {
+	flex: 1 1 300px;
+	min-width: 0;
+	border-radius: 6px;
+	padding: 15px;
+	box-sizing: border-box;
+}
+
+.roi-cours-catalog-filter-bar {
+	display: flex;
+	gap: 6px;
+	margin-bottom: 15px;
+	flex-wrap: nowrap !important;
+	align-items: center;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.roi-cours-catalog-filter-bar input[type="text"]#roi_catalog_search {
+	flex: 1 1 0 !important;
+	min-width: 60px !important;
+	width: 0 !important;
+	box-sizing: border-box;
+}
+
+.roi-cours-catalog-filter-bar select#roi_catalog_chapter_filter {
+	flex: 0 1 auto !important;
+	max-width: 45% !important;
+	min-width: 90px !important;
+	box-sizing: border-box;
+}
+
+.roi-cours-catalog-filter-bar select#roi_catalog_level_filter {
+	flex: 0 0 50px !important;
+	width: 50px !important;
+	min-width: 50px !important;
+	box-sizing: border-box;
+	padding-left: 6px !important;
+	padding-right: 16px !important;
+}
+
+
+/* Style for menu_order number input in Ordre du cours */
+#pageparentdiv input#menu_order {
+	width: 80px !important;
+}
+
+/* Hide redundant internal label 'Ordre' and Parent dropdown inside Ordre du cours metabox */
+#pageparentdiv .post-attributes-label-wrapper,
+#pageparentdiv label[for="menu_order"],
+#pageparentdiv label[for="parent_id"],
+#pageparentdiv p.post-attributes-label-wrapper,
+#pageparentdiv #parent_id,
+#pageparentdiv .post-attributes-label-wrapper:has(#parent_id) {
+	display: none !important;
+}
+
+
+
+
+
+
 

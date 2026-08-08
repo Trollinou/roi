@@ -3,6 +3,7 @@
  */
 
 import { openFenEditor, openPgnEditor } from '../utils/modals';
+import { getFinalFenFromPgn } from 'eg-chessboard';
 
 const textarea = document.getElementById( 'roi_config_json' );
 const t4EtapesContainer = document.getElementById( 'roi_t4_etapes_container' );
@@ -250,16 +251,15 @@ export function init() {
 						if ( t4Etapes[ i ].final_fen ) {
 							initialQcmFen = t4Etapes[ i ].final_fen;
 						} else if ( t4Etapes[ i ].pgn_data ) {
-							try {
-								if ( typeof window.Chess === 'function' ) {
-									const tempChess = new window.Chess();
-									tempChess.loadPgn( t4Etapes[ i ].pgn_data );
-									initialQcmFen = tempChess.fen();
-								}
-							} catch ( e ) {
-								console.warn(
-									'Impossible de lire le PGN précédent pour la FEN du QCM',
-									e
+							if (
+								typeof window.getFinalFenFromPgn === 'function'
+							) {
+								initialQcmFen = window.getFinalFenFromPgn(
+									t4Etapes[ i ].pgn_data
+								);
+							} else {
+								initialQcmFen = getFinalFenFromPgn(
+									t4Etapes[ i ].pgn_data
 								);
 							}
 						}

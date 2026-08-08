@@ -2,7 +2,7 @@
  * Handler for Type 5: Posi'Plan.
  */
 
-import { openFenEditor } from '../utils/modals';
+import { setupFenControl } from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 const t5FenDepart = document.getElementById( 'roi_t5_fen_depart' );
@@ -256,29 +256,18 @@ export function init() {
 		} );
 	}
 
-	if ( t5FenDepart ) {
-		t5FenDepart.addEventListener( 'input', updateConfig );
-	}
-	if ( t5Couleur ) {
-		t5Couleur.addEventListener( 'change', updateConfig );
-	}
-
-	if ( t5EditorBtn ) {
-		t5EditorBtn.addEventListener( 'click', function () {
-			const initialFen =
-				( t5FenDepart ? t5FenDepart.value.trim() : '' ) ||
-				'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-
-			openFenEditor(
-				{ fen: initialFen, shapes: t5Shapes },
-				function ( result ) {
-					if ( t5FenDepart ) {
-						t5FenDepart.value = result.fen;
-					}
-					t5Shapes = result.shapes;
-					updateConfig();
-				}
-			);
-		} );
-	}
+	setupFenControl( {
+		input: t5FenDepart,
+		button: t5EditorBtn,
+		colorSelect: t5Couleur,
+		getShapes() {
+			return t5Shapes || [];
+		},
+		onChange( fen, color, shapes ) {
+			if ( shapes ) {
+				t5Shapes = shapes;
+			}
+			updateConfig();
+		},
+	} );
 }

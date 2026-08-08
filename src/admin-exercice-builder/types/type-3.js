@@ -2,7 +2,11 @@
  * Handler for Type 3: ABCDaire Tactique and other visual exercises.
  */
 
-import { openFenEditor } from '../utils/modals';
+import {
+	setupFenControl,
+	updateOrientationDisplay,
+	getOrientationColor,
+} from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 const fenInput = document.getElementById( 'roi_fen_input' );
@@ -70,6 +74,7 @@ function updateBoardConfig() {
 	boardAPI.setConfig( {
 		orientation: configData.couleur_joueur,
 		viewOnly: false,
+		lastMove: undefined,
 		movable: {
 			color: 'both',
 			events: {
@@ -103,7 +108,10 @@ export function init() {
 	} catch ( e ) {
 		console.warn( 'Erreur parsing JSON Type 3 initial :', e );
 		configData.fen = fenInput ? fenInput.value.trim() : '';
-		configData.couleur_joueur = colorInput ? colorInput.value : 'white';
+		configData.couleur_joueur = getOrientationColor(
+			colorInput,
+			configData.fen
+		);
 		configData.solution = [];
 		configData.shapes = [];
 	}
@@ -112,7 +120,7 @@ export function init() {
 		fenInput.value = configData.fen;
 	}
 	if ( colorInput && configData.couleur_joueur ) {
-		colorInput.value = configData.couleur_joueur;
+		updateOrientationDisplay( colorInput, configData.couleur_joueur );
 	}
 
 	renderSolutionList();
@@ -132,6 +140,7 @@ export function init() {
 			clearInterval( checkInterval );
 
 			const boardConfig = {
+				mode: 'game',
 				fen:
 					configData.fen ||
 					( fenInput ? fenInput.value.trim() : '' ) ||
@@ -145,8 +154,9 @@ export function init() {
 			};
 
 			const boardState = {
+				mode: 'game',
+				preserveShapesOnPositionChange: true,
 				showThreats: false,
-				freeMode: false,
 				promotionDialogState: { isEnabled: false },
 				historyViewerState: { isEnabled: false },
 			};
@@ -194,30 +204,23 @@ export function init() {
 		} );
 	}
 
-	if ( openEditorBtn ) {
-		openEditorBtn.addEventListener( 'click', function () {
-			const initialFen =
-				( fenInput ? fenInput.value.trim() : '' ) ||
-				'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-
-			openFenEditor(
-				{ fen: initialFen, shapes: configData.shapes },
-				function ( result ) {
-					if ( fenInput ) {
-						fenInput.value = result.fen;
-					}
-					if ( colorInput && result.orientation ) {
-						colorInput.value = result.orientation;
-					}
-					configData.fen = result.fen;
-					configData.couleur_joueur = result.orientation;
-					configData.shapes = result.shapes || [];
-					if ( boardAPI ) {
-						boardAPI.setShapes( configData.shapes );
-					}
-					updateConfig();
-				}
-			);
-		} );
-	}
+	setupFenControl( {
+		input: fenInput,
+		button: openEditorBtn,
+		colorSelect: colorInput,
+		getShapes() {
+			return configData.shapes || [];
+		},
+		onChange( fen, color, shapes ) {
+			configData.fen = fen;
+			configData.couleur_joueur = color;
+			if ( shapes ) {
+				configData.shapes = shapes;
+			}
+			if ( boardAPI && typeof boardAPI.setShapes === 'function' ) {
+				boardAPI.setShapes( configData.shapes );
+			}
+			updateConfig();
+		},
+	} );
 }

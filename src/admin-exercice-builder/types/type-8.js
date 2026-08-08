@@ -2,7 +2,11 @@
  * Handler for Type 8: Vision'checs.
  */
 
-import { openFenEditor } from '../utils/modals';
+import {
+	setupFenControl,
+	updateOrientationDisplay,
+	getOrientationColor,
+} from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 const fenInput = document.getElementById( 'roi_t8_fen' );
@@ -21,9 +25,10 @@ export function updateConfig() {
 	if ( ! textarea ) {
 		return;
 	}
+	const fenVal = fenInput ? fenInput.value.trim() : '';
 	const configData = {
-		fen_depart: fenInput ? fenInput.value.trim() : '',
-		couleur_joueur: colorInput ? colorInput.value : 'white',
+		fen_depart: fenVal,
+		couleur_joueur: getOrientationColor( colorInput, fenVal ),
 		description: descInput ? descInput.value.trim() : '',
 		case_depart: caseDepartInput ? caseDepartInput.value.trim() : '',
 		case_arrivee: caseArriveeInput ? caseArriveeInput.value.trim() : '',
@@ -45,8 +50,11 @@ export function init() {
 				if ( parsed.fen_depart && fenInput ) {
 					fenInput.value = parsed.fen_depart;
 				}
-				if ( parsed.couleur_joueur && colorInput ) {
-					colorInput.value = parsed.couleur_joueur;
+				if ( colorInput ) {
+					updateOrientationDisplay(
+						colorInput,
+						parsed.couleur_joueur || parsed.fen_depart || 'white'
+					);
 				}
 				if ( parsed.description && descInput ) {
 					descInput.value = parsed.description;
@@ -79,39 +87,18 @@ export function init() {
 	if ( descInput ) {
 		descInput.addEventListener( 'input', updateConfig );
 	}
-	if ( colorInput ) {
-		colorInput.addEventListener( 'change', updateConfig );
-	}
-	if ( fenInput ) {
-		fenInput.addEventListener( 'input', updateConfig );
-	}
 
-	if ( openEditorBtn ) {
-		openEditorBtn.addEventListener( 'click', function () {
-			const initialFen =
-				( fenInput ? fenInput.value.trim() : '' ) ||
-				'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-
-			openFenEditor(
-				{ fen: initialFen, shapes: [] },
-				function ( result ) {
-					if ( fenInput ) {
-						fenInput.value = result.fen;
-					}
-					if ( colorInput && result.orientation ) {
-						colorInput.value = result.orientation;
-					}
-					updateConfig();
-					// Si l'échiquier est déjà généré, le rafraîchir
-					if ( boardAPI ) {
-						if ( generateBtn ) {
-							generateBtn.click();
-						}
-					}
-				}
-			);
-		} );
-	}
+	setupFenControl( {
+		input: fenInput,
+		button: openEditorBtn,
+		colorSelect: colorInput,
+		onChange() {
+			updateConfig();
+			if ( boardAPI && generateBtn ) {
+				generateBtn.click();
+			}
+		},
+	} );
 
 	if ( generateBtn ) {
 		generateBtn.addEventListener( 'click', function () {
@@ -139,6 +126,7 @@ export function init() {
 					clearInterval( checkInterval );
 
 					const boardConfig = {
+						mode: 'game',
 						fen,
 						orientation: color,
 						coordinates: true,
@@ -149,8 +137,8 @@ export function init() {
 					};
 
 					const boardState = {
+						mode: 'game',
 						showThreats: false,
-						freeMode: false,
 						promotionDialogState: { isEnabled: false },
 						historyViewerState: { isEnabled: false },
 					};

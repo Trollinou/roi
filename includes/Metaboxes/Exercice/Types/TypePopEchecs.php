@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace ROI\Metaboxes\Exercice\Types;
 
+use ROI\Metaboxes\Exercice\Components\FenInput;
+
 /**
  * Class TypePopEchecs
  * Handles rendering for Type 2: Pop'Echecs.
@@ -27,22 +29,22 @@ class TypePopEchecs implements TypeInterface {
 		<div id="roi_builder_type_2" class="roi-builder-section" style="display:none; margin-top: 15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
 			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice (Pop'Echecs)", "roi" ); ?></h4>
 			<p>
-				<label for="roi_t2_consigne"><strong>Consigne :</strong></label><br>
-				<input type="text" id="roi_t2_consigne" class="large-text" style="width: 100%;" placeholder="Ex : Replacez le Cavalier Blanc sur la bonne case.">
+				<label for="roi_t2_consigne"><strong><?php esc_html_e( 'Consigne :', 'roi' ); ?></strong></label><br>
+				<input type="text" id="roi_t2_consigne" class="large-text" style="width: 100%;" placeholder="<?php esc_attr_e( 'Ex : Replacez le Cavalier Blanc sur la bonne case.', 'roi' ); ?>">
 			</p>
-			<div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-end;">
-				<div style="flex: 1;">
-					<label for="roi_t2_fen_finale"><strong>FEN Complète (position finale) :</strong></label><br>
-					<input type="text" id="roi_t2_fen_finale" class="large-text" style="width: 100%; height: 30px;" placeholder="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1">
-				</div>
-				<div>
-					<button type="button" id="btn_open_fen_editor_t2" class="button" title="Éditer la position visuellement" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); border: 1px solid #ccd0d4; background: #ffffff; cursor: pointer; padding: 0;">
-						<span class="dashicons dashicons-edit" style="width: auto; height: auto; font-size: 18px; line-height: 1; margin: 0; color: #1e1e1e;"></span>
-					</button>
-				</div>
-				<div>
-					<button type="button" id="roi_t2_generate_btn" class="button button-secondary">Générer le plateau de sélection</button>
-				</div>
+			<?php
+			FenInput::render([
+				'id'               => 'roi_t2_fen_finale',
+				'value'            => 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+				'color'            => 'white',
+				'orientation_id'   => 'roi_t2_couleur',
+				'button_id'        => 'btn_open_fen_editor_t2',
+				'label'            => __( 'FEN Complète (position finale) :', 'roi' ),
+				'show_orientation' => true,
+			]);
+			?>
+			<div style="margin-bottom: 15px;">
+				<button type="button" id="roi_t2_generate_btn" class="button button-secondary"><?php esc_html_e( 'Générer le plateau de sélection', 'roi' ); ?></button>
 			</div>
 			<div style="display: flex; gap: 20px; align-items: flex-start;">
 				<div id="roi_t2_chessboard_container" style="width: 350px; flex-shrink: 0; position: relative;">

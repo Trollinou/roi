@@ -2,10 +2,14 @@
  * Handler for Type 14: Cap ou pas cap ?.
  */
 
-import { openFenEditor } from '../utils/modals';
+import {
+	setupFenControl,
+	updateOrientationDisplay,
+	getOrientationColor,
+} from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
-let diagramShapes = [ [], [], [], [], [] ];
+const diagramShapes = [ [], [], [], [], [] ];
 
 /**
  * Updates visibility of QCM / Move blocks depending on type_reponse.
@@ -53,7 +57,7 @@ export function updateConfig() {
 		const fen = fenInput
 			? fenInput.value.trim()
 			: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-		const couleurJoueur = couleurSelect ? couleurSelect.value : 'white';
+		const couleurJoueur = getOrientationColor( couleurSelect, fen );
 
 		// QCM inputs
 		const opt0TexteInput = document.querySelector(
@@ -129,10 +133,7 @@ export function init() {
 		try {
 			const parsed = JSON.parse( textarea.value );
 			if ( parsed && typeof parsed === 'object' ) {
-				if (
-					typeof parsed.consigne === 'string' &&
-					consigneInput
-				) {
+				if ( typeof parsed.consigne === 'string' && consigneInput ) {
 					consigneInput.value = parsed.consigne;
 				}
 
@@ -159,8 +160,11 @@ export function init() {
 						if ( diag.fen && fenInput ) {
 							fenInput.value = diag.fen;
 						}
-						if ( diag.couleur_joueur && couleurSelect ) {
-							couleurSelect.value = diag.couleur_joueur;
+						if ( couleurSelect ) {
+							updateOrientationDisplay(
+								couleurSelect,
+								diag.couleur_joueur || diag.fen || 'white'
+							);
 						}
 						if ( Array.isArray( diag.shapes ) ) {
 							diagramShapes[ i ] = diag.shapes;
@@ -174,11 +178,21 @@ export function init() {
 								const opt0ExpInput = document.querySelector(
 									`.roi_t14_qcm_explication[data-index="${ i }"][data-opt="0"]`
 								);
-								if ( opt0TexteInput && typeof diag.qcm_choix[ 0 ].texte === 'string' ) {
-									opt0TexteInput.value = diag.qcm_choix[ 0 ].texte;
+								if (
+									opt0TexteInput &&
+									typeof diag.qcm_choix[ 0 ].texte ===
+										'string'
+								) {
+									opt0TexteInput.value =
+										diag.qcm_choix[ 0 ].texte;
 								}
-								if ( opt0ExpInput && typeof diag.qcm_choix[ 0 ].explication === 'string' ) {
-									opt0ExpInput.value = diag.qcm_choix[ 0 ].explication;
+								if (
+									opt0ExpInput &&
+									typeof diag.qcm_choix[ 0 ].explication ===
+										'string'
+								) {
+									opt0ExpInput.value =
+										diag.qcm_choix[ 0 ].explication;
 								}
 							}
 
@@ -189,11 +203,21 @@ export function init() {
 								const opt1ExpInput = document.querySelector(
 									`.roi_t14_qcm_explication[data-index="${ i }"][data-opt="1"]`
 								);
-								if ( opt1TexteInput && typeof diag.qcm_choix[ 1 ].texte === 'string' ) {
-									opt1TexteInput.value = diag.qcm_choix[ 1 ].texte;
+								if (
+									opt1TexteInput &&
+									typeof diag.qcm_choix[ 1 ].texte ===
+										'string'
+								) {
+									opt1TexteInput.value =
+										diag.qcm_choix[ 1 ].texte;
 								}
-								if ( opt1ExpInput && typeof diag.qcm_choix[ 1 ].explication === 'string' ) {
-									opt1ExpInput.value = diag.qcm_choix[ 1 ].explication;
+								if (
+									opt1ExpInput &&
+									typeof diag.qcm_choix[ 1 ].explication ===
+										'string'
+								) {
+									opt1ExpInput.value =
+										diag.qcm_choix[ 1 ].explication;
 								}
 							}
 						}
@@ -214,10 +238,16 @@ export function init() {
 							`.roi_t14_move_explication[data-index="${ i }"]`
 						);
 
-						if ( moveSanInput && typeof diag.move_san === 'string' ) {
+						if (
+							moveSanInput &&
+							typeof diag.move_san === 'string'
+						) {
 							moveSanInput.value = diag.move_san;
 						}
-						if ( moveExpInput && typeof diag.move_explication === 'string' ) {
+						if (
+							moveExpInput &&
+							typeof diag.move_explication === 'string'
+						) {
 							moveExpInput.value = diag.move_explication;
 						}
 					} );
@@ -239,45 +269,35 @@ export function init() {
 		} );
 	}
 
-	// FEN modal trigger listeners
-	const fenBtns = document.querySelectorAll( '.btn_open_fen_editor_t14' );
-	fenBtns.forEach( ( btn ) => {
-		btn.addEventListener( 'click', function () {
-			const index = parseInt( btn.getAttribute( 'data-index' ), 10 );
-			const fenInput = document.querySelector(
-				`.roi_t14_fen[data-index="${ index }"]`
-			);
-			const couleurSelect = document.querySelector(
-				`.roi_t14_couleur[data-index="${ index }"]`
+	// FEN control setup for all 5 diagrams
+	for ( let i = 0; i < 5; i++ ) {
+		const fenInput = document.querySelector(
+			`.roi_t14_fen[data-index="${ i }"]`
+		);
+		const couleurSelect = document.querySelector(
+			`.roi_t14_couleur[data-index="${ i }"]`
+		);
+		const btnFen =
+			document.getElementById( `btn_open_fen_editor_t14_${ i }` ) ||
+			document.querySelector(
+				`.btn_open_fen_editor_t14[data-index="${ i }"]`
 			);
 
-			const currentFen = fenInput
-				? fenInput.value ||
-				  'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
-				: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-
-			openFenEditor(
-				{
-					fen: currentFen,
-					shapes: diagramShapes[ index ] || [],
-				},
-				function ( result ) {
-					if ( result && result.fen ) {
-						if ( fenInput ) {
-							fenInput.value = result.fen;
-						}
-						if ( result.shapes ) {
-							diagramShapes[ index ] = result.shapes;
-						}
-						if ( result.orientation && couleurSelect ) {
-							couleurSelect.value = result.orientation;
-						}
-						updateConfig();
-					}
+		setupFenControl( {
+			input: fenInput,
+			button: btnFen,
+			colorSelect: couleurSelect,
+			getShapes() {
+				return diagramShapes[ i ] || [];
+			},
+			onChange( fen, color, shapes ) {
+				if ( shapes ) {
+					diagramShapes[ i ] = shapes;
 				}
-			);
+				updateConfig();
+			},
 		} );
-	} );
+	}
 
 	// Input listeners for real-time config updates
 	const inputsToWatch = document.querySelectorAll(

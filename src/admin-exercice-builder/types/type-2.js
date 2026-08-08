@@ -2,11 +2,12 @@
  * Handler for Type 2: Pop'Echecs.
  */
 
-import { openFenEditor } from '../utils/modals';
+import { setupFenControl, getActiveColorFromFen } from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 const t2Consigne = document.getElementById( 'roi_t2_consigne' );
 const t2FenFinale = document.getElementById( 'roi_t2_fen_finale' );
+const t2Couleur = document.getElementById( 'roi_t2_couleur' );
 const t2GenerateBtn = document.getElementById( 'roi_t2_generate_btn' );
 const t2ChessboardContainer = document.getElementById(
 	'roi_t2_chessboard_container'
@@ -27,6 +28,7 @@ const pieceNames = {
 let t2BoardAPI = null;
 let t2BoardEl = null;
 let t2SelectedData = null;
+let t2Shapes = [];
 
 function getPieceName( pieceType, pieceColor ) {
 	const entry = pieceNames[ pieceType ];
@@ -42,7 +44,7 @@ function updateT2Feedback( message, color, showCancel ) {
 		t2Feedback.style.borderLeftColor = color;
 	}
 	if ( t2CancelBtn ) {
-		t2CancelBtn.style.display = showCancel ? '' : 'none';
+		t2CancelBtn.style.display = showCancel ? 'inline-block' : 'none';
 	}
 }
 
@@ -95,6 +97,7 @@ export function updateConfig() {
 	const t2Config = {
 		consigne: t2Consigne.value,
 		fen_finale: t2FenFinale.value.trim(),
+		shapes: t2Shapes,
 	};
 
 	if ( t2SelectedData ) {
@@ -127,7 +130,7 @@ function handleT2SquareClick( square ) {
 	if ( typeof t2BoardAPI.hideMoves === 'function' ) {
 		t2BoardAPI.hideMoves();
 	} else if ( typeof t2BoardAPI.setShapes === 'function' ) {
-		t2BoardAPI.setShapes( [] );
+		t2BoardAPI.setShapes( t2Shapes );
 	}
 
 	const pieceOnSquare = findPieceOnSquare( fenFinale, square );
@@ -142,10 +145,9 @@ function handleT2SquareClick( square ) {
 	t2BoardAPI.removePiece( square );
 	const fenDepart = t2BoardAPI.getFen();
 
-	if ( typeof t2BoardAPI.drawCircle === 'function' ) {
-		t2BoardAPI.drawCircle( square, 'green' );
-	} else if ( typeof t2BoardAPI.setShapes === 'function' ) {
-		t2BoardAPI.setShapes( [ { orig: square, brush: 'green' } ] );
+	const newShapes = [ ...t2Shapes, { orig: square, brush: 'green' } ];
+	if ( typeof t2BoardAPI.setShapes === 'function' ) {
+		t2BoardAPI.setShapes( newShapes );
 	}
 
 	t2SelectedData = {
@@ -184,6 +186,9 @@ export function init() {
 				}
 				if ( t2FenFinale && typeof parsedT2.fen_finale === 'string' ) {
 					t2FenFinale.value = parsedT2.fen_finale;
+				}
+				if ( Array.isArray( parsedT2.shapes ) ) {
+					t2Shapes = parsedT2.shapes;
 				}
 				if (
 					parsedT2.piece_type &&
@@ -235,109 +240,110 @@ export function init() {
 		t2Consigne.addEventListener( 'input', updateConfig );
 	}
 
-	t2GenerateBtn.addEventListener( 'click', function () {
-		const fen = t2FenFinale ? t2FenFinale.value.trim() : '';
-		if ( ! fen ) {
-			updateT2Feedback(
-				'Erreur : veuillez saisir une FEN valide.',
-				'#d63638',
-				false
-			);
-			return;
-		}
+	if ( t2GenerateBtn ) {
+		t2GenerateBtn.addEventListener( 'click', function () {
+			const isAutoLoad =
+				t2GenerateBtn.getAttribute( 'data-autoload' ) === 'true';
+			t2GenerateBtn.removeAttribute( 'data-autoload' );
 
-		const isAutoLoad =
-			t2GenerateBtn.getAttribute( 'data-autoload' ) === 'true';
-		t2GenerateBtn.removeAttribute( 'data-autoload' );
-
-		if ( ! isAutoLoad ) {
-			t2SelectedData = null;
-			updateT2Feedback(
-				"Cliquez sur une pièce de l'échiquier pour la retirer.",
-				'#72aee6',
-				false
-			);
-		}
-
-		if ( t2BoardAPI ) {
-			t2BoardAPI.destroy();
-			t2BoardAPI = null;
-		}
-
-		t2ChessboardContainer.innerHTML = '';
-		t2BoardEl = document.createElement( 'div' );
-		t2BoardEl.id = 'roi-t2-chessboard';
-		t2BoardEl.className = 'roi-clean-admin-board';
-		t2BoardEl.style.width = '100%';
-		t2BoardEl.style.aspectRatio = '1';
-		t2BoardEl.style.position = 'relative';
-		t2ChessboardContainer.appendChild( t2BoardEl );
-
-		const t2CheckInterval = setInterval( function () {
-			if ( window.EgBoardCore ) {
-				clearInterval( t2CheckInterval );
-
-				const boardConfig = {
-					fen,
-					orientation: 'white',
-					coordinates: true,
-					viewOnly: false,
-					movable: {
-						free: false,
-						color: 'both',
-					},
-					events: {
-						select( square ) {
-							handleT2SquareClick( square );
-						},
-					},
-				};
-
-				const boardState = {
-					showThreats: false,
-					freeMode: false,
-					promotionDialogState: { isEnabled: false },
-					historyViewerState: { isEnabled: false },
-				};
-
-				t2BoardAPI = new window.EgBoardCore(
-					t2BoardEl,
-					boardState,
-					function () {},
-					function () {},
-					boardConfig,
-					{ workerUrl: '' }
-				);
-
-				if (
-					isAutoLoad &&
-					t2SelectedData &&
-					t2SelectedData.fen_depart
-				) {
-					t2BoardAPI.setPosition( t2SelectedData.fen_depart );
-					if ( typeof t2BoardAPI.drawCircle === 'function' ) {
-						t2BoardAPI.drawCircle(
-							t2SelectedData.case_cible,
-							'green'
-						);
-					} else if ( typeof t2BoardAPI.setShapes === 'function' ) {
-						t2BoardAPI.setShapes( [
-							{ orig: t2SelectedData.case_cible, brush: 'green' },
-						] );
-					}
-				}
-
-				if ( typeof t2BoardAPI.updateStockfishConfig === 'function' ) {
-					t2BoardAPI.updateStockfishConfig( {
-						whiteMode: 'disabled',
-						blackMode: 'disabled',
-					} );
-				}
-
-				updateConfig();
+			const fen = t2FenFinale ? t2FenFinale.value.trim() : '';
+			if ( ! fen ) {
+				alert( 'Veuillez saisir une FEN finale valide.' );
+				return;
 			}
-		}, 50 );
-	} );
+
+			if ( ! isAutoLoad ) {
+				t2SelectedData = null;
+				updateT2Feedback(
+					"Aucune pièce sélectionnée. Cliquez sur une pièce à retirer pour l'exercice.",
+					'#72aee6',
+					false
+				);
+			}
+
+			t2ChessboardContainer.innerHTML = '';
+			t2BoardEl = document.createElement( 'div' );
+			t2BoardEl.id = 'roi-t2-chessboard';
+			t2BoardEl.className = 'roi-clean-admin-board';
+			t2BoardEl.style.width = '100%';
+			t2BoardEl.style.aspectRatio = '1';
+			t2BoardEl.style.position = 'relative';
+			t2ChessboardContainer.appendChild( t2BoardEl );
+
+			const t2CheckInterval = setInterval( function () {
+				if ( window.EgBoardCore ) {
+					clearInterval( t2CheckInterval );
+
+					const orientation = t2Couleur
+						? t2Couleur.value
+						: getActiveColorFromFen( fen );
+
+					const boardConfig = {
+						mode: 'game',
+						fen,
+						orientation,
+						coordinates: true,
+						viewOnly: false,
+						movable: {
+							free: false,
+							color: 'both',
+						},
+						events: {
+							select( square ) {
+								handleT2SquareClick( square );
+							},
+						},
+					};
+
+					const boardState = {
+						mode: 'game',
+						showThreats: false,
+						promotionDialogState: { isEnabled: false },
+						historyViewerState: { isEnabled: false },
+					};
+
+					t2BoardAPI = new window.EgBoardCore(
+						t2BoardEl,
+						boardState,
+						function () {},
+						function () {},
+						boardConfig,
+						{ workerUrl: '' }
+					);
+
+					if (
+						isAutoLoad &&
+						t2SelectedData &&
+						t2SelectedData.fen_depart
+					) {
+						t2BoardAPI.setPosition( t2SelectedData.fen_depart );
+						if ( typeof t2BoardAPI.setShapes === 'function' ) {
+							t2BoardAPI.setShapes( [
+								...t2Shapes,
+								{
+									orig: t2SelectedData.case_cible,
+									brush: 'green',
+								},
+							] );
+						}
+					} else if ( typeof t2BoardAPI.setShapes === 'function' ) {
+						t2BoardAPI.setShapes( t2Shapes );
+					}
+
+					if (
+						typeof t2BoardAPI.updateStockfishConfig === 'function'
+					) {
+						t2BoardAPI.updateStockfishConfig( {
+							whiteMode: 'disabled',
+							blackMode: 'disabled',
+						} );
+					}
+
+					updateConfig();
+				}
+			}, 50 );
+		} );
+	}
 
 	if ( t2CancelBtn ) {
 		t2CancelBtn.addEventListener( 'click', function () {
@@ -346,8 +352,9 @@ export function init() {
 				t2BoardAPI.setPosition( t2FenFinale.value.trim() );
 				if ( typeof t2BoardAPI.hideMoves === 'function' ) {
 					t2BoardAPI.hideMoves();
-				} else if ( typeof t2BoardAPI.setShapes === 'function' ) {
-					t2BoardAPI.setShapes( [] );
+				}
+				if ( typeof t2BoardAPI.setShapes === 'function' ) {
+					t2BoardAPI.setShapes( t2Shapes );
 				}
 			}
 			updateT2Feedback(
@@ -359,20 +366,21 @@ export function init() {
 		} );
 	}
 
-	if ( t2EditorBtn ) {
-		t2EditorBtn.addEventListener( 'click', function () {
-			const initialFen =
-				( t2FenFinale ? t2FenFinale.value.trim() : '' ) ||
-				'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-
-			openFenEditor( { fen: initialFen }, function ( result ) {
-				if ( t2FenFinale ) {
-					t2FenFinale.value = result.fen;
-				}
-				if ( t2GenerateBtn ) {
-					t2GenerateBtn.click();
-				}
-			} );
-		} );
-	}
+	setupFenControl( {
+		input: t2FenFinale,
+		button: t2EditorBtn,
+		colorSelect: t2Couleur,
+		getShapes() {
+			return t2Shapes || [];
+		},
+		onChange( fen, color, shapes ) {
+			if ( shapes ) {
+				t2Shapes = shapes;
+			}
+			updateConfig();
+			if ( t2GenerateBtn ) {
+				t2GenerateBtn.click();
+			}
+		},
+	} );
 }

@@ -11,6 +11,40 @@ import { BoardCore } from "eg-chessboard";
  * @param {Object} props.boardConfig - Configuration additionnelle pour l'échiquier
  * @param {React.Ref} ref - Ref impérative exposant redrawBoard() pour forcer le recalcul des bounds
  */
+/**
+ * Garantit que les entêtes PGN contiennent [SetUp "1"] et [FEN "..."] si un FEN initial personnalisé est défini.
+ */
+function ensurePgnFenHeader(pgn, fen) {
+  if (!fen || typeof fen !== "string") return pgn || "";
+  const cleanedFen = fen.trim();
+  if (
+    !cleanedFen ||
+    cleanedFen === "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+  ) {
+    return pgn || "";
+  }
+
+  const cleanedPgn = pgn ? pgn.trim() : "";
+  if (cleanedPgn.includes("[FEN ")) {
+    return cleanedPgn;
+  }
+
+  const setupHeaders = `[SetUp "1"]\n[FEN "${cleanedFen}"]\n`;
+
+  if (!cleanedPgn) {
+    return setupHeaders;
+  }
+
+  if (cleanedPgn.includes("]")) {
+    const lastHeaderIndex = cleanedPgn.lastIndexOf("]");
+    const headersPart = cleanedPgn.slice(0, lastHeaderIndex + 1);
+    const movesPart = cleanedPgn.slice(lastHeaderIndex + 1).trim();
+    return `${headersPart}\n${setupHeaders}\n${movesPart}`;
+  }
+
+  return `${setupHeaders}\n${cleanedPgn}`;
+}
+
 const PgnEditor = forwardRef(function PgnEditor({
   initialPgn = "",
   initialFen = "",
@@ -51,7 +85,8 @@ const PgnEditor = forwardRef(function PgnEditor({
     const shapes = api.getShapes();
     setCurrentComment(comment);
     setCurrentShapes(shapes);
-    setPgn(api.getPgn() || "");
+    const rawPgn = api.getPgn() || "";
+    setPgn(ensurePgnFenHeader(rawPgn, initialFen));
   };
 
   // Met à jour et injecte les annotations dans le coup en cours
@@ -59,7 +94,8 @@ const PgnEditor = forwardRef(function PgnEditor({
     if (boardApiRef.current) {
       boardApiRef.current.setComment(comment, shapes);
       boardApiRef.current.setShapes(shapes);
-      setPgn(boardApiRef.current.getPgn() || "");
+      const rawPgn = boardApiRef.current.getPgn() || "";
+      setPgn(ensurePgnFenHeader(rawPgn, initialFen));
     }
   };
 
@@ -69,6 +105,7 @@ const PgnEditor = forwardRef(function PgnEditor({
 
     // Configuration de BoardCore
     const config = {
+      mode: "study",
       ...boardConfig,
       pgn: initialPgn,
       fen: initialFen || undefined,
@@ -80,8 +117,8 @@ const PgnEditor = forwardRef(function PgnEditor({
     };
 
     const boardState = {
+      mode: "study",
       showThreats: false,
-      freeMode: false,
       promotionDialogState: { isEnabled: false },
       historyViewerState: { isEnabled: false },
     };
@@ -96,7 +133,8 @@ const PgnEditor = forwardRef(function PgnEditor({
         setCurrentComment("");
         setCurrentShapes([]);
         if (boardApiRef.current) {
-          setPgn(boardApiRef.current.getPgn() || "");
+          const rawPgn = boardApiRef.current.getPgn() || "";
+          setPgn(ensurePgnFenHeader(rawPgn, initialFen));
         }
       }
     };
@@ -110,12 +148,16 @@ const PgnEditor = forwardRef(function PgnEditor({
         blackMode: "disabled",
       });
 
-      // Charger le PGN initial si fourni
-      if (initialPgn) {
+      // Charger le PGN initial si fourni (en s'assurant d'injecter la FEN si absente)
+      const pgnToLoad = ensurePgnFenHeader(initialPgn, initialFen);
+      if (pgnToLoad && pgnToLoad.trim() !== "") {
         try {
-          api.loadPgn(initialPgn);
+          api.loadPgn(pgnToLoad);
         } catch (e) {
           console.warn("Échec du chargement du PGN initial:", e);
+          if (initialFen) {
+            api.setPosition(initialFen);
+          }
         }
       } else if (initialFen) {
         api.setPosition(initialFen);
@@ -217,13 +259,15 @@ const PgnEditor = forwardRef(function PgnEditor({
   // Validation
   const handleValidate = () => {
     if (onSave && boardApi) {
+      const rawPgn = boardApi.getPgn() || "";
+      const finalPgn = ensurePgnFenHeader(rawPgn, initialFen);
       let finalFen = "";
       try {
-        finalFen = boardApi.getFinalFenFromPgn(boardApi.getPgn() || "");
+        finalFen = boardApi.getFinalFenFromPgn(finalPgn);
       } catch (e) {
         console.warn("Échec du calcul de la FEN finale", e);
       }
-      onSave(boardApi.getPgn(), finalFen);
+      onSave(finalPgn, finalFen);
     }
   };
 

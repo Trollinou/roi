@@ -99,14 +99,14 @@ class ChessEngine {
 		$chess_url = $this->plugin_url . 'build/chessboard/';
 
 		wp_enqueue_style(
-			'chessboard-style',
+			'roi-public-chessboard-style',
 			$chess_url . 'style.css',
 			[],
 			ROI_VERSION
 		);
 
 		wp_enqueue_script(
-			'chessboard-view',
+			'roi-public-chessboard-view',
 			$chess_url . 'chessboard-view.js',
 			[ 'wp-element' ],
 			ROI_VERSION,
@@ -150,7 +150,7 @@ class ChessEngine {
 		$show_material         = filter_var( $atts['showMaterialIndicator'], FILTER_VALIDATE_BOOLEAN );
 
 		ob_start();
-		include $this->plugin_path . 'includes/chess/templates/chessboard.php';
+		include $this->plugin_path . 'includes/Chess/templates/chessboard.php';
 		return (string) ob_get_clean();
 	}
 }

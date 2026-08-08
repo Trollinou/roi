@@ -62,7 +62,7 @@ class Menu {
 			'roi-apprentissage',
 			'',
 			'dashicons-book',
-			22
+			35
 		);
 	}
 

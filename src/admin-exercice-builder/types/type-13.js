@@ -2,7 +2,11 @@
  * Handler for Type 13: Ouvre'boîte.
  */
 
-import { openFenEditor } from '../utils/modals';
+import {
+	setupFenControl,
+	updateOrientationDisplay,
+	getOrientationColor,
+} from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 let t13Shapes = [];
@@ -22,7 +26,7 @@ export function updateConfig() {
 	const fenDepart = fenInput
 		? fenInput.value.trim()
 		: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-	const couleurJoueur = couleurSelect ? couleurSelect.value : 'white';
+	const couleurJoueur = getOrientationColor( couleurSelect, fenDepart );
 	const questionText = questionInput ? questionInput.value.trim() : '';
 	const bonneReponseIndex = correctRadio
 		? parseInt( correctRadio.value, 10 )
@@ -60,14 +64,14 @@ export function updateConfig() {
 }
 
 export function init() {
+	if ( ! textarea ) {
+		return;
+	}
+
 	const fenInput = document.getElementById( 'roi_t13_fen_depart' );
 	const couleurSelect = document.getElementById( 'roi_t13_couleur' );
 	const questionInput = document.getElementById( 'roi_t13_question' );
 	const btnFenEditor = document.getElementById( 'btn_open_fen_editor_t13' );
-
-	if ( ! textarea ) {
-		return;
-	}
 
 	// Restauration des données JSON si présent
 	if ( textarea.value.trim() !== '' ) {
@@ -77,8 +81,11 @@ export function init() {
 				if ( parsed.fen_depart && fenInput ) {
 					fenInput.value = parsed.fen_depart;
 				}
-				if ( parsed.couleur_joueur && couleurSelect ) {
-					couleurSelect.value = parsed.couleur_joueur;
+				if ( couleurSelect ) {
+					updateOrientationDisplay(
+						couleurSelect,
+						parsed.couleur_joueur || parsed.fen_depart || 'white'
+					);
 				}
 				if ( Array.isArray( parsed.shapes ) ) {
 					t13Shapes = parsed.shapes;
@@ -100,7 +107,10 @@ export function init() {
 								`.t13-choix-explication[data-index="${ i }"]`
 							);
 
-							if ( texteInput && typeof item.texte === 'string' ) {
+							if (
+								texteInput &&
+								typeof item.texte === 'string'
+							) {
 								texteInput.value = item.texte;
 							}
 							if ( sanInput && typeof item.san === 'string' ) {
@@ -129,36 +139,21 @@ export function init() {
 		}
 	}
 
-	// Écouteur Éditeur FEN Visuel
-	if ( btnFenEditor ) {
-		btnFenEditor.addEventListener( 'click', function () {
-			const currentFen = fenInput
-				? fenInput.value ||
-				  'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
-				: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-
-			openFenEditor(
-				{
-					fen: currentFen,
-					shapes: t13Shapes,
-				},
-				function ( result ) {
-					if ( result && result.fen ) {
-						if ( fenInput ) {
-							fenInput.value = result.fen;
-						}
-						if ( result.shapes ) {
-							t13Shapes = result.shapes;
-						}
-						if ( result.orientation && couleurSelect ) {
-							couleurSelect.value = result.orientation;
-						}
-						updateConfig();
-					}
-				}
-			);
-		} );
-	}
+	// FEN Control Setup
+	setupFenControl( {
+		input: fenInput,
+		button: btnFenEditor,
+		colorSelect: couleurSelect,
+		getShapes() {
+			return t13Shapes || [];
+		},
+		onChange( fen, color, shapes ) {
+			if ( shapes ) {
+				t13Shapes = shapes;
+			}
+			updateConfig();
+		},
+	} );
 
 	// Écouteurs sur les éléments d'entrée pour la mise à jour temps réel
 	const inputsToWatch = document.querySelectorAll(

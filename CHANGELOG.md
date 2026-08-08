@@ -2,6 +2,61 @@
 
 ## [Unreleased] - NON PUBLIÉ
 
+*   **Améliorations de l'Éditeur & du Constructeur de Cours (`roi_cours`) :**
+    *   **Ordonnancement et Rendu des Metaboxes :** Renommage de la metabox `#pageparentdiv` en *"Ordre des cours"*, masquage du sous-libellé *"Ordre"* et suppression du menu déroulant hiérarchique parent par l'ajustement `'hierarchical' => false` dans `includes/CPT/Cours.php`.
+    *   **Positionnement Réactif :** Alignement strict de la colonne latérale dans l'ordre : *Publier* → *Ordre des cours* → *Niveau du cours* → *Chapitres*.
+    *   **Design Harmonisé des Éléments de Playlist :** Alignement du rendu visuel des cartes de la Playlist sur celui du Catalogue (affichage complet des badges de niveau `Niv. X`, de type `LEÇON`/`EXERCICE`, de la couleur thématique du chapitre et de la croix de suppression).
+    *   **Formatage Anti-Rupture (`&nbsp;` & `nowrap`) :** Utilisation d'un espace insécable entre `Niv.` et son numéro (`Niv.&nbsp;X`) et application de `white-space: nowrap; flex-shrink: 0;` sur les badges pour éviter tout saut de ligne involontaire lorsque le titre de l'élément s'étale sur plusieurs lignes.
+    *   **Tri Multi-Critères par Défaut (Liste Admin) :** Implémentation du filtre SQL `posts_clauses` dans `includes/Admin/Columns.php` appliquant le tri par défaut : *Niveau croissant* → *Ordre de progression du Chapitre* → *Ordre (`menu_order` croissant)*.
+    *   **Prise en charge REST API de Gutenberg (`_roi_lecon_niveau`) :** Résolution du bug de réinitialisation du niveau à `1` dans l'éditeur de Leçon en déclarant `'custom-fields'` dans les supports du CPT et en sortant l'instanciation des gestionnaires de métadonnées (`Settings`, `Manager`, `Builder`) du bloc `if (is_admin())` dans `includes/Core/Plugin.php`.
+
+
+*   **Gestionnaire Unifié de Diagramme (`FenInput` & `FenEditor`) :**
+    *   **Refonte `FenInput` :** Conversion du composant en gestionnaire de Diagramme complet (`FEN + Shapes`). Remplacement du menu déroulant d'orientation par un champ non modifiable calculé dynamiquement d'après le trait de la FEN ("Blanc" ou "Noir") et ajout d'un badge de synthèse des formes (`"X ◯ - Y ➔"`). Réinitialisation automatique des formes à `"0 ◯ - 0 ➔"` lors de la saisie directe d'une FEN texte.
+    *   **Orientation Automatique `FenEditor` :** Suppression du sélecteur d'orientation dans `FenEditor`. L'échiquier pivote désormais automatiquement en fonction du trait (Blancs ou Noirs) pour offrir une vue toujours orientée côté apprenant.
+    *   **Paires d'API Diagramme (`getDiagram` / `setDiagram`) :** Prise en charge native et exposition des méthodes `getDiagram()` et `setDiagram(diagram)` sur `FenEditor` et `FenInput` pour la lecture/écriture unifiée de l'objet `{ fen, orientation, shapes }`.
+    *   **Correction de la Persistance des Formes :** Correction de l'extraction des formes dans `FenEditor` pour préserver intégralement les cercles (◯) et les flèches (➔) dessinés par l'utilisateur lors de la validation (`handleApply`) et intégration du stockage des formes dans le Builder Type 2 (`Pop'Echecs`).
+    *   **Ajustement UX/UI :** Réduction des espacements verticaux sous le titre *OPTIONS DE POSITION* dans `FenEditor`.
+
+*   **Refactorisation Maintenabilité, Performances & Conformité `AGENTS.md` :**
+    *   **Optimisation des Performances SQL/Hooks :** Suppression de l'exécution en boucle des méthodes `Roles::add_capabilities_to_roles()` et `Chapitre_Taxonomy::seed_terms()` sur l'action `init` lors de chaque requête HTTP. Migration exclusive dans l'hook d'activation `Activator::activate`.
+    *   **Enregistrement des CPTs & Réécriture :** Inscription préalable des CPTs et taxonomies avant le `flush_rewrite_rules()` lors de l'activation du plugin.
+    *   **Plage des Niveaux de Difficulté (1 à 4) :** Ajustement des niveaux de difficulté de 1 à 4 (suppression des niveaux 5 et 6). Les boucles, validations et l'Enum PHP 8.4 `Exercice_Niveau` sont restreints entre 1 et 4.
+    *   **Typage Strict & Enums PHP 8.4 :** Création des Backed Enums `Exercice_Type` (16 types), `Chapitre_Couleur` (codes Hex) et `Exercice_Niveau` (1 à 4), ainsi que du DTO `readonly` `Exercice_Config_DTO`.
+    *   **Compatibilité PSR-4 & Linux :** Maintien du dossier `includes/Chess/` en PascalCase et alignement des instructions `include` dans `ChessEngine.php` (`includes/Chess/templates/chessboard.php`). Création du template d'affichage de l'échiquier.
+    *   **API REST Standardisée :** Migration de l'enregistrement des contrôleurs REST vers le hook natif `rest_api_init`. Création de `Permissions_Helper` pour la centralisation de l'autorisation d'accès au module Apprentissage et utilisation de `wp_date()`.
+    *   **Assets & Packaging :** 
+        *   Lecture dynamique des dépendances et des versions à partir des fichiers `.asset.php` générés par Webpack.
+        *   Suppression du fichier JS legacy obsolète `assets/js/admin-script.js`.
+        *   Maintien strict des noms originaux des bibliothèques Web Workers `stockfish.js` et `stockfish.wasm` dans `assets/js/`.
+        *   Normalisation des handles scripts/styles avec le préfixe `roi-`.
+        *   Création de `.eslintrc.json` (ES2021), alignement de `phpstan.neon` (PHP 8.4 Level 6) et correction de `.distignore` pour inclure la documentation de production (`README.md`, `CHANGELOG.md`, `USING.md`).
+    *   **Désinstallation Propre :** Nettoyage complet des options (`roi_plugin_version`, `roi_apprentissage_allowed_roles`) et de tous les CPTs (`roi_lecon`, `roi_exercice`, `roi_cours`, `roi_partie`) dans `uninstall.php`.
+
+*   **Nettoyage & Santé du Code (Code Health Improvement) :**
+    *   **Suppression du code mort :** Retrait de la fonction obsolète `roi_chess_pieces_shortcodes_filter()` dans `roi.php` qui appelait une classe `\ROI\Shortcodes\Shortcodes` inexistante, ainsi que du bouchon de test associé dans `tests/phpstan/bootstrap.php`.
+    *   **Architecture & Conformité PSR-4 :** Suppression du fichier procédural orphelin `includes/cron.php`, non inclus et non référencé dans le plugin.
+    *   **Typage Strict :** Ajout de la déclaration `declare(strict_types=1);` dans `uninstall.php` et `tests/phpstan/bootstrap.php`.
+
+*   **Intégration & Refactoring `eg-chessboard` v1.3.1 :**
+    *   **Modes Métiers Typés (`mode`) :** Prise en charge des modes `'editor'`, `'study'` et `'game'` sur toutes les instances d'échiquiers du plugin.
+    *   **Composants Métiers (`FenEditor` & `PgnEditor`) :** Configuration de `mode: "editor"` dans `FenEditor` (déplacement libre, tolérance FEN constructeur, persistance automatique des formes et détection universelle des promotions sur 1ère/8ème rangée) et `mode: "study"` dans `PgnEditor` (synchronisation native des formes PGN `[%cal]`/`[%cpl]` et navigation dans les sous-variantes).
+    *   **Blocs Gutenberg & Admin Builder :** Attribution de `mode: 'editor'` pour le bloc diagramme et les modales FEN/sélecteurs, `mode: 'study'` pour le bloc PGN, et `mode: 'game'` pour le bloc d'affichage front-end `chessboard` et les solveurs d'exercices (`type-2`, `type-3`, `type-8`).
+    *   **Exercices Visuels (Type 3) :** Activation de `preserveShapesOnPositionChange: true` sur le Builder d'exercice Type 3 pour maintenir affichées les formes cibles/consignes pendant l'exécution des coups.
+    *   **Interface & Promotion :** Mise à jour de la modale de promotion 1:1 (`PromotionDialog`) et harmonisation de la palette CSS.
+
+*   **Améliorations Éditeur FEN (`FenEditor`) :**
+    *   **Orientation dynamique :** Rotation réactive de l'échiquier lors du changement d'orientation (Blancs / Noirs) afin d'afficher la couleur sélectionnée en bas de l'écran.
+    *   **Zone d'importation FEN :** Ajout d'un champ de saisie et d'un bouton de chargement placés au-dessus de la palette de pièces.
+    *   **Déplacement libre multi-couleurs :** Activation du mode libre (`freeMode: true`) dans l'état `BoardCore` pour permettre le déplacement sans restriction de tour de toutes les pièces blanches et noires.
+    *   **Fenêtre de promotion interactive :** Écoute de `onStateChange` et affichage de l'overlay de promotion (`PromotionDialog`) lors de la pose ou du déplacement d'un pion sur la 1ère ou 8ème rangée.
+    *   **Dimensionnement Container Queries (`cqw`) :** Ajout de `container-type: inline-size;` sur le conteneur principal de l'échiquier pour assurer l'affichage et les proportions exactes des boutons de promotion.
+
+*   **Migration de `chess.js` vers `chessops` :**
+    *   Remplacement complet de la dépendance `chess.js` par `chessops` dans tout le plugin.
+    *   Utilisation de la fonction utilitaire native `getFinalFenFromPgn` exposée par `eg-chessboard` v1.2.0+.
+    *   Mise à jour des scripts d'administration (`admin-fen-editor.js`, `type-4.js`), des métadonnées du bloc `roi/chessboard` (`block.json`) et de la documentation.
+
 *   **Nouveau Type d'Exercice (Type 10 : Echec'éval) :**
     *   **Back-office PHP :** Création de `TypeEchecEval.php` (`ROI\Metaboxes\Exercice\Types\TypeEchecEval`) et enregistrement dans `Manager.php` pour la configuration de la FEN de départ, la couleur du joueur, le thème, les questions dynamiques (types `yesno` et `evaluation`, réponses attendues et explications), la séquence de coups à jouer et l'explication PGN finale.
     *   **Administration JS :** Création de `type-10.js` pour la gestion dynamique des questions d'évaluation, la sélection réactive du type de réponse et des options attendues, l'interaction avec la modale FEN `openFenEditor` (FEN et `shapes`) et la synchronisation temps réel du contrat JSON. Retrait de `'10'` de `visualTypes`, mise à jour de `main.js` et compilation du bundle d'assets.

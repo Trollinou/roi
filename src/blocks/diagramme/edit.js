@@ -61,6 +61,7 @@ export default function Edit( {
 			}
 
 			const config = {
+				mode: 'editor',
 				fen: attributes.fen,
 				orientation: attributes.orientation,
 				coordinates: true,
@@ -78,8 +79,8 @@ export default function Edit( {
 			};
 
 			const boardState = {
+				mode: 'editor',
 				showThreats: false,
-				freeMode: false,
 				promotionDialogState: { isEnabled: false },
 				historyViewerState: { isEnabled: false },
 			};

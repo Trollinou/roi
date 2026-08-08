@@ -50,6 +50,7 @@ export default function Edit( {
 			}
 
 			const config = {
+				mode: 'study',
 				pgn: attributes.pgn,
 				orientation: 'white',
 				coordinates: true,
@@ -67,8 +68,8 @@ export default function Edit( {
 			};
 
 			const boardState = {
+				mode: 'study',
 				showThreats: false,
-				freeMode: false,
 				promotionDialogState: { isEnabled: false },
 				historyViewerState: { isEnabled: false },
 			};

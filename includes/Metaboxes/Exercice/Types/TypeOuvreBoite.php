@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace ROI\Metaboxes\Exercice\Types;
 
+use ROI\Metaboxes\Exercice\Components\FenInput;
+
 /**
  * Class TypeOuvreBoite
  * Handles rendering for Type 13: Ouvre'boîte.
@@ -27,22 +29,16 @@ class TypeOuvreBoite implements TypeInterface {
 		<div id="roi_builder_type_13" class="roi-builder-section" style="display:none; margin-top: 15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
 			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice (Ouvre'boîte)", "roi" ); ?></h4>
 			
-			<div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-end;">
-				<div style="flex: 1;">
-					<label for="roi_t13_fen_depart"><strong><?php esc_html_e( "FEN de départ :", "roi" ); ?></strong></label><br>
-					<input type="text" id="roi_t13_fen_depart" readonly style="width: 100%; height: 30px;">
-				</div>
-				<div>
-					<button type="button" id="btn_open_fen_editor_t13" class="button"><?php esc_html_e( "Éditer la position", "roi" ); ?></button>
-				</div>
-				<div>
-					<label for="roi_t13_couleur"><strong><?php esc_html_e( "Couleur joueur :", "roi" ); ?></strong></label><br>
-					<select id="roi_t13_couleur" style="width: 120px;">
-						<option value="white"><?php esc_html_e( "Blancs", "roi" ); ?></option>
-						<option value="black"><?php esc_html_e( "Noirs", "roi" ); ?></option>
-					</select>
-				</div>
-			</div>
+			<?php
+			FenInput::render([
+				'id'             => 'roi_t13_fen_depart',
+				'value'          => 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+				'color'          => 'white',
+				'orientation_id' => 'roi_t13_couleur',
+				'button_id'      => 'btn_open_fen_editor_t13',
+				'label'          => __( 'FEN de départ :', 'roi' ),
+			]);
+			?>
 
 			<div style="margin-bottom: 15px;">
 				<label for="roi_t13_question"><strong><?php esc_html_e( "Question :", "roi" ); ?></strong></label><br>

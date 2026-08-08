@@ -56,45 +56,10 @@ class Parcours_Controller {
 				[
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => [ $this, 'get_parcours' ],
-					'permission_callback' => [ $this, 'check_apprentissage_access' ],
+					'permission_callback' => [ Permissions_Helper::class, 'check_apprentissage_access' ],
 				],
 			]
 		);
-	}
-
-	/**
-	 * Check if the current user has access to Apprentissage.
-	 *
-	 * @return bool|\WP_Error
-	 */
-	public function check_apprentissage_access(): bool|\WP_Error {
-		if ( ! is_user_logged_in() ) {
-			return new \WP_Error(
-				'rest_forbidden',
-				__( 'Vous devez être connecté.', 'roi' ),
-				[ 'status' => 401 ]
-			);
-		}
-
-		$user          = wp_get_current_user();
-		$default_roles = [ 'administrator', 'staff', 'entraineur', 'editor', 'membre' ];
-		$allowed_roles = get_option( 'roi_apprentissage_allowed_roles', $default_roles );
-
-		if ( false === $allowed_roles ) {
-			$allowed_roles = $default_roles;
-		}
-
-		$intersect = array_intersect( $allowed_roles, (array) $user->roles );
-
-		if ( empty( $intersect ) ) {
-			return new \WP_Error(
-				'rest_forbidden',
-				__( 'Accès non autorisé.', 'roi' ),
-				[ 'status' => 403 ]
-			);
-		}
-
-		return true;
 	}
 
 	/**
@@ -118,7 +83,7 @@ class Parcours_Controller {
 				$query->the_post();
 				$post_id = get_the_ID();
 				$post    = get_post( $post_id );
-				$ordre   = $post ? $post->menu_order : 0;
+				$ordre   = $post ? (int) $post->menu_order : 0;
 
 				// Retrieve level
 				$niveau_meta = get_post_meta( $post_id, '_roi_cours_niveau', true );

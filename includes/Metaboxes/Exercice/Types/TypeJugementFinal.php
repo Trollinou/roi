@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace ROI\Metaboxes\Exercice\Types;
 
+use ROI\Metaboxes\Exercice\Components\FenInput;
+use ROI\Metaboxes\Exercice\Components\PgnInput;
+
 /**
  * Class TypeJugementFinal
  * Handles rendering for Type 15: Jugement final.
@@ -45,22 +48,16 @@ class TypeJugementFinal implements TypeInterface {
 				<input type="text" id="roi_t15_consigne" value="<?php echo esc_attr( $consigne ); ?>" style="width:100%; height: 30px;" placeholder="<?php esc_attr_e( 'Observez ces 3 plans. Lequel est le plus prometteur ?', 'roi' ); ?>">
 			</div>
 
-			<div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-end;">
-				<div style="flex: 1;">
-					<label for="roi_t15_fen_depart"><strong><?php esc_html_e( 'Position de départ (FEN) :', 'roi' ); ?></strong></label><br>
-					<input type="text" id="roi_t15_fen_depart" value="<?php echo esc_attr( $fen_depart ); ?>" readonly style="width: 100%; height: 30px;">
-				</div>
-				<div>
-					<button type="button" id="btn_open_fen_editor_t15" class="button"><?php esc_html_e( 'Éditer la position', 'roi' ); ?></button>
-				</div>
-				<div>
-					<label for="roi_t15_couleur"><strong><?php esc_html_e( 'Couleur joueur :', 'roi' ); ?></strong></label><br>
-					<select id="roi_t15_couleur" style="width: 120px; height: 30px;">
-						<option value="white" <?php selected( $couleur_joueur, 'white' ); ?>><?php esc_html_e( 'Blancs', 'roi' ); ?></option>
-						<option value="black" <?php selected( $couleur_joueur, 'black' ); ?>><?php esc_html_e( 'Noirs', 'roi' ); ?></option>
-					</select>
-				</div>
-			</div>
+			<?php
+			FenInput::render([
+				'id'             => 'roi_t15_fen_depart',
+				'value'          => $fen_depart,
+				'color'          => $couleur_joueur,
+				'orientation_id' => 'roi_t15_couleur',
+				'button_id'      => 'btn_open_fen_editor_t15',
+				'label'          => __( 'Position de départ (FEN) :', 'roi' ),
+			]);
+			?>
 
 			<hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
 
@@ -76,7 +73,19 @@ class TypeJugementFinal implements TypeInterface {
 								<?php echo esc_html( 'Scénario ' . ( $i + 1 ) ); ?>
 							</h4>
 							<div style="margin-bottom: 8px;">
-								<textarea class="roi_t15_scenario_pgn" data-index="<?php echo $i; ?>" rows="3" placeholder="<?php esc_attr_e( 'Saisir le PGN brut sans commentaires...', 'roi' ); ?>" style="width: 100%;"><?php echo esc_textarea( $sc_pgn ); ?></textarea>
+								<?php
+								PgnInput::render([
+									'id'              => 'roi_t15_scenario_pgn_' . $i,
+									'value'           => $sc_pgn,
+									'button_id'       => 'btn_open_pgn_editor_t15_scenario_' . $i,
+									'input_class'     => 'roi_t15_scenario_pgn',
+									'button_class'    => 'button btn_open_pgn_editor_t15_scenario',
+									'label'           => '',
+									'rows'            => 3,
+									'placeholder'     => __( 'Saisir le PGN brut sans commentaires...', 'roi' ),
+									'data_attributes' => [ 'index' => $i ],
+								]);
+								?>
 							</div>
 							<div>
 								<label style="font-weight: 600; font-size: 13px;">
@@ -92,8 +101,16 @@ class TypeJugementFinal implements TypeInterface {
 			<hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0 15px;">
 
 			<div style="margin-top: 15px;">
-				<h3 style="margin-top: 0; font-size: 14px; font-weight: 600; margin-bottom: 8px;"><?php esc_html_e( 'Explication Finale', 'roi' ); ?></h3>
-				<textarea id="roi_t15_pgn_explication" rows="6" placeholder="<?php esc_attr_e( 'Saisir le PGN complet et commenté de la solution...', 'roi' ); ?>" style="width: 100%;"><?php echo esc_textarea( $pgn_explication ); ?></textarea>
+				<?php
+				PgnInput::render([
+					'id'          => 'roi_t15_pgn_explication',
+					'value'       => $pgn_explication,
+					'button_id'   => 'btn_open_pgn_editor_t15_explication',
+					'label'       => __( 'Explication Finale (PGN)', 'roi' ),
+					'rows'        => 6,
+					'placeholder' => __( 'Saisir le PGN complet et commenté de la solution...', 'roi' ),
+				]);
+				?>
 			</div>
 		</div>
 		<?php

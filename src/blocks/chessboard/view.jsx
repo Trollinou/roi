@@ -135,6 +135,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const initialViewOnly = useStockfish ? true : viewOnly;
 
     const boardConfig = {
+      mode: 'game',
       fen,
       orientation,
       coordinates,

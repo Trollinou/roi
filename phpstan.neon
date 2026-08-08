@@ -10,3 +10,5 @@ parameters:
         - includes/
     bootstrapFiles:
         - tests/phpstan/bootstrap.php
+    scanFiles:
+        - roi.php

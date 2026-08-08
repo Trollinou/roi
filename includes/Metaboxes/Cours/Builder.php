@@ -21,12 +21,13 @@ class Builder {
 	 */
 	public function __construct() {
 		add_action( 'add_meta_boxes', [ $this, 'ajouter_metabox' ] );
+		add_action( 'add_meta_boxes_roi_cours', [ $this, 'ordonner_metaboxes_side' ], 999 );
 		add_action( 'save_post', [ $this, 'sauvegarder_metabox' ] );
 		add_action( 'wp_ajax_roi_search_cours_items', [ $this, 'ajax_recherche_elements' ] );
 	}
 
 	/**
-	 * Adds the playlist builder metabox.
+	 * Adds the playlist builder metabox and level display metabox.
 	 *
 	 * @return void
 	 */
@@ -39,6 +40,80 @@ class Builder {
 			'normal',
 			'high'
 		);
+
+		add_meta_box(
+			'roi_cours_level_box',
+			__( 'Niveau du cours', 'roi' ),
+			[ $this, 'afficher_metabox_niveau' ],
+			'roi_cours',
+			'side',
+			'high'
+		);
+	}
+
+	/**
+	 * Reorders side column metaboxes for roi_cours:
+	 * 1. Ordre du cours (#pageparentdiv)
+	 * 2. Niveau du cours (#roi_cours_level_box)
+	 * 3. Chapitres (#roi_chapitrediv)
+	 *
+	 * @return void
+	 */
+	public function ordonner_metaboxes_side(): void {
+		global $wp_meta_boxes;
+
+		if ( ! isset( $wp_meta_boxes['roi_cours']['side'] ) ) {
+			return;
+		}
+
+		$desired_order = [
+			'pageparentdiv',
+			'roi_cours_level_box',
+			'roi_chapitrediv',
+			'taxonomy-roi_chapitre',
+		];
+
+		$reordered = [];
+
+		foreach ( $desired_order as $box_id ) {
+			foreach ( [ 'high', 'core', 'default', 'low' ] as $priority ) {
+				if ( isset( $wp_meta_boxes['roi_cours']['side'][ $priority ][ $box_id ] ) ) {
+					$reordered[ $box_id ] = $wp_meta_boxes['roi_cours']['side'][ $priority ][ $box_id ];
+					unset( $wp_meta_boxes['roi_cours']['side'][ $priority ][ $box_id ] );
+					break;
+				}
+			}
+		}
+
+		foreach ( [ 'high', 'core', 'default', 'low' ] as $priority ) {
+			if ( ! empty( $wp_meta_boxes['roi_cours']['side'][ $priority ] ) ) {
+				foreach ( $wp_meta_boxes['roi_cours']['side'][ $priority ] as $box_id => $box ) {
+					$reordered[ $box_id ] = $box;
+				}
+			}
+		}
+
+		$wp_meta_boxes['roi_cours']['side'] = [
+			'high' => $reordered,
+		];
+	}
+
+	/**
+	 * Renders the course level read-only metabox content.
+	 *
+	 * @param \WP_Post $post The post object.
+	 * @return void
+	 */
+	public function afficher_metabox_niveau( \WP_Post $post ): void {
+		$niveau = (int) get_post_meta( $post->ID, '_roi_cours_niveau', true );
+		$text   = ( $niveau > 0 )
+			? sprintf( __( 'Niveau %d', 'roi' ), $niveau )
+			: __( 'Déterminé par le 1er élément du cours', 'roi' );
+		?>
+		<div id="roi_cours_level_display" style="padding: 4px 0; font-weight: 600; font-size: 13px; color: #1d2327;">
+			<?php echo esc_html( $text ); ?>
+		</div>
+		<?php
 	}
 
 	/**
@@ -53,6 +128,14 @@ class Builder {
 		$playlist = get_post_meta( $post->ID, '_roi_cours_playlist', true );
 		if ( empty( $playlist ) ) {
 			$playlist = '[]';
+		}
+
+		$course_level      = (int) get_post_meta( $post->ID, '_roi_cours_niveau', true );
+		$course_chapter_id = 0;
+		$course_terms      = get_the_terms( $post->ID, 'roi_chapitre' );
+		if ( ! is_wp_error( $course_terms ) && ! empty( $course_terms ) ) {
+			$course_term       = reset( $course_terms );
+			$course_chapter_id = (int) $course_term->term_id;
 		}
 
 		$chapitres = get_terms( [
@@ -75,21 +158,54 @@ class Builder {
 			} );
 		}
 		?>
-		<div class="roi-cours-builder-container">
+		<style>
+			.roi-builder-badge {
+				display: inline-block;
+				background: #2271b1;
+				color: #fff;
+				font-size: 11px;
+				font-weight: 600;
+				padding: 2px 7px;
+				border-radius: 10px;
+				margin-left: 6px;
+				vertical-align: middle;
+			}
+			.roi-scrollable-container {
+				max-height: 450px;
+				overflow-y: auto;
+				scrollbar-width: thin;
+				scrollbar-color: #c1c1c1 #f1f1f1;
+			}
+			.roi-scrollable-container::-webkit-scrollbar {
+				width: 6px;
+			}
+			.roi-scrollable-container::-webkit-scrollbar-track {
+				background: #f1f1f1;
+				border-radius: 3px;
+			}
+			.roi-scrollable-container::-webkit-scrollbar-thumb {
+				background: #c1c1c1;
+				border-radius: 3px;
+			}
+			.roi-scrollable-container::-webkit-scrollbar-thumb:hover {
+				background: #a8a8a8;
+			}
+		</style>
+		<div class="roi-cours-builder-container" data-course-chapter-id="<?php echo $course_chapter_id; ?>" data-course-level="<?php echo $course_level; ?>">
 			<input type="hidden" name="roi_cours_playlist_json" id="roi_cours_playlist_json" value="<?php echo esc_attr( $playlist ); ?>">
 
-			<div style="display: flex; gap: 20px; margin-top: 15px;">
+			<div class="roi-cours-builder-columns">
 				<!-- Colonne Gauche : Catalogue -->
-				<div style="flex: 1; border: 1px solid #ccc; border-radius: 6px; padding: 15px; background: #fafafa;">
-					<h3 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;">
-						<?php esc_html_e( 'Catalogue des leçons & exercices', 'roi' ); ?>
+				<div class="roi-cours-builder-col" style="border: 1px solid #ccc; background: #fafafa;">
+					<h3 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+						<span><?php esc_html_e( 'Catalogue des leçons & exercices', 'roi' ); ?></span>
+						<span id="roi_available_count" class="roi-builder-badge">0</span>
 					</h3>
 
-					<div style="display: flex; gap: 10px; margin-bottom: 15px;">
-						<input type="text" id="roi_catalog_search" placeholder="<?php esc_attr_e( 'Rechercher par titre...', 'roi' ); ?>" style="flex: 1;">
+					<div class="roi-cours-catalog-filter-bar">
+						<input type="text" id="roi_catalog_search" placeholder="<?php esc_attr_e( 'Rechercher par titre...', 'roi' ); ?>">
 						
 						<select id="roi_catalog_chapter_filter">
-							<option value=""><?php esc_html_e( 'Tous les chapitres', 'roi' ); ?></option>
 							<?php if ( ! is_wp_error( $chapitres ) && ! empty( $chapitres ) ) : ?>
 								<?php foreach ( $chapitres as $chapitre ) : ?>
 									<option value="<?php echo esc_attr( (string) $chapitre->term_id ); ?>">
@@ -100,25 +216,25 @@ class Builder {
 						</select>
 
 						<select id="roi_catalog_level_filter">
-							<option value=""><?php esc_html_e( 'Tous les niveaux', 'roi' ); ?></option>
-							<?php for ( $i = 1; $i <= 6; $i++ ) : ?>
+							<?php for ( $i = 1; $i <= 4; $i++ ) : ?>
 								<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
 							<?php endfor; ?>
 						</select>
 					</div>
 
-					<div id="roi_available_items" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+					<div id="roi_available_items" class="roi-scrollable-container" style="display: flex; flex-direction: column; gap: 8px; padding-right: 4px;">
 						<!-- Rempli par JS -->
 					</div>
 				</div>
 
 				<!-- Colonne Droite : Playlist -->
-				<div style="flex: 1; border: 1px solid #ccc; border-radius: 6px; padding: 15px; background: #fff;">
-					<h3 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;">
-						<?php esc_html_e( 'Contenu du cours (Playlist)', 'roi' ); ?>
+				<div class="roi-cours-builder-col" style="border: 1px solid #ccc; background: #fff;">
+					<h3 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+						<span><?php esc_html_e( 'Contenu du cours (Playlist)', 'roi' ); ?></span>
+						<span id="roi_playlist_count" class="roi-builder-badge">0</span>
 					</h3>
 
-					<div id="roi_playlist_items" style="min-height: 350px; max-height: 400px; overflow-y: auto; border: 2px dashed #bbb; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+					<div id="roi_playlist_items" class="roi-scrollable-container" style="min-height: 350px; border: 2px dashed #bbb; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
 						<?php
 						$playlist_items = json_decode( $playlist, true );
 						if ( is_array( $playlist_items ) ) {
@@ -171,13 +287,17 @@ class Builder {
 										data-color="<?php echo esc_attr( $color ); ?>" 
 										data-level="<?php echo $level; ?>" 
 										data-chapter-id="<?php echo $chapter_id; ?>" 
-										style="padding: 10px; border: 1px solid <?php echo esc_attr( $styles['border'] ); ?>; background: #fff; color: #333; border-radius: 4px; cursor: move; font-size: 13px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-										<div style="display: flex; align-items: center; gap: 8px;">
-											<span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: <?php echo esc_attr( $styles['border'] ); ?>;"></span>
-											<strong style="color: <?php echo esc_attr( $styles['text'] ); ?>; font-size: 11px;">[<?php echo esc_html( $type_label ); ?>]</strong>
-											<span><?php echo esc_html( $title ); ?></span>
+										style="padding: 10px; border: 1px solid <?php echo esc_attr( $styles['border'] ); ?>; background: <?php echo esc_attr( $styles['bg'] ); ?>; color: <?php echo esc_attr( $styles['text'] ); ?>; border-radius: 4px; cursor: move; font-size: 13px; font-weight: 500; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+										<span style="word-break: break-word; overflow-wrap: anywhere;"><?php echo esc_html( $title ); ?></span>
+										<div style="display: flex; gap: 5px; align-items: center; flex-shrink: 0;">
+											<span style="font-size: 10px; white-space: nowrap; flex-shrink: 0; background: rgba(255,255,255,0.6); border: 1px solid <?php echo esc_attr( $styles['border'] ); ?>; padding: 1px 5px; border-radius: 3px;">
+												Niv.&nbsp;<?php echo $level; ?>
+											</span>
+											<span style="font-size: 10px; white-space: nowrap; flex-shrink: 0; text-transform: uppercase; background: <?php echo esc_attr( $styles['border'] ); ?>; color: #fff; padding: 2px 6px; border-radius: 3px;">
+												<?php echo esc_html( $type_label ); ?>
+											</span>
+											<button type="button" class="roi-playlist-item-remove" style="background: none; border: none; color: <?php echo esc_attr( $styles['text'] ); ?>; opacity: 0.6; cursor: pointer; font-size: 16px; font-weight: bold; line-height: 1; padding: 0 0 0 5px;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">&times;</button>
 										</div>
-										<button type="button" class="roi-playlist-item-remove" style="background: none; border: none; color: #bbb; cursor: pointer; font-size: 16px; font-weight: bold; line-height: 1; padding: 0 5px;" onmouseover="this.style.color='#d63638'" onmouseout="this.style.color='#bbb'">&times;</button>
 									</div>
 									<?php
 								}
@@ -228,10 +348,20 @@ class Builder {
 						update_post_meta( $post_id, '_roi_cours_niveau', $niveau );
 					}
 
-					$terms = get_the_terms( $first_id, 'roi_chapitre' );
+					$chapter_saved = false;
+					$terms         = get_the_terms( $first_id, 'roi_chapitre' );
 					if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
 						$term_ids = wp_list_pluck( $terms, 'term_id' );
 						wp_set_object_terms( $post_id, array_map( 'intval', $term_ids ), 'roi_chapitre' );
+						$chapter_saved = true;
+					}
+
+					if ( ! $chapter_saved && ! empty( $_POST['tax_input']['roi_chapitre'] ) ) {
+						$posted_terms = (array) $_POST['tax_input']['roi_chapitre'];
+						$posted_terms = array_filter( array_map( 'intval', $posted_terms ) );
+						if ( ! empty( $posted_terms ) ) {
+							wp_set_object_terms( $post_id, $posted_terms, 'roi_chapitre' );
+						}
 					}
 				} else {
 					delete_post_meta( $post_id, '_roi_cours_niveau' );
@@ -307,6 +437,14 @@ class Builder {
 					$term       = reset( $terms );
 					$chapter_id = $term->term_id;
 					$term_color = get_term_meta( $term->term_id, '_roi_chapitre_couleur', true );
+					if ( ! empty( $term_color ) ) {
+						$color = $term_color;
+					}
+				}
+
+				if ( 0 === $chapter_id && $chapitre > 0 ) {
+					$chapter_id = $chapitre;
+					$term_color = get_term_meta( $chapitre, '_roi_chapitre_couleur', true );
 					if ( ! empty( $term_color ) ) {
 						$color = $term_color;
 					}
