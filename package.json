@@ -8,10 +8,13 @@
     "lint": "eslint ."
   },
   "devDependencies": {
+    "@types/react": "^18.3.3",
     "@wordpress/eslint-plugin": "^25.8.0",
     "@wordpress/scripts": "^34.0.0",
     "chessops": "^0.15.1",
-    "copy-webpack-plugin": "^14.0.0"
+    "copy-webpack-plugin": "^14.0.0",
+    "react": "^18.3.1",
+    "typescript": "^6.x.x"
   },
   "dependencies": {
     "eg-chessboard": "file:../eg-chessboard"
@@ -23,5 +26,8 @@
     "@parcel/watcher@2.6.0": true,
     "core-js-pure@3.50.0": true,
     "core-js@3.50.0": true
+  },
+  "overrides": {
+    "react": "^18.3.1"
   }
 }
