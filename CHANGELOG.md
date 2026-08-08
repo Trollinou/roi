@@ -2,6 +2,15 @@
 
 ## [Unreleased] - NON PUBLIÉ
 
+*   **Améliorations de l'Éditeur & du Constructeur de Cours (`roi_cours`) :**
+    *   **Ordonnancement et Rendu des Metaboxes :** Renommage de la metabox `#pageparentdiv` en *"Ordre des cours"*, masquage du sous-libellé *"Ordre"* et suppression du menu déroulant hiérarchique parent par l'ajustement `'hierarchical' => false` dans `includes/CPT/Cours.php`.
+    *   **Positionnement Réactif :** Alignement strict de la colonne latérale dans l'ordre : *Publier* → *Ordre des cours* → *Niveau du cours* → *Chapitres*.
+    *   **Design Harmonisé des Éléments de Playlist :** Alignement du rendu visuel des cartes de la Playlist sur celui du Catalogue (affichage complet des badges de niveau `Niv. X`, de type `LEÇON`/`EXERCICE`, de la couleur thématique du chapitre et de la croix de suppression).
+    *   **Formatage Anti-Rupture (`&nbsp;` & `nowrap`) :** Utilisation d'un espace insécable entre `Niv.` et son numéro (`Niv.&nbsp;X`) et application de `white-space: nowrap; flex-shrink: 0;` sur les badges pour éviter tout saut de ligne involontaire lorsque le titre de l'élément s'étale sur plusieurs lignes.
+    *   **Tri Multi-Critères par Défaut (Liste Admin) :** Implémentation du filtre SQL `posts_clauses` dans `includes/Admin/Columns.php` appliquant le tri par défaut : *Niveau croissant* → *Ordre de progression du Chapitre* → *Ordre (`menu_order` croissant)*.
+    *   **Prise en charge REST API de Gutenberg (`_roi_lecon_niveau`) :** Résolution du bug de réinitialisation du niveau à `1` dans l'éditeur de Leçon en déclarant `'custom-fields'` dans les supports du CPT et en sortant l'instanciation des gestionnaires de métadonnées (`Settings`, `Manager`, `Builder`) du bloc `if (is_admin())` dans `includes/Core/Plugin.php`.
+
+
 *   **Gestionnaire Unifié de Diagramme (`FenInput` & `FenEditor`) :**
     *   **Refonte `FenInput` :** Conversion du composant en gestionnaire de Diagramme complet (`FEN + Shapes`). Remplacement du menu déroulant d'orientation par un champ non modifiable calculé dynamiquement d'après le trait de la FEN ("Blanc" ou "Noir") et ajout d'un badge de synthèse des formes (`"X ◯ - Y ➔"`). Réinitialisation automatique des formes à `"0 ◯ - 0 ➔"` lors de la saisie directe d'une FEN texte.
     *   **Orientation Automatique `FenEditor` :** Suppression du sélecteur d'orientation dans `FenEditor`. L'échiquier pivote désormais automatiquement en fonction du trait (Blancs ou Noirs) pour offrir une vue toujours orientée côté apprenant.

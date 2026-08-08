@@ -43,14 +43,15 @@ class Assets {
 		$chess_url  = $plugin_url . 'build/chessboard/';
 		$chess_dir  = $plugin_dir . 'build/chessboard/';
 
+		// Enqueue admin styles for all ROI post types
+		wp_enqueue_style(
+			'roi-admin-style',
+			$plugin_url . 'assets/css/admin-style.css',
+			[],
+			ROI_VERSION
+		);
+
 		if ( in_array( $post_type, [ 'roi_exercice', 'roi_lecon' ], true ) ) {
-			// Enqueue admin styles
-			wp_enqueue_style(
-				'roi-admin-style',
-				$plugin_url . 'assets/css/admin-style.css',
-				[],
-				ROI_VERSION
-			);
 
 			// Enqueue eg-chessboard styles & script
 			wp_enqueue_style(

@@ -27,6 +27,7 @@ class Columns {
 			add_filter( "manage_edit-{$post_type}_sortable_columns", [ $this, 'colonnes_triables' ] );
 		}
 		add_filter( 'request', [ $this, 'trier_colonnes' ] );
+		add_filter( 'posts_clauses', [ $this, 'trier_liste_cours_defaut' ], 10, 2 );
 	}
 
 	/**
@@ -140,5 +141,38 @@ class Columns {
 			}
 		}
 		return $vars;
+	}
+
+	/**
+	 * Configures default multi-criteria sorting for roi_cours admin list:
+	 * 1. Niveau ASC (1 -> 4)
+	 * 2. Chapitre in predefined order (Matérialité -> Activité des Pièces -> Sécurité du Roi -> Structure de Pions -> Combination)
+	 * 3. Ordre (menu_order ASC)
+	 *
+	 * @param array<string, string> $clauses Query clauses.
+	 * @param \WP_Query $query Query object.
+	 * @return array<string, string> Updated clauses.
+	 */
+	public function trier_liste_cours_defaut( array $clauses, \WP_Query $query ): array {
+		if ( ! is_admin() || ! $query->is_main_query() ) {
+			return $clauses;
+		}
+
+		if ( 'roi_cours' === $query->get( 'post_type' ) && ! isset( $_GET['orderby'] ) ) {
+			global $wpdb;
+
+			$clauses['join'] .= " LEFT JOIN {$wpdb->postmeta} AS pm_lvl ON ({$wpdb->posts}.ID = pm_lvl.post_id AND pm_lvl.meta_key = '_roi_cours_niveau') ";
+			$clauses['join'] .= " LEFT JOIN {$wpdb->term_relationships} AS tr ON ({$wpdb->posts}.ID = tr.object_id) ";
+			$clauses['join'] .= " LEFT JOIN {$wpdb->term_taxonomy} AS tt ON (tr.term_taxonomy_id = tt.term_taxonomy_id AND tt.taxonomy = 'roi_chapitre') ";
+			$clauses['join'] .= " LEFT JOIN {$wpdb->terms} AS t ON (tt.term_id = t.term_id) ";
+
+			$clauses['groupby'] = "{$wpdb->posts}.ID";
+
+			$chapitre_order = "'Matérialité', 'Activité des Pièces', 'Sécurité du Roi', 'Structure de Pions', 'Combination'";
+
+			$clauses['orderby'] = " CAST(COALESCE(pm_lvl.meta_value, '1') AS SIGNED) ASC, FIELD(t.name, {$chapitre_order}) ASC, {$wpdb->posts}.menu_order ASC, {$wpdb->posts}.post_title ASC ";
+		}
+
+		return $clauses;
 	}
 }

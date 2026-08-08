@@ -61,17 +61,19 @@ class Plugin {
 			);
 		}, 5 );
 
-		// Admin pages & functionalities
+		// Metaboxes & Meta handlers (must run for both Admin UI and REST API requests)
+		new \ROI\Metaboxes\Exercice\Manager();
+		new \ROI\Metaboxes\Cours\Builder();
+		new \ROI\Metaboxes\Lecon\Settings();
+		( new \ROI\Metaboxes\Partie() )->init();
+
+		// Admin pages & assets UI
 		if ( is_admin() ) {
 			$admin_menu = new \ROI\Admin\Menu();
 			$admin_menu->init();
 			$admin_assets = new \ROI\Admin\Assets();
 			$admin_assets->init();
 			( new \ROI\Admin\Suivi_Page() )->init();
-			new \ROI\Metaboxes\Exercice\Manager();
-			new \ROI\Metaboxes\Cours\Builder();
-			new \ROI\Metaboxes\Lecon\Settings();
-			( new \ROI\Metaboxes\Partie() )->init();
 			$backup = new \ROI\Admin\Backup();
 			$backup->init();
 			( new \ROI\Admin\Columns() )->init();

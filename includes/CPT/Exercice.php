@@ -58,7 +58,7 @@ class Exercice {
 			'label'               => __( 'Exercice', 'roi' ),
 			'description'         => __( 'Exercices de la section Échecs', 'roi' ),
 			'labels'              => $labels,
-			'supports'            => [ 'title', 'custom-fields', 'revisions', 'author' ],
+			'supports'            => [ 'title', 'revision' ],
 			'taxonomies'          => [ 'roi_chapitre' ],
 			'hierarchical'        => false,
 			'public'              => true,

@@ -64,7 +64,7 @@ class Lecon {
 			'label'               => __( 'Leçon', 'roi' ),
 			'description'         => __( 'Leçons de la section Échecs', 'roi' ),
 			'labels'              => $labels,
-			'supports'            => [ 'title', 'editor', 'thumbnail' ],
+			'supports'            => [ 'title', 'editor', 'revisions', 'custom-fields' ],
 			'taxonomies'          => [ 'roi_chapitre' ],
 			'hierarchical'        => false,
 			'public'              => true,

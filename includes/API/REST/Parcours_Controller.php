@@ -83,7 +83,7 @@ class Parcours_Controller {
 				$query->the_post();
 				$post_id = get_the_ID();
 				$post    = get_post( $post_id );
-				$ordre   = $post ? $post->menu_order : 0;
+				$ordre   = $post ? (int) $post->menu_order : 0;
 
 				// Retrieve level
 				$niveau_meta = get_post_meta( $post_id, '_roi_cours_niveau', true );

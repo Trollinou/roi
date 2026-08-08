@@ -162,12 +162,12 @@ document.addEventListener( 'DOMContentLoaded', () => {
 
 			const typeLabel = item.type === 'roi_lecon' ? 'Leçon' : 'Exercice';
 			el.innerHTML = `
-				<span>${ item.titre }</span>
-				<div style="display: flex; gap: 5px; align-items: center;">
-					<span style="font-size: 10px; background: rgba(255,255,255,0.6); border: 1px solid ${ styles.border }; padding: 1px 5px; border-radius: 3px;">
-						Niv. ${ item.niveau }
+				<span style="word-break: break-word; overflow-wrap: anywhere;">${ item.titre }</span>
+				<div style="display: flex; gap: 5px; align-items: center; flex-shrink: 0;">
+					<span style="font-size: 10px; white-space: nowrap; flex-shrink: 0; background: rgba(255,255,255,0.6); border: 1px solid ${ styles.border }; padding: 1px 5px; border-radius: 3px;">
+						Niv.&nbsp;${ item.niveau }
 					</span>
-					<span style="font-size: 10px; text-transform: uppercase; background: ${ styles.border }; color: #fff; padding: 2px 6px; border-radius: 3px;">
+					<span style="font-size: 10px; white-space: nowrap; flex-shrink: 0; text-transform: uppercase; background: ${ styles.border }; color: #fff; padding: 2px 6px; border-radius: 3px;">
 						${ typeLabel }
 					</span>
 				</div>
@@ -175,13 +175,23 @@ document.addEventListener( 'DOMContentLoaded', () => {
 
 			el.addEventListener( 'dragstart', ( e ) => {
 				draggedSource = 'catalog';
+				let effectiveChapterId = item.chapter_id;
+				if (
+					( ! effectiveChapterId ||
+						effectiveChapterId === 0 ||
+						effectiveChapterId === '0' ) &&
+					catalogFilter &&
+					catalogFilter.value
+				) {
+					effectiveChapterId = catalogFilter.value;
+				}
 				draggedData = {
 					id: item.id,
 					type: item.type,
 					title: item.titre,
 					color: item.color,
 					level: item.niveau,
-					chapterId: item.chapter_id,
+					chapterId: effectiveChapterId,
 				};
 				e.dataTransfer.effectAllowed = 'copy';
 			} );
@@ -206,11 +216,12 @@ document.addEventListener( 'DOMContentLoaded', () => {
 
 		el.style.padding = '10px';
 		el.style.border = `1px solid ${ styles.border }`;
-		el.style.background = '#fff';
-		el.style.color = '#333';
+		el.style.background = styles.bg;
+		el.style.color = styles.text;
 		el.style.borderRadius = '4px';
 		el.style.cursor = 'move';
 		el.style.fontSize = '13px';
+		el.style.fontWeight = '500';
 		el.style.display = 'flex';
 		el.style.justifyContent = 'space-between';
 		el.style.alignItems = 'center';
@@ -218,12 +229,16 @@ document.addEventListener( 'DOMContentLoaded', () => {
 
 		const typeLabel = type === 'roi_lecon' ? 'Leçon' : 'Exercice';
 		el.innerHTML = `
-			<div style="display: flex; align-items: center; gap: 8px;">
-				<span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: ${ styles.border };"></span>
-				<strong style="color: ${ styles.text }; font-size: 11px;">[${ typeLabel }]</strong>
-				<span>${ title }</span>
+			<span style="word-break: break-word; overflow-wrap: anywhere;">${ title }</span>
+			<div style="display: flex; gap: 5px; align-items: center; flex-shrink: 0;">
+				<span style="font-size: 10px; white-space: nowrap; flex-shrink: 0; background: rgba(255,255,255,0.6); border: 1px solid ${ styles.border }; padding: 1px 5px; border-radius: 3px;">
+					Niv.&nbsp;${ level }
+				</span>
+				<span style="font-size: 10px; white-space: nowrap; flex-shrink: 0; text-transform: uppercase; background: ${ styles.border }; color: #fff; padding: 2px 6px; border-radius: 3px;">
+					${ typeLabel }
+				</span>
+				<button type="button" class="roi-playlist-item-remove" style="background: none; border: none; color: ${ styles.text }; opacity: 0.6; cursor: pointer; font-size: 16px; font-weight: bold; line-height: 1; padding: 0 0 0 5px;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">&times;</button>
 			</div>
-			<button type="button" class="roi-playlist-item-remove" style="background: none; border: none; color: #bbb; cursor: pointer; font-size: 16px; font-weight: bold; line-height: 1; padding: 0 5px;" onmouseover="this.style.color='#d63638'" onmouseout="this.style.color='#bbb'">&times;</button>
 		`;
 
 		// Bind delete button
@@ -336,28 +351,126 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		updatePlaylistCount();
 	};
 
-	// Enforce same chapter and level constraints by disabling dropdowns
+	// Helper: Sync and lock/unlock sidebar Chapitre metabox
+	const syncSidebarChapitreMetabox = ( chapterId, isLocked ) => {
+		const metabox =
+			document.getElementById( 'roi_chapitrediv' ) ||
+			document.getElementById( 'taxonomy-roi_chapitre' );
+		if ( ! metabox ) {
+			return;
+		}
+
+		const inside = metabox.querySelector( '.inside' );
+
+		if ( isLocked && chapterId && String( chapterId ) !== '0' ) {
+			const inputs = metabox.querySelectorAll(
+				`input[value="${ chapterId }"], #in-roi_chapitre-${ chapterId }`
+			);
+			inputs.forEach( ( input ) => {
+				input.checked = true;
+				input.setAttribute( 'checked', 'checked' );
+				input.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+			} );
+			if ( inside ) {
+				inside.style.pointerEvents = 'none';
+				inside.style.opacity = '0.75';
+			}
+		} else {
+			if ( ! isLocked ) {
+				const checkedInputs = metabox.querySelectorAll( 'input[type="radio"]:checked, input[type="checkbox"]:checked' );
+				checkedInputs.forEach( ( input ) => {
+					input.checked = false;
+					input.removeAttribute( 'checked' );
+				} );
+			}
+			if ( inside ) {
+				inside.style.pointerEvents = 'auto';
+				inside.style.opacity = '1';
+			}
+		}
+	};
+
+	// Transform #menu_order to type="number" with spinner arrows for 'Attributs du cours'
+	const menuOrderInput = document.getElementById( 'menu_order' );
+	if ( menuOrderInput ) {
+		menuOrderInput.setAttribute( 'type', 'number' );
+		menuOrderInput.setAttribute( 'min', '0' );
+		menuOrderInput.setAttribute( 'step', '1' );
+		menuOrderInput.style.width = '80px';
+	}
+
+	// Enforce exact sidebar metabox order in DOM (below Publier / #submitdiv):
+	// 1. Publier (#submitdiv)
+	// 2. Ordre (#pageparentdiv)
+	// 3. Niveau (#roi_cours_level_box)
+	// 4. Chapitres (#roi_chapitrediv)
+	const sideContainer = document.getElementById( 'side-sortables' );
+	if ( sideContainer ) {
+		const boxPublier = document.getElementById( 'submitdiv' );
+		const boxOrdre = document.getElementById( 'pageparentdiv' );
+		const boxNiveau = document.getElementById( 'roi_cours_level_box' );
+		const boxChapitre =
+			document.getElementById( 'roi_chapitrediv' ) ||
+			document.getElementById( 'taxonomy-roi_chapitre' );
+
+		if ( boxPublier && boxOrdre && boxNiveau && boxChapitre ) {
+			boxPublier.after( boxOrdre );
+			boxOrdre.after( boxNiveau );
+			boxNiveau.after( boxChapitre );
+		}
+	}
+
+	// Enforce same chapter and level constraints by disabling dropdowns and updating level display
 	const enforceSameChapterAndLevelConstraints = () => {
+		const container = document.querySelector( '.roi-cours-builder-container' );
+		const levelDisplay = document.getElementById( 'roi_cours_level_display' );
+
 		const firstItem = playlistContainer.querySelector(
 			'[data-playlist-item]'
 		);
-		if ( firstItem ) {
-			const lockedChapterId = firstItem.getAttribute( 'data-chapter-id' );
-			const lockedLevel = firstItem.getAttribute( 'data-level' );
 
-			catalogFilter.value = lockedChapterId;
+		if ( firstItem ) {
+			let lockedChapterId = firstItem.getAttribute( 'data-chapter-id' ) || '';
+			if ( ( ! lockedChapterId || lockedChapterId === '0' ) && container ) {
+				lockedChapterId = container.getAttribute( 'data-course-chapter-id' ) || '';
+			}
+			if ( ( ! lockedChapterId || lockedChapterId === '0' ) && catalogFilter && catalogFilter.value ) {
+				lockedChapterId = catalogFilter.value;
+			}
+
+			let lockedLevel = firstItem.getAttribute( 'data-level' ) || '';
+			if ( ( ! lockedLevel || lockedLevel === '0' ) && container ) {
+				lockedLevel = container.getAttribute( 'data-course-level' ) || '';
+			}
+
+			if ( lockedChapterId && lockedChapterId !== '0' ) {
+				catalogFilter.value = String( lockedChapterId );
+				syncSidebarChapitreMetabox( lockedChapterId, true );
+			}
 			catalogFilter.disabled = true;
 
 			if ( catalogLevelFilter ) {
-				catalogLevelFilter.value = lockedLevel;
+				if ( lockedLevel && lockedLevel !== '0' ) {
+					catalogLevelFilter.value = String( lockedLevel );
+				}
 				catalogLevelFilter.disabled = true;
 			}
+
+			if ( levelDisplay && lockedLevel && lockedLevel !== '0' ) {
+				levelDisplay.textContent = `Niveau ${ lockedLevel }`;
+			}
 		} else {
+			// Playlist is empty: unlock everything completely!
 			catalogFilter.disabled = false;
 			if ( catalogLevelFilter ) {
 				catalogLevelFilter.disabled = false;
 			}
+			if ( levelDisplay ) {
+				levelDisplay.textContent = 'Déterminé par le 1er élément du cours';
+			}
+			syncSidebarChapitreMetabox( '', false );
 		}
+
 		searchCatalog();
 	};
 
