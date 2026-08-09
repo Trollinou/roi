@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.3.6 - 2026-08-09
+
 *   **Exercices — Type 8 (Vision'checs) — Refonte 4 Diagrammes & Aperçus Visuels :**
     *   **Structure à 4 Diagrammes :** Évolution du Type 8 (Vision'checs) pour gérer 4 diagrammes par exercice au lieu d'une position unique. Suppression de la saisie manuelle de description, des cases départ/arrivée, de la solution SAN et du plateau de saisie de coup.
     *   **Coups attendus & Annotations visuelles :** Le ou les coups attendus sont désormais matérialisés directement par des flèches bleues (`brush: "blue"`) dessinées sur le diagramme via `FenEditor`, complétées par d'autres formes visuelles d'explication (cercles, flèches).
