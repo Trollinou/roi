@@ -145,9 +145,7 @@ export function init() {
 					configData.fen ||
 					( fenInput ? fenInput.value.trim() : '' ) ||
 					'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-				orientation:
-					configData.couleur_joueur ||
-					( colorInput ? colorInput.value : 'white' ),
+				orientation: getOrientationColor( colorInput, configData.fen ),
 				coordinates: true,
 				viewOnly: false,
 				drawable: { shapes: configData.shapes },
@@ -181,7 +179,10 @@ export function init() {
 				return;
 			}
 			configData.fen = fenInput ? fenInput.value.trim() : '';
-			configData.couleur_joueur = colorInput ? colorInput.value : 'white';
+			configData.couleur_joueur = getOrientationColor(
+				colorInput,
+				configData.fen
+			);
 			configData.solution = [];
 
 			boardAPI.setPosition( configData.fen );

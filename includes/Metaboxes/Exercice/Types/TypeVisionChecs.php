@@ -13,7 +13,7 @@ use ROI\Metaboxes\Exercice\Components\FenInput;
 
 /**
  * Class TypeVisionChecs
- * Handles rendering for Type 8: Vision'checs.
+ * Handles rendering for Type 8: Vision'checs (4 Diagrammes avec aperçu).
  */
 class TypeVisionChecs implements TypeInterface {
 
@@ -25,60 +25,68 @@ class TypeVisionChecs implements TypeInterface {
 	 * @return void
 	 */
 	public function render( \WP_Post $post, array $config_data ): void {
-		$fen_depart     = $config_data['fen_depart'] ?? '';
-		$couleur_joueur = $config_data['couleur_joueur'] ?? 'white';
-		$description    = $config_data['description'] ?? '';
-		$case_depart    = $config_data['case_depart'] ?? '';
-		$case_arrivee   = $config_data['case_arrivee'] ?? '';
-		$solution_san   = $config_data['solution_san'] ?? '';
+		$consigne   = $config_data['consigne'] ?? __( 'Observez les 4 diagrammes ci-dessous.', 'roi' );
+		$diagrammes = isset( $config_data['diagrammes'] ) && is_array( $config_data['diagrammes'] ) ? $config_data['diagrammes'] : [];
+
+		// Retro-compatibilité avec l'ancienne FEN unique
+		if ( empty( $diagrammes ) && ! empty( $config_data['fen_depart'] ) ) {
+			$diagrammes = [
+				[
+					'fen'            => (string) $config_data['fen_depart'],
+					'couleur_joueur' => (string) ( $config_data['couleur_joueur'] ?? 'white' ),
+					'shapes'         => isset( $config_data['shapes'] ) && is_array( $config_data['shapes'] ) ? $config_data['shapes'] : [],
+				],
+			];
+		}
 		?>
 		<div id="roi_builder_type_8" class="roi-builder-section" style="display:none; margin-top: 15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
 			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice (Vision'checs)", "roi" ); ?></h4>
 			
 			<div style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
-				<!-- FEN de départ & Couleur -->
-				<?php
-				FenInput::render([
-					'id'             => 'roi_t8_fen',
-					'value'          => $fen_depart,
-					'color'          => $couleur_joueur,
-					'orientation_id' => 'roi_t8_couleur',
-					'button_id'      => 'btn_open_fen_editor_t8',
-					'label'          => __( 'FEN de départ :', 'roi' ),
-				]);
-				?>
-				<div style="margin-bottom: 5px;">
-					<button type="button" id="roi_t8_generate_btn" class="button button-secondary"><?php esc_html_e( "Générer l'échiquier", "roi" ); ?></button>
-				</div>
-
-				<!-- Description -->
+				<!-- Consigne -->
 				<div>
-					<label for="roi_t8_desc"><strong><?php esc_html_e( "Description :", "roi" ); ?></strong></label><br>
-					<textarea id="roi_t8_desc" style="width: 100%; height: 80px; resize: vertical;" placeholder="<?php esc_attr_e( "Description textuelle de la position (ex : Le Roi blanc est sur e1, la Dame sur d1...)", "roi" ); ?>"><?php echo esc_textarea( $description ); ?></textarea>
+					<label for="roi_t8_consigne"><strong><?php esc_html_e( 'Consigne :', 'roi' ); ?></strong></label><br>
+					<input type="text" id="roi_t8_consigne" value="<?php echo esc_attr( $consigne ); ?>" style="width: 100%; height: 30px;">
 				</div>
 
-				<!-- Solution (Readonly inputs) -->
-				<div style="display: flex; gap: 15px;">
-					<div style="flex: 1;">
-						<label for="roi_t8_case_depart"><strong><?php esc_html_e( "Case de départ :", "roi" ); ?></strong></label><br>
-						<input type="text" id="roi_t8_case_depart" value="<?php echo esc_attr( $case_depart ); ?>" readonly style="width: 100%; height: 30px; background: #f0f0f1; color: #50575e;">
-					</div>
-					<div style="flex: 1;">
-						<label for="roi_t8_case_arrivee"><strong><?php esc_html_e( "Case d'arrivée :", "roi" ); ?></strong></label><br>
-						<input type="text" id="roi_t8_case_arrivee" value="<?php echo esc_attr( $case_arrivee ); ?>" readonly style="width: 100%; height: 30px; background: #f0f0f1; color: #50575e;">
-					</div>
-					<div style="flex: 1;">
-						<label for="roi_t8_san"><strong><?php esc_html_e( "Solution (SAN) :", "roi" ); ?></strong></label><br>
-						<input type="text" id="roi_t8_san" value="<?php echo esc_attr( $solution_san ); ?>" readonly style="width: 100%; height: 30px; background: #f0f0f1; color: #50575e;">
-					</div>
-				</div>
+				<!-- Liste des 4 diagrammes avec aperçu -->
+				<div style="display: flex; flex-direction: column; gap: 15px;">
+					<?php for ( $i = 0; $i < 4; $i++ ) :
+						$pos_fen     = $diagrammes[ $i ]['fen'] ?? '';
+						$pos_couleur = $diagrammes[ $i ]['couleur_joueur'] ?? 'white';
+						$pos_shapes  = $diagrammes[ $i ]['shapes'] ?? [];
+					?>
+						<div style="border: 1px solid #e5e5e5; padding: 12px; border-radius: 4px; background: #f9f9f9;">
+							<h4 style="margin: 0 0 10px 0;">
+								<?php echo esc_html( sprintf( __( 'Diagramme %d', 'roi' ), $i + 1 ) ); ?>
+							</h4>
+							<?php
+							FenInput::render([
+								'id'              => 'roi_t8_fen_' . $i,
+								'value'           => $pos_fen,
+								'color'           => $pos_couleur,
+								'shapes'          => $pos_shapes,
+								'orientation_id'  => 'roi_t8_couleur_' . $i,
+								'button_id'       => 'btn_open_fen_editor_t8_' . $i,
+								'input_class'     => 'roi_t8_fen',
+								'color_class'     => 'roi_t8_couleur',
+								'button_class'    => 'button btn_open_fen_editor_t8',
+								'label'           => __( 'FEN :', 'roi' ),
+								'data_attributes' => [ 'index' => $i ],
+							]);
+							?>
 
-				<!-- Échiquier visuel pour jouer le coup attendu -->
-				<div>
-					<label><strong><?php esc_html_e( "Échiquier de saisie (jouez le coup attendu) :", "roi" ); ?></strong></label>
-					<div id="roi_t8_board" style="width: 350px; height: 350px; margin-top: 10px; border: 1px solid #ccd0d4; background: #fafafa; border-radius: 4px; display: flex; align-items: center; justify-content: center; position: relative;">
-						<p style="color: #646970; font-style: italic; text-align: center; padding: 20px;"><?php esc_html_e( "Entrez une FEN et cliquez sur \"Générer l'échiquier\" pour activer la saisie.", "roi" ); ?></p>
-					</div>
+							<!-- Aperçu visuel statique non-interactif du diagramme -->
+							<div style="margin-top: 10px;">
+								<label style="display: block; margin-bottom: 4px; font-size: 12px; color: #50575e;">
+									<strong><?php esc_html_e( 'Aperçu du diagramme (non interactif) :', 'roi' ); ?></strong>
+								</label>
+								<div id="roi_t8_preview_container_<?php echo $i; ?>" style="width: 260px; height: 260px; position: relative; border: 1px solid #ccd0d4; border-radius: 4px; background: #fff; overflow: hidden;">
+									<div id="roi_t8_preview_board_<?php echo $i; ?>" class="roi_t8_preview_board" data-index="<?php echo $i; ?>" style="width: 100%; height: 100%;"></div>
+								</div>
+							</div>
+						</div>
+					<?php endfor; ?>
 				</div>
 			</div>
 		</div>

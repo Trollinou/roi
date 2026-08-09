@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+*   **Exercices — Type 8 (Vision'checs) — Refonte 4 Diagrammes & Aperçus Visuels :**
+    *   **Structure à 4 Diagrammes :** Évolution du Type 8 (Vision'checs) pour gérer 4 diagrammes par exercice au lieu d'une position unique. Suppression de la saisie manuelle de description, des cases départ/arrivée, de la solution SAN et du plateau de saisie de coup.
+    *   **Coups attendus & Annotations visuelles :** Le ou les coups attendus sont désormais matérialisés directement par des flèches bleues (`brush: "blue"`) dessinées sur le diagramme via `FenEditor`, complétées par d'autres formes visuelles d'explication (cercles, flèches).
+    *   **Aperçus statiques non-interactifs (`TypeVisionChecs.php` & `type-8.js`) :** Ajout d'un plateau d'échiquier d'aperçu sous chaque `FenInput` (Diagrammes 1 à 4) en mode `viewOnly: true` pour valider visuellement la position et les annotations sans interaction possible.
+    *   **Orientation dynamique selon le trait FEN :** L'orientation de chaque plateau d'aperçu est automatiquement déterminée d'après le trait de sa FEN (`getActiveColorFromFen`), positionnant les Blancs en bas pour le trait aux Blancs (`w`) et les Noirs en bas pour le trait aux Noirs (`b`).
+    *   **Correction de l'orientation dans le Builder :** Utilisation systématique de `getOrientationColor()` dans les handlers du builder (Types 8, 2 et 3) au lieu de la lecture brute du libellé textuel `"Blanc"` / `"Noir"`, résolvant l'affichage d'un échiquier inversé.
+    *   **Contrat JSON REST API (`Contenu_Controller.php`) :** L'endpoint REST `/wp-json/roi/v1/contenu/<id>` (et `/exercice/<id>`) expose désormais la clé `config.diagrammes` (tableau des 4 diagrammes `{ fen, couleur_joueur, shapes }`) pour consommation par la PWA.
+
+*   **Exercices — Type 1 (100 Commandements) Multi-QCM :**
+    *   **Support des séries de QCM :** Évolution de l'exercice de Type 1 (100 Commandements) pour gérer une série de plusieurs QCMs par exercice (au lieu d'un QCM unique).
+    *   **Back-Office WordPress (`Type100Commandements.php`) :** Ajout d'une interface d'administration dynamique permettant d'ajouter et de supprimer des QCMs avec numérotation et ré-indexation automatique. Prise en charge de la rétrocompatibilité (conversion automatique des anciens exercices avec QCM unique vers la structure multi-QCM).
+    *   **Constructeur JS (`type-1.js`) :** Mise à jour du script du builder pour sérialiser le tableau `qcms` dans le JSON de configuration (`#roi_config_json`), et gestion de la ré-indexation dynamique des champs et boutons radio de sélection de la bonne réponse.
+    *   **API REST (`Contenu_Controller.php`) :** L'endpoint REST `/wp-json/roi/v1/contenu/<id>` expose désormais la clé `config.qcms` contenant le tableau des QCMs (chacun composé d'une `question`, d'un tableau `reponses` de 3 choix et de l'index de la `bonne_reponse`).
+
 ## 1.3.5 - 2026-08-08
 
 *   **Améliorations de l'Éditeur & du Constructeur de Cours (`roi_cours`) :**

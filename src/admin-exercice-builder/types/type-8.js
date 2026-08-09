@@ -1,212 +1,206 @@
 /**
- * Handler for Type 8: Vision'checs.
+ * Handler for Type 8: Vision'checs (4 Diagrammes avec aperçus).
  */
 
-import {
-	setupFenControl,
-	updateOrientationDisplay,
-	getOrientationColor,
-} from '../utils/controls';
+import { setupFenControl, getActiveColorFromFen } from '../utils/controls';
 
-const textarea = document.getElementById( 'roi_config_json' );
-const fenInput = document.getElementById( 'roi_t8_fen' );
-const colorInput = document.getElementById( 'roi_t8_couleur' );
-const descInput = document.getElementById( 'roi_t8_desc' );
-const caseDepartInput = document.getElementById( 'roi_t8_case_depart' );
-const caseArriveeInput = document.getElementById( 'roi_t8_case_arrivee' );
-const sanInput = document.getElementById( 'roi_t8_san' );
-const boardContainer = document.getElementById( 'roi_t8_board' );
-const generateBtn = document.getElementById( 'roi_t8_generate_btn' );
-const openEditorBtn = document.getElementById( 'btn_open_fen_editor_t8' );
+const textarea = document.getElementById('roi_config_json');
+const consigneInput = document.getElementById('roi_t8_consigne');
 
-let boardAPI = null;
+const t8Diagrammes = [
+	{ fen: '', couleur_joueur: 'white', shapes: [] },
+	{ fen: '', couleur_joueur: 'white', shapes: [] },
+	{ fen: '', couleur_joueur: 'white', shapes: [] },
+	{ fen: '', couleur_joueur: 'white', shapes: [] },
+];
+
+const previewAPIs = [null, null, null, null];
 
 export function updateConfig() {
-	if ( ! textarea ) {
+	if (!textarea) {
 		return;
 	}
-	const fenVal = fenInput ? fenInput.value.trim() : '';
+
+	const consigneText = consigneInput
+		? consigneInput.value.trim()
+		: 'Observez les 4 diagrammes ci-dessous.';
+
 	const configData = {
-		fen_depart: fenVal,
-		couleur_joueur: getOrientationColor( colorInput, fenVal ),
-		description: descInput ? descInput.value.trim() : '',
-		case_depart: caseDepartInput ? caseDepartInput.value.trim() : '',
-		case_arrivee: caseArriveeInput ? caseArriveeInput.value.trim() : '',
-		solution_san: sanInput ? sanInput.value.trim() : '',
+		consigne: consigneText,
+		diagrammes: t8Diagrammes,
 	};
-	textarea.value = JSON.stringify( configData, null, 4 );
+
+	textarea.value = JSON.stringify(configData, null, 4);
+}
+
+function renderPreviewBoard(index) {
+	const boardEl = document.getElementById(`roi_t8_preview_board_${index}`);
+	if (!boardEl) {
+		return;
+	}
+
+	const currentDiagram = t8Diagrammes[index];
+	const fen = currentDiagram ? currentDiagram.fen.trim() : '';
+
+	if (!fen) {
+		if (previewAPIs[index]) {
+			previewAPIs[index].destroy();
+			previewAPIs[index] = null;
+		}
+		boardEl.innerHTML = '';
+		return;
+	}
+
+	// L'orientation est strictement calculée d'après le trait de la FEN ('w' -> 'white', 'b' -> 'black')
+	const orientation = getActiveColorFromFen(fen);
+	const shapes = currentDiagram ? currentDiagram.shapes || [] : [];
+
+	if (previewAPIs[index]) {
+		previewAPIs[index].setPosition(fen);
+		if (typeof previewAPIs[index].setConfig === 'function') {
+			previewAPIs[index].setConfig({ orientation });
+		}
+		if (typeof previewAPIs[index].setShapes === 'function') {
+			previewAPIs[index].setShapes(shapes);
+		}
+		if (typeof previewAPIs[index].redraw === 'function') {
+			previewAPIs[index].redraw(true);
+		}
+		return;
+	}
+
+	const checkInterval = setInterval(function () {
+		if (window.EgBoardCore) {
+			clearInterval(checkInterval);
+
+			const boardConfig = {
+				mode: 'game',
+				fen,
+				orientation,
+				coordinates: true,
+				viewOnly: true,
+				movable: {
+					free: false,
+					color: 'none',
+				},
+				drawable: {
+					enabled: false,
+				},
+			};
+
+			const boardState = {
+				mode: 'game',
+				showThreats: false,
+				promotionDialogState: { isEnabled: false },
+				historyViewerState: { isEnabled: false },
+			};
+
+			const api = new window.EgBoardCore(
+				boardEl,
+				boardState,
+				function () {},
+				function () {},
+				boardConfig,
+				{ workerUrl: '' }
+			);
+
+			if (shapes && typeof api.setShapes === 'function') {
+				api.setShapes(shapes);
+			}
+
+			previewAPIs[index] = api;
+		}
+	}, 50);
 }
 
 export function init() {
-	if ( ! fenInput || ! colorInput || ! textarea ) {
+	if (!textarea) {
 		return;
 	}
 
-	// Charger les données depuis le JSON existant
-	if ( textarea.value.trim() !== '' ) {
+	// Restaurer les données depuis le JSON si présent
+	if (textarea.value.trim() !== '') {
 		try {
-			const parsed = JSON.parse( textarea.value );
-			if ( parsed && typeof parsed === 'object' ) {
-				if ( parsed.fen_depart && fenInput ) {
-					fenInput.value = parsed.fen_depart;
+			const parsed = JSON.parse(textarea.value);
+			if (parsed && typeof parsed === 'object') {
+				if (typeof parsed.consigne === 'string' && consigneInput) {
+					consigneInput.value = parsed.consigne;
 				}
-				if ( colorInput ) {
-					updateOrientationDisplay(
-						colorInput,
-						parsed.couleur_joueur || parsed.fen_depart || 'white'
-					);
-				}
-				if ( parsed.description && descInput ) {
-					descInput.value = parsed.description;
-				}
-				if ( parsed.case_depart && caseDepartInput ) {
-					caseDepartInput.value = parsed.case_depart;
-				}
-				if ( parsed.case_arrivee && caseArriveeInput ) {
-					caseArriveeInput.value = parsed.case_arrivee;
-				}
-				if ( parsed.solution_san && sanInput ) {
-					sanInput.value = parsed.solution_san;
-				}
-
-				// S'il y a déjà une FEN de départ, générer l'échiquier automatiquement
-				if ( parsed.fen_depart ) {
-					setTimeout( function () {
-						if ( generateBtn ) {
-							generateBtn.click();
+				if (Array.isArray(parsed.diagrammes)) {
+					for (let i = 0; i < 4; i++) {
+						if (parsed.diagrammes[i]) {
+							t8Diagrammes[i] = {
+								fen: parsed.diagrammes[i].fen || '',
+								couleur_joueur:
+									parsed.diagrammes[i].couleur_joueur ||
+									'white',
+								shapes: parsed.diagrammes[i].shapes || [],
+							};
 						}
-					}, 200 );
+					}
+				} else if (parsed.fen_depart) {
+					// Retro-compatibilité ancienne structure
+					t8Diagrammes[0] = {
+						fen: parsed.fen_depart,
+						couleur_joueur: parsed.couleur_joueur || 'white',
+						shapes: parsed.shapes || [],
+					};
 				}
 			}
-		} catch ( e ) {
-			console.warn( 'Erreur parsing JSON Type 8 initial :', e );
+		} catch (e) {
+			console.warn('Erreur parsing JSON Type 8 initial :', e);
 		}
 	}
 
-	// Écouteurs d'événements
-	if ( descInput ) {
-		descInput.addEventListener( 'input', updateConfig );
+	// Synchroniser les champs DOM (inputs FEN)
+	const fenInputs = document.querySelectorAll('.roi_t8_fen');
+	fenInputs.forEach((input) => {
+		const index = parseInt(input.getAttribute('data-index'), 10);
+		if (!isNaN(index) && t8Diagrammes[index]) {
+			input.value = t8Diagrammes[index].fen;
+		}
+	});
+
+	// Écouteur consigne
+	if (consigneInput) {
+		consigneInput.addEventListener('input', updateConfig);
 	}
 
-	setupFenControl( {
-		input: fenInput,
-		button: openEditorBtn,
-		colorSelect: colorInput,
-		onChange() {
-			updateConfig();
-			if ( boardAPI && generateBtn ) {
-				generateBtn.click();
-			}
-		},
-	} );
+	// Configuration unifiée des 4 contrôles FEN et instanciation des aperçus
+	for (let i = 0; i < 4; i++) {
+		const inputFen =
+			document.querySelector(`.roi_t8_fen[data-index="${i}"]`) ||
+			document.getElementById(`roi_t8_fen_${i}`);
+		const selectColor =
+			document.querySelector(`.roi_t8_couleur[data-index="${i}"]`) ||
+			document.getElementById(`roi_t8_couleur_${i}`);
+		const btnEditor =
+			document.getElementById(`btn_open_fen_editor_t8_${i}`) ||
+			document.querySelector(
+				`.btn_open_fen_editor_t8[data-index="${i}"]`
+			);
 
-	if ( generateBtn ) {
-		generateBtn.addEventListener( 'click', function () {
-			const fen = fenInput ? fenInput.value.trim() : '';
-			const color = colorInput ? colorInput.value : 'white';
-
-			if ( ! fen ) {
-				return;
-			}
-
-			if ( boardAPI ) {
-				boardAPI.destroy();
-				boardAPI = null;
-			}
-
-			boardContainer.innerHTML = '';
-			const boardEl = document.createElement( 'div' );
-			boardEl.id = 'roi-t8-chessboard-inner';
-			boardEl.style.width = '100%';
-			boardEl.style.height = '100%';
-			boardContainer.appendChild( boardEl );
-
-			const checkInterval = setInterval( function () {
-				if ( window.EgBoardCore ) {
-					clearInterval( checkInterval );
-
-					const boardConfig = {
-						mode: 'game',
-						fen,
-						orientation: color,
-						coordinates: true,
-						viewOnly: false,
-						movable: {
-							color: 'both',
-						},
-					};
-
-					const boardState = {
-						mode: 'game',
-						showThreats: false,
-						promotionDialogState: { isEnabled: false },
-						historyViewerState: { isEnabled: false },
-					};
-
-					boardAPI = new window.EgBoardCore(
-						boardEl,
-						boardState,
-						function () {},
-						function ( event, move ) {
-							if ( event === 'move' && move ) {
-								if ( caseDepartInput ) {
-									caseDepartInput.value = move.from;
-								}
-								if ( caseArriveeInput ) {
-									caseArriveeInput.value = move.to;
-								}
-								if ( sanInput ) {
-									sanInput.value = move.san;
-								}
-
-								// Annuler immédiatement le coup et dessiner la flèche verte
-								setTimeout( function () {
-									if ( boardAPI ) {
-										boardAPI.undoLastMove();
-										if (
-											typeof boardAPI.setShapes ===
-											'function'
-										) {
-											boardAPI.setShapes( [
-												{
-													orig: move.from,
-													dest: move.to,
-													brush: 'green',
-												},
-											] );
-										}
-									}
-								}, 50 );
-
-								updateConfig();
-							}
-						},
-						boardConfig,
-						{ workerUrl: '' }
-					);
-
-					// Si on a déjà une solution enregistrée au chargement, on affiche la flèche
-					const startSq = caseDepartInput
-						? caseDepartInput.value.trim()
-						: '';
-					const endSq = caseArriveeInput
-						? caseArriveeInput.value.trim()
-						: '';
-					if ( startSq && endSq ) {
-						setTimeout( function () {
-							if ( boardAPI ) {
-								boardAPI.setShapes( [
-									{
-										orig: startSq,
-										dest: endSq,
-										brush: 'green',
-									},
-								] );
-							}
-						}, 100 );
+		setupFenControl({
+			input: inputFen,
+			button: btnEditor,
+			colorSelect: selectColor,
+			getShapes() {
+				return t8Diagrammes[i] ? t8Diagrammes[i].shapes || [] : [];
+			},
+			onChange(fen, color, shapes) {
+				if (t8Diagrammes[i]) {
+					t8Diagrammes[i].fen = fen;
+					t8Diagrammes[i].couleur_joueur = color;
+					if (shapes) {
+						t8Diagrammes[i].shapes = shapes;
 					}
+					updateConfig();
+					renderPreviewBoard(i);
 				}
-			}, 50 );
-		} );
+			},
+		});
+
+		// Initialiser l'aperçu du diagramme
+		renderPreviewBoard(i);
 	}
 }

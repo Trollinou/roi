@@ -2,7 +2,11 @@
  * Handler for Type 2: Pop'Echecs.
  */
 
-import { setupFenControl, getActiveColorFromFen } from '../utils/controls';
+import {
+	setupFenControl,
+	getActiveColorFromFen,
+	getOrientationColor,
+} from '../utils/controls';
 
 const textarea = document.getElementById( 'roi_config_json' );
 const t2Consigne = document.getElementById( 'roi_t2_consigne' );
@@ -274,9 +278,7 @@ export function init() {
 				if ( window.EgBoardCore ) {
 					clearInterval( t2CheckInterval );
 
-					const orientation = t2Couleur
-						? t2Couleur.value
-						: getActiveColorFromFen( fen );
+					const orientation = getOrientationColor( t2Couleur, fen );
 
 					const boardConfig = {
 						mode: 'game',
