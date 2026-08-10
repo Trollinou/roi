@@ -56,6 +56,10 @@ const PgnEditor = forwardRef(function PgnEditor({
   const [importPgnText, setImportPgnText] = useState("");
   const [currentComment, setCurrentComment] = useState("");
   const [currentShapes, setCurrentShapes] = useState([]);
+  const [isReadOnly, setIsReadOnly] = useState(false);
+  const [variations, setVariations] = useState([]);
+  const [plyViewing, setPlyViewing] = useState(0);
+  const [totalPlies, setTotalPlies] = useState(0);
 
   const boardElRef = useRef(null);
   const boardApiRef = useRef(null);
@@ -87,6 +91,15 @@ const PgnEditor = forwardRef(function PgnEditor({
     setCurrentShapes(shapes);
     const rawPgn = api.getPgn() || "";
     setPgn(ensurePgnFenHeader(rawPgn, initialFen));
+    if (typeof api.getVariationsAtPly === "function") {
+      setVariations(api.getVariationsAtPly() || []);
+    }
+    if (typeof api.getHistoryViewerState === "function") {
+      const historyState = api.getHistoryViewerState() || {};
+      const currentPly = typeof api.getCurrentPlyNumber === "function" ? api.getCurrentPlyNumber() : 0;
+      setPlyViewing(historyState.plyViewing !== undefined ? historyState.plyViewing : currentPly);
+      setTotalPlies(currentPly);
+    }
   };
 
   // Met à jour et injecte les annotations dans le coup en cours
@@ -99,6 +112,41 @@ const PgnEditor = forwardRef(function PgnEditor({
     }
   };
 
+  // Gestion du mode Lecteur vs Éditeur
+  const toggleReadOnly = () => {
+    const nextReadOnly = !isReadOnly;
+    setIsReadOnly(nextReadOnly);
+    if (boardApiRef.current && typeof boardApiRef.current.setReadOnly === "function") {
+      boardApiRef.current.setReadOnly(nextReadOnly);
+      syncPositionData(boardApiRef.current);
+    }
+  };
+
+  // Actions sur les variantes
+  const handleSelectVariation = (idx) => {
+    if (boardApiRef.current && typeof boardApiRef.current.selectVariation === "function") {
+      if (boardApiRef.current.selectVariation(idx)) {
+        syncPositionData(boardApiRef.current);
+      }
+    }
+  };
+
+  const handlePromoteVariation = (idx) => {
+    if (boardApiRef.current && typeof boardApiRef.current.promoteVariation === "function") {
+      if (boardApiRef.current.promoteVariation(idx)) {
+        syncPositionData(boardApiRef.current);
+      }
+    }
+  };
+
+  const handleDeleteVariation = (idx) => {
+    if (boardApiRef.current && typeof boardApiRef.current.deleteVariation === "function") {
+      if (boardApiRef.current.deleteVariation(idx)) {
+        syncPositionData(boardApiRef.current);
+      }
+    }
+  };
+
   // Initialisation de BoardCore
   useEffect(() => {
     if (!boardElRef.current) return;
@@ -106,6 +154,7 @@ const PgnEditor = forwardRef(function PgnEditor({
     // Configuration de BoardCore
     const config = {
       mode: "study",
+      readOnly: isReadOnly,
       ...boardConfig,
       pgn: initialPgn,
       fen: initialFen || undefined,
@@ -129,12 +178,8 @@ const PgnEditor = forwardRef(function PgnEditor({
 
     const emit = (event) => {
       if (event === "move") {
-        // Saisie de coup : Réinitialise le commentaire et les formes à vide
-        setCurrentComment("");
-        setCurrentShapes([]);
         if (boardApiRef.current) {
-          const rawPgn = boardApiRef.current.getPgn() || "";
-          setPgn(ensurePgnFenHeader(rawPgn, initialFen));
+          syncPositionData(boardApiRef.current);
         }
       }
     };
@@ -192,10 +237,6 @@ const PgnEditor = forwardRef(function PgnEditor({
     }
 
     // Recalcul fiable des bounds via ResizeObserver
-    // Dans l'iFrame Gutenberg, les dimensions se stabilisent après le premier rendu.
-    // Un simple setTimeout(200ms) n'est pas suffisant ; le ResizeObserver détecte
-    // le moment exact où le conteneur atteint ses dimensions finales et force
-    // Chessground à recalculer ses bounds (position de référence pour le drag/dessin/flèches).
     let resizeObserver = null;
     if (typeof ResizeObserver !== "undefined" && boardElRef.current) {
       resizeObserver = new ResizeObserver(() => {
@@ -203,7 +244,6 @@ const PgnEditor = forwardRef(function PgnEditor({
       });
       resizeObserver.observe(boardElRef.current);
     } else {
-      // Fallback si ResizeObserver n'est pas disponible
       setTimeout(() => {
         boardAPI.redraw(true);
       }, 300);
@@ -271,18 +311,75 @@ const PgnEditor = forwardRef(function PgnEditor({
     }
   };
 
-  // Outils de dessin
   return (
     <div className="pgn-editor-container">
       <style>{`
         .pgn-editor-container {
           display: flex;
-          gap: 24px;
+          flex-direction: column;
+          gap: 16px;
           width: 100%;
-          max-width: 800px;
+          max-width: 820px;
           margin: 0 auto;
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
           box-sizing: border-box;
+        }
+
+        .pgn-mode-bar {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          background: #f8f9fa;
+          border: 1px solid #e9ecef;
+          border-radius: 8px;
+          padding: 10px 14px;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+
+        .pgn-mode-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 4px 10px;
+          border-radius: 20px;
+          font-weight: 600;
+          font-size: 13px;
+        }
+
+        .pgn-mode-badge.reader {
+          background: #e0f2fe;
+          color: #0369a1;
+          border: 1px solid #bae6fd;
+        }
+
+        .pgn-mode-badge.editor {
+          background: #dcfce7;
+          color: #15803d;
+          border: 1px solid #bbf7d0;
+        }
+
+        .pgn-mode-toggle-btn {
+          padding: 6px 12px;
+          font-size: 13px;
+          font-weight: 600;
+          border-radius: 6px;
+          border: 1px solid #ced4da;
+          background: #ffffff;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          color: #334155;
+        }
+
+        .pgn-mode-toggle-btn:hover {
+          background: #e2e8f0;
+          border-color: #94a3b8;
+        }
+
+        .pgn-editor-main-layout {
+          display: flex;
+          gap: 24px;
+          width: 100%;
         }
 
         .pgn-editor-left-col {
@@ -318,7 +415,7 @@ const PgnEditor = forwardRef(function PgnEditor({
         }
 
         .pgn-editor-right-col {
-          width: 350px;
+          width: 380px;
           display: flex;
           flex-direction: column;
           gap: 12px;
@@ -356,13 +453,14 @@ const PgnEditor = forwardRef(function PgnEditor({
         }
 
         .pgn-navigation-bar {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
           gap: 6px;
         }
 
         .pgn-nav-btn {
-          padding: 8px;
+          padding: 8px 12px;
           background: #ffffff;
           border: 1px solid #ced4da;
           border-radius: 6px;
@@ -377,6 +475,83 @@ const PgnEditor = forwardRef(function PgnEditor({
           background: #e9ecef;
           border-color: #adb5bd;
           color: #212529;
+        }
+
+        .pgn-ply-indicator {
+          font-size: 13px;
+          font-weight: 600;
+          color: #475569;
+          padding: 0 4px;
+          white-space: nowrap;
+        }
+
+        .pgn-variations-list {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .pgn-variation-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 6px;
+          padding: 6px 10px;
+          gap: 8px;
+        }
+
+        .pgn-var-san-btn {
+          background: transparent;
+          border: none;
+          font-weight: 600;
+          font-size: 13px;
+          color: #2563eb;
+          cursor: pointer;
+          padding: 2px 4px;
+          border-radius: 4px;
+          transition: background 0.2s;
+        }
+
+        .pgn-var-san-btn:hover {
+          background: #eff6ff;
+        }
+
+        .pgn-var-main-badge {
+          font-size: 11px;
+          color: #059669;
+          background: #ecfdf5;
+          padding: 2px 6px;
+          border-radius: 4px;
+          margin-left: 6px;
+        }
+
+        .pgn-var-actions {
+          display: flex;
+          gap: 4px;
+        }
+
+        .pgn-var-action-btn {
+          font-size: 11px;
+          padding: 3px 6px;
+          border-radius: 4px;
+          border: 1px solid #cbd5e1;
+          background: #f8fafc;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .pgn-var-action-btn.promote:hover {
+          background: #dcfce7;
+          border-color: #86efac;
+          color: #166534;
+        }
+
+        .pgn-var-action-btn.delete:hover {
+          background: #fee2e2;
+          border-color: #fca5a5;
+          color: #991b1b;
         }
 
         .pgn-comment-textarea {
@@ -456,188 +631,239 @@ const PgnEditor = forwardRef(function PgnEditor({
           flex-shrink: 0;
         }
 
-        .pgn-editor-drawing-legend .legend-tip {
-          font-size: 11px;
-          color: #868e96;
-          border-top: 1px dashed #dee2e6;
-          padding-top: 6px;
-          margin-top: 4px;
-        }
-
         @media (max-width: 768px) {
-          .pgn-editor-container {
+          .pgn-editor-main-layout {
             flex-direction: column;
           }
+          .pgn-editor-left-col,
           .pgn-editor-right-col {
             width: 100%;
           }
         }
       `}</style>
 
-      {/* Colonne de Gauche : Échiquier & Import PGN */}
-      <div className="pgn-editor-left-col">
-        <div className="pgn-editor-board-wrapper">
-          <div ref={boardElRef} />
+      {/* Bandeau de Mode */}
+      <div className="pgn-mode-bar">
+        <div className={`pgn-mode-badge ${isReadOnly ? 'reader' : 'editor'}`}>
+          {isReadOnly ? '📖 Mode Lecteur PGN' : '✏️ Mode Éditeur PGN (Création de variantes)'}
         </div>
-
-        {/* Barre de Navigation */}
-        <div className="pgn-navigation-bar" style={{ marginTop: "12px" }}>
-          <button type="button" className="pgn-nav-btn" onClick={handleViewStart} title="Début">|&lt;</button>
-          <button type="button" className="pgn-nav-btn" onClick={handleViewPrevious} title="Précédent">&lt;</button>
-          <button type="button" className="pgn-nav-btn" onClick={handleViewNext} title="Suivant">&gt;</button>
-          <button type="button" className="pgn-nav-btn" onClick={handleViewEnd} title="Fin">&gt;|</button>
-        </div>
-
-        {/* Aide au dessin */}
-        <div className="pgn-editor-drawing-legend">
-          <div className="legend-title">✍️ Annotations (comme Lichess)</div>
-          <div className="legend-grid">
-            <div className="legend-item">
-              <span className="legend-color-dot" style={{ backgroundColor: "#15ba3a" }} />
-              <span><strong>Vert</strong> : Clic droit</span>
-            </div>
-            <div className="legend-item">
-              <span className="legend-color-dot" style={{ backgroundColor: "#e22222" }} />
-              <span><strong>Rouge</strong> : Shift + Clic dr.</span>
-            </div>
-            <div className="legend-item">
-              <span className="legend-color-dot" style={{ backgroundColor: "#2072e2" }} />
-              <span><strong>Bleu</strong> : Alt + Clic dr.</span>
-            </div>
-            <div className="legend-item">
-              <span className="legend-color-dot" style={{ backgroundColor: "#e8c005" }} />
-              <span><strong>Jaune</strong> : Shift + Alt + Clic dr.</span>
-            </div>
-          </div>
-        </div>
+        <button
+          type="button"
+          className="pgn-mode-toggle-btn"
+          onClick={toggleReadOnly}
+        >
+          {isReadOnly ? '✏️ Passer en Mode Éditeur' : '📖 Passer en Mode Lecteur'}
+        </button>
       </div>
 
-      {/* Colonne de Droite : Outils d'édition */}
-      <div className="pgn-editor-right-col">
+      <div className="pgn-editor-main-layout">
+        {/* Colonne de Gauche : Échiquier & Import PGN */}
+        <div className="pgn-editor-left-col">
+          <div className="pgn-editor-board-wrapper">
+            <div ref={boardElRef} />
+          </div>
 
-        {/* Importer un PGN ou une FEN */}
-        <div className="pgn-editor-section">
-          <div className="pgn-editor-title">Importer un PGN / FEN</div>
-          <div style={{ display: "flex", gap: "8px" }}>
+          {/* Barre de Navigation avec Compteur */}
+          <div className="pgn-navigation-bar" style={{ marginTop: "12px" }}>
+            <button type="button" className="pgn-nav-btn" onClick={handleViewStart} title="Début">|&lt;</button>
+            <button type="button" className="pgn-nav-btn" onClick={handleViewPrevious} title="Précédent">&lt;</button>
+            <span className="pgn-ply-indicator">Coup {plyViewing} / {totalPlies}</span>
+            <button type="button" className="pgn-nav-btn" onClick={handleViewNext} title="Suivant">&gt;</button>
+            <button type="button" className="pgn-nav-btn" onClick={handleViewEnd} title="En direct">&gt;|</button>
+          </div>
+
+          {/* Aide au dessin */}
+          <div className="pgn-editor-drawing-legend">
+            <div className="legend-title">✍️ Annotations (comme Lichess)</div>
+            <div className="legend-grid">
+              <div className="legend-item">
+                <span className="legend-color-dot" style={{ backgroundColor: "#15ba3a" }} />
+                <span><strong>Vert</strong> : Clic droit</span>
+              </div>
+              <div className="legend-item">
+                <span className="legend-color-dot" style={{ backgroundColor: "#e22222" }} />
+                <span><strong>Rouge</strong> : Shift + Clic dr.</span>
+              </div>
+              <div className="legend-item">
+                <span className="legend-color-dot" style={{ backgroundColor: "#2072e2" }} />
+                <span><strong>Bleu</strong> : Alt + Clic dr.</span>
+              </div>
+              <div className="legend-item">
+                <span className="legend-color-dot" style={{ backgroundColor: "#e8c005" }} />
+                <span><strong>Jaune</strong> : Shift + Alt + Clic dr.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Colonne de Droite : Outils d'édition */}
+        <div className="pgn-editor-right-col">
+
+          {/* Importer un PGN ou une FEN */}
+          <div className="pgn-editor-section">
+            <div className="pgn-editor-title">Importer un PGN / FEN</div>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <textarea
+                className="pgn-comment-textarea"
+                style={{ height: "32px", flex: 1, padding: "6px" }}
+                placeholder="Collez un PGN ou une FEN ici..."
+                value={importPgnText}
+                onChange={(e) => setImportPgnText(e.target.value)}
+              />
+              <button
+                type="button"
+                className="pgn-nav-btn"
+                style={{ padding: "0 12px", height: "32px", fontSize: "12px" }}
+                onClick={() => {
+                  if (boardApi && importPgnText.trim()) {
+                    const input = importPgnText.trim();
+                    const isFen = !input.includes("[") && input.split("/").length >= 4;
+
+                    try {
+                      if (isFen) {
+                        boardApi.setPosition(input);
+                      } else {
+                        boardApi.loadPgn(input);
+                      }
+                      syncPositionData(boardApi);
+                      setImportPgnText("");
+                    } catch (err) {
+                       alert("Erreur lors du chargement : " + err.message);
+                    }
+                  }
+                }}
+              >
+                Charger
+              </button>
+            </div>
+          </div>
+
+          {/* Affichage du PGN en direct */}
+          <div className="pgn-editor-section">
+            <div className="pgn-editor-title">PGN en direct</div>
+            <div className="pgn-display-area">
+              {pgn || "Aucun coup joué."}
+            </div>
+          </div>
+
+          {/* Variantes alternatives au coup courant */}
+          {variations.length > 0 && (
+            <div className="pgn-editor-section">
+              <div className="pgn-editor-title">🌿 Variantes alternatives ({variations.length})</div>
+              <div className="pgn-variations-list">
+                {variations.map((v, idx) => (
+                  <div key={v.index ?? idx} className="pgn-variation-row">
+                    <div>
+                      <button
+                        type="button"
+                        className="pgn-var-san-btn"
+                        onClick={() => handleSelectVariation(v.index ?? idx)}
+                      >
+                        {v.san || `Variante ${idx + 1}`}
+                      </button>
+                      {v.isMainline && <span className="pgn-var-main-badge">Principale</span>}
+                    </div>
+                    {!isReadOnly && (
+                      <div className="pgn-var-actions">
+                        {!v.isMainline && (
+                          <button
+                            type="button"
+                            className="pgn-var-action-btn promote"
+                            title="Promouvoir en ligne principale"
+                            onClick={() => handlePromoteVariation(v.index ?? idx)}
+                          >
+                            ⬆️ Promouvoir
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          className="pgn-var-action-btn delete"
+                          title="Supprimer cette variante"
+                          onClick={() => handleDeleteVariation(v.index ?? idx)}
+                        >
+                          🗑️ Supprimer
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Commentaire */}
+          <div className="pgn-editor-section">
+            <div className="pgn-editor-title">Commentaire du coup</div>
             <textarea
               className="pgn-comment-textarea"
-              style={{ height: "32px", flex: 1, padding: "6px" }}
-              placeholder="Collez un PGN ou une FEN ici..."
-              value={importPgnText}
-              onChange={(e) => setImportPgnText(e.target.value)}
+              placeholder="Saisissez un commentaire pour la position actuelle..."
+              value={currentComment}
+              onChange={handleCommentChange}
             />
-            <button
-              type="button"
-              className="pgn-nav-btn"
-              style={{ padding: "0 12px", height: "32px", fontSize: "12px" }}
-              onClick={() => {
-                if (boardApi && importPgnText.trim()) {
-                  const input = importPgnText.trim();
-                  
-                  // Une FEN ne contient pas de crochets '[' (propres aux tags PGN)
-                  // et possède des slashes '/' pour diviser les rangées.
-                  const isFen = !input.includes("[") && input.split("/").length >= 4;
+          </div>
 
-                  try {
-                    if (isFen) {
-                      boardApi.setPosition(input);
-                    } else {
-                      boardApi.loadPgn(input);
-                    }
-                    syncPositionData(boardApi);
-                    setImportPgnText("");
-                  } catch (err) {
-                     alert("Erreur lors du chargement : " + err.message);
+          {/* Copier la FEN actuelle */}
+          <button
+            type="button"
+            className="pgn-nav-btn"
+            style={{ fontSize: "12px", padding: "8px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
+            onClick={() => {
+              if (boardApi && boardApi.game) {
+                const currentFen = (boardApi.board && boardApi.board.state && boardApi.board.state.fen)
+                  ? boardApi.board.state.fen
+                  : boardApi.game.fen();
+                const copyWithFallback = () => {
+                  if (navigator.clipboard && navigator.clipboard.writeText) {
+                    return navigator.clipboard.writeText(currentFen);
                   }
-                }
-              }}
-            >
-              Charger
-            </button>
-          </div>
+                  const textarea = document.createElement("textarea");
+                  textarea.value = currentFen;
+                  textarea.style.fontSize = "12pt";
+                  textarea.style.position = "fixed";
+                  textarea.style.top = "0";
+                  textarea.style.left = "0";
+                  textarea.style.width = "2em";
+                  textarea.style.height = "2em";
+                  textarea.style.padding = "0";
+                  textarea.style.border = "none";
+                  textarea.style.outline = "none";
+                  textarea.style.boxShadow = "none";
+                  textarea.style.background = "transparent";
+                  document.body.appendChild(textarea);
+                  textarea.focus();
+                  textarea.select();
+                  try {
+                    document.execCommand("copy");
+                    document.body.removeChild(textarea);
+                    return Promise.resolve();
+                  } catch (err) {
+                    document.body.removeChild(textarea);
+                    return Promise.reject(err);
+                  }
+                };
+
+                copyWithFallback()
+                  .then(() => {
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 1500);
+                  })
+                  .catch((err) => console.error("Erreur copie FEN :", err));
+              }
+            }}
+          >
+            {copied ? "✓ FEN copiée !" : "📋 Copier la FEN actuelle"}
+          </button>
+
+          {/* Validation */}
+          <button
+            type="button"
+            className="pgn-validate-btn"
+            onClick={handleValidate}
+          >
+            Valider ce PGN
+          </button>
+
         </div>
-
-        {/* 2. Affichage du PGN en direct */}
-        <div className="pgn-editor-section">
-          <div className="pgn-editor-title">PGN en direct</div>
-          <div className="pgn-display-area">
-            {pgn || "Aucun coup joué."}
-          </div>
-        </div>
-
-        {/* 4. Commentaire */}
-        <div className="pgn-editor-section">
-          <div className="pgn-editor-title">Commentaire du coup</div>
-          <textarea
-            className="pgn-comment-textarea"
-            placeholder="Saisissez un commentaire pour la position actuelle..."
-            value={currentComment}
-            onChange={handleCommentChange}
-          />
-        </div>
-
-        {/* Copier la FEN actuelle */}
-        <button
-          type="button"
-          className="pgn-nav-btn"
-          style={{ fontSize: "12px", padding: "8px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
-          onClick={() => {
-            if (boardApi && boardApi.game) {
-              const currentFen = (boardApi.board && boardApi.board.state && boardApi.board.state.fen)
-                ? boardApi.board.state.fen
-                : boardApi.game.fen();
-              const copyWithFallback = () => {
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                  return navigator.clipboard.writeText(currentFen);
-                }
-                // Fallback for non-secure HTTP contexts
-                const textarea = document.createElement("textarea");
-                textarea.value = currentFen;
-                textarea.style.fontSize = "12pt";
-                textarea.style.position = "fixed";
-                textarea.style.top = "0";
-                textarea.style.left = "0";
-                textarea.style.width = "2em";
-                textarea.style.height = "2em";
-                textarea.style.padding = "0";
-                textarea.style.border = "none";
-                textarea.style.outline = "none";
-                textarea.style.boxShadow = "none";
-                textarea.style.background = "transparent";
-                document.body.appendChild(textarea);
-                textarea.focus();
-                textarea.select();
-                try {
-                  document.execCommand("copy");
-                  document.body.removeChild(textarea);
-                  return Promise.resolve();
-                } catch (err) {
-                  document.body.removeChild(textarea);
-                  return Promise.reject(err);
-                }
-              };
-
-              copyWithFallback()
-                .then(() => {
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 1500);
-                })
-                .catch((err) => console.error("Erreur copie FEN :", err));
-            }
-          }}
-        >
-          {copied ? "✓ FEN copiée !" : "📋 Copier la FEN actuelle"}
-        </button>
-
-        {/* 7. Validation */}
-        <button
-          type="button"
-          className="pgn-validate-btn"
-          onClick={handleValidate}
-        >
-          Valider ce PGN
-        </button>
-
       </div>
     </div>
   );

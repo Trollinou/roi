@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+*   **Éditeur PGN (`PgnEditor.jsx`) — Support des Variantes PGN & Modes Métiers :**
+    *   **Prise en charge des Sous-Variantes :** Intégration complète du moteur d'arborescence PGN de `eg-chessboard` (v1.3.5+). Possibilité de créer, naviguer, promouvoir (`promoteVariation`) et supprimer (`deleteVariation`) des branches de sous-variantes à tout demi-coup de l'historique.
+    *   **Mode Lecteur vs Mode Éditeur :** Ajout d'une barre de commutation permettant d'alterner entre le *Mode Lecteur* (`readOnly: true` : navigation sans altération et formes éphémères) et le *Mode Éditeur* (`readOnly: false` : création de sous-variantes et persistance des annotations).
+    *   **Panneau d'Arborescence & Navigation :** Affichage dynamique de la liste des sous-variantes à la position courante, compteur réactif de demi-coups (`Coup X / Y`) et bouton d'accès direct au coup en direct (`⏭️`).
+
 ## 1.3.6 - 2026-08-09
 
 *   **Exercices — Type 8 (Vision'checs) — Refonte 4 Diagrammes & Aperçus Visuels :**
