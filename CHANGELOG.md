@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+*   **Refactorisation des Éditeurs (`FenEditor` & `PgnEditor`) — Architecture, Colocation & Hooks :**
+    *   **Colocation de Composants :** Restructuration de `FenEditor` et `PgnEditor` dans des sous-répertoires dédiés `src/components/FenEditor/` et `src/components/PgnEditor/` intégrant des barrels d'export `index.js` pour maintenir une rétrocompatibilité d'import totale.
+    *   **Extraction des CSS :** Suppression des balises `<style>` intégrées et déportation du code CSS dans `FenEditor.css` et `PgnEditor.css`.
+    *   **Composants UI Partagés (Dumb Components) :** Isolation du bloc d'annotations couleur dans `DrawingLegend` (`src/components/DrawingLegend/`) et de la palette de pièces/gomme dans `PiecePalette` (`src/components/FenEditor/PiecePalette.jsx`).
+    *   **Externalisation Logique Métier :** Externalisation de la fonction pure `ensurePgnFenHeader` vers l'utilitaire `src/utils/chessUtils.js`.
+    *   **Custom Hook `useChessBoard` :** Création du Hook personnalisé `src/hooks/useChessBoard.js` orchestrant l'instanciation de `BoardCore`, le suivi dynamique du redimensionnement via `ResizeObserver` et le nettoyage propre au démontage.
+    *   **Sécurité des API Impératives & ESLint 9 :** Maintien rigoureux des méthodes `forwardRef` / `useImperativeHandle` (`redrawBoard`, `getDiagram`, `setDiagram`), préservation de la JSDoc originale et validation 100% conforme à ESLint 9 / Prettier.
+
 *   **Éditeur PGN (`PgnEditor.jsx`) — Support des Variantes PGN & Modes Métiers :**
     *   **Prise en charge des Sous-Variantes :** Intégration complète du moteur d'arborescence PGN de `eg-chessboard` (v1.3.5+). Possibilité de créer, naviguer, promouvoir (`promoteVariation`) et supprimer (`deleteVariation`) des branches de sous-variantes à tout demi-coup de l'historique.
     *   **Mode Lecteur vs Mode Éditeur :** Ajout d'une barre de commutation permettant d'alterner entre le *Mode Lecteur* (`readOnly: true` : navigation sans altération et formes éphémères) et le *Mode Éditeur* (`readOnly: false` : création de sous-variantes et persistance des annotations).
