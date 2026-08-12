@@ -13,6 +13,8 @@
  * Text Domain:       roi
  * Domain Path:       /languages
  * Depends:           dame
+ *
+ * @package ROI
  */
 
 declare(strict_types=1);
@@ -56,7 +58,7 @@ add_action( 'admin_init', 'roi_check_dame_dependency' );
 function roi_dame_not_active_notice() {
 	?>
 	<div class="notice notice-error is-dismissible">
-		<p><?php _e( 'Le plugin ROI requiert que le plugin DAME soit activé. Le plugin ROI a été désactivé.', 'roi' ); ?></p>
+		<p><?php esc_html_e( 'Le plugin ROI requiert que le plugin DAME soit activé. Le plugin ROI a été désactivé.', 'roi' ); ?></p>
 	</div>
 	<?php
 }
@@ -64,18 +66,18 @@ function roi_dame_not_active_notice() {
 define( 'ROI_VERSION', '1.3.6' );
 define( 'ROI_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 
-// Autoloader SPL natif
+// Autoloader SPL natif.
 spl_autoload_register(
-	function ( $class ) {
+	function ( $class_name ) {
 		$prefix   = 'ROI\\';
 		$base_dir = plugin_dir_path( __FILE__ ) . 'includes/';
 
 		$len = strlen( $prefix );
-		if ( strncmp( $prefix, $class, $len ) !== 0 ) {
+		if ( strncmp( $prefix, $class_name, $len ) !== 0 ) {
 				return;
 		}
 
-		$relative_class = substr( $class, $len );
+		$relative_class = substr( $class_name, $len );
 		$file           = $base_dir . str_replace( '\\', '/', $relative_class ) . '.php';
 
 		if ( file_exists( $file ) ) {
@@ -84,11 +86,11 @@ spl_autoload_register(
 	}
 );
 
-// Initialisation du plugin
+// Initialisation du plugin.
 $roi_plugin = new \ROI\Core\Plugin();
 $roi_plugin->run();
 
-// Hooks d'activation et désactivation
+// Hooks d'activation et désactivation.
 register_activation_hook( __FILE__, array( \ROI\Core\Activator::class, 'activate' ) );
 register_deactivation_hook( __FILE__, array( \ROI\Core\Deactivator::class, 'deactivate' ) );
 

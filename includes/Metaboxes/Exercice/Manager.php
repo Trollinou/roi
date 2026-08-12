@@ -326,7 +326,7 @@ class Manager {
 			delete_transient( 'roi_exercice_errors_' . $post->ID );
 			?>
 			<div class="notice notice-error is-dismissible">
-				<p><strong><?php _e( "Impossible de publier l'exercice. Des informations obligatoires sont manquantes :", 'roi' ); ?></strong></p>
+				<p><strong><?php esc_html_e( "Impossible de publier l'exercice. Des informations obligatoires sont manquantes :", 'roi' ); ?></strong></p>
 				<ul>
 					<?php foreach ( $errors as $error ) : ?>
 						<li><?php echo esc_html( $error ); ?></li>

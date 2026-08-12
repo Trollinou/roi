@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+*   **Conformité Qualité & Standards de Code (PHPCS / WPCS) :**
+    *   **Configuration WPCS (`phpcs.xml`) :** Intégration du standard officiel WordPress avec configuration du text domain `roi`, version minimale de WordPress ciblée à 6.7 et exclusion des dossiers compilés (`/build/`).
+    *   **Exclusion sur Mesure du Nommage WP :** Désactivation de la règle `WordPress.Files.FileName` dans `phpcs.xml` pour préserver le standard d'architecture PSR-4 / PascalCase requis par le projet.
+    *   **Sécurisation & Échappement (`roi.php`, `Partie.php`, `Manager.php`) :** Remplacement de `_e()` par `esc_html_e()`, ajout du tag `@package ROI`, renommage du paramètre réservé `$class` en `$class_name` dans l'autoloader SPL et assainissement strict des entrées `$_POST` avec `wp_unslash()`.
+    *   **Sécurisation de la Désinstallation (`uninstall.php`) :** Préparation et échappement sécurisé des identifiants SQL, renommage de la variable `$taxonomy` en `$roi_taxonomy` pour éviter d'écraser la globale WP et ajout d'annotations de suppression ciblées pour les requêtes directes SQL de désinstallation.
+
 *   **Refactorisation des Éditeurs (`FenEditor` & `PgnEditor`) — Architecture, Colocation & Hooks :**
     *   **Colocation de Composants :** Restructuration de `FenEditor` et `PgnEditor` dans des sous-répertoires dédiés `src/components/FenEditor/` et `src/components/PgnEditor/` intégrant des barrels d'export `index.js` pour maintenir une rétrocompatibilité d'import totale.
     *   **Extraction des CSS :** Suppression des balises `<style>` intégrées et déportation du code CSS dans `FenEditor.css` et `PgnEditor.css`.
