@@ -21,9 +21,9 @@ class Menu {
 	 * @return void
 	 */
 	public function init(): void {
-		add_action( 'admin_menu', [ $this, 'add_apprentissage_menu' ] );
-		add_filter( 'parent_file', [ $this, 'apprentissage_menu_highlight' ] );
-		add_action( 'admin_notices', [ $this, 'display_admin_notices' ] );
+		add_action( 'admin_menu', array( $this, 'add_apprentissage_menu' ) );
+		add_filter( 'parent_file', array( $this, 'apprentissage_menu_highlight' ) );
+		add_action( 'admin_notices', array( $this, 'display_admin_notices' ) );
 	}
 
 	/**

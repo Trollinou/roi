@@ -29,7 +29,7 @@ class TypeDestinationFinale implements TypeInterface {
 		$consigne        = isset( $config_data['consigne'] ) && is_string( $config_data['consigne'] ) ? $config_data['consigne'] : "Remettez les étapes de ce plan d'attaque dans le bon ordre :";
 		$fen_depart      = isset( $config_data['fen_depart'] ) && is_string( $config_data['fen_depart'] ) ? $config_data['fen_depart'] : 'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 4 5';
 		$couleur_joueur  = isset( $config_data['couleur_joueur'] ) && is_string( $config_data['couleur_joueur'] ) ? $config_data['couleur_joueur'] : 'white';
-		$etapes_texte    = isset( $config_data['etapes_texte'] ) && is_array( $config_data['etapes_texte'] ) ? $config_data['etapes_texte'] : [];
+		$etapes_texte    = isset( $config_data['etapes_texte'] ) && is_array( $config_data['etapes_texte'] ) ? $config_data['etapes_texte'] : array();
 		$pgn_explication = isset( $config_data['pgn_explication'] ) && is_string( $config_data['pgn_explication'] ) ? $config_data['pgn_explication'] : '';
 		?>
 		<div id="roi_builder_type_16" class="roi-builder-section" style="display:none; margin-top:15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
@@ -41,14 +41,16 @@ class TypeDestinationFinale implements TypeInterface {
 			</div>
 
 			<?php
-			FenInput::render([
-				'id'             => 'roi_t16_fen_depart',
-				'value'          => $fen_depart,
-				'color'          => $couleur_joueur,
-				'orientation_id' => 'roi_t16_couleur',
-				'button_id'      => 'btn_open_fen_editor_t16',
-				'label'          => __( 'Position de départ (FEN) :', 'roi' ),
-			]);
+			FenInput::render(
+				array(
+					'id'             => 'roi_t16_fen_depart',
+					'value'          => $fen_depart,
+					'color'          => $couleur_joueur,
+					'orientation_id' => 'roi_t16_couleur',
+					'button_id'      => 'btn_open_fen_editor_t16',
+					'label'          => __( 'Position de départ (FEN) :', 'roi' ),
+				)
+			);
 			?>
 
 			<hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
@@ -69,7 +71,7 @@ class TypeDestinationFinale implements TypeInterface {
 								<input type="text" class="roi_t16_etape_input" value="<?php echo esc_attr( $etape_val ); ?>" style="flex: 1; height: 30px;" placeholder="<?php esc_attr_e( 'Saisir le texte de l\'étape...', 'roi' ); ?>">
 								<button type="button" class="button roi_t16_remove_etape" style="color: #b32d2e; border-color: #b32d2e; font-weight: bold;">&times;</button>
 							</div>
-						<?php
+							<?php
 						endforeach;
 					endif;
 					?>
@@ -81,14 +83,16 @@ class TypeDestinationFinale implements TypeInterface {
 
 			<div style="margin-top: 15px;">
 				<?php
-				PgnInput::render([
-					'id'          => 'roi_t16_pgn_explication',
-					'value'       => $pgn_explication,
-					'button_id'   => 'btn_open_pgn_editor_t16_explication',
-					'label'       => __( 'Solution & Explications (PGN)', 'roi' ),
-					'rows'        => 6,
-					'placeholder' => __( 'Saisir le PGN de la solution...', 'roi' ),
-				]);
+				PgnInput::render(
+					array(
+						'id'          => 'roi_t16_pgn_explication',
+						'value'       => $pgn_explication,
+						'button_id'   => 'btn_open_pgn_editor_t16_explication',
+						'label'       => __( 'Solution & Explications (PGN)', 'roi' ),
+						'rows'        => 6,
+						'placeholder' => __( 'Saisir le PGN de la solution...', 'roi' ),
+					)
+				);
 				?>
 			</div>
 		</div>

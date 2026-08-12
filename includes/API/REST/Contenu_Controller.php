@@ -40,7 +40,7 @@ class Contenu_Controller {
 	 * @return void
 	 */
 	public function init(): void {
-		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
+		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 	}
 
 	/**
@@ -52,13 +52,13 @@ class Contenu_Controller {
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>\d+)',
-			[
-				[
+			array(
+				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'get_contenu' ],
-					'permission_callback' => [ Permissions_Helper::class, 'check_apprentissage_access' ],
-				],
-			]
+					'callback'            => array( $this, 'get_contenu' ),
+					'permission_callback' => array( Permissions_Helper::class, 'check_apprentissage_access' ),
+				),
+			)
 		);
 	}
 
@@ -72,11 +72,11 @@ class Contenu_Controller {
 		$id   = (int) $request->get_param( 'id' );
 		$post = get_post( $id );
 
-		if ( ! $post || 'publish' !== $post->post_status || ! in_array( $post->post_type, [ 'roi_exercice', 'roi_lecon' ], true ) ) {
+		if ( ! $post || 'publish' !== $post->post_status || ! in_array( $post->post_type, array( 'roi_exercice', 'roi_lecon' ), true ) ) {
 			return new WP_Error(
 				'rest_contenu_not_found',
 				__( 'Contenu non trouvé ou non publié.', 'roi' ),
-				[ 'status' => 404 ]
+				array( 'status' => 404 )
 			);
 		}
 
@@ -95,14 +95,14 @@ class Contenu_Controller {
 		$niveau_meta = get_post_meta( $post->ID, $is_exercice ? '_roi_exercice_niveau' : '_roi_lecon_niveau', true );
 		$niveau      = is_numeric( $niveau_meta ) ? (int) $niveau_meta : 1;
 
-		$data = [
+		$data = array(
 			'id'               => $post->ID,
 			'titre'            => $post->post_title,
 			'post_type'        => $post->post_type,
 			'chapitre_nom'     => $chapitre_nom,
 			'chapitre_couleur' => $chapitre_couleur,
 			'niveau'           => $niveau,
-		];
+		);
 
 		if ( $is_exercice ) {
 			$type_meta   = get_post_meta( $post->ID, '_roi_exercice_type', true );

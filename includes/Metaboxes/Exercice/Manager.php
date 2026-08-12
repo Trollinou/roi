@@ -37,10 +37,10 @@ class Manager {
 	 * Registers actions.
 	 */
 	public function __construct() {
-		add_action( 'add_meta_boxes', [ $this, 'ajouter_metabox' ] );
-		add_action( 'save_post', [ $this, 'sauvegarder_metabox' ] );
-		add_filter( 'wp_insert_post_data', [ $this, 'valider_exercice_donnees' ], 10, 2 );
-		add_action( 'admin_notices', [ $this, 'afficher_validation_erreurs' ] );
+		add_action( 'add_meta_boxes', array( $this, 'ajouter_metabox' ) );
+		add_action( 'save_post', array( $this, 'sauvegarder_metabox' ) );
+		add_filter( 'wp_insert_post_data', array( $this, 'valider_exercice_donnees' ), 10, 2 );
+		add_action( 'admin_notices', array( $this, 'afficher_validation_erreurs' ) );
 	}
 
 	/**
@@ -52,7 +52,7 @@ class Manager {
 		add_meta_box(
 			'roi_exercice_config_box',
 			'Configuration de l\'Exercice (Headless)',
-			[ $this, 'afficher_metabox' ],
+			array( $this, 'afficher_metabox' ),
 			'roi_exercice',
 			'normal',
 			'high'
@@ -68,9 +68,9 @@ class Manager {
 	public function afficher_metabox( $post ): void {
 		wp_nonce_field( 'roi_sauvegarder_exercice', 'roi_exercice_nonce' );
 
-		$type     = get_post_meta( $post->ID, '_roi_exercice_type', true );
-		$niveau   = get_post_meta( $post->ID, '_roi_exercice_niveau', true );
-		$config   = get_post_meta( $post->ID, '_roi_exercice_config', true );
+		$type   = get_post_meta( $post->ID, '_roi_exercice_type', true );
+		$niveau = get_post_meta( $post->ID, '_roi_exercice_niveau', true );
+		$config = get_post_meta( $post->ID, '_roi_exercice_config', true );
 
 		if ( empty( $config ) ) {
 			$config = '{"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "color": "white", "solution": []}';
@@ -78,7 +78,7 @@ class Manager {
 
 		$config_data = json_decode( $config, true );
 		if ( ! is_array( $config_data ) ) {
-			$config_data = [];
+			$config_data = array();
 		}
 		?>
 		<p>
@@ -113,7 +113,7 @@ class Manager {
 
 		<?php
 		// Render type sections via registry
-		$type_classes = [
+		$type_classes = array(
 			Type100Commandements::class,
 			TypePopEchecs::class,
 			TypePartieHeros::class,
@@ -130,7 +130,7 @@ class Manager {
 			TypeCapOuPasCap::class,
 			TypeJugementFinal::class,
 			TypeDestinationFinale::class,
-		];
+		);
 
 		foreach ( $type_classes as $type_class ) {
 			( new $type_class() )->render( $post, $config_data );
@@ -247,7 +247,7 @@ class Manager {
 		}
 
 		$is_publishing = 'publish' === $data['post_status'];
-		$errors        = [];
+		$errors        = array();
 
 		// 1. Title validation
 		$title = trim( $data['post_title'] ?? '' );
@@ -261,7 +261,7 @@ class Manager {
 			$niveau = (int) get_post_meta( (int) $postarr['ID'], '_roi_exercice_niveau', true );
 		}
 		if ( $niveau < 1 || $niveau > 4 ) {
-			$errors[] = __( "Le niveau de difficulté (1 à 4) est obligatoire.", 'roi' );
+			$errors[] = __( 'Le niveau de difficulté (1 à 4) est obligatoire.', 'roi' );
 		}
 
 		// 3. Exercise type validation (value between 1 and 16)

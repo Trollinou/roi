@@ -21,11 +21,11 @@ class FenInput {
 	 * @param array<string, mixed> $args Configuration arguments.
 	 * @return void
 	 */
-	public static function render( array $args = [] ): void {
+	public static function render( array $args = array() ): void {
 		$id                = isset( $args['id'] ) && is_string( $args['id'] ) ? $args['id'] : 'roi_fen_input';
 		$name              = isset( $args['name'] ) && is_string( $args['name'] ) ? $args['name'] : '';
 		$value             = isset( $args['value'] ) && is_string( $args['value'] ) ? $args['value'] : 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-		$shapes            = $args['shapes'] ?? [];
+		$shapes            = $args['shapes'] ?? array();
 		$label             = isset( $args['label'] ) && is_string( $args['label'] ) ? $args['label'] : __( 'Position de départ (FEN) :', 'roi' );
 		$show_orientation  = ! isset( $args['show_orientation'] ) || (bool) $args['show_orientation'];
 		$orientation_id    = isset( $args['orientation_id'] ) && is_string( $args['orientation_id'] ) ? $args['orientation_id'] : $id . '_color';
@@ -39,7 +39,7 @@ class FenInput {
 		$color_class       = isset( $args['color_class'] ) && is_string( $args['color_class'] ) ? $args['color_class'] : 'roi-color-field';
 		$button_class      = isset( $args['button_class'] ) && is_string( $args['button_class'] ) ? $args['button_class'] : 'button roi-btn-open-fen-editor';
 		$readonly          = isset( $args['readonly'] ) && (bool) $args['readonly'];
-		
+
 		// Build data attributes string
 		$data_attrs_str = '';
 		if ( isset( $args['data_attributes'] ) ) {
@@ -63,7 +63,7 @@ class FenInput {
 		$orientation_display = ( 'black' === $active_color ) ? __( 'Noir', 'roi' ) : __( 'Blanc', 'roi' );
 
 		// Process initial shapes array & count circles and arrows
-		$shapes_list = [];
+		$shapes_list = array();
 		if ( is_string( $shapes ) && ! empty( $shapes ) ) {
 			$decoded = json_decode( $shapes, true );
 			if ( is_array( $decoded ) ) {
@@ -78,9 +78,9 @@ class FenInput {
 		foreach ( $shapes_list as $s ) {
 			if ( is_array( $s ) && isset( $s['orig'] ) ) {
 				if ( isset( $s['dest'] ) && $s['dest'] !== $s['orig'] ) {
-					$arrows++;
+					++$arrows;
 				} else {
-					$circles++;
+					++$circles;
 				}
 			}
 		}
@@ -97,13 +97,16 @@ class FenInput {
 			<div class="roi-control-inline roi-fen-input-group">
 				<div class="roi-control-input-wrapper roi-fen-wrapper">
 					<input type="text" 
-					       id="<?php echo esc_attr( $id ); ?>" 
-					       <?php if ( ! empty( $name ) ) : ?>name="<?php echo esc_attr( $name ); ?>"<?php endif; ?> 
-					       value="<?php echo esc_attr( $value ); ?>" 
-					       class="regular-text roi-control-input <?php echo esc_attr( $input_class ); ?>" 
-					       placeholder="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-					       <?php echo $readonly ? 'readonly' : ''; ?>
-					       <?php echo $data_attrs_str; ?>>
+							id="<?php echo esc_attr( $id ); ?>" 
+							<?php
+							if ( ! empty( $name ) ) :
+								?>
+								name="<?php echo esc_attr( $name ); ?>"<?php endif; ?> 
+							value="<?php echo esc_attr( $value ); ?>" 
+							class="regular-text roi-control-input <?php echo esc_attr( $input_class ); ?>" 
+							placeholder="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+							<?php echo $readonly ? 'readonly' : ''; ?>
+							<?php echo $data_attrs_str; ?>>
 				</div>
 
 				<?php if ( $show_orientation ) : ?>
@@ -112,14 +115,17 @@ class FenInput {
 							<strong><?php esc_html_e( 'Orientation :', 'roi' ); ?></strong>
 						</label>
 						<input type="text" 
-						       id="<?php echo esc_attr( $orientation_id ); ?>" 
-						       <?php if ( ! empty( $orientation_name ) ) : ?>name="<?php echo esc_attr( $orientation_name ); ?>"<?php endif; ?> 
-						       value="<?php echo esc_attr( $orientation_display ); ?>" 
-						       class="roi-control-input-readonly roi-orientation-field <?php echo esc_attr( $color_class ); ?>"
-						       readonly 
-						       tabindex="-1"
-						       data-color="<?php echo esc_attr( $active_color ); ?>"
-						       <?php echo $data_attrs_str; ?>>
+								id="<?php echo esc_attr( $orientation_id ); ?>" 
+								<?php
+								if ( ! empty( $orientation_name ) ) :
+									?>
+									name="<?php echo esc_attr( $orientation_name ); ?>"<?php endif; ?> 
+								value="<?php echo esc_attr( $orientation_display ); ?>" 
+								class="roi-control-input-readonly roi-orientation-field <?php echo esc_attr( $color_class ); ?>"
+								readonly 
+								tabindex="-1"
+								data-color="<?php echo esc_attr( $active_color ); ?>"
+								<?php echo $data_attrs_str; ?>>
 					</div>
 				<?php endif; ?>
 
@@ -128,29 +134,35 @@ class FenInput {
 						<strong><?php esc_html_e( 'Formes :', 'roi' ); ?></strong>
 					</label>
 					<input type="text" 
-					       id="<?php echo esc_attr( $shapes_summary_id ); ?>" 
-					       value="<?php echo esc_attr( $shapes_summary ); ?>" 
-					       class="roi-control-input-readonly roi-shapes-summary-field" 
-					       readonly 
-					       tabindex="-1"
-					       title="<?php esc_attr_e( 'Nombre de cercles (◯) et flèches (➔)', 'roi' ); ?>">
+							id="<?php echo esc_attr( $shapes_summary_id ); ?>" 
+							value="<?php echo esc_attr( $shapes_summary ); ?>" 
+							class="roi-control-input-readonly roi-shapes-summary-field" 
+							readonly 
+							tabindex="-1"
+							title="<?php esc_attr_e( 'Nombre de cercles (◯) et flèches (➔)', 'roi' ); ?>">
 					<input type="hidden" 
-					       id="<?php echo esc_attr( $shapes_id ); ?>" 
-					       <?php if ( ! empty( $shapes_name ) ) : ?>name="<?php echo esc_attr( $shapes_name ); ?>"<?php endif; ?> 
-					       value="<?php echo esc_attr( false !== $shapes_json ? $shapes_json : '[]' ); ?>" 
-					       class="roi-shapes-field">
+							id="<?php echo esc_attr( $shapes_id ); ?>" 
+							<?php
+							if ( ! empty( $shapes_name ) ) :
+								?>
+								name="<?php echo esc_attr( $shapes_name ); ?>"<?php endif; ?> 
+							value="<?php echo esc_attr( false !== $shapes_json ? $shapes_json : '[]' ); ?>" 
+							class="roi-shapes-field">
 				</div>
 
 				<div class="roi-control-button-wrapper">
 					<button type="button" 
-					        id="<?php echo esc_attr( $button_id ); ?>" 
-					        class="<?php echo esc_attr( $button_class ); ?>" 
-					        title="<?php esc_attr_e( 'Éditer la position visuellement', 'roi' ); ?>"
-					        data-target-fen="<?php echo esc_attr( $id ); ?>"
-					        <?php if ( $show_orientation ) : ?>data-target-color="<?php echo esc_attr( $orientation_id ); ?>"<?php endif; ?>
-					        data-target-shapes="<?php echo esc_attr( $shapes_id ); ?>"
-					        data-target-shapes-summary="<?php echo esc_attr( $shapes_summary_id ); ?>"
-					        <?php echo $data_attrs_str; ?>>
+							id="<?php echo esc_attr( $button_id ); ?>" 
+							class="<?php echo esc_attr( $button_class ); ?>" 
+							title="<?php esc_attr_e( 'Éditer la position visuellement', 'roi' ); ?>"
+							data-target-fen="<?php echo esc_attr( $id ); ?>"
+							<?php
+							if ( $show_orientation ) :
+								?>
+								data-target-color="<?php echo esc_attr( $orientation_id ); ?>"<?php endif; ?>
+							data-target-shapes="<?php echo esc_attr( $shapes_id ); ?>"
+							data-target-shapes-summary="<?php echo esc_attr( $shapes_summary_id ); ?>"
+							<?php echo $data_attrs_str; ?>>
 						<span class="dashicons dashicons-edit"></span>
 						<span class="roi-btn-text"><?php echo esc_html( $button_label ); ?></span>
 					</button>

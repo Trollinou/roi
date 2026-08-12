@@ -39,7 +39,7 @@ class Config_Controller {
 	 * @return void
 	 */
 	public function init(): void {
-		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
+		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 	}
 
 	/**
@@ -51,13 +51,13 @@ class Config_Controller {
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
-			[
-				[
+			array(
+				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'get_config' ],
+					'callback'            => array( $this, 'get_config' ),
 					'permission_callback' => '__return_true',
-				],
-			]
+				),
+			)
 		);
 	}
 
@@ -68,16 +68,16 @@ class Config_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function get_config( WP_REST_Request $request ): WP_REST_Response {
-		$default_roles = [ 'administrator', 'staff', 'entraineur', 'editor', 'membre' ];
+		$default_roles = array( 'administrator', 'staff', 'entraineur', 'editor', 'membre' );
 		$allowed_roles = get_option( 'roi_apprentissage_allowed_roles', $default_roles );
 
 		if ( false === $allowed_roles ) {
 			$allowed_roles = $default_roles;
 		}
 
-		$data = [
+		$data = array(
 			'apprentissage_allowed_roles' => $allowed_roles,
-		];
+		);
 
 		return rest_ensure_response( $data );
 	}

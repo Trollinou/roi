@@ -21,7 +21,7 @@ class Exercice {
 	 * @return void
 	 */
 	public function init(): void {
-		add_action( 'init', [ $this, 'register' ], 0 );
+		add_action( 'init', array( $this, 'register' ), 0 );
 	}
 
 	/**
@@ -30,7 +30,7 @@ class Exercice {
 	 * @return void
 	 */
 	public function register(): void {
-		$labels = [
+		$labels = array(
 			'name'                  => _x( 'Exercices', 'Post Type General Name', 'roi' ),
 			'singular_name'         => _x( 'Exercice', 'Post Type Singular Name', 'roi' ),
 			'menu_name'             => __( 'Exercices', 'roi' ),
@@ -52,14 +52,14 @@ class Exercice {
 			'items_list'            => __( 'Liste des exercices', 'roi' ),
 			'items_list_navigation' => __( 'Navigation de la liste des exercices', 'roi' ),
 			'filter_items_list'     => __( 'Filtrer la liste des exercices', 'roi' ),
-		];
+		);
 
-		$args = [
+		$args = array(
 			'label'               => __( 'Exercice', 'roi' ),
 			'description'         => __( 'Exercices de la section Échecs', 'roi' ),
 			'labels'              => $labels,
-			'supports'            => [ 'title', 'revision' ],
-			'taxonomies'          => [ 'roi_chapitre' ],
+			'supports'            => array( 'title', 'revision' ),
+			'taxonomies'          => array( 'roi_chapitre' ),
 			'hierarchical'        => false,
 			'public'              => true,
 			'show_ui'             => true,
@@ -71,7 +71,7 @@ class Exercice {
 			'exclude_from_search' => false,
 			'publicly_queryable'  => true,
 			'capability_type'     => 'post',
-			'capabilities'        => [
+			'capabilities'        => array(
 				'edit_post'          => 'edit_exercice',
 				'read_post'          => 'read_exercice',
 				'delete_post'        => 'delete_exercice',
@@ -79,10 +79,10 @@ class Exercice {
 				'edit_others_posts'  => 'edit_others_exercices',
 				'publish_posts'      => 'publish_exercices',
 				'read_private_posts' => 'read_private_exercices',
-			],
+			),
 			'map_meta_cap'        => true,
 			'show_in_rest'        => true,
-		];
+		);
 
 		register_post_type( 'roi_exercice', $args );
 	}

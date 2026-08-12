@@ -40,7 +40,7 @@ class Games_Controller {
 	 * @return void
 	 */
 	public function init(): void {
-		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
+		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 	}
 
 	/**
@@ -52,13 +52,13 @@ class Games_Controller {
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
-			[
-				[
+			array(
+				array(
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => [ $this, 'save_game' ],
-					'permission_callback' => [ $this, 'save_game_permissions_check' ],
-				],
-			]
+					'callback'            => array( $this, 'save_game' ),
+					'permission_callback' => array( $this, 'save_game_permissions_check' ),
+				),
+			)
 		);
 	}
 
@@ -87,38 +87,42 @@ class Games_Controller {
 		$game_date_raw    = sanitize_text_field( (string) $request->get_param( 'game_date' ) );
 
 		if ( $member_id <= 0 ) {
-			return new WP_Error( 'invalid_member', __( 'ID de membre invalide.', 'roi' ), [ 'status' => 400 ] );
+			return new WP_Error( 'invalid_member', __( 'ID de membre invalide.', 'roi' ), array( 'status' => 400 ) );
 		}
 
 		// Contrôle anti-doublons (Même membre et même PGN)
-		$existing_games = get_posts( [
-			'post_type'      => 'roi_partie',
-			'posts_per_page' => 1,
-			'fields'         => 'ids',
-			'meta_query'     => [
-				[
-					'key'   => '_roi_member_id',
-					'value' => $member_id,
-				],
-				[
-					'key'   => '_roi_pgn',
-					'value' => $pgn,
-				],
-			],
-		] );
+		$existing_games = get_posts(
+			array(
+				'post_type'      => 'roi_partie',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'meta_query'     => array(
+					array(
+						'key'   => '_roi_member_id',
+						'value' => $member_id,
+					),
+					array(
+						'key'   => '_roi_pgn',
+						'value' => $pgn,
+					),
+				),
+			)
+		);
 
 		if ( ! empty( $existing_games ) ) {
-			return rest_ensure_response( [
-				'success' => true,
-				'id'      => $existing_games[0],
-				'message' => __( 'Partie déjà enregistrée.', 'roi' ),
-			] );
+			return rest_ensure_response(
+				array(
+					'success' => true,
+					'id'      => $existing_games[0],
+					'message' => __( 'Partie déjà enregistrée.', 'roi' ),
+				)
+			);
 		}
 
 		// Vérifier que le membre existe bien (CPT adherent de Dame)
 		$member = get_post( $member_id );
 		if ( ! $member || 'adherent' !== $member->post_type ) {
-			return new WP_Error( 'member_not_found', __( 'Membre non trouvé.', 'roi' ), [ 'status' => 404 ] );
+			return new WP_Error( 'member_not_found', __( 'Membre non trouvé.', 'roi' ), array( 'status' => 404 ) );
 		}
 
 		// Formater la date fournie ou repli sur la date actuelle
@@ -134,18 +138,21 @@ class Games_Controller {
 
 		// Insérer le post roi_partie
 		$post_title = sprintf( 'Partie de %s - %s', $member->post_title, wp_date( 'd/m/Y H:i', strtotime( $post_date ) ) );
-		
-		$post_id = wp_insert_post( [
-			'post_type'    => 'roi_partie',
-			'post_status'  => 'publish',
-			'post_title'   => $post_title,
-			'post_content' => $pgn, // Stockage du PGN dans le contenu également
-			'post_author'  => $current_user->ID,
-			'post_date'    => $post_date,
-		], true );
+
+		$post_id = wp_insert_post(
+			array(
+				'post_type'    => 'roi_partie',
+				'post_status'  => 'publish',
+				'post_title'   => $post_title,
+				'post_content' => $pgn, // Stockage du PGN dans le contenu également
+				'post_author'  => $current_user->ID,
+				'post_date'    => $post_date,
+			),
+			true
+		);
 
 		if ( is_wp_error( $post_id ) || 0 === $post_id ) {
-			return new WP_Error( 'db_error', __( 'Erreur lors de l\'enregistrement en base de données.', 'roi' ), [ 'status' => 500 ] );
+			return new WP_Error( 'db_error', __( 'Erreur lors de l\'enregistrement en base de données.', 'roi' ), array( 'status' => 500 ) );
 		}
 
 		// Sauvegarde des métadonnées avec préfixe _roi_
@@ -157,10 +164,12 @@ class Games_Controller {
 		update_post_meta( $post_id, '_roi_game_duration', $duration );
 		update_post_meta( $post_id, '_roi_game_date', $post_date );
 
-		return rest_ensure_response( [
-			'success' => true,
-			'id'      => $post_id,
-			'message' => __( 'Partie enregistrée avec succès.', 'roi' ),
-		] );
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'id'      => $post_id,
+				'message' => __( 'Partie enregistrée avec succès.', 'roi' ),
+			)
+		);
 	}
 }

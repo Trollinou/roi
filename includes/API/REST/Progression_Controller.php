@@ -41,7 +41,7 @@ class Progression_Controller {
 	 * @return void
 	 */
 	public function init(): void {
-		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
+		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 	}
 
 	/**
@@ -54,44 +54,44 @@ class Progression_Controller {
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
-			[
-				[
+			array(
+				array(
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => [ $this, 'enregistrer_progression' ],
-					'permission_callback' => [ $this, 'check_adherent_permissions' ],
-				],
-				[
+					'callback'            => array( $this, 'enregistrer_progression' ),
+					'permission_callback' => array( $this, 'check_adherent_permissions' ),
+				),
+				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'obtenir_progression' ],
-					'permission_callback' => [ $this, 'check_adherent_permissions' ],
-				],
-			]
+					'callback'            => array( $this, 'obtenir_progression' ),
+					'permission_callback' => array( $this, 'check_adherent_permissions' ),
+				),
+			)
 		);
 
 		// Tâche 2 : Route de consultation (Entraîneur) - GET /wp-json/roi/v1/progression/groupe
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/groupe',
-			[
-				[
+			array(
+				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'obtenir_progression_groupe' ],
-					'permission_callback' => [ $this, 'check_entraineur_permissions' ],
-				],
-			]
+					'callback'            => array( $this, 'obtenir_progression_groupe' ),
+					'permission_callback' => array( $this, 'check_entraineur_permissions' ),
+				),
+			)
 		);
 
 		// Route de réinitialisation de progression (Entraîneur) - POST /wp-json/roi/v1/progression/reset
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/reset',
-			[
-				[
+			array(
+				array(
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => [ $this, 'reset_progression_cours' ],
-					'permission_callback' => [ $this, 'check_entraineur_permissions' ],
-				],
-			]
+					'callback'            => array( $this, 'reset_progression_cours' ),
+					'permission_callback' => array( $this, 'check_entraineur_permissions' ),
+				),
+			)
 		);
 	}
 
@@ -109,7 +109,7 @@ class Progression_Controller {
 			return new WP_Error(
 				'rest_forbidden',
 				__( 'Vous devez être connecté.', 'roi' ),
-				[ 'status' => 401 ]
+				array( 'status' => 401 )
 			);
 		}
 
@@ -120,11 +120,11 @@ class Progression_Controller {
 			return new WP_Error(
 				'rest_forbidden',
 				__( 'Accès réservé aux entraîneurs et administrateurs.', 'roi' ),
-				[ 'status' => 403 ]
+				array( 'status' => 403 )
 			);
 		}
 
-		$default_roles = [ 'administrator', 'staff', 'entraineur', 'editor', 'membre' ];
+		$default_roles = array( 'administrator', 'staff', 'entraineur', 'editor', 'membre' );
 		$allowed_roles = get_option( 'roi_apprentissage_allowed_roles', $default_roles );
 
 		if ( false === $allowed_roles ) {
@@ -137,7 +137,7 @@ class Progression_Controller {
 			return new WP_Error(
 				'rest_forbidden',
 				__( 'Accès non autorisé.', 'roi' ),
-				[ 'status' => 403 ]
+				array( 'status' => 403 )
 			);
 		}
 
@@ -171,16 +171,16 @@ class Progression_Controller {
 			return new WP_Error(
 				'invalid_element_id',
 				__( 'ID d\'élément invalide.', 'roi' ),
-				[ 'status' => 400 ]
+				array( 'status' => 400 )
 			);
 		}
 
 		$post = get_post( $element_id );
-		if ( ! $post || ! in_array( $post->post_type, [ 'roi_exercice', 'roi_lecon' ], true ) ) {
+		if ( ! $post || ! in_array( $post->post_type, array( 'roi_exercice', 'roi_lecon' ), true ) ) {
 			return new WP_Error(
 				'element_not_found',
 				__( 'Élément non trouvé.', 'roi' ),
-				[ 'status' => 404 ]
+				array( 'status' => 404 )
 			);
 		}
 
@@ -200,18 +200,18 @@ class Progression_Controller {
 		}
 
 		if ( ! $already_validated ) {
-			$data = [
+			$data = array(
 				'element_id' => $element_id,
 				'date'       => current_time( 'mysql' ),
-			];
+			);
 			add_user_meta( $user_id, $meta_key, $data, false );
 		}
 
 		return new WP_REST_Response(
-			[
+			array(
 				'success' => true,
 				'message' => __( 'Progression sauvegardée', 'roi' ),
-			],
+			),
 			200
 		);
 	}
@@ -223,21 +223,23 @@ class Progression_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function obtenir_progression_groupe( WP_REST_Request $request ): WP_REST_Response {
-		$default_roles = [ 'administrator', 'staff', 'entraineur', 'editor', 'membre' ];
+		$default_roles = array( 'administrator', 'staff', 'entraineur', 'editor', 'membre' );
 		$allowed_roles = get_option( 'roi_apprentissage_allowed_roles', $default_roles );
 
 		if ( false === $allowed_roles || empty( $allowed_roles ) ) {
 			$allowed_roles = $default_roles;
 		}
 
-		$query = new WP_User_Query( [
-			'role__in' => $allowed_roles,
-			'orderby'  => 'display_name',
-			'order'    => 'ASC',
-		] );
+		$query = new WP_User_Query(
+			array(
+				'role__in' => $allowed_roles,
+				'orderby'  => 'display_name',
+				'order'    => 'ASC',
+			)
+		);
 
-		$users    = $query->get_results();
-		$groupe   = [];
+		$users  = $query->get_results();
+		$groupe = array();
 
 		foreach ( $users as $user ) {
 			$user_meta = get_user_meta( $user->ID );
@@ -246,7 +248,7 @@ class Progression_Controller {
 			}
 
 			// Trouver toutes les clés de progression pour cet utilisateur
-			$progression_keys = [];
+			$progression_keys = array();
 			foreach ( $user_meta as $key => $val ) {
 				if ( str_starts_with( $key, '_roi_element_valide' ) ) {
 					$progression_keys[] = $key;
@@ -258,8 +260,8 @@ class Progression_Controller {
 			}
 
 			foreach ( $progression_keys as $key ) {
-				$meta_entries = get_user_meta( $user->ID, $key, false );
-				$elements_valides = [];
+				$meta_entries     = get_user_meta( $user->ID, $key, false );
+				$elements_valides = array();
 
 				if ( is_array( $meta_entries ) ) {
 					foreach ( $meta_entries as $entry ) {
@@ -306,14 +308,14 @@ class Progression_Controller {
 					$nom    = '';
 				}
 
-				$groupe[] = [
+				$groupe[] = array(
 					'id'               => $user->ID . '__' . $key, // ID unique pour le tableau React (double underscore)
 					'display_id'       => $display_id,
 					'nom'              => $nom,
 					'prenom'           => $prenom,
 					'display_name'     => $display_name,
 					'elements_valides' => $elements_valides,
-				];
+				);
 			}
 		}
 
@@ -330,7 +332,7 @@ class Progression_Controller {
 		$user_id      = get_current_user_id();
 		$meta_key     = $this->get_progression_meta_key( $request );
 		$meta_entries = get_user_meta( $user_id, $meta_key, false );
-		$elements     = [];
+		$elements     = array();
 
 		if ( is_array( $meta_entries ) ) {
 			foreach ( $meta_entries as $entry ) {
@@ -366,19 +368,19 @@ class Progression_Controller {
 			$student_id = (int) $student_id_raw;
 		}
 
-		$course_id  = (int) $request->get_param( 'course_id' );
+		$course_id = (int) $request->get_param( 'course_id' );
 
 		if ( $student_id <= 0 || $course_id <= 0 ) {
 			return new \WP_Error(
 				'invalid_params',
 				__( 'Paramètres invalides.', 'roi' ),
-				[ 'status' => 400 ]
+				array( 'status' => 400 )
 			);
 		}
 
 		// Retrieve course playlist
 		$playlist_meta = get_post_meta( $course_id, '_roi_cours_playlist', true );
-		$playlist_ids  = [];
+		$playlist_ids  = array();
 		if ( is_string( $playlist_meta ) && '' !== $playlist_meta ) {
 			$decoded = json_decode( $playlist_meta, true );
 			if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
@@ -392,10 +394,10 @@ class Progression_Controller {
 
 		if ( empty( $playlist_ids ) ) {
 			return new WP_REST_Response(
-				[
+				array(
 					'success' => true,
 					'message' => __( 'Le cours ne contient aucun élément à réinitialiser.', 'roi' ),
-				],
+				),
 				200
 			);
 		}
@@ -419,10 +421,10 @@ class Progression_Controller {
 		}
 
 		return new WP_REST_Response(
-			[
+			array(
 				'success' => true,
 				'message' => __( 'Progression réinitialisée avec succès.', 'roi' ),
-			],
+			),
 			200
 		);
 	}

@@ -40,7 +40,7 @@ class Stockfish_Controller {
 	 * @return void
 	 */
 	public function init(): void {
-		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
+		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 	}
 
 	/**
@@ -52,13 +52,13 @@ class Stockfish_Controller {
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
-			[
-				[
+			array(
+				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'serve_wasm' ],
+					'callback'            => array( $this, 'serve_wasm' ),
 					'permission_callback' => '__return_true',
-				],
-			]
+				),
+			)
 		);
 	}
 
@@ -72,7 +72,7 @@ class Stockfish_Controller {
 		$file_path = ROI_PLUGIN_DIR . 'assets/js/stockfish.wasm';
 
 		if ( ! file_exists( $file_path ) ) {
-			return new WP_Error( 'file_not_found', __( 'Fichier non trouvé.', 'roi' ), [ 'status' => 404 ] );
+			return new WP_Error( 'file_not_found', __( 'Fichier non trouvé.', 'roi' ), array( 'status' => 404 ) );
 		}
 
 		// Clean output buffers to prevent any garbage characters

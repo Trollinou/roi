@@ -20,8 +20,8 @@ class Settings {
 	 * Registers actions.
 	 */
 	public function __construct() {
-		add_action( 'init', [ $this, 'enregistrer_meta' ] );
-		add_action( 'save_post', [ $this, 'sauvegarder_metabox' ] );
+		add_action( 'init', array( $this, 'enregistrer_meta' ) );
+		add_action( 'save_post', array( $this, 'sauvegarder_metabox' ) );
 	}
 
 	/**
@@ -30,21 +30,25 @@ class Settings {
 	 * @return void
 	 */
 	public function enregistrer_meta(): void {
-		register_post_meta( 'roi_lecon', '_roi_lecon_niveau', [
-			'show_in_rest'      => [
-				'schema' => [
-					'type'    => 'integer',
-					'default' => 1,
-				],
-			],
-			'single'            => true,
-			'type'              => 'integer',
-			'default'           => 1,
-			'sanitize_callback' => 'absint',
-			'auth_callback'     => function( bool $allowed, string $meta_key, int $post_id ): bool {
-				return current_user_can( 'edit_post', $post_id );
-			},
-		] );
+		register_post_meta(
+			'roi_lecon',
+			'_roi_lecon_niveau',
+			array(
+				'show_in_rest'      => array(
+					'schema' => array(
+						'type'    => 'integer',
+						'default' => 1,
+					),
+				),
+				'single'            => true,
+				'type'              => 'integer',
+				'default'           => 1,
+				'sanitize_callback' => 'absint',
+				'auth_callback'     => function ( bool $allowed, string $meta_key, int $post_id ): bool {
+					return current_user_can( 'edit_post', $post_id );
+				},
+			)
+		);
 	}
 
 	/**
@@ -75,5 +79,3 @@ class Settings {
 		}
 	}
 }
-
-

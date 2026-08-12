@@ -20,10 +20,10 @@ class Builder {
 	 * Registers actions.
 	 */
 	public function __construct() {
-		add_action( 'add_meta_boxes', [ $this, 'ajouter_metabox' ] );
-		add_action( 'add_meta_boxes_roi_cours', [ $this, 'ordonner_metaboxes_side' ], 999 );
-		add_action( 'save_post', [ $this, 'sauvegarder_metabox' ] );
-		add_action( 'wp_ajax_roi_search_cours_items', [ $this, 'ajax_recherche_elements' ] );
+		add_action( 'add_meta_boxes', array( $this, 'ajouter_metabox' ) );
+		add_action( 'add_meta_boxes_roi_cours', array( $this, 'ordonner_metaboxes_side' ), 999 );
+		add_action( 'save_post', array( $this, 'sauvegarder_metabox' ) );
+		add_action( 'wp_ajax_roi_search_cours_items', array( $this, 'ajax_recherche_elements' ) );
 	}
 
 	/**
@@ -35,7 +35,7 @@ class Builder {
 		add_meta_box(
 			'roi_cours_builder_box',
 			__( 'Constructeur de Cours (Playlist)', 'roi' ),
-			[ $this, 'afficher_metabox' ],
+			array( $this, 'afficher_metabox' ),
 			'roi_cours',
 			'normal',
 			'high'
@@ -44,7 +44,7 @@ class Builder {
 		add_meta_box(
 			'roi_cours_level_box',
 			__( 'Niveau du cours', 'roi' ),
-			[ $this, 'afficher_metabox_niveau' ],
+			array( $this, 'afficher_metabox_niveau' ),
 			'roi_cours',
 			'side',
 			'high'
@@ -66,17 +66,17 @@ class Builder {
 			return;
 		}
 
-		$desired_order = [
+		$desired_order = array(
 			'pageparentdiv',
 			'roi_cours_level_box',
 			'roi_chapitrediv',
 			'taxonomy-roi_chapitre',
-		];
+		);
 
-		$reordered = [];
+		$reordered = array();
 
 		foreach ( $desired_order as $box_id ) {
-			foreach ( [ 'high', 'core', 'default', 'low' ] as $priority ) {
+			foreach ( array( 'high', 'core', 'default', 'low' ) as $priority ) {
 				if ( isset( $wp_meta_boxes['roi_cours']['side'][ $priority ][ $box_id ] ) ) {
 					$reordered[ $box_id ] = $wp_meta_boxes['roi_cours']['side'][ $priority ][ $box_id ];
 					unset( $wp_meta_boxes['roi_cours']['side'][ $priority ][ $box_id ] );
@@ -85,7 +85,7 @@ class Builder {
 			}
 		}
 
-		foreach ( [ 'high', 'core', 'default', 'low' ] as $priority ) {
+		foreach ( array( 'high', 'core', 'default', 'low' ) as $priority ) {
 			if ( ! empty( $wp_meta_boxes['roi_cours']['side'][ $priority ] ) ) {
 				foreach ( $wp_meta_boxes['roi_cours']['side'][ $priority ] as $box_id => $box ) {
 					$reordered[ $box_id ] = $box;
@@ -93,9 +93,9 @@ class Builder {
 			}
 		}
 
-		$wp_meta_boxes['roi_cours']['side'] = [
+		$wp_meta_boxes['roi_cours']['side'] = array(
 			'high' => $reordered,
-		];
+		);
 	}
 
 	/**
@@ -138,24 +138,29 @@ class Builder {
 			$course_chapter_id = (int) $course_term->term_id;
 		}
 
-		$chapitres = get_terms( [
-			'taxonomy'   => 'roi_chapitre',
-			'hide_empty' => false,
-		] );
+		$chapitres = get_terms(
+			array(
+				'taxonomy'   => 'roi_chapitre',
+				'hide_empty' => false,
+			)
+		);
 
 		if ( ! is_wp_error( $chapitres ) && ! empty( $chapitres ) ) {
-			$order_map = [
+			$order_map = array(
 				'Matérialité'         => 1,
 				'Activité des Pièces' => 2,
 				'Sécurité du Roi'     => 3,
 				'Structure de Pions'  => 4,
 				'Combination'         => 5,
-			];
-			usort( $chapitres, function( $a, $b ) use ( $order_map ) {
-				$pos_a = $order_map[ $a->name ] ?? 99;
-				$pos_b = $order_map[ $b->name ] ?? 99;
-				return $pos_a <=> $pos_b;
-			} );
+			);
+			usort(
+				$chapitres,
+				function ( $a, $b ) use ( $order_map ) {
+					$pos_a = $order_map[ $a->name ] ?? 99;
+					$pos_b = $order_map[ $b->name ] ?? 99;
+					return $pos_a <=> $pos_b;
+				}
+			);
 		}
 		?>
 		<style>
@@ -243,7 +248,7 @@ class Builder {
 								$item_type = sanitize_text_field( $item['type'] );
 								$post_obj  = get_post( $item_id );
 
-								if ( $post_obj && in_array( $post_obj->post_type, [ 'roi_lecon', 'roi_exercice' ], true ) ) {
+								if ( $post_obj && in_array( $post_obj->post_type, array( 'roi_lecon', 'roi_exercice' ), true ) ) {
 									$title = get_the_title( $post_obj );
 
 									// Get color and ID
@@ -268,14 +273,34 @@ class Builder {
 									$type_label = ( 'roi_lecon' === $item_type ) ? 'Leçon' : 'Exercice';
 
 									// Color style details
-									$color_palette = [
-										'primary'  => [ 'bg' => '#e5f3ff', 'border' => '#0073aa', 'text' => '#005a87' ],
-										'warning'  => [ 'bg' => '#fff5ec', 'border' => '#d94f00', 'text' => '#a63c00' ],
-										'danger'   => [ 'bg' => '#fbeaea', 'border' => '#d63638', 'text' => '#9e2526' ],
-										'success'  => [ 'bg' => '#edfaef', 'border' => '#00a32a', 'text' => '#00701c' ],
-										'tertiary' => [ 'bg' => '#f5ecfc', 'border' => '#8224e3', 'text' => '#5c16a6' ],
-									];
-									$styles = isset( $color_palette[ $color ] ) ? $color_palette[ $color ] : $color_palette['primary'];
+									$color_palette = array(
+										'primary'  => array(
+											'bg'     => '#e5f3ff',
+											'border' => '#0073aa',
+											'text'   => '#005a87',
+										),
+										'warning'  => array(
+											'bg'     => '#fff5ec',
+											'border' => '#d94f00',
+											'text'   => '#a63c00',
+										),
+										'danger'   => array(
+											'bg'     => '#fbeaea',
+											'border' => '#d63638',
+											'text'   => '#9e2526',
+										),
+										'success'  => array(
+											'bg'     => '#edfaef',
+											'border' => '#00a32a',
+											'text'   => '#00701c',
+										),
+										'tertiary' => array(
+											'bg'     => '#f5ecfc',
+											'border' => '#8224e3',
+											'text'   => '#5c16a6',
+										),
+									);
+									$styles        = isset( $color_palette[ $color ] ) ? $color_palette[ $color ] : $color_palette['primary'];
 
 									?>
 									<div class="roi-playlist-item" 
@@ -365,7 +390,7 @@ class Builder {
 					}
 				} else {
 					delete_post_meta( $post_id, '_roi_cours_niveau' );
-					wp_set_object_terms( $post_id, [], 'roi_chapitre' );
+					wp_set_object_terms( $post_id, array(), 'roi_chapitre' );
 				}
 			} else {
 				update_post_meta( $post_id, '_roi_cours_playlist', wp_slash( $json_raw ) );
@@ -385,48 +410,48 @@ class Builder {
 		$chapitre = isset( $_GET['chapter'] ) ? (int) $_GET['chapter'] : 0;
 		$niveau   = isset( $_GET['level'] ) ? (int) $_GET['level'] : 0;
 
-		$args = [
-			'post_type'      => [ 'roi_lecon', 'roi_exercice' ],
+		$args = array(
+			'post_type'      => array( 'roi_lecon', 'roi_exercice' ),
 			'post_status'    => 'publish',
 			'posts_per_page' => 50,
 			's'              => $search,
-		];
+		);
 
 		if ( $chapitre > 0 ) {
-			$args['tax_query'] = [
-				[
+			$args['tax_query'] = array(
+				array(
 					'taxonomy' => 'roi_chapitre',
 					'field'    => 'term_id',
 					'terms'    => $chapitre,
-				],
-			];
+				),
+			);
 		}
 
 		if ( $niveau > 0 ) {
-			$args['meta_query'] = [
+			$args['meta_query'] = array(
 				'relation' => 'OR',
-				[
+				array(
 					'key'     => '_roi_exercice_niveau',
 					'value'   => $niveau,
 					'compare' => '=',
 					'type'    => 'NUMERIC',
-				],
-				[
+				),
+				array(
 					'key'     => '_roi_lecon_niveau',
 					'value'   => $niveau,
 					'compare' => '=',
 					'type'    => 'NUMERIC',
-				],
-			];
+				),
+			);
 		}
 
-		$query = new \WP_Query( $args );
-		$results = [];
+		$query   = new \WP_Query( $args );
+		$results = array();
 
 		if ( $query->have_posts() ) {
 			while ( $query->have_posts() ) {
 				$query->the_post();
-				$post_id = get_the_ID();
+				$post_id   = get_the_ID();
 				$post_type = get_post_type();
 
 				// Get associated chapter color and ID
@@ -452,19 +477,19 @@ class Builder {
 
 				// Retrieve the level from CPT specific meta key
 				$meta_key = ( 'roi_lecon' === $post_type ) ? '_roi_lecon_niveau' : '_roi_exercice_niveau';
-				$level = (int) get_post_meta( $post_id, $meta_key, true );
+				$level    = (int) get_post_meta( $post_id, $meta_key, true );
 				if ( 0 === $level ) {
 					$level = 1;
 				}
 
-				$results[] = [
+				$results[] = array(
 					'id'         => $post_id,
 					'titre'      => get_the_title(),
 					'type'       => $post_type,
 					'color'      => $color,
 					'niveau'     => $level,
 					'chapter_id' => $chapter_id,
-				];
+				);
 			}
 			wp_reset_postdata();
 		}

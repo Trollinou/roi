@@ -35,7 +35,6 @@ class Plugin {
 		( new \ROI\CPT\Cours() )->init();
 		( new \ROI\CPT\Partie() )->init();
 
-
 		// Taxonomies
 		( new \ROI\CPT\Chapitre_Taxonomy() )->init();
 
@@ -44,22 +43,29 @@ class Plugin {
 		$roles->init();
 
 		// REST API endpoints
-		add_action( 'rest_api_init', function(): void {
-			( new \ROI\API\REST\Games_Controller() )->register_routes();
-			( new \ROI\API\REST\Stockfish_Controller() )->register_routes();
-			( new \ROI\API\REST\Contenu_Controller() )->register_routes();
-			( new \ROI\API\REST\Progression_Controller() )->register_routes();
-			( new \ROI\API\REST\Parcours_Controller() )->register_routes();
-			( new \ROI\API\REST\Config_Controller() )->register_routes();
-		} );
+		add_action(
+			'rest_api_init',
+			function (): void {
+				( new \ROI\API\REST\Games_Controller() )->register_routes();
+				( new \ROI\API\REST\Stockfish_Controller() )->register_routes();
+				( new \ROI\API\REST\Contenu_Controller() )->register_routes();
+				( new \ROI\API\REST\Progression_Controller() )->register_routes();
+				( new \ROI\API\REST\Parcours_Controller() )->register_routes();
+				( new \ROI\API\REST\Config_Controller() )->register_routes();
+			}
+		);
 
 		// Chess Engine Integration
-		add_action( 'init', function(): void {
-			\ROI\Chess\ChessEngine::get_instance(
-				plugin_dir_url( ROI_PLUGIN_DIR . 'roi.php' ),
-				ROI_PLUGIN_DIR
-			);
-		}, 5 );
+		add_action(
+			'init',
+			function (): void {
+				\ROI\Chess\ChessEngine::get_instance(
+					plugin_dir_url( ROI_PLUGIN_DIR . 'roi.php' ),
+					ROI_PLUGIN_DIR
+				);
+			},
+			5
+		);
 
 		// Metaboxes & Meta handlers (must run for both Admin UI and REST API requests)
 		new \ROI\Metaboxes\Exercice\Manager();

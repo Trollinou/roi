@@ -27,7 +27,7 @@ class Main {
 	 *
 	 * @var array<string, string>
 	 */
-	private array $tabs = [];
+	private array $tabs = array();
 
 	/**
 	 * Initialize the settings page hooks.
@@ -35,8 +35,8 @@ class Main {
 	 * @return void
 	 */
 	public function init(): void {
-		add_action( 'admin_menu', [ $this, 'register_settings_page' ] );
-		add_action( 'admin_init', [ $this, 'save_settings' ] );
+		add_action( 'admin_menu', array( $this, 'register_settings_page' ) );
+		add_action( 'admin_init', array( $this, 'save_settings' ) );
 	}
 
 	/**
@@ -51,7 +51,7 @@ class Main {
 			__( 'Configuration', 'roi' ),
 			'manage_options',
 			'roi-settings',
-			[ $this, 'render' ]
+			array( $this, 'render' )
 		);
 	}
 
@@ -76,7 +76,7 @@ class Main {
 		$tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'apprentissage';
 
 		if ( 'apprentissage' === $tab ) {
-			$allowed_roles = [];
+			$allowed_roles = array();
 			if ( isset( $_POST['roi_apprentissage_allowed_roles'] ) && is_array( $_POST['roi_apprentissage_allowed_roles'] ) ) {
 				$wp_roles = wp_roles()->get_names();
 				foreach ( $_POST['roi_apprentissage_allowed_roles'] as $role ) {
@@ -92,21 +92,21 @@ class Main {
 		// Store notice in transient
 		$notices = get_transient( 'roi_admin_notices' );
 		if ( ! is_array( $notices ) ) {
-			$notices = [];
+			$notices = array();
 		}
-		$notices[] = [
+		$notices[] = array(
 			'message' => __( 'Configuration enregistrée avec succès.', 'roi' ),
 			'type'    => 'success',
-		];
+		);
 		set_transient( 'roi_admin_notices', $notices, 30 );
 
 		// Redirect to avoid form resubmission
 		wp_safe_redirect(
 			add_query_arg(
-				[
+				array(
 					'page' => 'roi-settings',
 					'tab'  => $tab,
-				],
+				),
 				admin_url( 'admin.php' )
 			)
 		);
@@ -124,9 +124,9 @@ class Main {
 		}
 
 		$this->active_tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'apprentissage';
-		$this->tabs       = [
+		$this->tabs       = array(
 			'apprentissage' => __( 'Apprentissage', 'roi' ),
-		];
+		);
 
 		?>
 		<div class="wrap">

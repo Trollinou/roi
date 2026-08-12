@@ -29,17 +29,19 @@ class TypeABCDaire implements TypeInterface {
 		$initial_color = $config_data['color'] ?? 'white';
 		?>
 		<div class="roi-exercice-visual-builder-container" style="margin-top: 15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
-			<h4 id="roi_visual_builder_title" style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice visuel (ABCDaire Tactique)", "roi" ); ?></h4>
+			<h4 id="roi_visual_builder_title" style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice visuel (ABCDaire Tactique)", 'roi' ); ?></h4>
 			
 			<?php
-			FenInput::render([
-				'id'             => 'roi_fen_input',
-				'value'          => $initial_fen,
-				'color'          => $initial_color,
-				'orientation_id' => 'roi_color_input',
-				'button_id'      => 'btn_open_fen_editor',
-				'label'          => __( 'Position de départ (FEN) :', 'roi' ),
-			]);
+			FenInput::render(
+				array(
+					'id'             => 'roi_fen_input',
+					'value'          => $initial_fen,
+					'color'          => $initial_color,
+					'orientation_id' => 'roi_color_input',
+					'button_id'      => 'btn_open_fen_editor',
+					'label'          => __( 'Position de départ (FEN) :', 'roi' ),
+				)
+			);
 			?>
 			<div style="margin-bottom: 15px;">
 				<button type="button" id="roi_generate_board_btn" class="button button-secondary"><?php esc_html_e( "Générer l'échiquier de travail", 'roi' ); ?></button>
@@ -51,10 +53,10 @@ class TypeABCDaire implements TypeInterface {
 						<span class="dashicons dashicons-edit" style="width: auto; height: auto; font-size: 18px; line-height: 1; margin: 0; color: #1e1e1e;"></span>
 					</button>
 					<div id="roi-exercice-builder-chessboard" 
-					     class="roi-clean-admin-board"
-					     data-fen="<?php echo esc_attr( $initial_fen ); ?>"
-					     data-orientation="<?php echo esc_attr( $initial_color ); ?>"
-					     style="width: 100%; aspect-ratio: 1; position: relative;">
+						class="roi-clean-admin-board"
+						data-fen="<?php echo esc_attr( $initial_fen ); ?>"
+						data-orientation="<?php echo esc_attr( $initial_color ); ?>"
+						style="width: 100%; aspect-ratio: 1; position: relative;">
 					</div>
 				</div>
 				

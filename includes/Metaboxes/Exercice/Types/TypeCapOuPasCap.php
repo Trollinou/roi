@@ -27,7 +27,7 @@ class TypeCapOuPasCap implements TypeInterface {
 	public function render( \WP_Post $post, array $config_data ): void {
 		$consigne     = isset( $config_data['consigne'] ) && is_string( $config_data['consigne'] ) ? $config_data['consigne'] : '';
 		$type_reponse = isset( $config_data['type_reponse'] ) && is_string( $config_data['type_reponse'] ) ? $config_data['type_reponse'] : 'qcm';
-		$diagrammes   = isset( $config_data['diagrammes'] ) && is_array( $config_data['diagrammes'] ) ? $config_data['diagrammes'] : [];
+		$diagrammes   = isset( $config_data['diagrammes'] ) && is_array( $config_data['diagrammes'] ) ? $config_data['diagrammes'] : array();
 		?>
 		<div id="roi_builder_type_14" class="roi-builder-section" style="display:none; margin-top:15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
 			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice (Cap ou pas cap ?)", 'roi' ); ?></h4>
@@ -54,10 +54,10 @@ class TypeCapOuPasCap implements TypeInterface {
 			<div id="roi_t14_diagrammes_container" style="display: flex; flex-direction: column; gap: 15px;">
 				<?php
 				for ( $i = 0; $i < 5; $i++ ) :
-					$diag             = isset( $diagrammes[ $i ] ) && is_array( $diagrammes[ $i ] ) ? $diagrammes[ $i ] : [];
+					$diag             = isset( $diagrammes[ $i ] ) && is_array( $diagrammes[ $i ] ) ? $diagrammes[ $i ] : array();
 					$fen              = isset( $diag['fen'] ) && is_string( $diag['fen'] ) ? $diag['fen'] : 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 					$couleur_joueur   = isset( $diag['couleur_joueur'] ) && is_string( $diag['couleur_joueur'] ) ? $diag['couleur_joueur'] : 'white';
-					$qcm_choix        = isset( $diag['qcm_choix'] ) && is_array( $diag['qcm_choix'] ) ? $diag['qcm_choix'] : [];
+					$qcm_choix        = isset( $diag['qcm_choix'] ) && is_array( $diag['qcm_choix'] ) ? $diag['qcm_choix'] : array();
 					$qcm_bonne        = isset( $diag['qcm_bonne_reponse'] ) ? (int) $diag['qcm_bonne_reponse'] : 0;
 					$move_san         = isset( $diag['move_san'] ) && is_string( $diag['move_san'] ) ? $diag['move_san'] : '';
 					$move_explication = isset( $diag['move_explication'] ) && is_string( $diag['move_explication'] ) ? $diag['move_explication'] : '';
@@ -73,18 +73,20 @@ class TypeCapOuPasCap implements TypeInterface {
 						</div>
 
 						<?php
-						FenInput::render([
-							'id'              => 'roi_t14_fen_' . $i,
-							'value'           => $fen,
-							'color'           => $couleur_joueur,
-							'orientation_id'  => 'roi_t14_couleur_' . $i,
-							'button_id'       => 'btn_open_fen_editor_t14_' . $i,
-							'input_class'     => 'roi_t14_fen',
-							'color_class'     => 'roi_t14_couleur',
-							'button_class'    => 'button btn_open_fen_editor_t14',
-							'label'           => __( 'FEN :', 'roi' ),
-							'data_attributes' => [ 'index' => $i ],
-						]);
+						FenInput::render(
+							array(
+								'id'              => 'roi_t14_fen_' . $i,
+								'value'           => $fen,
+								'color'           => $couleur_joueur,
+								'orientation_id'  => 'roi_t14_couleur_' . $i,
+								'button_id'       => 'btn_open_fen_editor_t14_' . $i,
+								'input_class'     => 'roi_t14_fen',
+								'color_class'     => 'roi_t14_couleur',
+								'button_class'    => 'button btn_open_fen_editor_t14',
+								'label'           => __( 'FEN :', 'roi' ),
+								'data_attributes' => array( 'index' => $i ),
+							)
+						);
 						?>
 
 						<!-- Bloc QCM -->

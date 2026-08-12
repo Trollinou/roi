@@ -23,9 +23,9 @@ class Backup {
 	 * @return void
 	 */
 	public function init(): void {
-		add_action( 'admin_menu', [ $this, 'add_backup_restore_page' ] );
-		add_action( 'admin_init', [ $this, 'handle_backup_action' ] );
-		add_action( 'admin_init', [ $this, 'handle_restore_action' ] );
+		add_action( 'admin_menu', array( $this, 'add_backup_restore_page' ) );
+		add_action( 'admin_init', array( $this, 'handle_backup_action' ) );
+		add_action( 'admin_init', array( $this, 'handle_restore_action' ) );
 	}
 
 	/**
@@ -40,7 +40,7 @@ class Backup {
 			__( 'Sauvegarde / Restauration', 'roi' ),
 			'manage_options',
 			'roi-backup-restore',
-			[ $this, 'render_backup_restore_page' ]
+			array( $this, 'render_backup_restore_page' )
 		);
 	}
 
@@ -50,57 +50,57 @@ class Backup {
 	 * @return array<string, mixed> The complete export data.
 	 */
 	public function get_apprentissage_export_data(): array {
-		$post_types = [ 'roi_lecon', 'roi_exercice', 'roi_cours' ];
+		$post_types = array( 'roi_lecon', 'roi_exercice', 'roi_cours' );
 		$taxonomy   = 'roi_chapitre';
 
-		$export_data = [
-			'posts' => [],
-			'terms' => [],
-		];
+		$export_data = array(
+			'posts' => array(),
+			'terms' => array(),
+		);
 
 		// Export terms
 		$terms = get_terms(
-			[
+			array(
 				'taxonomy'   => $taxonomy,
 				'hide_empty' => false,
-			]
+			)
 		);
 
 		if ( is_array( $terms ) ) {
 			foreach ( $terms as $term ) {
-				$export_data['terms'][] = [
+				$export_data['terms'][] = array(
 					'term_id'     => $term->term_id,
 					'name'        => $term->name,
 					'slug'        => $term->slug,
 					'description' => $term->description,
 					'parent'      => $term->parent,
-				];
+				);
 			}
 		}
 
 		// Export posts
 		$posts_query = new WP_Query(
-			[
+			array(
 				'post_type'      => $post_types,
 				'posts_per_page' => -1,
 				'post_status'    => 'any',
-			]
+			)
 		);
 
 		if ( $posts_query->have_posts() ) {
 			while ( $posts_query->have_posts() ) {
 				$posts_query->the_post();
 				$post_id   = get_the_ID();
-				$post_data = [
+				$post_data = array(
 					'post_title'   => get_the_title(),
 					'post_content' => get_the_content(),
 					'post_excerpt' => get_the_excerpt(),
 					'post_status'  => get_post_status(),
 					'post_type'    => get_post_type(),
 					'post_name'    => get_post_field( 'post_name' ),
-					'meta_input'   => [],
-					'tax_input'    => [],
-				];
+					'meta_input'   => array(),
+					'tax_input'    => array(),
+				);
 
 				$meta = get_post_meta( $post_id );
 				if ( is_array( $meta ) ) {
@@ -109,7 +109,7 @@ class Backup {
 					}
 				}
 
-				$post_terms = wp_get_post_terms( $post_id, $taxonomy, [ 'fields' => 'slugs' ] );
+				$post_terms = wp_get_post_terms( $post_id, $taxonomy, array( 'fields' => 'slugs' ) );
 				if ( ! is_wp_error( $post_terms ) && is_array( $post_terms ) ) {
 					$post_data['tax_input'][ $taxonomy ] = $post_terms;
 				}
@@ -203,23 +203,27 @@ class Backup {
 		}
 
 		// Clear existing data
-		$post_types = [ 'roi_lecon', 'roi_exercice', 'roi_cours' ];
+		$post_types = array( 'roi_lecon', 'roi_exercice', 'roi_cours' );
 		$taxonomy   = 'roi_chapitre';
 
-		$existing_posts = get_posts( [
-			'post_type'      => $post_types,
-			'posts_per_page' => -1,
-			'fields'         => 'ids',
-		] );
+		$existing_posts = get_posts(
+			array(
+				'post_type'      => $post_types,
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+			)
+		);
 		foreach ( $existing_posts as $post_id ) {
 			wp_delete_post( $post_id, true );
 		}
 
-		$existing_terms = get_terms( [
-			'taxonomy'   => $taxonomy,
-			'hide_empty' => false,
-			'fields'     => 'ids',
-		] );
+		$existing_terms = get_terms(
+			array(
+				'taxonomy'   => $taxonomy,
+				'hide_empty' => false,
+				'fields'     => 'ids',
+			)
+		);
 		if ( is_array( $existing_terms ) ) {
 			foreach ( $existing_terms as $term_id ) {
 				wp_delete_term( (int) $term_id, $taxonomy );
@@ -227,17 +231,17 @@ class Backup {
 		}
 
 		// Import terms
-		$term_map = [];
+		$term_map = array();
 		if ( ! empty( $import_data['terms'] ) ) {
 			foreach ( $import_data['terms'] as $term_data ) {
 				$new_term = wp_insert_term(
 					$term_data['name'],
 					$taxonomy,
-					[
+					array(
 						'slug'        => $term_data['slug'],
 						'description' => $term_data['description'],
 						'parent'      => 0,
-					]
+					)
 				);
 				if ( ! is_wp_error( $new_term ) ) {
 					$term_map[ $term_data['term_id'] ] = $new_term['term_id'];
@@ -250,9 +254,9 @@ class Backup {
 					wp_update_term(
 						$term_map[ $term_data['term_id'] ],
 						$taxonomy,
-						[
+						array(
 							'parent' => $term_map[ $term_data['parent'] ],
-						]
+						)
 					);
 				}
 			}
@@ -277,10 +281,14 @@ class Backup {
 	 */
 	private function add_admin_notice( string $message, string $type = 'success' ): void {
 		$transient_name = 'roi_admin_notice_' . md5( $message );
-		set_transient( $transient_name, [
-			'message' => $message,
-			'type'    => $type,
-		], 5 );
+		set_transient(
+			$transient_name,
+			array(
+				'message' => $message,
+				'type'    => $type,
+			),
+			5
+		);
 	}
 
 	/**
@@ -298,7 +306,7 @@ class Backup {
 				<!-- Backup Section -->
 				<div class="roi-backup-section" style="margin-bottom: 2em;">
 					<h2><?php esc_html_e( 'Sauvegarder les données d\'apprentissage', 'roi' ); ?></h2>
-					<p><?php esc_html_e( "Cliquez sur le bouton ci-dessous pour télécharger une sauvegarde de toutes les leçons, exercices et cours, ainsi que leurs catégories.", 'roi' ); ?></p>
+					<p><?php esc_html_e( 'Cliquez sur le bouton ci-dessous pour télécharger une sauvegarde de toutes les leçons, exercices et cours, ainsi que leurs catégories.', 'roi' ); ?></p>
 					<form method="post" action="">
 						<?php wp_nonce_field( 'roi_backup_nonce_action', 'roi_backup_nonce' ); ?>
 						<?php submit_button( __( 'Sauvegarder la base de données', 'roi' ), 'primary', 'roi_backup_action', false ); ?>

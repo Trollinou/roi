@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<ruleset name="MonProjetWordPress">
+    <description>Standard de code pour mon projet WordPress.</description>
+
+    <!-- 1. Définir le standard à utiliser (Les règles officielles de WordPress) -->
+    <rule ref="WordPress" />
+
+    <!-- 2. Quels dossiers analyser ? (ici, tout le dossier courant) -->
+    <file>.</file>
+
+    <!-- 3. Quels dossiers exclure ? (Très important pour ne pas analyser les librairies tierces) -->
+    <exclude-pattern>/vendor/*</exclude-pattern>
+    <exclude-pattern>/node_modules/*</exclude-pattern>
+    <exclude-pattern>/tests/*</exclude-pattern>
+
+    <!-- 4. Paramètres de confort -->
+    <arg name="colors"/> <!-- Affiche les résultats en couleur dans le terminal -->
+    <arg value="sp"/> <!-- Affiche la progression (s) et le chemin des fichiers (p) -->
+    <arg name="extensions" value="php"/> <!-- N'analyse que les fichiers PHP -->
+</ruleset>

@@ -21,10 +21,10 @@ readonly class Exercice_Config_DTO {
 	/**
 	 * Constructor property promotion.
 	 *
-	 * @param int                $id           Post ID of the exercise.
-	 * @param string             $title        Title of the exercise.
-	 * @param Exercice_Type      $type         Exercise type.
-	 * @param Exercice_Niveau    $niveau       Difficulty level.
+	 * @param int                       $id           Post ID of the exercise.
+	 * @param string                    $title        Title of the exercise.
+	 * @param Exercice_Type             $type         Exercise type.
+	 * @param Exercice_Niveau           $niveau       Difficulty level.
 	 * @param array<string, mixed>|null $config Config array decoded from JSON.
 	 */
 	public function __construct(

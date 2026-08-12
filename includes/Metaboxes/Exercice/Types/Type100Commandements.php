@@ -23,38 +23,38 @@ class Type100Commandements implements TypeInterface {
 	 * @return void
 	 */
 	public function render( \WP_Post $post, array $config_data ): void {
-		$qcms = [];
+		$qcms = array();
 
 		if ( isset( $config_data['qcms'] ) && is_array( $config_data['qcms'] ) ) {
 			foreach ( $config_data['qcms'] as $qcm_item ) {
 				if ( is_array( $qcm_item ) ) {
-					$qcms[] = [
+					$qcms[] = array(
 						'question'      => isset( $qcm_item['question'] ) && is_string( $qcm_item['question'] ) ? $qcm_item['question'] : '',
-						'reponses'      => isset( $qcm_item['reponses'] ) && is_array( $qcm_item['reponses'] ) ? array_values( array_map( 'strval', $qcm_item['reponses'] ) ) : [ '', '', '' ],
+						'reponses'      => isset( $qcm_item['reponses'] ) && is_array( $qcm_item['reponses'] ) ? array_values( array_map( 'strval', $qcm_item['reponses'] ) ) : array( '', '', '' ),
 						'bonne_reponse' => isset( $qcm_item['bonne_reponse'] ) && is_numeric( $qcm_item['bonne_reponse'] ) ? (int) $qcm_item['bonne_reponse'] : 0,
-					];
+					);
 				}
 			}
 		} elseif ( isset( $config_data['question'] ) ) {
 			// Backward compatibility with single QCM configuration.
-			$reponses = isset( $config_data['reponses'] ) && is_array( $config_data['reponses'] ) ? array_values( array_map( 'strval', $config_data['reponses'] ) ) : [ '', '', '' ];
-			$qcms[]   = [
+			$reponses = isset( $config_data['reponses'] ) && is_array( $config_data['reponses'] ) ? array_values( array_map( 'strval', $config_data['reponses'] ) ) : array( '', '', '' );
+			$qcms[]   = array(
 				'question'      => is_string( $config_data['question'] ) ? $config_data['question'] : '',
 				'reponses'      => $reponses,
 				'bonne_reponse' => isset( $config_data['bonne_reponse'] ) && is_numeric( $config_data['bonne_reponse'] ) ? (int) $config_data['bonne_reponse'] : 0,
-			];
+			);
 		}
 
 		if ( empty( $qcms ) ) {
-			$qcms[] = [
+			$qcms[] = array(
 				'question'      => '',
-				'reponses'      => [ '', '', '' ],
+				'reponses'      => array( '', '', '' ),
 				'bonne_reponse' => 0,
-			];
+			);
 		}
 		?>
 		<div id="roi_builder_type_1" class="roi-builder-section" style="display:none; margin-top: 15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
-			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice (100 Commandements)", "roi" ); ?></h4>
+			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice (100 Commandements)", 'roi' ); ?></h4>
 			
 			<div id="roi_t1_qcms_container" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px;">
 				<?php foreach ( $qcms as $idx => $qcm ) : ?>

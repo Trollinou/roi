@@ -7,7 +7,7 @@
  * Requires at least: 6.9.1
  * Requires PHP:      8.4
  * Author:            Etienne Gagnon
- * Author URI:        
+ * Author URI:
  * License:           GPL v2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       roi
@@ -65,30 +65,32 @@ define( 'ROI_VERSION', '1.3.6' );
 define( 'ROI_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 
 // Autoloader SPL natif
-spl_autoload_register( function ( $class ) {
-	$prefix   = 'ROI\\';
-	$base_dir = plugin_dir_path( __FILE__ ) . 'includes/';
+spl_autoload_register(
+	function ( $class ) {
+		$prefix   = 'ROI\\';
+		$base_dir = plugin_dir_path( __FILE__ ) . 'includes/';
 
-	$len = strlen( $prefix );
-	if ( strncmp( $prefix, $class, $len ) !== 0 ) {
-		return;
+		$len = strlen( $prefix );
+		if ( strncmp( $prefix, $class, $len ) !== 0 ) {
+				return;
+		}
+
+		$relative_class = substr( $class, $len );
+		$file           = $base_dir . str_replace( '\\', '/', $relative_class ) . '.php';
+
+		if ( file_exists( $file ) ) {
+			require $file;
+		}
 	}
-
-	$relative_class = substr( $class, $len );
-	$file           = $base_dir . str_replace( '\\', '/', $relative_class ) . '.php';
-
-	if ( file_exists( $file ) ) {
-		require $file;
-	}
-} );
+);
 
 // Initialisation du plugin
 $roi_plugin = new \ROI\Core\Plugin();
 $roi_plugin->run();
 
 // Hooks d'activation et désactivation
-register_activation_hook( __FILE__, [ \ROI\Core\Activator::class, 'activate' ] );
-register_deactivation_hook( __FILE__, [ \ROI\Core\Deactivator::class, 'deactivate' ] );
+register_activation_hook( __FILE__, array( \ROI\Core\Activator::class, 'activate' ) );
+register_deactivation_hook( __FILE__, array( \ROI\Core\Deactivator::class, 'deactivate' ) );
 
 /**
  * Load plugin textdomain.

@@ -26,13 +26,13 @@ class TypeMarcheHeros implements TypeInterface {
 		$current_mode = $config_data['mode'] ?? '3x5';
 		?>
 		<div id="roi_builder_type_7" class="roi-builder-section" style="display:none; margin-top: 15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
-			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Marche du Héros (Type 7)", "roi" ); ?></h4>
+			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( 'Marche du Héros (Type 7)', 'roi' ); ?></h4>
 			
 			<div style="margin-bottom: 15px;">
-				<label for="roi_t7_mode"><strong><?php esc_html_e( "Mode de configuration :", "roi" ); ?></strong></label><br>
+				<label for="roi_t7_mode"><strong><?php esc_html_e( 'Mode de configuration :', 'roi' ); ?></strong></label><br>
 				<select id="roi_t7_mode" style="margin-top: 5px;">
-					<option value="3x5" <?php selected( $current_mode, '3x5' ); ?>><?php esc_html_e( "3 séries de 5 diagrammes", "roi" ); ?></option>
-					<option value="5x3" <?php selected( $current_mode, '5x3' ); ?>><?php esc_html_e( "5 séries de 3 diagrammes", "roi" ); ?></option>
+					<option value="3x5" <?php selected( $current_mode, '3x5' ); ?>><?php esc_html_e( '3 séries de 5 diagrammes', 'roi' ); ?></option>
+					<option value="5x3" <?php selected( $current_mode, '5x3' ); ?>><?php esc_html_e( '5 séries de 3 diagrammes', 'roi' ); ?></option>
 				</select>
 			</div>
 

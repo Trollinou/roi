@@ -21,13 +21,13 @@ class Columns {
 	 * @return void
 	 */
 	public function init(): void {
-		foreach ( [ 'roi_exercice', 'roi_lecon', 'roi_cours' ] as $post_type ) {
-			add_filter( "manage_{$post_type}_posts_columns", [ $this, 'ajouter_colonnes' ] );
-			add_action( "manage_{$post_type}_posts_custom_column", [ $this, 'afficher_colonnes' ], 10, 2 );
-			add_filter( "manage_edit-{$post_type}_sortable_columns", [ $this, 'colonnes_triables' ] );
+		foreach ( array( 'roi_exercice', 'roi_lecon', 'roi_cours' ) as $post_type ) {
+			add_filter( "manage_{$post_type}_posts_columns", array( $this, 'ajouter_colonnes' ) );
+			add_action( "manage_{$post_type}_posts_custom_column", array( $this, 'afficher_colonnes' ), 10, 2 );
+			add_filter( "manage_edit-{$post_type}_sortable_columns", array( $this, 'colonnes_triables' ) );
 		}
-		add_filter( 'request', [ $this, 'trier_colonnes' ] );
-		add_filter( 'posts_clauses', [ $this, 'trier_liste_cours_defaut' ], 10, 2 );
+		add_filter( 'request', array( $this, 'trier_colonnes' ) );
+		add_filter( 'posts_clauses', array( $this, 'trier_liste_cours_defaut' ), 10, 2 );
 	}
 
 	/**
@@ -38,7 +38,7 @@ class Columns {
 	 */
 	public function ajouter_colonnes( array $columns ): array {
 		global $post_type;
-		$new_columns = [];
+		$new_columns = array();
 		foreach ( $columns as $key => $value ) {
 			if ( 'date' === $key ) {
 				$new_columns['roi_niveau']   = __( 'Niveau', 'roi' );
@@ -56,7 +56,7 @@ class Columns {
 	 * Outputs the content of custom columns.
 	 *
 	 * @param string $column Column key.
-	 * @param int $post_id Post ID.
+	 * @param int    $post_id Post ID.
 	 * @return void
 	 */
 	public function afficher_colonnes( string $column, int $post_id ): void {
@@ -79,12 +79,12 @@ class Columns {
 		if ( 'roi_chapitre' === $column ) {
 			$terms = get_the_terms( $post_id, 'roi_chapitre' );
 			if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
-				$term = reset( $terms );
+				$term       = reset( $terms );
 				$color_slug = (string) get_term_meta( $term->term_id, '_roi_chapitre_couleur', true );
 				$enum_color = \ROI\Enums\Chapitre_Couleur::tryFrom( $color_slug );
-				$hex = $enum_color ? $enum_color->hex() : '#666';
+				$hex        = $enum_color ? $enum_color->hex() : '#666';
 
-				echo sprintf(
+				printf(
 					'<span style="display:inline-block; width:8px; height:8px; border-radius:50%%; background:%s; margin-right:6px;"></span>%s',
 					esc_attr( $hex ),
 					esc_html( $term->name )
@@ -124,7 +124,7 @@ class Columns {
 	public function trier_colonnes( array $vars ): array {
 		if ( isset( $vars['orderby'] ) && 'roi_niveau' === $vars['orderby'] ) {
 			$post_type = $vars['post_type'] ?? '';
-			$meta_key = '';
+			$meta_key  = '';
 			if ( 'roi_exercice' === $post_type ) {
 				$meta_key = '_roi_exercice_niveau';
 			} elseif ( 'roi_lecon' === $post_type ) {
@@ -134,10 +134,13 @@ class Columns {
 			}
 
 			if ( $meta_key ) {
-				$vars = array_merge( $vars, [
-					'meta_key' => $meta_key,
-					'orderby'  => 'meta_value_num',
-				] );
+				$vars = array_merge(
+					$vars,
+					array(
+						'meta_key' => $meta_key,
+						'orderby'  => 'meta_value_num',
+					)
+				);
 			}
 		}
 		return $vars;
@@ -150,7 +153,7 @@ class Columns {
 	 * 3. Ordre (menu_order ASC)
 	 *
 	 * @param array<string, string> $clauses Query clauses.
-	 * @param \WP_Query $query Query object.
+	 * @param \WP_Query             $query Query object.
 	 * @return array<string, string> Updated clauses.
 	 */
 	public function trier_liste_cours_defaut( array $clauses, \WP_Query $query ): array {

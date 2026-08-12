@@ -23,9 +23,9 @@ class Partie {
 	 * @return void
 	 */
 	public function init(): void {
-		add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ] );
-		add_action( 'save_post_roi_partie', [ $this, 'save_meta' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
+		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
+		add_action( 'save_post_roi_partie', array( $this, 'save_meta' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
 	}
 
 	/**
@@ -38,7 +38,7 @@ class Partie {
 		add_meta_box(
 			'roi_partie_side_metabox',
 			__( 'Informations de la partie', 'roi' ),
-			[ $this, 'render_side_metabox' ],
+			array( $this, 'render_side_metabox' ),
 			'roi_partie',
 			'side',
 			'core'
@@ -48,7 +48,7 @@ class Partie {
 		add_meta_box(
 			'roi_partie_viewer_metabox',
 			__( 'Visualisation de la partie', 'roi' ),
-			[ $this, 'render_viewer_metabox' ],
+			array( $this, 'render_viewer_metabox' ),
 			'roi_partie',
 			'normal',
 			'high'
@@ -64,12 +64,12 @@ class Partie {
 	public function render_side_metabox( WP_Post $post ): void {
 		wp_nonce_field( 'roi_save_partie_meta', 'roi_partie_metabox_nonce' );
 
-		$member_id   = get_post_meta( $post->ID, '_roi_member_id', true );
-		$level       = get_post_meta( $post->ID, '_roi_difficulty_level', true );
-		$hints       = get_post_meta( $post->ID, '_roi_hints_count', true );
-		$takebacks   = get_post_meta( $post->ID, '_roi_takebacks_count', true );
-		$duration    = get_post_meta( $post->ID, '_roi_game_duration', true );
-		$game_date   = get_post_meta( $post->ID, '_roi_game_date', true );
+		$member_id = get_post_meta( $post->ID, '_roi_member_id', true );
+		$level     = get_post_meta( $post->ID, '_roi_difficulty_level', true );
+		$hints     = get_post_meta( $post->ID, '_roi_hints_count', true );
+		$takebacks = get_post_meta( $post->ID, '_roi_takebacks_count', true );
+		$duration  = get_post_meta( $post->ID, '_roi_game_duration', true );
+		$game_date = get_post_meta( $post->ID, '_roi_game_date', true );
 
 		$member_name = __( 'Inconnu', 'roi' );
 		$member_link = '';
@@ -86,7 +86,7 @@ class Partie {
 			$duration_int       = (int) $duration;
 			$minutes            = floor( $duration_int / 60 );
 			$seconds            = $duration_int % 60;
-			$formatted_duration = sprintf( __( '%d min %d s', 'roi' ), $minutes, $seconds );
+			$formatted_duration = sprintf( __( '%1$d min %2$d s', 'roi' ), $minutes, $seconds );
 		}
 		?>
 		<div class="roi-side-meta-fields">
@@ -134,7 +134,7 @@ class Partie {
 	 * @return void
 	 */
 	public function render_viewer_metabox( WP_Post $post ): void {
-		$pgn = get_post_meta( $post->ID, '_roi_pgn', true );
+		$pgn         = get_post_meta( $post->ID, '_roi_pgn', true );
 		$initial_fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 		?>
 		<div class="roi-pgn-viewer-container" style="display: flex; flex-direction: column; gap: 15px;">
@@ -163,15 +163,15 @@ class Partie {
 				<!-- Colonne Droite : L'échiquier -->
 				<div class="roi-viewer-board-wrapper" style="width: 350px; flex-shrink: 0; position: relative;">
 					<div id="roi-partie-viewer-chessboard" 
-					     class="chessboard-block"
-					     data-fen="<?php echo esc_attr( $initial_fen ); ?>"
-					     data-orientation="white"
-					     data-coordinates="true"
-					     data-view-only="true"
-					     data-player-color="both"
-					     data-show-threats="false"
-					     data-use-stockfish="false"
-					     data-free-mode="false">
+						class="chessboard-block"
+						data-fen="<?php echo esc_attr( $initial_fen ); ?>"
+						data-orientation="white"
+						data-coordinates="true"
+						data-view-only="true"
+						data-player-color="both"
+						data-show-threats="false"
+						data-use-stockfish="false"
+						data-free-mode="false">
 						<section class="main-wrap">
 							<div class="main-board">
 								<div class="chessboard-mount-element"></div>
@@ -250,19 +250,19 @@ class Partie {
 
 		if ( 'post.php' === $hook || 'post-new.php' === $hook ) {
 			$plugin_url = plugin_dir_url( dirname( __DIR__, 2 ) . '/roi.php' );
-			$chess_url = $plugin_url . 'build/chessboard/';
+			$chess_url  = $plugin_url . 'build/chessboard/';
 
 			wp_enqueue_style(
 				'roi-public-chessboard-style',
 				$chess_url . 'style.css',
-				[],
+				array(),
 				ROI_VERSION
 			);
 
 			wp_enqueue_script(
 				'roi-public-chessboard-view',
 				$chess_url . 'chessboard-view.js',
-				[ 'wp-element' ],
+				array( 'wp-element' ),
 				ROI_VERSION,
 				true
 			);
@@ -270,7 +270,7 @@ class Partie {
 			wp_enqueue_script(
 				'roi-admin-partie-viewer',
 				$plugin_url . 'assets/js/admin-partie-viewer.js',
-				[ 'roi-public-chessboard-view' ],
+				array( 'roi-public-chessboard-view' ),
 				ROI_VERSION,
 				true
 			);

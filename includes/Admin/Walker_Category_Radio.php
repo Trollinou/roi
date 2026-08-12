@@ -18,14 +18,14 @@ class Walker_Category_Radio extends \Walker_Category_Checklist {
 	/**
 	 * Start the element output.
 	 *
-	 * @param string $output Used to append additional content (passed by reference).
-	 * @param \WP_Term $category The current term object.
-	 * @param int $depth Depth of category. Used for tab indentation.
+	 * @param string               $output Used to append additional content (passed by reference).
+	 * @param \WP_Term             $category The current term object.
+	 * @param int                  $depth Depth of category. Used for tab indentation.
 	 * @param array<string, mixed> $args An array of arguments.
-	 * @param int $id Current category ID.
+	 * @param int                  $id Current category ID.
 	 * @return void
 	 */
-	public function start_el( &$output, $category, $depth = 0, $args = [], $id = 0 ): void {
+	public function start_el( &$output, $category, $depth = 0, $args = array(), $id = 0 ): void {
 		$temp_output = '';
 		parent::start_el( $temp_output, $category, $depth, $args, $id );
 
@@ -38,7 +38,7 @@ class Walker_Category_Radio extends \Walker_Category_Checklist {
 		// but tax_input[roi_chapitre][] is actually perfectly handled by WP save post.
 		// Let's replace tax_input[roi_chapitre][] with tax_input[roi_chapitre] to ensure the browser groups them properly.
 		// Actually, browser groups by the exact string of the name attribute, so tax_input[roi_chapitre][] already groups them.
-		
+
 		$output .= $temp_output;
 	}
 }

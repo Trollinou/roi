@@ -29,7 +29,7 @@ class TypeEchecEval implements TypeInterface {
 		$fen_depart      = isset( $config_data['fen_depart'] ) && is_string( $config_data['fen_depart'] ) ? $config_data['fen_depart'] : 'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 4 5';
 		$couleur_joueur  = isset( $config_data['couleur_joueur'] ) && is_string( $config_data['couleur_joueur'] ) ? $config_data['couleur_joueur'] : 'white';
 		$theme           = isset( $config_data['theme'] ) && is_string( $config_data['theme'] ) ? $config_data['theme'] : '';
-		$questions       = isset( $config_data['questions'] ) && is_array( $config_data['questions'] ) ? $config_data['questions'] : [];
+		$questions       = isset( $config_data['questions'] ) && is_array( $config_data['questions'] ) ? $config_data['questions'] : array();
 		$solution_moves  = isset( $config_data['solution_moves'] ) && is_array( $config_data['solution_moves'] ) ? implode( ', ', $config_data['solution_moves'] ) : '';
 		$pgn_explication = isset( $config_data['pgn_explication'] ) && is_string( $config_data['pgn_explication'] ) ? $config_data['pgn_explication'] : '';
 		?>
@@ -39,14 +39,16 @@ class TypeEchecEval implements TypeInterface {
 			<!-- Configuration Globale -->
 			<div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
 				<?php
-				FenInput::render([
-					'id'             => 'roi_t10_fen_depart',
-					'value'          => $fen_depart,
-					'color'          => $couleur_joueur,
-					'orientation_id' => 'roi_t10_couleur',
-					'button_id'      => 'btn_open_fen_editor_t10',
-					'label'          => __( 'Position de départ (FEN) :', 'roi' ),
-				]);
+				FenInput::render(
+					array(
+						'id'             => 'roi_t10_fen_depart',
+						'value'          => $fen_depart,
+						'color'          => $couleur_joueur,
+						'orientation_id' => 'roi_t10_couleur',
+						'button_id'      => 'btn_open_fen_editor_t10',
+						'label'          => __( 'Position de départ (FEN) :', 'roi' ),
+					)
+				);
 				?>
 
 				<div>
@@ -131,14 +133,16 @@ class TypeEchecEval implements TypeInterface {
 
 				<div>
 					<?php
-					PgnInput::render([
-						'id'          => 'roi_t10_pgn_explication',
-						'value'       => $pgn_explication,
-						'button_id'   => 'btn_open_pgn_editor_t10_explication',
-						'label'       => __( 'Explication Finale (PGN)', 'roi' ),
-						'rows'        => 5,
-						'placeholder' => __( 'Ex: 1. Nxe5 {Une attaque centrale forte} Nxe5 2. d4 {Récupération de la pièce}', 'roi' ),
-					]);
+					PgnInput::render(
+						array(
+							'id'          => 'roi_t10_pgn_explication',
+							'value'       => $pgn_explication,
+							'button_id'   => 'btn_open_pgn_editor_t10_explication',
+							'label'       => __( 'Explication Finale (PGN)', 'roi' ),
+							'rows'        => 5,
+							'placeholder' => __( 'Ex: 1. Nxe5 {Une attaque centrale forte} Nxe5 2. d4 {Récupération de la pièce}', 'roi' ),
+						)
+					);
 					?>
 				</div>
 			</div>

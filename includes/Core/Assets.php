@@ -21,7 +21,7 @@ class Assets {
 	 * @return void
 	 */
 	public function init(): void {
-		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_public_assets' ] );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_public_assets' ) );
 	}
 
 	/**
@@ -34,7 +34,7 @@ class Assets {
 		wp_enqueue_style(
 			'roi-public-styles',
 			$plugin_url . 'assets/css/public-style.css',
-			[],
+			array(),
 			ROI_VERSION
 		);
 	}
