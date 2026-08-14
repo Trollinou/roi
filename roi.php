@@ -3,16 +3,18 @@
  * Plugin Name:       ROI - Ressources et Organisation pour l’Initiation (aux échecs)
  * Plugin URI:        https://example.com/plugins/the-basics/
  * Description:       Ressources et Organisation pour l’Initiation aux échecs.
- * Version:           1.3.6
+ * Version:           1.4.0
  * Requires at least: 6.9.1
  * Requires PHP:      8.4
  * Author:            Etienne Gagnon
- * Author URI:        
+ * Author URI:
  * License:           GPL v2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       roi
  * Domain Path:       /languages
  * Depends:           dame
+ *
+ * @package ROI
  */
 
 declare(strict_types=1);
@@ -56,39 +58,41 @@ add_action( 'admin_init', 'roi_check_dame_dependency' );
 function roi_dame_not_active_notice() {
 	?>
 	<div class="notice notice-error is-dismissible">
-		<p><?php _e( 'Le plugin ROI requiert que le plugin DAME soit activé. Le plugin ROI a été désactivé.', 'roi' ); ?></p>
+		<p><?php esc_html_e( 'Le plugin ROI requiert que le plugin DAME soit activé. Le plugin ROI a été désactivé.', 'roi' ); ?></p>
 	</div>
 	<?php
 }
 
-define( 'ROI_VERSION', '1.3.6' );
+define( 'ROI_VERSION', '1.4.0' );
 define( 'ROI_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 
-// Autoloader SPL natif
-spl_autoload_register( function ( $class ) {
-	$prefix   = 'ROI\\';
-	$base_dir = plugin_dir_path( __FILE__ ) . 'includes/';
+// Autoloader SPL natif.
+spl_autoload_register(
+	function ( $class_name ) {
+		$prefix   = 'ROI\\';
+		$base_dir = plugin_dir_path( __FILE__ ) . 'includes/';
 
-	$len = strlen( $prefix );
-	if ( strncmp( $prefix, $class, $len ) !== 0 ) {
-		return;
+		$len = strlen( $prefix );
+		if ( strncmp( $prefix, $class_name, $len ) !== 0 ) {
+				return;
+		}
+
+		$relative_class = substr( $class_name, $len );
+		$file           = $base_dir . str_replace( '\\', '/', $relative_class ) . '.php';
+
+		if ( file_exists( $file ) ) {
+			require $file;
+		}
 	}
+);
 
-	$relative_class = substr( $class, $len );
-	$file           = $base_dir . str_replace( '\\', '/', $relative_class ) . '.php';
-
-	if ( file_exists( $file ) ) {
-		require $file;
-	}
-} );
-
-// Initialisation du plugin
+// Initialisation du plugin.
 $roi_plugin = new \ROI\Core\Plugin();
 $roi_plugin->run();
 
-// Hooks d'activation et désactivation
-register_activation_hook( __FILE__, [ \ROI\Core\Activator::class, 'activate' ] );
-register_deactivation_hook( __FILE__, [ \ROI\Core\Deactivator::class, 'deactivate' ] );
+// Hooks d'activation et désactivation.
+register_activation_hook( __FILE__, array( \ROI\Core\Activator::class, 'activate' ) );
+register_deactivation_hook( __FILE__, array( \ROI\Core\Deactivator::class, 'deactivate' ) );
 
 /**
  * Load plugin textdomain.

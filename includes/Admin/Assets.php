@@ -21,7 +21,7 @@ class Assets {
 	 * @return void
 	 */
 	public function init(): void {
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
 	}
 
 	/**
@@ -33,8 +33,8 @@ class Assets {
 	public function enqueue_admin_assets( string $hook ): void {
 		global $post_type;
 
-		// Only load on CPT Exercice, Lecon or Cours post editing screen
-		if ( ! in_array( $post_type, [ 'roi_exercice', 'roi_cours', 'roi_lecon' ], true ) || ( 'post.php' !== $hook && 'post-new.php' !== $hook ) ) {
+		// Only load on CPT Exercice, Lecon or Cours post editing screen.
+		if ( ! in_array( $post_type, array( 'roi_exercice', 'roi_cours', 'roi_lecon' ), true ) || ( 'post.php' !== $hook && 'post-new.php' !== $hook ) ) {
 			return;
 		}
 
@@ -43,26 +43,29 @@ class Assets {
 		$chess_url  = $plugin_url . 'build/chessboard/';
 		$chess_dir  = $plugin_dir . 'build/chessboard/';
 
-		// Enqueue admin styles for all ROI post types
+		// Enqueue admin styles for all ROI post types.
 		wp_enqueue_style(
 			'roi-admin-style',
 			$plugin_url . 'assets/css/admin-style.css',
-			[],
+			array(),
 			ROI_VERSION
 		);
 
-		if ( in_array( $post_type, [ 'roi_exercice', 'roi_lecon' ], true ) ) {
+		if ( in_array( $post_type, array( 'roi_exercice', 'roi_lecon' ), true ) ) {
 
-			// Enqueue eg-chessboard styles & script
+			// Enqueue eg-chessboard styles & script.
 			wp_enqueue_style(
 				'roi-admin-chessboard-style',
 				$chess_url . 'eg-chessboard.css',
-				[],
+				array(),
 				ROI_VERSION
 			);
 
 			$fen_asset_file = $chess_dir . 'admin-fen-editor.asset.php';
-			$fen_asset      = file_exists( $fen_asset_file ) ? include $fen_asset_file : [ 'dependencies' => [ 'wp-element' ], 'version' => ROI_VERSION ];
+			$fen_asset      = file_exists( $fen_asset_file ) ? include $fen_asset_file : array(
+				'dependencies' => array( 'wp-element' ),
+				'version'      => ROI_VERSION,
+			);
 
 			wp_enqueue_script(
 				'roi-admin-fen-editor',
@@ -74,19 +77,25 @@ class Assets {
 
 			if ( 'roi_exercice' === $post_type ) {
 				$ex_asset_file = $chess_dir . 'admin-exercice-builder.asset.php';
-				$ex_asset      = file_exists( $ex_asset_file ) ? include $ex_asset_file : [ 'dependencies' => [ 'roi-admin-fen-editor' ], 'version' => ROI_VERSION ];
+				$ex_asset      = file_exists( $ex_asset_file ) ? include $ex_asset_file : array(
+					'dependencies' => array( 'roi-admin-fen-editor' ),
+					'version'      => ROI_VERSION,
+				);
 
 				wp_enqueue_script(
 					'roi-admin-exercice-builder',
 					$chess_url . 'admin-exercice-builder.js',
-					array_merge( [ 'roi-admin-fen-editor' ], $ex_asset['dependencies'] ),
+					array_merge( array( 'roi-admin-fen-editor' ), $ex_asset['dependencies'] ),
 					$ex_asset['version'],
 					true
 				);
 			}
 		} elseif ( 'roi_cours' === $post_type ) {
 			$cours_asset_file = $chess_dir . 'admin-cours-builder.asset.php';
-			$cours_asset      = file_exists( $cours_asset_file ) ? include $cours_asset_file : [ 'dependencies' => [], 'version' => ROI_VERSION ];
+			$cours_asset      = file_exists( $cours_asset_file ) ? include $cours_asset_file : array(
+				'dependencies' => array(),
+				'version'      => ROI_VERSION,
+			);
 
 			wp_enqueue_script(
 				'roi-admin-cours-builder',
@@ -96,9 +105,13 @@ class Assets {
 				true
 			);
 
-			wp_localize_script( 'roi-admin-cours-builder', 'roi_cours_builder', [
-				'nonce' => wp_create_nonce( 'roi_search_cours_items_nonce' ),
-			] );
+			wp_localize_script(
+				'roi-admin-cours-builder',
+				'roi_cours_builder',
+				array(
+					'nonce' => wp_create_nonce( 'roi_search_cours_items_nonce' ),
+				)
+			);
 		}
 	}
 }

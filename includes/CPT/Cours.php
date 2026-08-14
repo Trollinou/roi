@@ -21,7 +21,7 @@ class Cours {
 	 * @return void
 	 */
 	public function init(): void {
-		add_action( 'init', [ $this, 'register' ], 0 );
+		add_action( 'init', array( $this, 'register' ), 0 );
 	}
 
 	/**
@@ -30,7 +30,7 @@ class Cours {
 	 * @return void
 	 */
 	public function register(): void {
-		$labels = [
+		$labels = array(
 			'name'              => _x( 'Cours', 'Post Type General Name', 'roi' ),
 			'singular_name'     => _x( 'Cours', 'Post Type Singular Name', 'roi' ),
 			'menu_name'         => __( 'Cours', 'roi' ),
@@ -47,14 +47,14 @@ class Cours {
 			'view_item'         => __( 'Voir le cours', 'roi' ),
 			'view_items'        => __( 'Voir les cours', 'roi' ),
 			'search_items'      => __( 'Rechercher un cours', 'roi' ),
-		];
+		);
 
-		$args = [
+		$args = array(
 			'label'               => __( 'Cours', 'roi' ),
 			'description'         => __( 'Cours constitués de leçons et d\'exercices', 'roi' ),
 			'labels'              => $labels,
-			'supports'            => [ 'title', 'page-attributes' ],
-			'taxonomies'          => [ 'roi_chapitre' ],
+			'supports'            => array( 'title', 'page-attributes' ),
+			'taxonomies'          => array( 'roi_chapitre' ),
 			'hierarchical'        => false,
 			'public'              => true,
 			'show_ui'             => true,
@@ -69,7 +69,7 @@ class Cours {
 			'map_meta_cap'        => true,
 			'show_in_rest'        => true,
 			'menu_icon'           => 'dashicons-book-alt',
-		];
+		);
 
 		register_post_type( 'roi_cours', $args );
 	}

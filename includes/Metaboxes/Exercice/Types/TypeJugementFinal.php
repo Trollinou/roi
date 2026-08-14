@@ -29,7 +29,7 @@ class TypeJugementFinal implements TypeInterface {
 		$consigne        = isset( $config_data['consigne'] ) && is_string( $config_data['consigne'] ) ? $config_data['consigne'] : '';
 		$fen_depart      = isset( $config_data['fen_depart'] ) && is_string( $config_data['fen_depart'] ) ? $config_data['fen_depart'] : 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 		$couleur_joueur  = isset( $config_data['couleur_joueur'] ) && is_string( $config_data['couleur_joueur'] ) ? $config_data['couleur_joueur'] : 'white';
-		$scenarios       = isset( $config_data['scenarios'] ) && is_array( $config_data['scenarios'] ) ? $config_data['scenarios'] : [];
+		$scenarios       = isset( $config_data['scenarios'] ) && is_array( $config_data['scenarios'] ) ? $config_data['scenarios'] : array();
 		$pgn_explication = isset( $config_data['pgn_explication'] ) && is_string( $config_data['pgn_explication'] ) ? $config_data['pgn_explication'] : '';
 
 		$correct_index = 0;
@@ -49,14 +49,16 @@ class TypeJugementFinal implements TypeInterface {
 			</div>
 
 			<?php
-			FenInput::render([
-				'id'             => 'roi_t15_fen_depart',
-				'value'          => $fen_depart,
-				'color'          => $couleur_joueur,
-				'orientation_id' => 'roi_t15_couleur',
-				'button_id'      => 'btn_open_fen_editor_t15',
-				'label'          => __( 'Position de départ (FEN) :', 'roi' ),
-			]);
+			FenInput::render(
+				array(
+					'id'             => 'roi_t15_fen_depart',
+					'value'          => $fen_depart,
+					'color'          => $couleur_joueur,
+					'orientation_id' => 'roi_t15_couleur',
+					'button_id'      => 'btn_open_fen_editor_t15',
+					'label'          => __( 'Position de départ (FEN) :', 'roi' ),
+				)
+			);
 			?>
 
 			<hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
@@ -74,22 +76,24 @@ class TypeJugementFinal implements TypeInterface {
 							</h4>
 							<div style="margin-bottom: 8px;">
 								<?php
-								PgnInput::render([
-									'id'              => 'roi_t15_scenario_pgn_' . $i,
-									'value'           => $sc_pgn,
-									'button_id'       => 'btn_open_pgn_editor_t15_scenario_' . $i,
-									'input_class'     => 'roi_t15_scenario_pgn',
-									'button_class'    => 'button btn_open_pgn_editor_t15_scenario',
-									'label'           => '',
-									'rows'            => 3,
-									'placeholder'     => __( 'Saisir le PGN brut sans commentaires...', 'roi' ),
-									'data_attributes' => [ 'index' => $i ],
-								]);
+								PgnInput::render(
+									array(
+										'id'              => 'roi_t15_scenario_pgn_' . $i,
+										'value'           => $sc_pgn,
+										'button_id'       => 'btn_open_pgn_editor_t15_scenario_' . $i,
+										'input_class'     => 'roi_t15_scenario_pgn',
+										'button_class'    => 'button btn_open_pgn_editor_t15_scenario',
+										'label'           => '',
+										'rows'            => 3,
+										'placeholder'     => __( 'Saisir le PGN brut sans commentaires...', 'roi' ),
+										'data_attributes' => array( 'index' => $i ),
+									)
+								);
 								?>
 							</div>
 							<div>
 								<label style="font-weight: 600; font-size: 13px;">
-									<input type="radio" name="roi_t15_correct" value="<?php echo $i; ?>" <?php checked( $correct_index, $i ); ?>>
+									<input type="radio" name="roi_t15_correct" value="<?php echo (int) $i; ?>" <?php checked( $correct_index, $i ); ?>>
 									<?php esc_html_e( 'Bonne réponse', 'roi' ); ?>
 								</label>
 							</div>
@@ -102,14 +106,16 @@ class TypeJugementFinal implements TypeInterface {
 
 			<div style="margin-top: 15px;">
 				<?php
-				PgnInput::render([
-					'id'          => 'roi_t15_pgn_explication',
-					'value'       => $pgn_explication,
-					'button_id'   => 'btn_open_pgn_editor_t15_explication',
-					'label'       => __( 'Explication Finale (PGN)', 'roi' ),
-					'rows'        => 6,
-					'placeholder' => __( 'Saisir le PGN complet et commenté de la solution...', 'roi' ),
-				]);
+				PgnInput::render(
+					array(
+						'id'          => 'roi_t15_pgn_explication',
+						'value'       => $pgn_explication,
+						'button_id'   => 'btn_open_pgn_editor_t15_explication',
+						'label'       => __( 'Explication Finale (PGN)', 'roi' ),
+						'rows'        => 6,
+						'placeholder' => __( 'Saisir le PGN complet et commenté de la solution...', 'roi' ),
+					)
+				);
 				?>
 			</div>
 		</div>

@@ -21,7 +21,7 @@ class Lecon {
 	 * @return void
 	 */
 	public function init(): void {
-		add_action( 'init', [ $this, 'register' ], 0 );
+		add_action( 'init', array( $this, 'register' ), 0 );
 	}
 
 	/**
@@ -30,7 +30,7 @@ class Lecon {
 	 * @return void
 	 */
 	public function register(): void {
-		$labels = [
+		$labels = array(
 			'name'                  => _x( 'Leçons', 'Post Type General Name', 'roi' ),
 			'singular_name'         => _x( 'Leçon', 'Post Type Singular Name', 'roi' ),
 			'menu_name'             => __( 'Leçons', 'roi' ),
@@ -58,14 +58,14 @@ class Lecon {
 			'items_list'            => __( 'Liste des leçons', 'roi' ),
 			'items_list_navigation' => __( 'Navigation de la liste des leçons', 'roi' ),
 			'filter_items_list'     => __( 'Filtrer la liste des leçons', 'roi' ),
-		];
+		);
 
-		$args = [
+		$args = array(
 			'label'               => __( 'Leçon', 'roi' ),
 			'description'         => __( 'Leçons de la section Échecs', 'roi' ),
 			'labels'              => $labels,
-			'supports'            => [ 'title', 'editor', 'revisions', 'custom-fields' ],
-			'taxonomies'          => [ 'roi_chapitre' ],
+			'supports'            => array( 'title', 'editor', 'revisions', 'custom-fields' ),
+			'taxonomies'          => array( 'roi_chapitre' ),
 			'hierarchical'        => false,
 			'public'              => true,
 			'show_ui'             => true,
@@ -79,7 +79,7 @@ class Lecon {
 			'capability_type'     => 'page',
 			'show_in_rest'        => true,
 			'menu_icon'           => 'dashicons-welcome-learn-more',
-		];
+		);
 
 		register_post_type( 'roi_lecon', $args );
 	}

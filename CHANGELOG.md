@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+*   **Conformité Qualité & Standards de Code (PHPCS / WPCS) :**
+    *   **Nettoyage & Correction globale (100% PHPCS) :** Résolution complète des 182 erreurs et 17 avertissements signalés par `composer lint` sur 57 fichiers (0 erreur, 0 avertissement).
+    *   **Configuration WPCS (`phpcs.xml`) :** Intégration du standard officiel WordPress avec configuration du text domain `roi`, version minimale de WordPress ciblée à 6.7 et exclusion des dossiers compilés (`/build/`).
+    *   **Exclusion sur Mesure du Nommage WP :** Désactivation de la règle `WordPress.Files.FileName` dans `phpcs.xml` pour préserver le standard d'architecture PSR-4 / PascalCase requis par le projet.
+    *   **Sécurisation & Échappement :** Échappement systématique des sorties HTML (`esc_html`, `esc_attr`, `esc_textarea`, cast d'index `(int)`), assainissement et découplage sécurisé des entrées `$_POST` avec `wp_unslash()`, et annotations ciblées `phpcs:ignore` pour les accès intentionnels et sécurisés par le contexte (REST API / Gutenberg).
+    *   **Internationalisation & Commentaires :** Ajout des commentaires traducteurs `/* translators: ... */` pour toutes les chaînes `sprintf`, correction des fonctions dépréciées (`gmdate()`, `wp_json_encode()`), et harmonisation de la ponctuation de l'ensemble des commentaires inline.
+    *   **Sécurisation de la Désinstallation (`uninstall.php`) :** Préparation et échappement sécurisé des identifiants SQL, renommage de la variable `$taxonomy` en `$roi_taxonomy` pour éviter d'écraser la globale WP et ajout d'annotations de suppression ciblées pour les requêtes directes SQL de désinstallation.
+
+*   **Refactorisation des Éditeurs (`FenEditor` & `PgnEditor`) — Architecture, Colocation & Hooks :**
+    *   **Colocation de Composants :** Restructuration de `FenEditor` et `PgnEditor` dans des sous-répertoires dédiés `src/components/FenEditor/` et `src/components/PgnEditor/` intégrant des barrels d'export `index.js` pour maintenir une rétrocompatibilité d'import totale.
+    *   **Extraction des CSS :** Suppression des balises `<style>` intégrées et déportation du code CSS dans `FenEditor.css` et `PgnEditor.css`.
+    *   **Composants UI Partagés (Dumb Components) :** Isolation du bloc d'annotations couleur dans `DrawingLegend` (`src/components/DrawingLegend/`) et de la palette de pièces/gomme dans `PiecePalette` (`src/components/FenEditor/PiecePalette.jsx`).
+    *   **Externalisation Logique Métier :** Externalisation de la fonction pure `ensurePgnFenHeader` vers l'utilitaire `src/utils/chessUtils.js`.
+    *   **Custom Hook `useChessBoard` :** Création du Hook personnalisé `src/hooks/useChessBoard.js` orchestrant l'instanciation de `BoardCore`, le suivi dynamique du redimensionnement via `ResizeObserver` et le nettoyage propre au démontage.
+    *   **Sécurité des API Impératives & ESLint 9 :** Maintien rigoureux des méthodes `forwardRef` / `useImperativeHandle` (`redrawBoard`, `getDiagram`, `setDiagram`), préservation de la JSDoc originale et validation 100% conforme à ESLint 9 / Prettier.
+
+*   **Éditeur PGN (`PgnEditor.jsx`) — Support des Variantes PGN & Modes Métiers :**
+    *   **Prise en charge des Sous-Variantes :** Intégration complète du moteur d'arborescence PGN de `eg-chessboard` (v1.3.5+). Possibilité de créer, naviguer, promouvoir (`promoteVariation`) et supprimer (`deleteVariation`) des branches de sous-variantes à tout demi-coup de l'historique.
+    *   **Mode Lecteur vs Mode Éditeur :** Ajout d'une barre de commutation permettant d'alterner entre le *Mode Lecteur* (`readOnly: true` : navigation sans altération et formes éphémères) et le *Mode Éditeur* (`readOnly: false` : création de sous-variantes et persistance des annotations).
+    *   **Panneau d'Arborescence & Navigation :** Affichage dynamique de la liste des sous-variantes à la position courante, compteur réactif de demi-coups (`Coup X / Y`) et bouton d'accès direct au coup en direct (`⏭️`).
+
 ## 1.3.6 - 2026-08-09
 
 *   **Exercices — Type 8 (Vision'checs) — Refonte 4 Diagrammes & Aperçus Visuels :**

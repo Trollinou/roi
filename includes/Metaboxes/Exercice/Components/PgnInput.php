@@ -21,7 +21,7 @@ class PgnInput {
 	 * @param array<string, mixed> $args Configuration arguments.
 	 * @return void
 	 */
-	public static function render( array $args = [] ): void {
+	public static function render( array $args = array() ): void {
 		$id               = isset( $args['id'] ) && is_string( $args['id'] ) ? $args['id'] : 'roi_pgn_input';
 		$name             = isset( $args['name'] ) && is_string( $args['name'] ) ? $args['name'] : '';
 		$value            = isset( $args['value'] ) && is_string( $args['value'] ) ? $args['value'] : '';
@@ -39,7 +39,7 @@ class PgnInput {
 		$orientation_name = isset( $args['orientation_name'] ) && is_string( $args['orientation_name'] ) ? $args['orientation_name'] : '';
 		$color_class      = isset( $args['color_class'] ) && is_string( $args['color_class'] ) ? $args['color_class'] : 'roi-color-field';
 
-		// Build data attributes string
+		// Build data attributes string.
 		$data_attrs_str = '';
 		if ( isset( $args['data_attributes'] ) ) {
 			if ( is_array( $args['data_attributes'] ) ) {
@@ -65,20 +65,23 @@ class PgnInput {
 
 			<div class="roi-control-textarea-wrapper">
 				<textarea id="<?php echo esc_attr( $id ); ?>" 
-				          <?php if ( ! empty( $name ) ) : ?>name="<?php echo esc_attr( $name ); ?>"<?php endif; ?> 
-				          rows="<?php echo $rows; ?>" 
-				          class="large-text code roi-control-textarea <?php echo esc_attr( $input_class ); ?>" 
-				          placeholder="<?php echo esc_attr( $placeholder ); ?>"
-				          <?php echo $readonly ? 'readonly' : ''; ?>
-				          <?php echo $data_attrs_str; ?>><?php echo esc_textarea( $value ); ?></textarea>
+							<?php
+							if ( ! empty( $name ) ) :
+								?>
+								name="<?php echo esc_attr( $name ); ?>"<?php endif; ?> 
+							rows="<?php echo (int) $rows; ?>" 
+							class="large-text code roi-control-textarea <?php echo esc_attr( $input_class ); ?>" 
+							placeholder="<?php echo esc_attr( $placeholder ); ?>"
+							<?php echo $readonly ? 'readonly' : ''; ?>
+							<?php echo $data_attrs_str; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>><?php echo esc_textarea( $value ); ?></textarea>
 
 				<div class="roi-control-actions">
 					<button type="button" 
-					        id="<?php echo esc_attr( $button_id ); ?>" 
-					        class="<?php echo esc_attr( $button_class ); ?>" 
-					        title="<?php esc_attr_e( 'Éditer le PGN dans l\'éditeur interactif', 'roi' ); ?>"
-					        data-target-pgn="<?php echo esc_attr( $id ); ?>"
-					        <?php echo $data_attrs_str; ?>>
+							id="<?php echo esc_attr( $button_id ); ?>" 
+							class="<?php echo esc_attr( $button_class ); ?>" 
+							title="<?php esc_attr_e( 'Éditer le PGN dans l\'éditeur interactif', 'roi' ); ?>"
+							data-target-pgn="<?php echo esc_attr( $id ); ?>"
+							<?php echo $data_attrs_str; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 						<span class="dashicons dashicons-edit"></span>
 						<span class="roi-btn-text"><?php echo esc_html( $button_label ); ?></span>
 					</button>
@@ -89,9 +92,12 @@ class PgnInput {
 								<strong><?php esc_html_e( 'Orientation :', 'roi' ); ?></strong>
 							</label>
 							<select id="<?php echo esc_attr( $orientation_id ); ?>" 
-							        <?php if ( ! empty( $orientation_name ) ) : ?>name="<?php echo esc_attr( $orientation_name ); ?>"<?php endif; ?> 
-							        class="roi-control-select <?php echo esc_attr( $color_class ); ?>"
-							        <?php echo $data_attrs_str; ?>>
+									<?php
+									if ( ! empty( $orientation_name ) ) :
+										?>
+										name="<?php echo esc_attr( $orientation_name ); ?>"<?php endif; ?> 
+									class="roi-control-select <?php echo esc_attr( $color_class ); ?>"
+									<?php echo $data_attrs_str; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 								<option value="white" <?php selected( $color, 'white' ); ?>>♔ <?php esc_html_e( 'Blancs', 'roi' ); ?></option>
 								<option value="black" <?php selected( $color, 'black' ); ?>>♚ <?php esc_html_e( 'Noirs', 'roi' ); ?></option>
 							</select>

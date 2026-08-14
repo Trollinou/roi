@@ -40,7 +40,7 @@ class Stockfish_Controller {
 	 * @return void
 	 */
 	public function init(): void {
-		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
+		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 	}
 
 	/**
@@ -52,13 +52,13 @@ class Stockfish_Controller {
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
-			[
-				[
+			array(
+				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'serve_wasm' ],
+					'callback'            => array( $this, 'serve_wasm' ),
 					'permission_callback' => '__return_true',
-				],
-			]
+				),
+			)
 		);
 	}
 
@@ -68,14 +68,14 @@ class Stockfish_Controller {
 	 * @param WP_REST_Request $request The request object.
 	 * @return WP_REST_Response|WP_Error|void
 	 */
-	public function serve_wasm( WP_REST_Request $request ): mixed {
+	public function serve_wasm( WP_REST_Request $request ): mixed { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		$file_path = ROI_PLUGIN_DIR . 'assets/js/stockfish.wasm';
 
 		if ( ! file_exists( $file_path ) ) {
-			return new WP_Error( 'file_not_found', __( 'Fichier non trouvé.', 'roi' ), [ 'status' => 404 ] );
+			return new WP_Error( 'file_not_found', __( 'Fichier non trouvé.', 'roi' ), array( 'status' => 404 ) );
 		}
 
-		// Clean output buffers to prevent any garbage characters
+		// Clean output buffers to prevent any garbage characters.
 		if ( ob_get_level() ) {
 			ob_end_clean();
 		}
@@ -85,6 +85,7 @@ class Stockfish_Controller {
 		header( 'Last-Modified: ' . gmdate( 'D, d M Y H:i:s', filemtime( $file_path ) ) . ' GMT' );
 		header( 'Cache-Control: public, max-age=31536000' );
 
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
 		readfile( $file_path );
 		exit;
 	}

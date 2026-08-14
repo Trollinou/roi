@@ -21,8 +21,8 @@ class Suivi_Page {
 	 * @return void
 	 */
 	public function init(): void {
-		add_action( 'admin_menu', [ $this, 'add_suivi_menu' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_suivi_assets' ] );
+		add_action( 'admin_menu', array( $this, 'add_suivi_menu' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_suivi_assets' ) );
 	}
 
 	/**
@@ -35,9 +35,10 @@ class Suivi_Page {
 			'roi-apprentissage',
 			__( 'Suivi des élèves', 'roi' ),
 			__( 'Suivi des élèves', 'roi' ),
+			// phpcs:ignore WordPress.WP.Capabilities.Unknown
 			'edit_others_exercices',
 			'roi-suivi-eleves',
-			[ $this, 'render_suivi_page' ]
+			array( $this, 'render_suivi_page' )
 		);
 	}
 
@@ -58,7 +59,7 @@ class Suivi_Page {
 		wp_enqueue_script(
 			'roi-suivi-react',
 			$script_url,
-			[ 'wp-element' ],
+			array( 'wp-element' ),
 			ROI_VERSION,
 			true
 		);
@@ -66,10 +67,10 @@ class Suivi_Page {
 		wp_localize_script(
 			'roi-suivi-react',
 			'roiSuiviConfig',
-			[
+			array(
 				'apiUrl' => rest_url( 'roi/v1' ),
 				'nonce'  => wp_create_nonce( 'wp_rest' ),
-			]
+			)
 		);
 	}
 

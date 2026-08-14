@@ -30,7 +30,7 @@ class Roles {
 	 * @return array<string, bool>
 	 */
 	public static function get_exercice_capabilities(): array {
-		return [
+		return array(
 			'edit_exercice'          => true,
 			'read_exercice'          => true,
 			'delete_exercice'        => true,
@@ -38,7 +38,7 @@ class Roles {
 			'edit_others_exercices'  => true,
 			'publish_exercices'      => true,
 			'read_private_exercices' => true,
-		];
+		);
 	}
 
 	/**
@@ -47,7 +47,7 @@ class Roles {
 	 * @return array<string, bool>
 	 */
 	public static function get_cours_capabilities(): array {
-		return [
+		return array(
 			'edit_cours_item'    => true,
 			'read_cours_item'    => true,
 			'delete_cours_item'  => true,
@@ -55,7 +55,7 @@ class Roles {
 			'edit_others_cours'  => true,
 			'publish_cours'      => true,
 			'read_private_cours' => true,
-		];
+		);
 	}
 
 	/**
@@ -69,7 +69,7 @@ class Roles {
 			self::get_cours_capabilities()
 		);
 
-		// Coach
+		// Coach.
 		$entraineur = get_role( 'entraineur' );
 		if ( $entraineur ) {
 			foreach ( $caps as $cap => $grant ) {
@@ -77,7 +77,7 @@ class Roles {
 			}
 		}
 
-		// Admin
+		// Admin.
 		$admin = get_role( 'administrator' );
 		if ( $admin ) {
 			foreach ( $caps as $cap => $grant ) {
@@ -97,7 +97,7 @@ class Roles {
 			self::get_cours_capabilities()
 		);
 
-		// Coach
+		// Coach.
 		$entraineur = get_role( 'entraineur' );
 		if ( $entraineur ) {
 			foreach ( $caps as $cap => $grant ) {
@@ -105,7 +105,7 @@ class Roles {
 			}
 		}
 
-		// Admin
+		// Admin.
 		$admin = get_role( 'administrator' );
 		if ( $admin ) {
 			foreach ( $caps as $cap => $grant ) {

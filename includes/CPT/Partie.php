@@ -21,7 +21,7 @@ class Partie {
 	 * @return void
 	 */
 	public function init(): void {
-		add_action( 'init', [ $this, 'register' ], 0 );
+		add_action( 'init', array( $this, 'register' ), 0 );
 	}
 
 	/**
@@ -30,7 +30,7 @@ class Partie {
 	 * @return void
 	 */
 	public function register(): void {
-		$labels = [
+		$labels = array(
 			'name'               => _x( 'Parties', 'Post Type General Name', 'roi' ),
 			'singular_name'      => _x( 'Partie', 'Post Type Singular Name', 'roi' ),
 			'menu_name'          => __( 'Parties', 'roi' ),
@@ -48,13 +48,13 @@ class Partie {
 			'search_items'       => __( 'Rechercher une partie', 'roi' ),
 			'not_found'          => __( 'Non trouvé', 'roi' ),
 			'not_found_in_trash' => __( 'Non trouvé dans la corbeille', 'roi' ),
-		];
+		);
 
-		$args = [
+		$args = array(
 			'label'               => __( 'Partie', 'roi' ),
 			'description'         => __( 'Parties d\'échecs enregistrées depuis la PWA', 'roi' ),
 			'labels'              => $labels,
-			'supports'            => [ 'title', 'author' ],
+			'supports'            => array( 'title', 'author' ),
 			'hierarchical'        => false,
 			'public'              => true,
 			'show_ui'             => true,
@@ -67,7 +67,7 @@ class Partie {
 			'publicly_queryable'  => true,
 			'capability_type'     => 'post',
 			'show_in_rest'        => false,
-		];
+		);
 
 		register_post_type( 'roi_partie', $args );
 	}

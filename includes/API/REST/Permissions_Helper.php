@@ -20,7 +20,7 @@ class Permissions_Helper {
 	/**
 	 * Default allowed roles for Apprentissage module.
 	 */
-	public const DEFAULT_ROLES = [ 'administrator', 'staff', 'entraineur', 'editor', 'membre' ];
+	public const DEFAULT_ROLES = array( 'administrator', 'staff', 'entraineur', 'editor', 'membre' );
 
 	/**
 	 * Checks if the current user is logged in and belongs to an allowed Apprentissage role.
@@ -32,7 +32,7 @@ class Permissions_Helper {
 			return new WP_Error(
 				'rest_forbidden',
 				__( 'Vous devez être connecté.', 'roi' ),
-				[ 'status' => 401 ]
+				array( 'status' => 401 )
 			);
 		}
 
@@ -49,7 +49,7 @@ class Permissions_Helper {
 			return new WP_Error(
 				'rest_forbidden',
 				__( 'Accès non autorisé.', 'roi' ),
-				[ 'status' => 403 ]
+				array( 'status' => 403 )
 			);
 		}
 

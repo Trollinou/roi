@@ -21,10 +21,10 @@ class Activator {
 	 * @return void
 	 */
 	public static function activate(): void {
-		// Register capabilities
+		// Register capabilities.
 		Roles::add_capabilities_to_roles();
 
-		// Register CPTs and Taxonomies to enable rewrite rules generation
+		// Register CPTs and Taxonomies to enable rewrite rules generation.
 		( new \ROI\CPT\Chapitre_Taxonomy() )->register();
 		\ROI\CPT\Chapitre_Taxonomy::seed_terms();
 		( new \ROI\CPT\Lecon() )->register();
@@ -32,7 +32,7 @@ class Activator {
 		( new \ROI\CPT\Cours() )->register();
 		( new \ROI\CPT\Partie() )->register();
 
-		// Flush rewrite rules
+		// Flush rewrite rules.
 		flush_rewrite_rules();
 	}
 }
