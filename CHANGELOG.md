@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [1.4.0] - 2026-08-14
 
 *   **Conformité Qualité & Standards de Code (PHPCS / WPCS) :**
     *   **Nettoyage & Correction globale (100% PHPCS) :** Résolution complète des 182 erreurs et 17 avertissements signalés par `composer lint` sur 57 fichiers (0 erreur, 0 avertissement).
