@@ -58,7 +58,7 @@ class Backup {
 			'terms' => array(),
 		);
 
-		// Export terms
+		// Export terms.
 		$terms = get_terms(
 			array(
 				'taxonomy'   => $taxonomy,
@@ -78,7 +78,7 @@ class Backup {
 			}
 		}
 
-		// Export posts
+		// Export posts.
 		$posts_query = new WP_Query(
 			array(
 				'post_type'      => $post_types,
@@ -128,7 +128,7 @@ class Backup {
 	 * @return void
 	 */
 	public function handle_backup_action(): void {
-		if ( ! isset( $_POST['roi_backup_action'] ) || ! isset( $_POST['roi_backup_nonce'] ) || ! wp_verify_nonce( $_POST['roi_backup_nonce'], 'roi_backup_nonce_action' ) ) {
+		if ( ! isset( $_POST['roi_backup_action'], $_POST['roi_backup_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['roi_backup_nonce'] ) ), 'roi_backup_nonce_action' ) ) {
 			return;
 		}
 
@@ -138,8 +138,8 @@ class Backup {
 
 		$export_data = $this->get_apprentissage_export_data();
 
-		$filename         = 'roi-apprentissage-backup-' . date( 'Y-m-d' ) . '.json.gz';
-		$data_to_compress = json_encode( $export_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
+		$filename         = 'roi-apprentissage-backup-' . gmdate( 'Y-m-d' ) . '.json.gz';
+		$data_to_compress = wp_json_encode( $export_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
 		$compressed_data  = gzcompress( $data_to_compress );
 
 		if ( false === $compressed_data ) {
@@ -150,6 +150,7 @@ class Backup {
 		header( 'Content-Type: application/octet-stream' );
 		header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
 		header( 'Content-Length: ' . strlen( $compressed_data ) );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo $compressed_data;
 		exit;
 	}
@@ -160,7 +161,7 @@ class Backup {
 	 * @return void
 	 */
 	public function handle_restore_action(): void {
-		if ( ! isset( $_POST['roi_restore_action'] ) || ! isset( $_POST['roi_restore_nonce'] ) || ! wp_verify_nonce( $_POST['roi_restore_nonce'], 'roi_restore_nonce_action' ) ) {
+		if ( ! isset( $_POST['roi_restore_action'], $_POST['roi_restore_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['roi_restore_nonce'] ) ), 'roi_restore_nonce_action' ) ) {
 			return;
 		}
 
@@ -168,21 +169,23 @@ class Backup {
 			wp_die( esc_html__( "Vous n'avez pas la permission d'effectuer cette action.", 'roi' ) );
 		}
 
-		if ( ! isset( $_FILES['roi_restore_file'] ) || $_FILES['roi_restore_file']['error'] !== UPLOAD_ERR_OK ) {
+		if ( ! isset( $_FILES['roi_restore_file'] ) || ! is_array( $_FILES['roi_restore_file'] ) || ! isset( $_FILES['roi_restore_file']['error'] ) || UPLOAD_ERR_OK !== $_FILES['roi_restore_file']['error'] ) {
 			$this->add_admin_notice( __( 'Erreur lors du téléversement du fichier.', 'roi' ), 'error' );
 			return;
 		}
 
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$file            = $_FILES['roi_restore_file'];
-		$filename        = $file['name'];
+		$filename        = sanitize_file_name( wp_unslash( $file['name'] ?? '' ) );
 		$file_ext        = pathinfo( $filename, PATHINFO_EXTENSION );
 		$file_ext_double = pathinfo( str_replace( '.gz', '', $filename ), PATHINFO_EXTENSION );
 
-		if ( $file_ext !== 'gz' || $file_ext_double !== 'json' ) {
+		if ( 'gz' !== $file_ext || 'json' !== $file_ext_double ) {
 			$this->add_admin_notice( __( "Le fichier téléversé n'est pas une sauvegarde valide (format .json.gz attendu).", 'roi' ), 'error' );
 			return;
 		}
 
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$compressed_data = file_get_contents( $file['tmp_name'] );
 		if ( false === $compressed_data ) {
 			$this->add_admin_notice( __( 'Erreur lors de la lecture du fichier temporaire.', 'roi' ), 'error' );
@@ -202,7 +205,7 @@ class Backup {
 			return;
 		}
 
-		// Clear existing data
+		// Clear existing data.
 		$post_types = array( 'roi_lecon', 'roi_exercice', 'roi_cours' );
 		$taxonomy   = 'roi_chapitre';
 
@@ -230,7 +233,7 @@ class Backup {
 			}
 		}
 
-		// Import terms
+		// Import terms.
 		$term_map = array();
 		if ( ! empty( $import_data['terms'] ) ) {
 			foreach ( $import_data['terms'] as $term_data ) {
@@ -248,7 +251,7 @@ class Backup {
 				}
 			}
 
-			// Update term parents
+			// Update term parents.
 			foreach ( $import_data['terms'] as $term_data ) {
 				if ( $term_data['parent'] && isset( $term_map[ $term_data['term_id'] ], $term_map[ $term_data['parent'] ] ) ) {
 					wp_update_term(
@@ -262,7 +265,7 @@ class Backup {
 			}
 		}
 
-		// Import posts
+		// Import posts.
 		if ( ! empty( $import_data['posts'] ) ) {
 			foreach ( $import_data['posts'] as $post_data ) {
 				wp_insert_post( $post_data, true );
@@ -276,7 +279,7 @@ class Backup {
 	 * Adds a transient-based admin notice.
 	 *
 	 * @param string $message The message.
-	 * @param string $type    The type ('success', 'error', etc.)
+	 * @param string $type    The type ('success', 'error', etc.).
 	 * @return void
 	 */
 	private function add_admin_notice( string $message, string $type = 'success' ): void {

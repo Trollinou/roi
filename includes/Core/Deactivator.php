@@ -21,10 +21,10 @@ class Deactivator {
 	 * @return void
 	 */
 	public static function deactivate(): void {
-		// Remove capabilities
+		// Remove capabilities.
 		Roles::remove_capabilities_from_roles();
 
-		// Flush rewrite rules
+		// Flush rewrite rules.
 		flush_rewrite_rules();
 	}
 }

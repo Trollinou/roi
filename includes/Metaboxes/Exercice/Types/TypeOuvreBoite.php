@@ -54,16 +54,19 @@ class TypeOuvreBoite implements TypeInterface {
 						<div class="t13-choix-card" style="padding: 10px; border: 1px solid #ddd; background: #f9f9f9; border-radius: 4px;">
 							<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
 								<label style="font-weight: 600;">
-									<input type="radio" name="roi_t13_correct" value="<?php echo $i; ?>" <?php checked( $i, 0 ); ?>>
-									<?php printf( esc_html__( 'Bonne réponse (Choix %d)', 'roi' ), $i + 1 ); ?>
+									<input type="radio" name="roi_t13_correct" value="<?php echo (int) $i; ?>" <?php checked( $i, 0 ); ?>>
+									<?php
+									/* translators: %d: Choice number */
+									echo esc_html( sprintf( __( 'Bonne réponse (Choix %d)', 'roi' ), $i + 1 ) );
+									?>
 								</label>
 							</div>
 							<div style="display: flex; gap: 10px; margin-bottom: 8px;">
-								<input type="text" class="t13-choix-texte" data-index="<?php echo $i; ?>" placeholder="<?php esc_attr_e( 'Texte du bouton', 'roi' ); ?>" style="flex: 2;">
-								<input type="text" class="t13-choix-san" data-index="<?php echo $i; ?>" placeholder="<?php esc_attr_e( 'Coup SAN (ex: e4)', 'roi' ); ?>" style="flex: 1;">
+								<input type="text" class="t13-choix-texte" data-index="<?php echo (int) $i; ?>" placeholder="<?php esc_attr_e( 'Texte du bouton', 'roi' ); ?>" style="flex: 2;">
+								<input type="text" class="t13-choix-san" data-index="<?php echo (int) $i; ?>" placeholder="<?php esc_attr_e( 'Coup SAN (ex: e4)', 'roi' ); ?>" style="flex: 1;">
 							</div>
 							<div>
-								<input type="text" class="t13-choix-explication" data-index="<?php echo $i; ?>" placeholder="<?php esc_attr_e( 'Explication si sélectionné', 'roi' ); ?>" style="width: 100%;">
+								<input type="text" class="t13-choix-explication" data-index="<?php echo (int) $i; ?>" placeholder="<?php esc_attr_e( 'Explication si sélectionné', 'roi' ); ?>" style="width: 100%;">
 							</div>
 						</div>
 					<?php endfor; ?>

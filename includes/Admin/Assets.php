@@ -33,7 +33,7 @@ class Assets {
 	public function enqueue_admin_assets( string $hook ): void {
 		global $post_type;
 
-		// Only load on CPT Exercice, Lecon or Cours post editing screen
+		// Only load on CPT Exercice, Lecon or Cours post editing screen.
 		if ( ! in_array( $post_type, array( 'roi_exercice', 'roi_cours', 'roi_lecon' ), true ) || ( 'post.php' !== $hook && 'post-new.php' !== $hook ) ) {
 			return;
 		}
@@ -43,7 +43,7 @@ class Assets {
 		$chess_url  = $plugin_url . 'build/chessboard/';
 		$chess_dir  = $plugin_dir . 'build/chessboard/';
 
-		// Enqueue admin styles for all ROI post types
+		// Enqueue admin styles for all ROI post types.
 		wp_enqueue_style(
 			'roi-admin-style',
 			$plugin_url . 'assets/css/admin-style.css',
@@ -53,7 +53,7 @@ class Assets {
 
 		if ( in_array( $post_type, array( 'roi_exercice', 'roi_lecon' ), true ) ) {
 
-			// Enqueue eg-chessboard styles & script
+			// Enqueue eg-chessboard styles & script.
 			wp_enqueue_style(
 				'roi-admin-chessboard-style',
 				$chess_url . 'eg-chessboard.css',

@@ -90,12 +90,13 @@ class Games_Controller {
 			return new WP_Error( 'invalid_member', __( 'ID de membre invalide.', 'roi' ), array( 'status' => 400 ) );
 		}
 
-		// Contrôle anti-doublons (Même membre et même PGN)
+		// Contrôle anti-doublons (Même membre et même PGN).
 		$existing_games = get_posts(
 			array(
 				'post_type'      => 'roi_partie',
 				'posts_per_page' => 1,
 				'fields'         => 'ids',
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 				'meta_query'     => array(
 					array(
 						'key'   => '_roi_member_id',
@@ -119,13 +120,13 @@ class Games_Controller {
 			);
 		}
 
-		// Vérifier que le membre existe bien (CPT adherent de Dame)
+		// Vérifier que le membre existe bien (CPT adherent de Dame).
 		$member = get_post( $member_id );
 		if ( ! $member || 'adherent' !== $member->post_type ) {
 			return new WP_Error( 'member_not_found', __( 'Membre non trouvé.', 'roi' ), array( 'status' => 404 ) );
 		}
 
-		// Formater la date fournie ou repli sur la date actuelle
+		// Formater la date fournie ou repli sur la date actuelle.
 		$post_date = current_time( 'mysql' );
 		if ( ! empty( $game_date_raw ) ) {
 			$timestamp = strtotime( $game_date_raw );
@@ -136,7 +137,7 @@ class Games_Controller {
 
 		$current_user = wp_get_current_user();
 
-		// Insérer le post roi_partie
+		// Insérer le post roi_partie.
 		$post_title = sprintf( 'Partie de %s - %s', $member->post_title, wp_date( 'd/m/Y H:i', strtotime( $post_date ) ) );
 
 		$post_id = wp_insert_post(
@@ -144,7 +145,7 @@ class Games_Controller {
 				'post_type'    => 'roi_partie',
 				'post_status'  => 'publish',
 				'post_title'   => $post_title,
-				'post_content' => $pgn, // Stockage du PGN dans le contenu également
+				'post_content' => $pgn, // Stockage du PGN dans le contenu également.
 				'post_author'  => $current_user->ID,
 				'post_date'    => $post_date,
 			),
@@ -155,7 +156,7 @@ class Games_Controller {
 			return new WP_Error( 'db_error', __( 'Erreur lors de l\'enregistrement en base de données.', 'roi' ), array( 'status' => 500 ) );
 		}
 
-		// Sauvegarde des métadonnées avec préfixe _roi_
+		// Sauvegarde des métadonnées avec préfixe _roi_.
 		update_post_meta( $post_id, '_roi_member_id', $member_id );
 		update_post_meta( $post_id, '_roi_difficulty_level', $difficulty_level );
 		update_post_meta( $post_id, '_roi_hints_count', $hints_count );

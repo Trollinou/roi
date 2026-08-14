@@ -137,6 +137,7 @@ class Columns {
 				$vars = array_merge(
 					$vars,
 					array(
+						// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 						'meta_key' => $meta_key,
 						'orderby'  => 'meta_value_num',
 					)
@@ -161,6 +162,7 @@ class Columns {
 			return $clauses;
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( 'roi_cours' === $query->get( 'post_type' ) && ! isset( $_GET['orderby'] ) ) {
 			global $wpdb;
 

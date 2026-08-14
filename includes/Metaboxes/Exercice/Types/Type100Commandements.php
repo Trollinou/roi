@@ -59,16 +59,23 @@ class Type100Commandements implements TypeInterface {
 			<div id="roi_t1_qcms_container" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px;">
 				<?php foreach ( $qcms as $idx => $qcm ) : ?>
 					<?php
-					$q_text = $qcm['question'];
-					$reps   = $qcm['reponses'];
-					while ( count( $reps ) < 3 ) {
+					$q_text     = $qcm['question'];
+					$reps       = $qcm['reponses'];
+					$reps_count = count( $reps );
+					while ( $reps_count < 3 ) {
 						$reps[] = '';
+						++$reps_count;
 					}
 					$bonne = $qcm['bonne_reponse'];
 					?>
 					<div class="roi-t1-qcm-item" data-index="<?php echo (int) $idx; ?>" style="border: 1px solid #e0e0e0; padding: 12px; border-radius: 4px; background-color: #fafafa;">
 						<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px dashed #ddd; padding-bottom: 6px;">
-							<strong class="roi-t1-qcm-title"><?php printf( esc_html__( 'QCM #%d', 'roi' ), (int) $idx + 1 ); ?></strong>
+							<strong class="roi-t1-qcm-title">
+								<?php
+								/* translators: %d: QCM number */
+								echo esc_html( sprintf( __( 'QCM #%d', 'roi' ), (int) $idx + 1 ) );
+								?>
+							</strong>
 							<button type="button" class="button roi_t1_remove_qcm" style="color: #b32d2e; border-color: #b32d2e; font-weight: bold;"><?php esc_html_e( 'Supprimer ce QCM', 'roi' ); ?></button>
 						</div>
 						<p style="margin-top: 0;">

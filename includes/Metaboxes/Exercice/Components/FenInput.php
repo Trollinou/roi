@@ -40,7 +40,7 @@ class FenInput {
 		$button_class      = isset( $args['button_class'] ) && is_string( $args['button_class'] ) ? $args['button_class'] : 'button roi-btn-open-fen-editor';
 		$readonly          = isset( $args['readonly'] ) && (bool) $args['readonly'];
 
-		// Build data attributes string
+		// Build data attributes string.
 		$data_attrs_str = '';
 		if ( isset( $args['data_attributes'] ) ) {
 			if ( is_array( $args['data_attributes'] ) ) {
@@ -57,12 +57,12 @@ class FenInput {
 			$container_class .= ' ' . trim( $args['container_class'] );
 		}
 
-		// Calculate active color and orientation display
+		// Calculate active color and orientation display.
 		$parts               = explode( ' ', trim( $value ) );
 		$active_color        = ( isset( $parts[1] ) && 'b' === strtolower( $parts[1] ) ) ? 'black' : 'white';
 		$orientation_display = ( 'black' === $active_color ) ? __( 'Noir', 'roi' ) : __( 'Blanc', 'roi' );
 
-		// Process initial shapes array & count circles and arrows
+		// Process initial shapes array & count circles and arrows.
 		$shapes_list = array();
 		if ( is_string( $shapes ) && ! empty( $shapes ) ) {
 			$decoded = json_decode( $shapes, true );
@@ -106,7 +106,7 @@ class FenInput {
 							class="regular-text roi-control-input <?php echo esc_attr( $input_class ); ?>" 
 							placeholder="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 							<?php echo $readonly ? 'readonly' : ''; ?>
-							<?php echo $data_attrs_str; ?>>
+							<?php echo $data_attrs_str; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 				</div>
 
 				<?php if ( $show_orientation ) : ?>
@@ -125,7 +125,7 @@ class FenInput {
 								readonly 
 								tabindex="-1"
 								data-color="<?php echo esc_attr( $active_color ); ?>"
-								<?php echo $data_attrs_str; ?>>
+								<?php echo $data_attrs_str; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 					</div>
 				<?php endif; ?>
 
@@ -162,7 +162,7 @@ class FenInput {
 								data-target-color="<?php echo esc_attr( $orientation_id ); ?>"<?php endif; ?>
 							data-target-shapes="<?php echo esc_attr( $shapes_id ); ?>"
 							data-target-shapes-summary="<?php echo esc_attr( $shapes_summary_id ); ?>"
-							<?php echo $data_attrs_str; ?>>
+							<?php echo $data_attrs_str; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 						<span class="dashicons dashicons-edit"></span>
 						<span class="roi-btn-text"><?php echo esc_html( $button_label ); ?></span>
 					</button>

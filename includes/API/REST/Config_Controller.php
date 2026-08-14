@@ -67,7 +67,7 @@ class Config_Controller {
 	 * @param WP_REST_Request $request The request object.
 	 * @return WP_REST_Response
 	 */
-	public function get_config( WP_REST_Request $request ): WP_REST_Response {
+	public function get_config( WP_REST_Request $request ): WP_REST_Response { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		$default_roles = array( 'administrator', 'staff', 'entraineur', 'editor', 'membre' );
 		$allowed_roles = get_option( 'roi_apprentissage_allowed_roles', $default_roles );
 

@@ -33,9 +33,14 @@ class TypeAssociPlan implements TypeInterface {
 			
 			<div style="display: flex; flex-direction: column; gap: 20px; margin-top: 15px;">
 				<?php for ( $i = 0; $i < 4; $i++ ) : ?>
-					<div class="roi-t6-paire-card" data-index="<?php echo $i; ?>" style="border: 1px solid #ccd0d4; padding: 15px; background: #fafafa; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+					<div class="roi-t6-paire-card" data-index="<?php echo (int) $i; ?>" style="border: 1px solid #ccd0d4; padding: 15px; background: #fafafa; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
 						<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px dashed #eee; padding-bottom: 8px;">
-							<strong style="font-size: 14px; color: #1e1e1e;"><?php printf( esc_html__( 'Paire %d', 'roi' ), $i + 1 ); ?></strong>
+							<strong style="font-size: 14px; color: #1e1e1e;">
+								<?php
+								/* translators: %d: Pair number */
+								echo esc_html( sprintf( __( 'Paire %d', 'roi' ), $i + 1 ) );
+								?>
+							</strong>
 						</div>
 						
 						<div style="display: flex; flex-direction: column; gap: 12px;">

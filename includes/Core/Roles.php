@@ -69,7 +69,7 @@ class Roles {
 			self::get_cours_capabilities()
 		);
 
-		// Coach
+		// Coach.
 		$entraineur = get_role( 'entraineur' );
 		if ( $entraineur ) {
 			foreach ( $caps as $cap => $grant ) {
@@ -77,7 +77,7 @@ class Roles {
 			}
 		}
 
-		// Admin
+		// Admin.
 		$admin = get_role( 'administrator' );
 		if ( $admin ) {
 			foreach ( $caps as $cap => $grant ) {
@@ -97,7 +97,7 @@ class Roles {
 			self::get_cours_capabilities()
 		);
 
-		// Coach
+		// Coach.
 		$entraineur = get_role( 'entraineur' );
 		if ( $entraineur ) {
 			foreach ( $caps as $cap => $grant ) {
@@ -105,7 +105,7 @@ class Roles {
 			}
 		}
 
-		// Admin
+		// Admin.
 		$admin = get_role( 'administrator' );
 		if ( $admin ) {
 			foreach ( $caps as $cap => $grant ) {

@@ -106,13 +106,13 @@ class Manager {
 			<label for="roi_exercice_niveau"><strong>Niveau de difficulté :</strong></label><br>
 			<select name="roi_exercice_niveau" id="roi_exercice_niveau">
 				<?php for ( $i = 1; $i <= 4; $i++ ) : ?>
-					<option value="<?php echo $i; ?>" <?php selected( $niveau, (string) $i ); ?>><?php echo $i; ?></option>
+					<option value="<?php echo (int) $i; ?>" <?php selected( $niveau, (string) $i ); ?>><?php echo (int) $i; ?></option>
 				<?php endfor; ?>
 			</select>
 		</p>
 
 		<?php
-		// Render type sections via registry
+		// Render type sections via registry.
 		$type_classes = array(
 			Type100Commandements::class,
 			TypePopEchecs::class,
@@ -181,27 +181,27 @@ class Manager {
 	 * @return void
 	 */
 	public function sauvegarder_metabox( int $post_id ): void {
-		// Nonce check
-		if ( ! isset( $_POST['roi_exercice_nonce'] ) || ! wp_verify_nonce( $_POST['roi_exercice_nonce'], 'roi_sauvegarder_exercice' ) ) {
+		// Nonce check.
+		if ( ! isset( $_POST['roi_exercice_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['roi_exercice_nonce'] ) ), 'roi_sauvegarder_exercice' ) ) {
 			return;
 		}
 
-		// Autosave check
+		// Autosave check.
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			return;
 		}
 
-		// Permissions check
+		// Permissions check.
 		if ( ! current_user_can( 'edit_post', $post_id ) ) {
 			return;
 		}
 
-		// Save exercise type (integer value)
+		// Save exercise type (integer value).
 		if ( isset( $_POST['roi_exercice_type'] ) ) {
 			update_post_meta( $post_id, '_roi_exercice_type', (int) $_POST['roi_exercice_type'] );
 		}
 
-		// Save exercise level (integer value between 1 and 4)
+		// Save exercise level (integer value between 1 and 4).
 		if ( isset( $_POST['roi_exercice_niveau'] ) ) {
 			$niveau = (int) $_POST['roi_exercice_niveau'];
 			if ( $niveau >= 1 && $niveau <= 4 ) {
@@ -209,16 +209,17 @@ class Manager {
 			}
 		}
 
-		// Save raw JSON config
+		// Save raw JSON config.
 		if ( isset( $_POST['roi_exercice_config'] ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$json_raw = wp_unslash( $_POST['roi_exercice_config'] );
 
-			// Validate JSON structure
+			// Validate JSON structure.
 			json_decode( $json_raw );
 			if ( json_last_error() === JSON_ERROR_NONE ) {
 				update_post_meta( $post_id, '_roi_exercice_config', wp_slash( $json_raw ) );
 			} else {
-				// Save anyway but avoid corruption by preserving raw layout
+				// Save anyway but avoid corruption by preserving raw layout.
 				update_post_meta( $post_id, '_roi_exercice_config', wp_slash( $json_raw ) );
 			}
 		}
@@ -233,12 +234,12 @@ class Manager {
 	 * @return array<string, mixed>
 	 */
 	public function valider_exercice_donnees( array $data, array $postarr ): array {
-		// Only validate 'roi_exercice' post type
+		// Only validate 'roi_exercice' post type.
 		if ( 'roi_exercice' !== ( $data['post_type'] ?? '' ) ) {
 			return $data;
 		}
 
-		// Avoid validation on autosave, revision, or trash/untrash actions
+		// Avoid validation on autosave, revision, or trash/untrash actions.
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			return $data;
 		}
@@ -249,14 +250,16 @@ class Manager {
 		$is_publishing = 'publish' === $data['post_status'];
 		$errors        = array();
 
-		// 1. Title validation
+		// 1. Title validation.
 		$title = trim( $data['post_title'] ?? '' );
 		if ( empty( $title ) || 'Brouillon automatique' === $title ) {
 			$errors[] = __( "Le titre de l'exercice est obligatoire.", 'roi' );
 		}
 
-		// 2. Difficulty level validation (value between 1 and 4)
+		// 2. Difficulty level validation (value between 1 and 4).
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$niveau = isset( $_POST['roi_exercice_niveau'] ) ? (int) $_POST['roi_exercice_niveau'] : 0;
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( ! isset( $_POST['roi_exercice_niveau'] ) && isset( $postarr['ID'] ) ) {
 			$niveau = (int) get_post_meta( (int) $postarr['ID'], '_roi_exercice_niveau', true );
 		}
@@ -264,8 +267,10 @@ class Manager {
 			$errors[] = __( 'Le niveau de difficulté (1 à 4) est obligatoire.', 'roi' );
 		}
 
-		// 3. Exercise type validation (value between 1 and 16)
+		// 3. Exercise type validation (value between 1 and 16).
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$type = isset( $_POST['roi_exercice_type'] ) ? (int) $_POST['roi_exercice_type'] : 0;
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( ! isset( $_POST['roi_exercice_type'] ) && isset( $postarr['ID'] ) ) {
 			$type = (int) get_post_meta( (int) $postarr['ID'], '_roi_exercice_type', true );
 		}
@@ -273,10 +278,12 @@ class Manager {
 			$errors[] = __( "Le type d'exercice est obligatoire.", 'roi' );
 		}
 
-		// 4. Chapter validation (taxonomy 'roi_chapitre')
+		// 4. Chapter validation (taxonomy 'roi_chapitre').
 		$has_chapitre = false;
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( ! empty( $_POST['tax_input']['roi_chapitre'] ) ) {
-			$chapitres = (array) $_POST['tax_input']['roi_chapitre'];
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$chapitres = (array) wp_unslash( $_POST['tax_input']['roi_chapitre'] );
 			$chapitres = array_filter( array_map( 'intval', $chapitres ) );
 			if ( ! empty( $chapitres ) ) {
 				$has_chapitre = true;

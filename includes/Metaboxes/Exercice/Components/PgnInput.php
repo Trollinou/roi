@@ -39,7 +39,7 @@ class PgnInput {
 		$orientation_name = isset( $args['orientation_name'] ) && is_string( $args['orientation_name'] ) ? $args['orientation_name'] : '';
 		$color_class      = isset( $args['color_class'] ) && is_string( $args['color_class'] ) ? $args['color_class'] : 'roi-color-field';
 
-		// Build data attributes string
+		// Build data attributes string.
 		$data_attrs_str = '';
 		if ( isset( $args['data_attributes'] ) ) {
 			if ( is_array( $args['data_attributes'] ) ) {
@@ -69,11 +69,11 @@ class PgnInput {
 							if ( ! empty( $name ) ) :
 								?>
 								name="<?php echo esc_attr( $name ); ?>"<?php endif; ?> 
-							rows="<?php echo $rows; ?>" 
+							rows="<?php echo (int) $rows; ?>" 
 							class="large-text code roi-control-textarea <?php echo esc_attr( $input_class ); ?>" 
 							placeholder="<?php echo esc_attr( $placeholder ); ?>"
 							<?php echo $readonly ? 'readonly' : ''; ?>
-							<?php echo $data_attrs_str; ?>><?php echo esc_textarea( $value ); ?></textarea>
+							<?php echo $data_attrs_str; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>><?php echo esc_textarea( $value ); ?></textarea>
 
 				<div class="roi-control-actions">
 					<button type="button" 
@@ -81,7 +81,7 @@ class PgnInput {
 							class="<?php echo esc_attr( $button_class ); ?>" 
 							title="<?php esc_attr_e( 'Éditer le PGN dans l\'éditeur interactif', 'roi' ); ?>"
 							data-target-pgn="<?php echo esc_attr( $id ); ?>"
-							<?php echo $data_attrs_str; ?>>
+							<?php echo $data_attrs_str; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 						<span class="dashicons dashicons-edit"></span>
 						<span class="roi-btn-text"><?php echo esc_html( $button_label ); ?></span>
 					</button>
@@ -97,7 +97,7 @@ class PgnInput {
 										?>
 										name="<?php echo esc_attr( $orientation_name ); ?>"<?php endif; ?> 
 									class="roi-control-select <?php echo esc_attr( $color_class ); ?>"
-									<?php echo $data_attrs_str; ?>>
+									<?php echo $data_attrs_str; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 								<option value="white" <?php selected( $color, 'white' ); ?>>♔ <?php esc_html_e( 'Blancs', 'roi' ); ?></option>
 								<option value="black" <?php selected( $color, 'black' ); ?>>♚ <?php esc_html_e( 'Noirs', 'roi' ); ?></option>
 							</select>

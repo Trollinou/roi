@@ -74,7 +74,10 @@ class TypeEchecEval implements TypeInterface {
 						<div class="roi-t10-question-card" data-index="<?php echo (int) $idx; ?>" style="padding: 12px; border: 1px solid #ddd; background: #f9f9f9; border-radius: 4px;">
 							<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
 								<strong style="font-size: 13px; color: #1d2327;">
-									<?php printf( esc_html__( 'Question %d', 'roi' ), (int) $idx + 1 ); ?>
+									<?php
+									/* translators: %d: Question number */
+									echo esc_html( sprintf( __( 'Question %d', 'roi' ), (int) $idx + 1 ) );
+									?>
 								</strong>
 								<button type="button" class="button button-link-delete roi_t10_remove_question" style="color: #b32d2e; text-decoration: none;">
 									<?php esc_html_e( 'Supprimer', 'roi' ); ?>

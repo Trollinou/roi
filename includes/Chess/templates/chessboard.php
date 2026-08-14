@@ -8,6 +8,8 @@
 declare(strict_types=1);
 
 /**
+ * Chessboard template variables.
+ *
  * @var string $board_id
  * @var array<string, mixed> $atts
  * @var bool $coordinates

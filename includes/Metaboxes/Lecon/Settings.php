@@ -66,12 +66,16 @@ class Settings {
 			return;
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( isset( $_POST['roi_lecon_niveau'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$niveau = (int) $_POST['roi_lecon_niveau'];
 			if ( $niveau >= 1 && $niveau <= 4 ) {
 				update_post_meta( $post_id, '_roi_lecon_niveau', $niveau );
 			}
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		} elseif ( isset( $_POST['meta']['_roi_lecon_niveau'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$niveau = (int) $_POST['meta']['_roi_lecon_niveau'];
 			if ( $niveau >= 1 && $niveau <= 4 ) {
 				update_post_meta( $post_id, '_roi_lecon_niveau', $niveau );

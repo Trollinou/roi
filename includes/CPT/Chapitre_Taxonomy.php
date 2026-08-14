@@ -108,7 +108,7 @@ class Chapitre_Taxonomy {
 	 * @param array<string, mixed>        $args Arguments.
 	 * @return array<int, mixed>|\WP_Error Sorted terms.
 	 */
-	public function trier_termes_chapitre( $terms, $taxonomies, $args ) {
+	public function trier_termes_chapitre( $terms, $taxonomies, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		if ( is_wp_error( $terms ) || empty( $terms ) ) {
 			return $terms;
 		}
@@ -144,7 +144,7 @@ class Chapitre_Taxonomy {
 	 * @param int                  $post_id Post ID.
 	 * @return array<string, mixed>
 	 */
-	public function args_checklist_chapitre( array $args, int $post_id ): array {
+	public function args_checklist_chapitre( array $args, int $post_id ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		if ( isset( $args['taxonomy'] ) && 'roi_chapitre' === $args['taxonomy'] ) {
 			$args['checked_ontop'] = false;
 			$args['walker']        = new \ROI\Admin\Walker_Category_Radio();

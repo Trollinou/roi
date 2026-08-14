@@ -67,9 +67,12 @@ class TypeCapOuPasCap implements TypeInterface {
 					$opt1_texte       = isset( $qcm_choix[1]['texte'] ) && is_string( $qcm_choix[1]['texte'] ) ? $qcm_choix[1]['texte'] : '';
 					$opt1_explication = isset( $qcm_choix[1]['explication'] ) && is_string( $qcm_choix[1]['explication'] ) ? $qcm_choix[1]['explication'] : '';
 					?>
-					<div class="roi-t14-diagramme-item" data-index="<?php echo $i; ?>" style="padding: 12px; border: 1px solid #ddd; background: #f9f9f9; border-radius: 4px;">
+					<div class="roi-t14-diagramme-item" data-index="<?php echo (int) $i; ?>" style="padding: 12px; border: 1px solid #ddd; background: #f9f9f9; border-radius: 4px;">
 						<div style="font-weight: 600; margin-bottom: 8px; font-size: 13px; color: #1d2327;">
-							<?php printf( esc_html__( 'Diagramme %d', 'roi' ), $i + 1 ); ?>
+							<?php
+							/* translators: %d: Diagram number */
+							echo esc_html( sprintf( __( 'Diagramme %d', 'roi' ), $i + 1 ) );
+							?>
 						</div>
 
 						<?php
@@ -90,40 +93,40 @@ class TypeCapOuPasCap implements TypeInterface {
 						?>
 
 						<!-- Bloc QCM -->
-						<div class="roi_t14_bloc_qcm" data-index="<?php echo $i; ?>" style="display: <?php echo 'qcm' === $type_reponse ? 'block' : 'none'; ?>; border-top: 1px dashed #ccc; padding-top: 10px; margin-top: 10px;">
+						<div class="roi_t14_bloc_qcm" data-index="<?php echo (int) $i; ?>" style="display: <?php echo 'qcm' === $type_reponse ? 'block' : 'none'; ?>; border-top: 1px dashed #ccc; padding-top: 10px; margin-top: 10px;">
 							<label style="font-weight: 600; margin-bottom: 6px; display: block;"><?php esc_html_e( 'Options QCM (2 choix) :', 'roi' ); ?></label>
 
 							<!-- Choix 1 -->
 							<div style="padding: 8px; border: 1px solid #e2e4e7; background: #fff; border-radius: 4px; margin-bottom: 8px;">
 								<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-									<input type="radio" class="roi_t14_qcm_bonne_reponse" name="roi_t14_qcm_bonne_reponse_<?php echo $i; ?>" value="0" data-index="<?php echo $i; ?>" <?php checked( $qcm_bonne, 0 ); ?>>
+									<input type="radio" class="roi_t14_qcm_bonne_reponse" name="roi_t14_qcm_bonne_reponse_<?php echo (int) $i; ?>" value="0" data-index="<?php echo (int) $i; ?>" <?php checked( $qcm_bonne, 0 ); ?>>
 									<strong style="font-size: 12px;"><?php esc_html_e( 'Choix 1 (Bonne réponse ?)', 'roi' ); ?></strong>
 								</div>
 								<div style="display: flex; gap: 10px;">
-									<input type="text" class="roi_t14_qcm_texte" data-index="<?php echo $i; ?>" data-opt="0" value="<?php echo esc_attr( $opt0_texte ); ?>" placeholder="<?php esc_attr_e( 'Texte du bouton (ex: Cap !)', 'roi' ); ?>" style="flex: 1; height: 30px;">
-									<input type="text" class="roi_t14_qcm_explication" data-index="<?php echo $i; ?>" data-opt="0" value="<?php echo esc_attr( $opt0_explication ); ?>" placeholder="<?php esc_attr_e( 'Explication (ex: Bien joué...)', 'roi' ); ?>" style="flex: 2; height: 30px;">
+									<input type="text" class="roi_t14_qcm_texte" data-index="<?php echo (int) $i; ?>" data-opt="0" value="<?php echo esc_attr( $opt0_texte ); ?>" placeholder="<?php esc_attr_e( 'Texte du bouton (ex: Cap !)', 'roi' ); ?>" style="flex: 1; height: 30px;">
+									<input type="text" class="roi_t14_qcm_explication" data-index="<?php echo (int) $i; ?>" data-opt="0" value="<?php echo esc_attr( $opt0_explication ); ?>" placeholder="<?php esc_attr_e( 'Explication (ex: Bien joué...)', 'roi' ); ?>" style="flex: 2; height: 30px;">
 								</div>
 							</div>
 
 							<!-- Choix 2 -->
 							<div style="padding: 8px; border: 1px solid #e2e4e7; background: #fff; border-radius: 4px;">
 								<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-									<input type="radio" class="roi_t14_qcm_bonne_reponse" name="roi_t14_qcm_bonne_reponse_<?php echo $i; ?>" value="1" data-index="<?php echo $i; ?>" <?php checked( $qcm_bonne, 1 ); ?>>
+									<input type="radio" class="roi_t14_qcm_bonne_reponse" name="roi_t14_qcm_bonne_reponse_<?php echo (int) $i; ?>" value="1" data-index="<?php echo (int) $i; ?>" <?php checked( $qcm_bonne, 1 ); ?>>
 									<strong style="font-size: 12px;"><?php esc_html_e( 'Choix 2 (Bonne réponse ?)', 'roi' ); ?></strong>
 								</div>
 								<div style="display: flex; gap: 10px;">
-									<input type="text" class="roi_t14_qcm_texte" data-index="<?php echo $i; ?>" data-opt="1" value="<?php echo esc_attr( $opt1_texte ); ?>" placeholder="<?php esc_attr_e( 'Texte du bouton (ex: Pas cap.)', 'roi' ); ?>" style="flex: 1; height: 30px;">
-									<input type="text" class="roi_t14_qcm_explication" data-index="<?php echo $i; ?>" data-opt="1" value="<?php echo esc_attr( $opt1_explication ); ?>" placeholder="<?php esc_attr_e( 'Explication (ex: Dommage...)', 'roi' ); ?>" style="flex: 2; height: 30px;">
+									<input type="text" class="roi_t14_qcm_texte" data-index="<?php echo (int) $i; ?>" data-opt="1" value="<?php echo esc_attr( $opt1_texte ); ?>" placeholder="<?php esc_attr_e( 'Texte du bouton (ex: Pas cap.)', 'roi' ); ?>" style="flex: 1; height: 30px;">
+									<input type="text" class="roi_t14_qcm_explication" data-index="<?php echo (int) $i; ?>" data-opt="1" value="<?php echo esc_attr( $opt1_explication ); ?>" placeholder="<?php esc_attr_e( 'Explication (ex: Dommage...)', 'roi' ); ?>" style="flex: 2; height: 30px;">
 								</div>
 							</div>
 						</div>
 
 						<!-- Bloc Move -->
-						<div class="roi_t14_bloc_move" data-index="<?php echo $i; ?>" style="display: <?php echo 'move' === $type_reponse ? 'block' : 'none'; ?>; border-top: 1px dashed #ccc; padding-top: 10px; margin-top: 10px;">
+						<div class="roi_t14_bloc_move" data-index="<?php echo (int) $i; ?>" style="display: <?php echo 'move' === $type_reponse ? 'block' : 'none'; ?>; border-top: 1px dashed #ccc; padding-top: 10px; margin-top: 10px;">
 							<label style="font-weight: 600; margin-bottom: 6px; display: block;"><?php esc_html_e( 'Déplacement attendu :', 'roi' ); ?></label>
 							<div style="display: flex; gap: 10px;">
-								<input type="text" class="roi_t14_move_san" data-index="<?php echo $i; ?>" value="<?php echo esc_attr( $move_san ); ?>" placeholder="<?php esc_attr_e( 'Coup attendu (ex: Nxf7)', 'roi' ); ?>" style="flex: 1; height: 30px;">
-								<input type="text" class="roi_t14_move_explication" data-index="<?php echo $i; ?>" value="<?php echo esc_attr( $move_explication ); ?>" placeholder="<?php esc_attr_e( 'Explication si erreur', 'roi' ); ?>" style="flex: 2; height: 30px;">
+								<input type="text" class="roi_t14_move_san" data-index="<?php echo (int) $i; ?>" value="<?php echo esc_attr( $move_san ); ?>" placeholder="<?php esc_attr_e( 'Coup attendu (ex: Nxf7)', 'roi' ); ?>" style="flex: 1; height: 30px;">
+								<input type="text" class="roi_t14_move_explication" data-index="<?php echo (int) $i; ?>" value="<?php echo esc_attr( $move_explication ); ?>" placeholder="<?php esc_attr_e( 'Explication si erreur', 'roi' ); ?>" style="flex: 2; height: 30px;">
 							</div>
 						</div>
 					</div>

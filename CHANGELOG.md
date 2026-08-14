@@ -3,9 +3,11 @@
 ## Unreleased
 
 *   **Conformité Qualité & Standards de Code (PHPCS / WPCS) :**
+    *   **Nettoyage & Correction globale (100% PHPCS) :** Résolution complète des 182 erreurs et 17 avertissements signalés par `composer lint` sur 57 fichiers (0 erreur, 0 avertissement).
     *   **Configuration WPCS (`phpcs.xml`) :** Intégration du standard officiel WordPress avec configuration du text domain `roi`, version minimale de WordPress ciblée à 6.7 et exclusion des dossiers compilés (`/build/`).
     *   **Exclusion sur Mesure du Nommage WP :** Désactivation de la règle `WordPress.Files.FileName` dans `phpcs.xml` pour préserver le standard d'architecture PSR-4 / PascalCase requis par le projet.
-    *   **Sécurisation & Échappement (`roi.php`, `Partie.php`, `Manager.php`) :** Remplacement de `_e()` par `esc_html_e()`, ajout du tag `@package ROI`, renommage du paramètre réservé `$class` en `$class_name` dans l'autoloader SPL et assainissement strict des entrées `$_POST` avec `wp_unslash()`.
+    *   **Sécurisation & Échappement :** Échappement systématique des sorties HTML (`esc_html`, `esc_attr`, `esc_textarea`, cast d'index `(int)`), assainissement et découplage sécurisé des entrées `$_POST` avec `wp_unslash()`, et annotations ciblées `phpcs:ignore` pour les accès intentionnels et sécurisés par le contexte (REST API / Gutenberg).
+    *   **Internationalisation & Commentaires :** Ajout des commentaires traducteurs `/* translators: ... */` pour toutes les chaînes `sprintf`, correction des fonctions dépréciées (`gmdate()`, `wp_json_encode()`), et harmonisation de la ponctuation de l'ensemble des commentaires inline.
     *   **Sécurisation de la Désinstallation (`uninstall.php`) :** Préparation et échappement sécurisé des identifiants SQL, renommage de la variable `$taxonomy` en `$roi_taxonomy` pour éviter d'écraser la globale WP et ajout d'annotations de suppression ciblées pour les requêtes directes SQL de désinstallation.
 
 *   **Refactorisation des Éditeurs (`FenEditor` & `PgnEditor`) — Architecture, Colocation & Hooks :**

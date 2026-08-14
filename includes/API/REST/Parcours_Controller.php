@@ -68,7 +68,7 @@ class Parcours_Controller {
 	 * @param WP_REST_Request $request The request object.
 	 * @return WP_REST_Response
 	 */
-	public function get_parcours( WP_REST_Request $request ): WP_REST_Response {
+	public function get_parcours( WP_REST_Request $request ): WP_REST_Response { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		$args = array(
 			'post_type'      => 'roi_cours',
 			'post_status'    => 'publish',
@@ -85,11 +85,11 @@ class Parcours_Controller {
 				$post    = get_post( $post_id );
 				$ordre   = $post ? (int) $post->menu_order : 0;
 
-				// Retrieve level
+				// Retrieve level.
 				$niveau_meta = get_post_meta( $post_id, '_roi_cours_niveau', true );
 				$niveau      = is_numeric( $niveau_meta ) ? (int) $niveau_meta : 1;
 
-				// Retrieve playlist
+				// Retrieve playlist.
 				$playlist_meta = get_post_meta( $post_id, '_roi_cours_playlist', true );
 				$playlist      = array();
 				if ( is_string( $playlist_meta ) && '' !== $playlist_meta ) {
@@ -105,7 +105,7 @@ class Parcours_Controller {
 					}
 				}
 
-				// Retrieve chapter info
+				// Retrieve chapter info.
 				$chapitre_nom     = '';
 				$chapitre_couleur = '';
 				$terms            = get_the_terms( $post_id, 'roi_chapitre' );

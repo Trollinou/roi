@@ -60,7 +60,7 @@ class ChessEngine {
 		$this->plugin_url  = $plugin_url;
 		$this->plugin_path = $plugin_path;
 
-		// Hooks
+		// Hooks.
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'init', array( $this, 'register_block' ) );
 		add_shortcode( 'chess_board', array( $this, 'render_chessboard' ) );

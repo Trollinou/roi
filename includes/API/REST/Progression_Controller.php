@@ -50,7 +50,7 @@ class Progression_Controller {
 	 * @return void
 	 */
 	public function register_routes(): void {
-		// Tâche 1 : Route d'enregistrement (Élève) - POST /wp-json/roi/v1/progression
+		// Tâche 1 : Route d'enregistrement (Élève) - POST /wp-json/roi/v1/progression.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
@@ -68,7 +68,7 @@ class Progression_Controller {
 			)
 		);
 
-		// Tâche 2 : Route de consultation (Entraîneur) - GET /wp-json/roi/v1/progression/groupe
+		// Tâche 2 : Route de consultation (Entraîneur) - GET /wp-json/roi/v1/progression/groupe.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/groupe',
@@ -81,7 +81,7 @@ class Progression_Controller {
 			)
 		);
 
-		// Route de réinitialisation de progression (Entraîneur) - POST /wp-json/roi/v1/progression/reset
+		// Route de réinitialisation de progression (Entraîneur) - POST /wp-json/roi/v1/progression/reset.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/reset',
@@ -95,6 +95,11 @@ class Progression_Controller {
 		);
 	}
 
+	/**
+	 * Permission callback for students to manage progression.
+	 *
+	 * @return bool|\WP_Error
+	 */
 	public function check_adherent_permissions(): bool|WP_Error {
 		return Permissions_Helper::check_apprentissage_access();
 	}
@@ -187,7 +192,7 @@ class Progression_Controller {
 		$user_id  = get_current_user_id();
 		$meta_key = $this->get_progression_meta_key( $request );
 
-		// On vérifie si l'adhérent a déjà validé cet élément pour éviter d'ajouter des doublons
+		// On vérifie si l'adhérent a déjà validé cet élément pour éviter d'ajouter des doublons.
 		$meta_entries      = get_user_meta( $user_id, $meta_key, false );
 		$already_validated = false;
 		if ( is_array( $meta_entries ) ) {
@@ -222,7 +227,7 @@ class Progression_Controller {
 	 * @param WP_REST_Request $request The request object.
 	 * @return WP_REST_Response
 	 */
-	public function obtenir_progression_groupe( WP_REST_Request $request ): WP_REST_Response {
+	public function obtenir_progression_groupe( WP_REST_Request $request ): WP_REST_Response { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		$default_roles = array( 'administrator', 'staff', 'entraineur', 'editor', 'membre' );
 		$allowed_roles = get_option( 'roi_apprentissage_allowed_roles', $default_roles );
 
@@ -247,7 +252,7 @@ class Progression_Controller {
 				continue;
 			}
 
-			// Trouver toutes les clés de progression pour cet utilisateur
+			// Trouver toutes les clés de progression pour cet utilisateur.
 			$progression_keys = array();
 			foreach ( $user_meta as $key => $val ) {
 				if ( str_starts_with( $key, '_roi_element_valide' ) ) {
@@ -271,14 +276,14 @@ class Progression_Controller {
 					}
 				}
 
-				// Garder des IDs uniques et ordonnés
+				// Garder des IDs uniques et ordonnés.
 				$elements_valides = array_values( array_unique( $elements_valides ) );
 
 				if ( empty( $elements_valides ) ) {
 					continue;
 				}
 
-				// Déterminer le nom et prénom en fonction de la clé d'identité
+				// Déterminer le nom et prénom en fonction de la clé d'identité.
 				$nom          = $user->last_name;
 				$prenom       = $user->first_name;
 				$display_name = $user->display_name;
@@ -292,8 +297,8 @@ class Progression_Controller {
 						$adh_nom     = get_post_meta( $adherent_id, '_dame_nom', true );
 						$adh_prenom  = get_post_meta( $adherent_id, '_dame_prenom', true );
 						if ( ! empty( $adh_nom ) || ! empty( $adh_prenom ) ) {
-							$nom          = $adh_nom ?: '';
-							$prenom       = $adh_prenom ?: '';
+							$nom          = ! empty( $adh_nom ) ? (string) $adh_nom : '';
+							$prenom       = ! empty( $adh_prenom ) ? (string) $adh_prenom : '';
 							$display_name = trim( $prenom . ' ' . $nom );
 						}
 					} elseif ( str_starts_with( $identity, 'rep_' ) ) {
@@ -309,7 +314,7 @@ class Progression_Controller {
 				}
 
 				$groupe[] = array(
-					'id'               => $user->ID . '__' . $key, // ID unique pour le tableau React (double underscore)
+					'id'               => $user->ID . '__' . $key, // ID unique pour le tableau React (double underscore).
 					'display_id'       => $display_id,
 					'nom'              => $nom,
 					'prenom'           => $prenom,
@@ -378,7 +383,7 @@ class Progression_Controller {
 			);
 		}
 
-		// Retrieve course playlist
+		// Retrieve course playlist.
 		$playlist_meta = get_post_meta( $course_id, '_roi_cours_playlist', true );
 		$playlist_ids  = array();
 		if ( is_string( $playlist_meta ) && '' !== $playlist_meta ) {
@@ -402,13 +407,13 @@ class Progression_Controller {
 			);
 		}
 
-		// Get all entries
+		// Get all entries.
 		$meta_entries = get_user_meta( $student_id, $meta_key, false );
 
-		// Delete all entries
+		// Delete all entries.
 		delete_user_meta( $student_id, $meta_key );
 
-		// Filter and re-add entries not in the playlist
+		// Filter and re-add entries not in the playlist.
 		if ( is_array( $meta_entries ) ) {
 			foreach ( $meta_entries as $entry ) {
 				if ( is_array( $entry ) && isset( $entry['element_id'] ) ) {

@@ -35,6 +35,7 @@ class Suivi_Page {
 			'roi-apprentissage',
 			__( 'Suivi des élèves', 'roi' ),
 			__( 'Suivi des élèves', 'roi' ),
+			// phpcs:ignore WordPress.WP.Capabilities.Unknown
 			'edit_others_exercices',
 			'roi-suivi-eleves',
 			array( $this, 'render_suivi_page' )

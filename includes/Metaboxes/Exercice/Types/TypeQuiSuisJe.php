@@ -63,7 +63,12 @@ class TypeQuiSuisJe implements TypeInterface {
 					<div id="roi_t12_indices_container" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;">
 						<?php foreach ( $indices as $index => $indice_texte ) : ?>
 							<div class="roi-t12-indice-item" style="display: flex; gap: 10px; align-items: center;">
-								<span style="font-weight: 600; width: 80px; color: #50575e;"><?php printf( esc_html__( 'Indice %d :', 'roi' ), $index + 1 ); ?></span>
+								<span style="font-weight: 600; width: 80px; color: #50575e;">
+									<?php
+									/* translators: %d: Indice number */
+									echo esc_html( sprintf( __( 'Indice %d :', 'roi' ), $index + 1 ) );
+									?>
+								</span>
 								<input type="text" class="roi_t12_indice_input" value="<?php echo esc_attr( $indice_texte ); ?>" placeholder="<?php esc_attr_e( 'Saisir un indice...', 'roi' ); ?>" style="flex: 1; height: 30px;">
 								<button type="button" class="button button-link-delete roi_t12_remove_indice" style="color: #b32d2e; text-decoration: none;" title="<?php esc_attr_e( "Supprimer l'indice", 'roi' ); ?>">&times;</button>
 							</div>
@@ -117,20 +122,24 @@ class TypeQuiSuisJe implements TypeInterface {
 						for ( $i = 0; $i < 3; $i++ ) :
 							$txt  = $qcm_choix[ $i ]['texte'] ?? '';
 							$expl = $qcm_choix[ $i ]['explication'] ?? '';
+							/* translators: %s: Option letter */
+							$option_label = sprintf( __( 'Option %s', 'roi' ), chr( 65 + $i ) );
+							/* translators: %s: Option letter */
+							$placeholder_txt = sprintf( __( "Texte de l'option %s", 'roi' ), chr( 65 + $i ) );
 							?>
 							<div class="roi-t12-qcm-item" style="border: 1px solid #ddd; padding: 10px; border-radius: 4px; background: #fff;">
 								<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-									<input type="radio" name="roi_t12_qcm_good" value="<?php echo $i; ?>" <?php checked( $qcm_bonne_reponse, $i ); ?> id="roi_t12_qcm_good_<?php echo $i; ?>">
-									<label for="roi_t12_qcm_good_<?php echo $i; ?>" style="font-weight: 600;"><?php printf( esc_html__( 'Option %s', 'roi' ), chr( 65 + $i ) ); ?></label>
+									<input type="radio" name="roi_t12_qcm_good" value="<?php echo (int) $i; ?>" <?php checked( $qcm_bonne_reponse, $i ); ?> id="roi_t12_qcm_good_<?php echo (int) $i; ?>">
+									<label for="roi_t12_qcm_good_<?php echo (int) $i; ?>" style="font-weight: 600;"><?php echo esc_html( $option_label ); ?></label>
 								</div>
 								<div style="display: flex; flex-direction: column; gap: 8px; margin-left: 25px;">
 									<div>
 										<label style="font-size: 12px; color: #50575e;"><?php esc_html_e( 'Texte du choix :', 'roi' ); ?></label>
-										<input type="text" class="roi_t12_qcm_texte" data-index="<?php echo $i; ?>" value="<?php echo esc_attr( $txt ); ?>" placeholder="<?php printf( esc_attr__( "Texte de l'option %s", 'roi' ), chr( 65 + $i ) ); ?>" style="width: 100%; height: 30px;">
+										<input type="text" class="roi_t12_qcm_texte" data-index="<?php echo (int) $i; ?>" value="<?php echo esc_attr( $txt ); ?>" placeholder="<?php echo esc_attr( $placeholder_txt ); ?>" style="width: 100%; height: 30px;">
 									</div>
 									<div>
 										<label style="font-size: 12px; color: #50575e;"><?php esc_html_e( 'Explication si erreur :', 'roi' ); ?></label>
-										<input type="text" class="roi_t12_qcm_explication" data-index="<?php echo $i; ?>" value="<?php echo esc_attr( $expl ); ?>" placeholder="<?php esc_attr_e( 'Explication si ce choix est sélectionné par erreur...', 'roi' ); ?>" style="width: 100%; height: 30px;">
+										<input type="text" class="roi_t12_qcm_explication" data-index="<?php echo (int) $i; ?>" value="<?php echo esc_attr( $expl ); ?>" placeholder="<?php esc_attr_e( 'Explication si ce choix est sélectionné par erreur...', 'roi' ); ?>" style="width: 100%; height: 30px;">
 									</div>
 								</div>
 							</div>

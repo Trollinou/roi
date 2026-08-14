@@ -29,7 +29,7 @@ class Walker_Category_Radio extends \Walker_Category_Checklist {
 		$temp_output = '';
 		parent::start_el( $temp_output, $category, $depth, $args, $id );
 
-		// Convert checkboxes to radio buttons
+		// Convert checkboxes to radio buttons.
 		$temp_output = str_replace( 'type="checkbox"', 'type="radio"', $temp_output );
 
 		// Remove brackets from input name to make it a standard radio group if needed,

@@ -93,7 +93,7 @@ class TypeJugementFinal implements TypeInterface {
 							</div>
 							<div>
 								<label style="font-weight: 600; font-size: 13px;">
-									<input type="radio" name="roi_t15_correct" value="<?php echo $i; ?>" <?php checked( $correct_index, $i ); ?>>
+									<input type="radio" name="roi_t15_correct" value="<?php echo (int) $i; ?>" <?php checked( $correct_index, $i ); ?>>
 									<?php esc_html_e( 'Bonne réponse', 'roi' ); ?>
 								</label>
 							</div>

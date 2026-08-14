@@ -21,7 +21,7 @@ class Apprentissage {
 	 * @return void
 	 */
 	public function render(): void {
-		// Default allowed roles if not set: administrator, staff, entraineur, editor, membre
+		// Default allowed roles if not set: administrator, staff, entraineur, editor, membre.
 		$default_roles = array( 'administrator', 'staff', 'entraineur', 'editor', 'membre' );
 		$allowed_roles = get_option( 'roi_apprentissage_allowed_roles', $default_roles );
 

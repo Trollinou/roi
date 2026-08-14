@@ -28,7 +28,7 @@ class TypeVisionChecs implements TypeInterface {
 		$consigne   = $config_data['consigne'] ?? __( 'Observez les 4 diagrammes ci-dessous.', 'roi' );
 		$diagrammes = isset( $config_data['diagrammes'] ) && is_array( $config_data['diagrammes'] ) ? $config_data['diagrammes'] : array();
 
-		// Retro-compatibilité avec l'ancienne FEN unique
+		// Retro-compatibilité avec l'ancienne FEN unique.
 		if ( empty( $diagrammes ) && ! empty( $config_data['fen_depart'] ) ) {
 			$diagrammes = array(
 				array(
@@ -59,7 +59,10 @@ class TypeVisionChecs implements TypeInterface {
 						?>
 						<div style="border: 1px solid #e5e5e5; padding: 12px; border-radius: 4px; background: #f9f9f9;">
 							<h4 style="margin: 0 0 10px 0;">
-								<?php echo esc_html( sprintf( __( 'Diagramme %d', 'roi' ), $i + 1 ) ); ?>
+								<?php
+								/* translators: %d: Diagram number */
+								echo esc_html( sprintf( __( 'Diagramme %d', 'roi' ), $i + 1 ) );
+								?>
 							</h4>
 							<?php
 							FenInput::render(
@@ -84,8 +87,8 @@ class TypeVisionChecs implements TypeInterface {
 								<label style="display: block; margin-bottom: 4px; font-size: 12px; color: #50575e;">
 									<strong><?php esc_html_e( 'Aperçu du diagramme (non interactif) :', 'roi' ); ?></strong>
 								</label>
-								<div id="roi_t8_preview_container_<?php echo $i; ?>" style="width: 260px; height: 260px; position: relative; border: 1px solid #ccd0d4; border-radius: 4px; background: #fff; overflow: hidden;">
-									<div id="roi_t8_preview_board_<?php echo $i; ?>" class="roi_t8_preview_board" data-index="<?php echo $i; ?>" style="width: 100%; height: 100%;"></div>
+								<div id="roi_t8_preview_container_<?php echo (int) $i; ?>" style="width: 260px; height: 260px; position: relative; border: 1px solid #ccd0d4; border-radius: 4px; background: #fff; overflow: hidden;">
+									<div id="roi_t8_preview_board_<?php echo (int) $i; ?>" class="roi_t8_preview_board" data-index="<?php echo (int) $i; ?>" style="width: 100%; height: 100%;"></div>
 								</div>
 							</div>
 						</div>

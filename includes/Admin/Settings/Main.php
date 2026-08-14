@@ -78,9 +78,9 @@ class Main {
 		if ( 'apprentissage' === $tab ) {
 			$allowed_roles = array();
 			if ( isset( $_POST['roi_apprentissage_allowed_roles'] ) && is_array( $_POST['roi_apprentissage_allowed_roles'] ) ) {
-				$wp_roles = wp_roles()->get_names();
-				foreach ( $_POST['roi_apprentissage_allowed_roles'] as $role ) {
-					$role_sanitized = sanitize_key( $role );
+				$wp_roles  = wp_roles()->get_names();
+				$raw_roles = map_deep( wp_unslash( $_POST['roi_apprentissage_allowed_roles'] ), 'sanitize_key' );
+				foreach ( $raw_roles as $role_sanitized ) {
 					if ( isset( $wp_roles[ $role_sanitized ] ) ) {
 						$allowed_roles[] = $role_sanitized;
 					}
@@ -89,7 +89,7 @@ class Main {
 			update_option( 'roi_apprentissage_allowed_roles', $allowed_roles );
 		}
 
-		// Store notice in transient
+		// Store notice in transient.
 		$notices = get_transient( 'roi_admin_notices' );
 		if ( ! is_array( $notices ) ) {
 			$notices = array();
@@ -100,7 +100,7 @@ class Main {
 		);
 		set_transient( 'roi_admin_notices', $notices, 30 );
 
-		// Redirect to avoid form resubmission
+		// Redirect to avoid form resubmission.
 		wp_safe_redirect(
 			add_query_arg(
 				array(
@@ -123,6 +123,7 @@ class Main {
 			wp_die( esc_html__( 'Accès non autorisé.', 'roi' ) );
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->active_tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'apprentissage';
 		$this->tabs       = array(
 			'apprentissage' => __( 'Apprentissage', 'roi' ),
