@@ -254,17 +254,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      if (boardAPI.getIsGameOver()) {
+      const boardState = typeof boardAPI.getState === 'function' ? boardAPI.getState() : {};
+      const isGameOver = boardState.isGameOver ?? boardAPI.getIsGameOver();
+      const isCheck = boardState.isCheck ?? boardAPI.getIsCheck();
+      const turnColor = boardState.turnColor ?? boardAPI.getTurnColor();
+
+      if (isGameOver) {
         statusElement.textContent = boardAPI.getGameOverReason();
         return;
       }
 
-      if (boardAPI.getIsCheck()) {
-        const inCheckColor =
-          boardAPI.getTurnColor() === 'white' ? 'Blancs' : 'Noirs';
+      if (isCheck) {
+        const inCheckColor = turnColor === 'white' ? 'Blancs' : 'Noirs';
         statusElement.textContent = `Échec ! Au tour des ${inCheckColor}.`;
       } else {
-        const turnColor = boardAPI.getTurnColor();
         if (useStockfish) {
           if (turnColor === currentStockfishColor) {
             statusElement.textContent = 'Le moteur réfléchit...';
@@ -663,40 +666,42 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Replace emit to handle timer ticks and moves
     const newEmit = (event, val) => {
-      if (event === 'move') {
+      if (event === 'turn-change' || event === 'move') {
+        const turnColor = val?.turnColor || (typeof boardAPI.getState === 'function' ? boardAPI.getState().turnColor : null) || boardAPI.getTurnColor();
+        const plyCount = val?.ply !== undefined ? val.ply : (typeof boardAPI.getState === 'function' ? boardAPI.getState().ply : boardAPI.getCurrentPlyNumber());
+
         updateStatus();
 
-        const turnColor = boardAPI.getTurnColor();
-        const plyCount = boardAPI.getCurrentPlyNumber();
+        if (event === 'move' || event === 'turn-change') {
+          // Increment Fischer Time
+          const justFinishedColor = turnColor === 'white' ? 'black' : 'white';
+          clock.applyIncrement(justFinishedColor, plyCount);
+          clockSettings.wtime = clock.wtime;
+          clockSettings.btime = clock.btime;
 
-        // Increment Fischer Time
-        const justFinishedColor = turnColor === 'white' ? 'black' : 'white';
-        clock.applyIncrement(justFinishedColor, plyCount);
-        clockSettings.wtime = clock.wtime;
-        clockSettings.btime = clock.btime;
-
-        if (plyCount === 1) {
-          startTimer();
-        }
-
-        activeClockColor = turnColor;
-        clock.setActiveColor(turnColor);
-        updateClockDisplays();
-        updateCapturedAndMaterial();
-
-        setTimeout(() => {
-          if (boardAPI.getTurnColor() === currentStockfishColor) {
-            const positionCmd = getEnginePositionCommand();
-            if (clockSettings.preset !== 'none') {
-              const timeParams = `wtime ${clockSettings.wtime} winc ${clockSettings.winc} btime ${clockSettings.btime} binc ${clockSettings.binc}`;
-              stockfishManager.startOpponentMove(positionCmd, timeParams);
-            } else {
-              stockfishManager.startOpponentMove(positionCmd, 5000);
-            }
-          } else if (stockfishManager) {
-            stockfishManager.startEvaluation(getEnginePositionCommand());
+          if (plyCount === 1) {
+            startTimer();
           }
-        }, 100);
+
+          activeClockColor = turnColor;
+          clock.setActiveColor(turnColor);
+          updateClockDisplays();
+          updateCapturedAndMaterial();
+
+          setTimeout(() => {
+            if (turnColor === currentStockfishColor) {
+              const positionCmd = getEnginePositionCommand();
+              if (clockSettings.preset !== 'none') {
+                const timeParams = `wtime ${clockSettings.wtime} winc ${clockSettings.winc} btime ${clockSettings.btime} binc ${clockSettings.binc}`;
+                stockfishManager.startOpponentMove(positionCmd, timeParams);
+              } else {
+                stockfishManager.startOpponentMove(positionCmd, 5000);
+              }
+            } else if (stockfishManager) {
+              stockfishManager.startEvaluation(getEnginePositionCommand());
+            }
+          }, 100);
+        }
       } else if (['checkmate', 'draw', 'stalemate'].includes(event)) {
         stopTimer();
         updateStatus();

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.1] - 2026-08-18
+
+*   **Intégration Réactive & Simplification `eg-chessboard` :**
+    *   **Front-end Échiquier (`src/blocks/chessboard/view.jsx`) :** Exploitation de l'état unifié `getState()` (`turnColor`, `isCheck`, `isGameOver`) dans `updateStatus()` pour éliminer les appels impératifs redondants. Mise à jour de `newEmit()` pour écouter l'événement `turn-change` et le payload enrichi `Move` (`val.turnColor`, `val.ply`), assurant une synchronisation parfaite des pendules et du moteur Stockfish.
+    *   **Éditeur PGN (`src/components/PgnEditor/PgnEditor.jsx`) :** Simplification de la méthode `syncPositionData()` en lisant directement `state.ply` exposé par `getState()` pour la mise à jour des plies lors des navigations et ajouts de coups.
+    *   **Bloc Éditeur Gutenberg (`src/blocks/chessboard/edit.jsx`) :** Suppression du contournement par `Proxy` sur `boardStateRef` au profit du callback natif `onStateChange` synchronisant `setBoardState()` via `getState()`.
+
 ## [1.4.0] - 2026-08-14
 
 *   **Conformité Qualité & Standards de Code (PHPCS / WPCS) :**

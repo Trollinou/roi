@@ -93,13 +93,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
       reactiveConfig: attributes.reactiveConfig,
     };
 
-    const boardStateProxy = new Proxy(boardStateRef.current, {
-      set(target, prop, value) {
-        target[prop] = value;
-        setBoardState({ ...target });
-        return true;
-      },
-    });
+    const boardStateObj = { ...boardStateRef.current };
 
     const emit = (event, val) => {
       if (event === 'move') {
@@ -110,9 +104,11 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 
     const boardAPI = new BoardCore(
       boardRef.current,
-      boardStateProxy,
+      boardStateObj,
       () => {
-        setBoardState({ ...boardStateProxy });
+        if (boardApiRef.current && typeof boardApiRef.current.getState === 'function') {
+          setBoardState({ ...boardApiRef.current.getState() });
+        }
       },
       emit,
       boardConfig

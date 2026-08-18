@@ -47,6 +47,7 @@ const PgnEditor = forwardRef(function PgnEditor({
   // Synchronise les données de la position actuelle
   const syncPositionData = (api = boardApiRef.current) => {
     if (!api) return;
+    const state = typeof api.getState === "function" ? api.getState() : {};
     const comment = api.getCurrentComment();
     const shapes = api.getShapes();
     setCurrentComment(comment);
@@ -56,12 +57,10 @@ const PgnEditor = forwardRef(function PgnEditor({
     if (typeof api.getVariationsAtPly === "function") {
       setVariations(api.getVariationsAtPly() || []);
     }
-    if (typeof api.getHistoryViewerState === "function") {
-      const historyState = api.getHistoryViewerState() || {};
-      const currentPly = typeof api.getCurrentPlyNumber === "function" ? api.getCurrentPlyNumber() : 0;
-      setPlyViewing(historyState.plyViewing !== undefined ? historyState.plyViewing : currentPly);
-      setTotalPlies(currentPly);
-    }
+    const currentPly = state.ply !== undefined ? state.ply : (typeof api.getCurrentPlyNumber === "function" ? api.getCurrentPlyNumber() : 0);
+    const historyState = typeof api.getHistoryViewerState === "function" ? api.getHistoryViewerState() : {};
+    setPlyViewing(historyState?.plyViewing !== undefined ? historyState.plyViewing : currentPly);
+    setTotalPlies(currentPly);
   };
 
   // Initialisation et orchestration via custom hook
