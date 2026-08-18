@@ -4,7 +4,7 @@
  * Plugin URI:        https://example.com/plugins/the-basics/
  * Description:       Ressources et Organisation pour l’Initiation aux échecs.
  * Version:           1.4.1
- * Requires at least: 6.9.1
+ * Requires at least: 7.0.1
  * Requires PHP:      8.4
  * Author:            Etienne Gagnon
  * Author URI:
