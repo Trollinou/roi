@@ -22,9 +22,6 @@ class Plugin {
 	 * @return void
 	 */
 	public function run(): void {
-		// Assets.
-		$assets = new Assets();
-		$assets->init();
 
 		// Gutenberg Blocks.
 		( new \ROI\Blocks\Manager() )->init();
