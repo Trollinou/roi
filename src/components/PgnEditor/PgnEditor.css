@@ -67,35 +67,12 @@
 }
 
 .pgn-editor-left-col {
-  width: 400px;
+  flex: 0 0 380px;
+  width: 380px;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-}
-
-.pgn-editor-board-wrapper {
-  width: 400px;
-  height: 400px;
-  position: relative;
-  cursor: pointer;
-  overflow: hidden;
-}
-
-.pgn-editor-board-wrapper > div {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-cg-container {
-  width: 100% !important;
-  height: 100% !important;
-}
-
-.pgn-editor-board-wrapper svg {
-  pointer-events: none !important;
 }
 
 .pgn-editor-right-col {

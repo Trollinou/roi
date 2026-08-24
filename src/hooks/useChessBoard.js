@@ -39,24 +39,29 @@ export function useChessBoard( containerRef, initBoard, deps = [] ) {
 		let resizeObserver = null;
 		let fallbackTimer = null;
 
+		const triggerRedraw = () => {
+			if ( boardApiRef.current ) {
+				boardApiRef.current.redraw( true );
+			}
+		};
+
+		// Immediate RAF + delayed timeouts to ensure styles & modal transitions are completed
+		window.requestAnimationFrame( triggerRedraw );
+		fallbackTimer = setTimeout( triggerRedraw, 50 );
+		const secondaryTimer = setTimeout( triggerRedraw, 250 );
+
 		if (
 			typeof window.ResizeObserver !== 'undefined' &&
 			containerRef.current
 		) {
-			resizeObserver = new window.ResizeObserver( () => {
-				window.requestAnimationFrame( () => {
-					if ( boardApiRef.current ) {
-						boardApiRef.current.redraw( true );
+			resizeObserver = new window.ResizeObserver( ( entries ) => {
+				for ( const entry of entries ) {
+					if ( entry.contentRect.width > 0 && entry.contentRect.height > 0 ) {
+						window.requestAnimationFrame( triggerRedraw );
 					}
-				} );
+				}
 			} );
 			resizeObserver.observe( containerRef.current );
-		} else {
-			fallbackTimer = setTimeout( () => {
-				if ( boardApiRef.current ) {
-					boardApiRef.current.redraw( true );
-				}
-			}, 300 );
 		}
 
 		return () => {
@@ -65,6 +70,9 @@ export function useChessBoard( containerRef, initBoard, deps = [] ) {
 			}
 			if ( fallbackTimer ) {
 				clearTimeout( fallbackTimer );
+			}
+			if ( secondaryTimer ) {
+				clearTimeout( secondaryTimer );
 			}
 			if ( instance && typeof instance.destroy === 'function' ) {
 				instance.destroy();

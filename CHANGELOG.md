@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+*   **Correctifs d'Intégration `eg-chessboard` (FenEditor & PgnEditor) :**
+    *   **Résolution de la récursion infinie (`RangeError: Maximum call stack size exceeded`) :** Ajout d'une garde de comparaison FEN (`positionRef`) dans `syncPositionFromBoard` et sécurisation du `useEffect` d'orientation dans `FenEditor.jsx`.
+    *   **Restauration des SVG vectoriels des pièces (`pieceSet` & `boardTheme`) :** Application des classes de conteneur `.piece-set-cburnett` et `.board-theme-brown` sur le wrapper `.main-wrap` et sur la palette de pièces `PiecePalette.jsx`.
+    *   **Normalisation du DOM Chessground & Enfilement CSS :** Imbrication directe de l'élément de référence Chessground dans `.main-board` (alignée sur le composant React officiel d'`eg-chessboard`), enfilement de la feuille de style `admin-fen-editor.css` dans `Assets.php` et fiabilisation du calcul des `bounds` / `redraw(true)` via `ResizeObserver` dans `useChessBoard.js`.
+
 ## [1.4.1] - 2026-08-18
 
 *   **Intégration Réactive & Simplification `eg-chessboard` :**

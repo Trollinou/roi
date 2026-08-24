@@ -3,6 +3,7 @@ import { BoardCore } from "eg-chessboard";
 import DrawingLegend from "../DrawingLegend";
 import { ensurePgnFenHeader } from "../../utils/chessUtils";
 import useChessBoard from "../../hooks/useChessBoard";
+import "eg-chessboard/style.css";
 import "./PgnEditor.css";
 
 /**
@@ -278,9 +279,9 @@ const PgnEditor = forwardRef(function PgnEditor({
       <div className="pgn-editor-main-layout">
         {/* Colonne de Gauche : Échiquier & Navigation */}
         <div className="pgn-editor-left-col">
-          <div className="pgn-editor-board-wrapper">
-            <div ref={boardElRef} />
-          </div>
+          <section className="main-wrap piece-set-cburnett board-theme-brown">
+            <div className="main-board" ref={boardElRef} />
+          </section>
 
           {/* Barre de Navigation avec Compteur */}
           <div className="pgn-navigation-bar" style={{ marginTop: "12px" }}>

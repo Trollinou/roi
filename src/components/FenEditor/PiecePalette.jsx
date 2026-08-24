@@ -7,7 +7,7 @@ import React from "react";
  * @param {Object|string|null} props.selectedPiece - Pièce sélectionnée ({ role, color }) ou "eraser" ou null
  * @param {Function} props.onSelect - Callback appelé lors de la sélection d'une pièce ou de la gomme : onSelect(piece)
  */
-export function PiecePalette({ selectedPiece, onSelect }) {
+export function PiecePalette({ selectedPiece, onSelect, pieceSet = "cburnett" }) {
   const roles = ["pawn", "knight", "bishop", "rook", "queen", "king"];
 
   const renderPalettePiece = (role, color) => {
@@ -42,7 +42,7 @@ export function PiecePalette({ selectedPiece, onSelect }) {
   };
 
   return (
-    <div className="fen-editor-palette-group">
+    <div className={`fen-editor-palette-group piece-set-${pieceSet}`}>
       <div className="fen-editor-palette-row">
         {roles.map((role) => renderPalettePiece(role, "white"))}
       </div>

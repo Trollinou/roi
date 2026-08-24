@@ -3,6 +3,7 @@ import { BoardCore } from "eg-chessboard";
 import PiecePalette from "./PiecePalette";
 import DrawingLegend from "../DrawingLegend";
 import useChessBoard from "../../hooks/useChessBoard";
+import "eg-chessboard/style.css";
 import "./FenEditor.css";
 
 /**
@@ -32,11 +33,17 @@ const FenEditor = forwardRef(function FenEditor({
   const effectiveFen = diagram?.fen || initialDiagram?.fen || initialFen || fen || defaultFen;
   const effectiveShapes = diagram?.shapes || initialDiagram?.shapes || initialShapes || [];
 
+  const parts = effectiveFen.split(" ");
+  const initialPlacement = parts[0] || "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+  const initialTurn = parts[1] || "w";
+  const initialCastling = parts[2] || "KQkq";
+  const initialOrientation = initialTurn === "b" ? "black" : "white";
+
   // États de la FEN
-  const [position, setPosition] = useState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
-  const [turn, setTurn] = useState("w");
-  const [castling, setCastling] = useState("KQkq");
-  const [orientation, setOrientation] = useState("white");
+  const [position, setPosition] = useState(initialPlacement);
+  const [turn, setTurn] = useState(initialTurn);
+  const [castling, setCastling] = useState(initialCastling);
+  const [orientation, setOrientation] = useState(initialOrientation);
   const [importFenText, setImportFenText] = useState("");
   const [selectedPiece, setSelectedPiece] = useState(null); // { role, color } ou "eraser" ou null
   const [currentShapes, setCurrentShapes] = useState(effectiveShapes);
@@ -46,6 +53,7 @@ const FenEditor = forwardRef(function FenEditor({
   const currentShapesRef = useRef(effectiveShapes);
   const selectedPieceRef = useRef(selectedPiece);
   const orientationRef = useRef(orientation);
+  const positionRef = useRef(initialPlacement);
 
   useEffect(() => {
     currentShapesRef.current = currentShapes;
@@ -59,10 +67,18 @@ const FenEditor = forwardRef(function FenEditor({
     orientationRef.current = orientation;
   }, [orientation]);
 
+  useEffect(() => {
+    positionRef.current = position;
+  }, [position]);
+
   // Met à jour la position FEN à partir de l'état actuel de l'échiquier
   const syncPositionFromBoard = () => {
     if (boardApiRef.current) {
-      setPosition(boardApiRef.current.getPlacementFen());
+      const placement = boardApiRef.current.getPlacementFen();
+      if (placement && placement !== positionRef.current) {
+        positionRef.current = placement;
+        setPosition(placement);
+      }
     }
   };
 
@@ -71,7 +87,10 @@ const FenEditor = forwardRef(function FenEditor({
     const computed = turn === "b" ? "black" : "white";
     setOrientation(computed);
     if (boardApiRef.current) {
-      boardApiRef.current.setConfig({ orientation: computed });
+      const currentOrient = boardApiRef.current.getOrientation();
+      if (currentOrient !== computed) {
+        boardApiRef.current.setConfig({ orientation: computed });
+      }
     }
   }, [turn]);
 
@@ -112,8 +131,13 @@ const FenEditor = forwardRef(function FenEditor({
       setCastling(cast);
       setOrientation(initialOrient);
 
+      const selectedPieceSet = boardConfig.pieceSet || "cburnett";
+      const selectedBoardTheme = boardConfig.boardTheme || "brown";
+
       const config = {
         mode: "editor",
+        pieceSet: selectedPieceSet,
+        boardTheme: selectedBoardTheme,
         ...boardConfig,
         fen: currentFen,
         orientation: initialOrient,
@@ -140,6 +164,8 @@ const FenEditor = forwardRef(function FenEditor({
 
       const boardState = {
         mode: "editor",
+        pieceSet: selectedPieceSet,
+        boardTheme: selectedBoardTheme,
         freeMode: true,
         preserveShapesOnPositionChange: true,
         showThreats: false,
@@ -172,6 +198,9 @@ const FenEditor = forwardRef(function FenEditor({
           blackMode: "disabled",
         }
       );
+
+      boardAPI.setPieceSet(selectedPieceSet);
+      boardAPI.setBoardTheme(selectedBoardTheme);
 
       if (typeof boardAPI.setDiagram === "function") {
         boardAPI.setDiagram({ fen: currentFen, shapes: effectiveShapes });
@@ -316,13 +345,19 @@ const FenEditor = forwardRef(function FenEditor({
     setCastling(current);
   };
 
+  const pieceSet = boardConfig.pieceSet || "cburnett";
+  const boardTheme = boardConfig.boardTheme || "brown";
+
   return (
     <div className="fen-editor-container">
       {/* Colonne Gauche - L'échiquier */}
       <div className="fen-editor-board-col">
-        <section className={`fen-editor-main-wrap ${promotionState && promotionState.isEnabled ? "disabledBoard" : ""}`}>
-          <div className="fen-editor-main-board">
-            <div ref={boardElRef} />
+        <section
+          className={`main-wrap piece-set-${pieceSet} board-theme-${boardTheme} ${
+            promotionState && promotionState.isEnabled ? "disabledBoard" : ""
+          }`}
+        >
+          <div className="main-board">
             {promotionState && promotionState.isEnabled && (
               <dialog className="promotion-dialog" open>
                 <div className="promotion-pieces">
@@ -350,6 +385,7 @@ const FenEditor = forwardRef(function FenEditor({
                 </div>
               </dialog>
             )}
+            <div ref={boardElRef} />
           </div>
         </section>
         
@@ -412,6 +448,7 @@ const FenEditor = forwardRef(function FenEditor({
           <PiecePalette
             selectedPiece={selectedPiece}
             onSelect={setSelectedPiece}
+            pieceSet={pieceSet}
           />
         </div>
 
