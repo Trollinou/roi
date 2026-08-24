@@ -64,6 +64,9 @@ const PgnEditor = forwardRef(function PgnEditor({
     setTotalPlies(currentPly);
   };
 
+  const pieceSet = boardConfig.pieceSet || "cburnett";
+  const boardTheme = boardConfig.boardTheme || "brown";
+
   // Initialisation et orchestration via custom hook
   const { boardApiRef } = useChessBoard(
     boardElRef,
@@ -73,6 +76,8 @@ const PgnEditor = forwardRef(function PgnEditor({
       const config = {
         mode: "study",
         readOnly: isReadOnly,
+        pieceSet,
+        boardTheme,
         ...boardConfig,
         pgn: initialPgn,
         fen: initialFen || undefined,
@@ -85,6 +90,8 @@ const PgnEditor = forwardRef(function PgnEditor({
 
       const boardState = {
         mode: "study",
+        pieceSet,
+        boardTheme,
         showThreats: false,
         promotionDialogState: { isEnabled: false },
         historyViewerState: { isEnabled: false },
@@ -279,8 +286,10 @@ const PgnEditor = forwardRef(function PgnEditor({
       <div className="pgn-editor-main-layout">
         {/* Colonne de Gauche : Échiquier & Navigation */}
         <div className="pgn-editor-left-col">
-          <section className="main-wrap piece-set-cburnett board-theme-brown">
-            <div className="main-board" ref={boardElRef} />
+          <section className={`main-wrap piece-set-${pieceSet} board-theme-${boardTheme}`}>
+            <div className="main-board">
+              <div ref={boardElRef} />
+            </div>
           </section>
 
           {/* Barre de Navigation avec Compteur */}
