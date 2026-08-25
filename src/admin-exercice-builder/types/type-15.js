@@ -9,19 +9,19 @@ import {
 	getOrientationColor,
 } from '../utils/controls';
 
-const textarea = document.getElementById( 'roi_config_json' );
+const textarea = document.getElementById('roi_config_json');
 
 /**
  * Serializes configuration to JSON.
  */
 export function updateConfig() {
-	if ( ! textarea ) {
+	if (!textarea) {
 		return;
 	}
 
-	const consigneInput = document.getElementById( 'roi_t15_consigne' );
-	const fenInput = document.getElementById( 'roi_t15_fen_depart' );
-	const couleurSelect = document.getElementById( 'roi_t15_couleur' );
+	const consigneInput = document.getElementById('roi_t15_consigne');
+	const fenInput = document.getElementById('roi_t15_fen_depart');
+	const couleurSelect = document.getElementById('roi_t15_couleur');
 	const pgnExplicationInput = document.getElementById(
 		'roi_t15_pgn_explication'
 	);
@@ -33,24 +33,24 @@ export function updateConfig() {
 	const fenDepart = fenInput
 		? fenInput.value.trim()
 		: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-	const couleurJoueur = getOrientationColor( couleurSelect, fenDepart );
+	const couleurJoueur = getOrientationColor(couleurSelect, fenDepart);
 	const bonneReponseIndex = correctRadio
-		? parseInt( correctRadio.value, 10 )
+		? parseInt(correctRadio.value, 10)
 		: 0;
 	const pgnExplicationText = pgnExplicationInput
 		? pgnExplicationInput.value.trim()
 		: '';
 
 	const scenariosList = [];
-	for ( let i = 0; i < 3; i++ ) {
+	for (let i = 0; i < 3; i++) {
 		const scenarioPgnArea = document.querySelector(
-			`.roi_t15_scenario_pgn[data-index="${ i }"]`
+			`.roi_t15_scenario_pgn[data-index="${i}"]`
 		);
 
-		scenariosList.push( {
+		scenariosList.push({
 			pgn: scenarioPgnArea ? scenarioPgnArea.value.trim() : '',
 			is_correct: i === bonneReponseIndex,
-		} );
+		});
 	}
 
 	const configData = {
@@ -61,37 +61,37 @@ export function updateConfig() {
 		pgn_explication: pgnExplicationText,
 	};
 
-	textarea.value = JSON.stringify( configData, null, 4 );
+	textarea.value = JSON.stringify(configData, null, 4);
 }
 
 /**
  * Initializes Type 15 handlers.
  */
 export function init() {
-	if ( ! textarea ) {
+	if (!textarea) {
 		return;
 	}
 
-	const consigneInput = document.getElementById( 'roi_t15_consigne' );
-	const fenInput = document.getElementById( 'roi_t15_fen_depart' );
-	const couleurSelect = document.getElementById( 'roi_t15_couleur' );
+	const consigneInput = document.getElementById('roi_t15_consigne');
+	const fenInput = document.getElementById('roi_t15_fen_depart');
+	const couleurSelect = document.getElementById('roi_t15_couleur');
 	const pgnExplicationInput = document.getElementById(
 		'roi_t15_pgn_explication'
 	);
-	const btnFenEditor = document.getElementById( 'btn_open_fen_editor_t15' );
+	const btnFenEditor = document.getElementById('btn_open_fen_editor_t15');
 
 	// Restoration from saved JSON
-	if ( textarea.value.trim() !== '' ) {
+	if (textarea.value.trim() !== '') {
 		try {
-			const parsed = JSON.parse( textarea.value );
-			if ( parsed && typeof parsed === 'object' ) {
-				if ( typeof parsed.consigne === 'string' && consigneInput ) {
+			const parsed = JSON.parse(textarea.value);
+			if (parsed && typeof parsed === 'object') {
+				if (typeof parsed.consigne === 'string' && consigneInput) {
 					consigneInput.value = parsed.consigne;
 				}
-				if ( typeof parsed.fen_depart === 'string' && fenInput ) {
+				if (typeof parsed.fen_depart === 'string' && fenInput) {
 					fenInput.value = parsed.fen_depart;
 				}
-				if ( couleurSelect ) {
+				if (couleurSelect) {
 					updateOrientationDisplay(
 						couleurSelect,
 						parsed.couleur_joueur || parsed.fen_depart || 'white'
@@ -104,12 +104,12 @@ export function init() {
 					pgnExplicationInput.value = parsed.pgn_explication;
 				}
 
-				if ( Array.isArray( parsed.scenarios ) ) {
-					for ( let i = 0; i < 3; i++ ) {
-						const scenarioData = parsed.scenarios[ i ];
-						if ( scenarioData ) {
+				if (Array.isArray(parsed.scenarios)) {
+					for (let i = 0; i < 3; i++) {
+						const scenarioData = parsed.scenarios[i];
+						if (scenarioData) {
 							const scenarioPgnArea = document.querySelector(
-								`.roi_t15_scenario_pgn[data-index="${ i }"]`
+								`.roi_t15_scenario_pgn[data-index="${i}"]`
 							);
 
 							if (
@@ -119,11 +119,11 @@ export function init() {
 								scenarioPgnArea.value = scenarioData.pgn;
 							}
 
-							if ( scenarioData.is_correct === true ) {
+							if (scenarioData.is_correct === true) {
 								const radioToSelect = document.querySelector(
-									`input[name="roi_t15_correct"][value="${ i }"]`
+									`input[name="roi_t15_correct"][value="${i}"]`
 								);
-								if ( radioToSelect ) {
+								if (radioToSelect) {
 									radioToSelect.checked = true;
 								}
 							}
@@ -131,30 +131,30 @@ export function init() {
 					}
 				}
 			}
-		} catch ( e ) {
-			console.warn( 'Erreur parsing JSON Type 15 initial :', e );
+		} catch (e) {
+			console.warn('Erreur parsing JSON Type 15 initial :', e);
 		}
 	}
 
 	// FEN Control Setup
-	setupFenControl( {
+	setupFenControl({
 		input: fenInput,
 		button: btnFenEditor,
 		colorSelect: couleurSelect,
 		onChange() {
 			updateConfig();
 		},
-	} );
+	});
 
 	// PGN Control Setup for 3 Scenarios
-	for ( let i = 0; i < 3; i++ ) {
+	for (let i = 0; i < 3; i++) {
 		const scenarioPgnArea = document.querySelector(
-			`.roi_t15_scenario_pgn[data-index="${ i }"]`
+			`.roi_t15_scenario_pgn[data-index="${i}"]`
 		);
 		const btnScenario = document.getElementById(
-			`btn_open_pgn_editor_t15_scenario_${ i }`
+			`btn_open_pgn_editor_t15_scenario_${i}`
 		);
-		setupPgnControl( {
+		setupPgnControl({
 			textarea: scenarioPgnArea,
 			button: btnScenario,
 			initialFen() {
@@ -163,14 +163,14 @@ export function init() {
 			onChange() {
 				updateConfig();
 			},
-		} );
+		});
 	}
 
 	// PGN Control Setup for Explication Finale
 	const btnPgnExplication = document.getElementById(
 		'btn_open_pgn_editor_t15_explication'
 	);
-	setupPgnControl( {
+	setupPgnControl({
 		textarea: pgnExplicationInput,
 		button: btnPgnExplication,
 		initialFen() {
@@ -179,17 +179,17 @@ export function init() {
 		onChange() {
 			updateConfig();
 		},
-	} );
+	});
 
 	// Real-time update event listeners
 	const inputsToWatch = document.querySelectorAll(
 		'#roi_builder_type_15 input, #roi_builder_type_15 select, #roi_builder_type_15 textarea'
 	);
 
-	inputsToWatch.forEach( ( input ) => {
-		input.addEventListener( 'input', updateConfig );
-		input.addEventListener( 'change', updateConfig );
-	} );
+	inputsToWatch.forEach((input) => {
+		input.addEventListener('input', updateConfig);
+		input.addEventListener('change', updateConfig);
+	});
 
 	// Initial update
 	updateConfig();

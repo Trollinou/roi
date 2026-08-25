@@ -73,6 +73,16 @@ function renderPreviewBoard(index) {
 		if (window.EgBoardCore) {
 			clearInterval(checkInterval);
 
+			if (boardEl.parentElement) {
+				boardEl.parentElement.classList.add(
+					'main-wrap',
+					'fit-container',
+					'piece-set-cburnett',
+					'board-theme-brown'
+				);
+			}
+			boardEl.classList.add('main-board');
+
 			const boardConfig = {
 				mode: 'game',
 				fen,
@@ -90,6 +100,8 @@ function renderPreviewBoard(index) {
 
 			const boardState = {
 				mode: 'game',
+				pieceSet: 'cburnett',
+				boardTheme: 'brown',
 				showThreats: false,
 				promotionDialogState: { isEnabled: false },
 				historyViewerState: { isEnabled: false },

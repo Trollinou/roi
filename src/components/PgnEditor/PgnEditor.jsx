@@ -3,7 +3,6 @@ import { BoardCore } from "eg-chessboard";
 import DrawingLegend from "../DrawingLegend";
 import { ensurePgnFenHeader } from "../../utils/chessUtils";
 import useChessBoard from "../../hooks/useChessBoard";
-import "eg-chessboard/style.css";
 import "./PgnEditor.css";
 
 /**
@@ -293,12 +292,12 @@ const PgnEditor = forwardRef(function PgnEditor({
           </section>
 
           {/* Barre de Navigation avec Compteur */}
-          <div className="pgn-navigation-bar" style={{ marginTop: "12px" }}>
-            <button type="button" className="pgn-nav-btn" onClick={handleViewStart} title="Début">|&lt;</button>
-            <button type="button" className="pgn-nav-btn" onClick={handleViewPrevious} title="Précédent">&lt;</button>
-            <span className="pgn-ply-indicator">Coup {plyViewing} / {totalPlies}</span>
-            <button type="button" className="pgn-nav-btn" onClick={handleViewNext} title="Suivant">&gt;</button>
-            <button type="button" className="pgn-nav-btn" onClick={handleViewEnd} title="En direct">&gt;|</button>
+          <div className="pgn-navigation-bar" style={{ marginTop: "12px", position: "relative", zIndex: 10 }}>
+            <button type="button" className="pgn-nav-btn" onClick={handleViewStart} title="Début" style={{ position: "relative", zIndex: 11, pointerEvents: "auto" }}>|&lt;</button>
+            <button type="button" className="pgn-nav-btn" onClick={handleViewPrevious} title="Précédent" style={{ position: "relative", zIndex: 11, pointerEvents: "auto" }}>&lt;</button>
+            <span className="pgn-ply-indicator" style={{ position: "relative", zIndex: 11 }}>Coup {plyViewing} / {totalPlies}</span>
+            <button type="button" className="pgn-nav-btn" onClick={handleViewNext} title="Suivant" style={{ position: "relative", zIndex: 11, pointerEvents: "auto" }}>&gt;</button>
+            <button type="button" className="pgn-nav-btn" onClick={handleViewEnd} title="En direct" style={{ position: "relative", zIndex: 11, pointerEvents: "auto" }}>&gt;|</button>
           </div>
 
           {/* Aide au dessin */}

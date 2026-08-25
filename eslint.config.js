@@ -1,4 +1,4 @@
-const wordpress = require( '@wordpress/eslint-plugin' );
+const wordpress = require('@wordpress/eslint-plugin');
 
 module.exports = [
 	{
@@ -38,7 +38,7 @@ module.exports = [
 			},
 		},
 		rules: {
-			'no-console': [ 'warn', { allow: [ 'warn', 'error' ] } ],
+			'no-console': ['warn', { allow: ['warn', 'error'] }],
 			'no-unused-vars': 'warn',
 			eqeqeq: 'warn',
 			'import/no-unresolved': 'off',
