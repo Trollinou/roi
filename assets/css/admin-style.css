@@ -13,6 +13,22 @@
     z-index: 10;
 }
 
+/* Ensure Chessground SVG layers never capture pointer events over buttons */
+.cg-wrap svg,
+.cg-wrap .cg-custom-below,
+.cg-wrap .cg-custom-svgs,
+.cg-wrap .cg-shapes,
+.cg-wrap .cg-shapes-below {
+	pointer-events: none !important;
+}
+
+.roi-viewer-controls button,
+.pgn-nav-btn {
+	position: relative;
+	z-index: 10;
+	pointer-events: auto !important;
+}
+
 /* Unified FEN and PGN Control Styles */
 .roi-control-group {
 	margin-bottom: 15px;

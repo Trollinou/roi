@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace ROI\Metaboxes\Exercice;
 
+use ROI\Enums\Exercice_Niveau;
+use ROI\Enums\Exercice_Type;
 use ROI\Metaboxes\Exercice\Types\Type100Commandements;
 use ROI\Metaboxes\Exercice\Types\TypePopEchecs;
 use ROI\Metaboxes\Exercice\Types\TypeABCDaire;
@@ -84,30 +86,21 @@ class Manager {
 		<p>
 			<label for="roi_exercice_type"><strong>Type d'exercice :</strong></label><br>
 			<select name="roi_exercice_type" id="roi_exercice_type">
-				<option value="1" <?php selected( $type, '1' ); ?>>1 - 100 Commandements</option>
-				<option value="2" <?php selected( $type, '2' ); ?>>2 - Pop'Echecs</option>
-				<option value="3" <?php selected( $type, '3' ); ?>>3 - ABCDaire Tactique</option>
-				<option value="4" <?php selected( $type, '4' ); ?>>4 - La Partie dont tu es le Héros</option>
-				<option value="5" <?php selected( $type, '5' ); ?>>5 - Posi'Plan</option>
-				<option value="6" <?php selected( $type, '6' ); ?>>6 - Associ'Plan</option>
-				<option value="7" <?php selected( $type, '7' ); ?>>7 - Marche du Héros</option>
-				<option value="8" <?php selected( $type, '8' ); ?>>8 - Vision'checs</option>
-				<option value="9" <?php selected( $type, '9' ); ?>>9 - Parcours</option>
-				<option value="10" <?php selected( $type, '10' ); ?>>10 - Echec'éval</option>
-				<option value="11" <?php selected( $type, '11' ); ?>>11 - Class'échecs</option>
-				<option value="12" <?php selected( $type, '12' ); ?>>12 - Qui-suis-je ?</option>
-				<option value="13" <?php selected( $type, '13' ); ?>>13 - Ouvre'boite</option>
-				<option value="14" <?php selected( $type, '14' ); ?>>14 - Cap ou pas cap ?</option>
-				<option value="15" <?php selected( $type, '15' ); ?>>15 - Jugement final</option>
-				<option value="16" <?php selected( $type, '16' ); ?>>16 - Destination finale</option>
+				<?php foreach ( Exercice_Type::cases() as $enum_type ) : ?>
+					<option value="<?php echo esc_attr( (string) $enum_type->value ); ?>" <?php selected( (int) $type, $enum_type->value ); ?>>
+						<?php echo esc_html( $enum_type->label() ); ?>
+					</option>
+				<?php endforeach; ?>
 			</select>
 		</p>
 		<p>
 			<label for="roi_exercice_niveau"><strong>Niveau de difficulté :</strong></label><br>
 			<select name="roi_exercice_niveau" id="roi_exercice_niveau">
-				<?php for ( $i = 1; $i <= 4; $i++ ) : ?>
-					<option value="<?php echo (int) $i; ?>" <?php selected( $niveau, (string) $i ); ?>><?php echo (int) $i; ?></option>
-				<?php endfor; ?>
+				<?php foreach ( Exercice_Niveau::cases() as $enum_niveau ) : ?>
+					<option value="<?php echo esc_attr( (string) $enum_niveau->value ); ?>" <?php selected( (int) $niveau, $enum_niveau->value ); ?>>
+						<?php echo esc_html( (string) $enum_niveau->value ); ?>
+					</option>
+				<?php endforeach; ?>
 			</select>
 		</p>
 
@@ -198,14 +191,17 @@ class Manager {
 
 		// Save exercise type (integer value).
 		if ( isset( $_POST['roi_exercice_type'] ) ) {
-			update_post_meta( $post_id, '_roi_exercice_type', (int) $_POST['roi_exercice_type'] );
+			$type_enum = Exercice_Type::tryFrom( (int) $_POST['roi_exercice_type'] );
+			if ( null !== $type_enum ) {
+				update_post_meta( $post_id, '_roi_exercice_type', $type_enum->value );
+			}
 		}
 
 		// Save exercise level (integer value between 1 and 4).
 		if ( isset( $_POST['roi_exercice_niveau'] ) ) {
-			$niveau = (int) $_POST['roi_exercice_niveau'];
-			if ( $niveau >= 1 && $niveau <= 4 ) {
-				update_post_meta( $post_id, '_roi_exercice_niveau', $niveau );
+			$niveau_enum = Exercice_Niveau::tryFrom( (int) $_POST['roi_exercice_niveau'] );
+			if ( null !== $niveau_enum ) {
+				update_post_meta( $post_id, '_roi_exercice_niveau', $niveau_enum->value );
 			}
 		}
 
@@ -263,7 +259,7 @@ class Manager {
 		if ( ! isset( $_POST['roi_exercice_niveau'] ) && isset( $postarr['ID'] ) ) {
 			$niveau = (int) get_post_meta( (int) $postarr['ID'], '_roi_exercice_niveau', true );
 		}
-		if ( $niveau < 1 || $niveau > 4 ) {
+		if ( null === Exercice_Niveau::tryFrom( $niveau ) ) {
 			$errors[] = __( 'Le niveau de difficulté (1 à 4) est obligatoire.', 'roi' );
 		}
 
@@ -274,7 +270,7 @@ class Manager {
 		if ( ! isset( $_POST['roi_exercice_type'] ) && isset( $postarr['ID'] ) ) {
 			$type = (int) get_post_meta( (int) $postarr['ID'], '_roi_exercice_type', true );
 		}
-		if ( $type < 1 || $type > 16 ) {
+		if ( null === Exercice_Type::tryFrom( $type ) ) {
 			$errors[] = __( "Le type d'exercice est obligatoire.", 'roi' );
 		}
 

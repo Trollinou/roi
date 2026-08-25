@@ -67,35 +67,12 @@
 }
 
 .pgn-editor-left-col {
-  width: 400px;
+  flex: 0 0 380px;
+  width: 380px;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-}
-
-.pgn-editor-board-wrapper {
-  width: 400px;
-  height: 400px;
-  position: relative;
-  cursor: pointer;
-  overflow: hidden;
-}
-
-.pgn-editor-board-wrapper > div {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-cg-container {
-  width: 100% !important;
-  height: 100% !important;
-}
-
-.pgn-editor-board-wrapper svg {
-  pointer-events: none !important;
 }
 
 .pgn-editor-right-col {
@@ -141,6 +118,8 @@ cg-container {
   align-items: center;
   justify-content: space-between;
   gap: 6px;
+  position: relative;
+  z-index: 20;
 }
 
 .pgn-nav-btn {
@@ -153,12 +132,62 @@ cg-container {
   cursor: pointer;
   transition: all 0.2s ease;
   color: #495057;
+  position: relative;
+  z-index: 21;
+  pointer-events: auto !important;
 }
 
 .pgn-nav-btn:hover {
   background: #e9ecef;
   border-color: #adb5bd;
   color: #212529;
+}
+
+/* Chessground SVG layer styling to prevent overlays blocking clicks */
+cg-container .cg-shapes,
+cg-container .cg-shapes-below,
+cg-container .cg-custom-svgs,
+cg-container .cg-custom-below,
+cg-auto-pieces,
+.cg-wrap .cg-shapes,
+.cg-wrap .cg-shapes-below,
+.cg-wrap .cg-custom-svgs,
+.cg-wrap .cg-custom-below,
+.cg-wrap cg-auto-pieces {
+  overflow: visible;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none !important;
+}
+
+cg-container .cg-shapes,
+.cg-wrap .cg-shapes {
+  opacity: 0.6;
+  z-index: 2;
+  overflow: hidden;
+}
+
+cg-container .cg-shapes-below,
+.cg-wrap .cg-shapes-below {
+  overflow: hidden;
+  z-index: 1;
+}
+
+cg-container .cg-custom-below,
+.cg-wrap .cg-custom-below {
+  z-index: 1;
+}
+
+cg-container .cg-custom-svgs,
+.cg-wrap .cg-custom-svgs {
+  z-index: 4;
+}
+
+.cg-wrap svg {
+  pointer-events: none !important;
 }
 
 .pgn-ply-indicator {

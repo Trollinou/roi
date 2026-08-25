@@ -32,11 +32,17 @@ const FenEditor = forwardRef(function FenEditor({
   const effectiveFen = diagram?.fen || initialDiagram?.fen || initialFen || fen || defaultFen;
   const effectiveShapes = diagram?.shapes || initialDiagram?.shapes || initialShapes || [];
 
+  const parts = effectiveFen.split(" ");
+  const initialPlacement = parts[0] || "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+  const initialTurn = parts[1] || "w";
+  const initialCastling = parts[2] || "KQkq";
+  const initialOrientation = initialTurn === "b" ? "black" : "white";
+
   // États de la FEN
-  const [position, setPosition] = useState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
-  const [turn, setTurn] = useState("w");
-  const [castling, setCastling] = useState("KQkq");
-  const [orientation, setOrientation] = useState("white");
+  const [position, setPosition] = useState(initialPlacement);
+  const [turn, setTurn] = useState(initialTurn);
+  const [castling, setCastling] = useState(initialCastling);
+  const [orientation, setOrientation] = useState(initialOrientation);
   const [importFenText, setImportFenText] = useState("");
   const [selectedPiece, setSelectedPiece] = useState(null); // { role, color } ou "eraser" ou null
   const [currentShapes, setCurrentShapes] = useState(effectiveShapes);
@@ -46,6 +52,7 @@ const FenEditor = forwardRef(function FenEditor({
   const currentShapesRef = useRef(effectiveShapes);
   const selectedPieceRef = useRef(selectedPiece);
   const orientationRef = useRef(orientation);
+  const positionRef = useRef(initialPlacement);
 
   useEffect(() => {
     currentShapesRef.current = currentShapes;
@@ -59,10 +66,18 @@ const FenEditor = forwardRef(function FenEditor({
     orientationRef.current = orientation;
   }, [orientation]);
 
+  useEffect(() => {
+    positionRef.current = position;
+  }, [position]);
+
   // Met à jour la position FEN à partir de l'état actuel de l'échiquier
   const syncPositionFromBoard = () => {
     if (boardApiRef.current) {
-      setPosition(boardApiRef.current.getPlacementFen());
+      const placement = boardApiRef.current.getPlacementFen();
+      if (placement && placement !== positionRef.current) {
+        positionRef.current = placement;
+        setPosition(placement);
+      }
     }
   };
 
@@ -71,7 +86,10 @@ const FenEditor = forwardRef(function FenEditor({
     const computed = turn === "b" ? "black" : "white";
     setOrientation(computed);
     if (boardApiRef.current) {
-      boardApiRef.current.setConfig({ orientation: computed });
+      const currentOrient = boardApiRef.current.getOrientation();
+      if (currentOrient !== computed) {
+        boardApiRef.current.setConfig({ orientation: computed });
+      }
     }
   }, [turn]);
 
@@ -112,8 +130,13 @@ const FenEditor = forwardRef(function FenEditor({
       setCastling(cast);
       setOrientation(initialOrient);
 
+      const selectedPieceSet = boardConfig.pieceSet || "cburnett";
+      const selectedBoardTheme = boardConfig.boardTheme || "brown";
+
       const config = {
         mode: "editor",
+        pieceSet: selectedPieceSet,
+        boardTheme: selectedBoardTheme,
         ...boardConfig,
         fen: currentFen,
         orientation: initialOrient,
@@ -140,6 +163,8 @@ const FenEditor = forwardRef(function FenEditor({
 
       const boardState = {
         mode: "editor",
+        pieceSet: selectedPieceSet,
+        boardTheme: selectedBoardTheme,
         freeMode: true,
         preserveShapesOnPositionChange: true,
         showThreats: false,
@@ -173,6 +198,9 @@ const FenEditor = forwardRef(function FenEditor({
         }
       );
 
+      boardAPI.setPieceSet(selectedPieceSet);
+      boardAPI.setBoardTheme(selectedBoardTheme);
+
       if (typeof boardAPI.setDiagram === "function") {
         boardAPI.setDiagram({ fen: currentFen, shapes: effectiveShapes });
       } else if (effectiveShapes && effectiveShapes.length > 0) {
@@ -188,6 +216,87 @@ const FenEditor = forwardRef(function FenEditor({
     []
   );
 
+/**
+ * Parse a FEN string or Lichess PGN export with annotations ([%csl ...] and [%cal ...]).
+ *
+ * @param {string} text Raw FEN or PGN string.
+ * @return {{ fen: string, shapes: Array<{ orig: string, dest?: string, brush: string }> } | null}
+ */
+function parsePgnOrFen(text) {
+  if (!text || typeof text !== "string") {
+    return null;
+  }
+  const trimmed = text.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const brushMap = {
+    g: "green",
+    r: "red",
+    b: "blue",
+    y: "yellow",
+    c: "green",
+    o: "yellow",
+  };
+
+  let fen = "";
+  const shapes = [];
+
+  // 1. Extraire la FEN depuis l'en-tête [FEN "..."] si présent
+  const fenMatch = trimmed.match(/\[FEN\s+"([^"]+)"\]/i);
+  if (fenMatch && fenMatch[1]) {
+    fen = fenMatch[1].trim();
+  }
+
+  // 2. Extraire les cercles [%csl ...] ou [%cpl ...]
+  const cslRegex = /\[%(?:csl|cpl)\s+([^\]]+)\]/gi;
+  let cslMatch;
+  while ((cslMatch = cslRegex.exec(trimmed)) !== null) {
+    const items = cslMatch[1].split(",");
+    for (const item of items) {
+      const cleanItem = item.trim();
+      if (cleanItem.length >= 3) {
+        const brushChar = cleanItem[0].toLowerCase();
+        const brush = brushMap[brushChar] || "green";
+        const orig = cleanItem.substring(1, 3).toLowerCase();
+        shapes.push({ orig, brush });
+      }
+    }
+  }
+
+  // 3. Extraire les flèches [%cal ...]
+  const calRegex = /\[%cal\s+([^\]]+)\]/gi;
+  let calMatch;
+  while ((calMatch = calRegex.exec(trimmed)) !== null) {
+    const items = calMatch[1].split(",");
+    for (const item of items) {
+      const cleanItem = item.trim();
+      if (cleanItem.length >= 5) {
+        const brushChar = cleanItem[0].toLowerCase();
+        const brush = brushMap[brushChar] || "green";
+        const orig = cleanItem.substring(1, 3).toLowerCase();
+        const dest = cleanItem.substring(3, 5).toLowerCase();
+        shapes.push({ orig, dest, brush });
+      }
+    }
+  }
+
+  // 4. Si aucune FEN n'a été trouvée dans les balises PGN
+  if (!fen) {
+    const firstLine = trimmed.split("\n")[0].trim();
+    if (firstLine.includes("/") && !firstLine.startsWith("[")) {
+      fen = firstLine;
+    } else if (trimmed.startsWith("[") && trimmed.includes("]")) {
+      fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    } else {
+      fen = trimmed;
+    }
+  }
+
+  return { fen, shapes };
+}
+
   // Exposer redrawBoard(), getDiagram() et setDiagram() au composant parent via ref
   useImperativeHandle(ref, () => ({
     redrawBoard() {
@@ -195,10 +304,12 @@ const FenEditor = forwardRef(function FenEditor({
     },
     getDiagram() {
       const finalFen = `${position} ${turn} ${castling} - 0 1`;
-      const boardDiagram = boardApiRef.current?.getDiagram() || {};
-      const shapes = (boardDiagram.shapes && boardDiagram.shapes.length > 0)
-        ? boardDiagram.shapes
-        : (currentShapesRef.current && currentShapesRef.current.length > 0 ? currentShapesRef.current : currentShapes);
+      let shapes = (currentShapesRef.current && Array.isArray(currentShapesRef.current))
+        ? currentShapesRef.current
+        : (currentShapes && Array.isArray(currentShapes) ? currentShapes : []);
+      if ((!shapes || shapes.length === 0) && boardApiRef.current && typeof boardApiRef.current.getShapes === "function") {
+        shapes = boardApiRef.current.getShapes() || [];
+      }
       return {
         fen: finalFen,
         orientation: turn === "b" ? "black" : "white",
@@ -234,26 +345,47 @@ const FenEditor = forwardRef(function FenEditor({
     }
   }));
 
-  // Chargement d'une FEN personnalisée
+  // Chargement d'une FEN ou d'un PGN (avec formes) personnalisé
   const handleLoadFen = () => {
     const input = importFenText.trim();
     if (!input) return;
 
     try {
+      const parsed = parsePgnOrFen(input);
+      if (!parsed || !parsed.fen) {
+        alert("Format FEN ou PGN non reconnu.");
+        return;
+      }
+
+      const { fen: newFen, shapes: newShapes } = parsed;
+
+      const parts = newFen.split(/\s+/);
+      const pos = parts[0] || "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+      const t = parts[1] || "w";
+      const cast = parts[2] || "KQkq";
+      const computedOrient = t === "b" ? "black" : "white";
+
+      setPosition(pos);
+      setTurn(t);
+      setCastling(cast);
+      setOrientation(computedOrient);
+      setCurrentShapes(newShapes);
+      currentShapesRef.current = newShapes;
+
       if (boardApiRef.current) {
-        boardApiRef.current.setPosition(input);
+        if (typeof boardApiRef.current.setDiagram === "function") {
+          boardApiRef.current.setDiagram({ fen: newFen, shapes: newShapes });
+        } else {
+          boardApiRef.current.setPosition(newFen);
+          boardApiRef.current.setShapes(newShapes);
+        }
+        boardApiRef.current.setConfig({ orientation: computedOrient });
       }
-      const parts = input.split(/\s+/);
-      if (parts[0]) setPosition(parts[0]);
-      if (parts[1] && (parts[1] === "w" || parts[1] === "b")) {
-        setTurn(parts[1]);
-        setOrientation(parts[1] === "b" ? "black" : "white");
-      }
-      if (parts[2]) setCastling(parts[2]);
+
       syncPositionFromBoard();
       setImportFenText("");
     } catch (err) {
-      alert("Erreur lors du chargement de la FEN : " + err.message);
+      alert("Erreur lors du chargement : " + err.message);
     }
   };
 
@@ -262,12 +394,9 @@ const FenEditor = forwardRef(function FenEditor({
     if (onSave) {
       const finalFen = `${position} ${turn} ${castling} - 0 1`;
       const currentOrientation = turn === "b" ? "black" : "white";
-      const boardDiagram = boardApiRef.current?.getDiagram() || {};
-      let shapes = (boardDiagram.shapes && boardDiagram.shapes.length > 0)
-        ? boardDiagram.shapes
-        : (currentShapesRef.current && currentShapesRef.current.length > 0
-            ? currentShapesRef.current
-            : (currentShapes && currentShapes.length > 0 ? currentShapes : []));
+      let shapes = (currentShapesRef.current && Array.isArray(currentShapesRef.current))
+        ? currentShapesRef.current
+        : (currentShapes && Array.isArray(currentShapes) ? currentShapes : []);
       if ((!shapes || shapes.length === 0) && boardApiRef.current && typeof boardApiRef.current.getShapes === "function") {
         shapes = boardApiRef.current.getShapes() || [];
       }
@@ -316,13 +445,19 @@ const FenEditor = forwardRef(function FenEditor({
     setCastling(current);
   };
 
+  const pieceSet = boardConfig.pieceSet || "cburnett";
+  const boardTheme = boardConfig.boardTheme || "brown";
+
   return (
     <div className="fen-editor-container">
       {/* Colonne Gauche - L'échiquier */}
       <div className="fen-editor-board-col">
-        <section className={`fen-editor-main-wrap ${promotionState && promotionState.isEnabled ? "disabledBoard" : ""}`}>
-          <div className="fen-editor-main-board">
-            <div ref={boardElRef} />
+        <section
+          className={`main-wrap piece-set-${pieceSet} board-theme-${boardTheme} ${
+            promotionState && promotionState.isEnabled ? "disabledBoard" : ""
+          }`}
+        >
+          <div className="main-board">
             {promotionState && promotionState.isEnabled && (
               <dialog className="promotion-dialog" open>
                 <div className="promotion-pieces">
@@ -350,6 +485,7 @@ const FenEditor = forwardRef(function FenEditor({
                 </div>
               </dialog>
             )}
+            <div ref={boardElRef} />
           </div>
         </section>
         
@@ -377,19 +513,18 @@ const FenEditor = forwardRef(function FenEditor({
 
       {/* Colonne Droite - Contrôles */}
       <div className="fen-editor-controls-col">
-        {/* Importer une FEN */}
+        {/* Importer une FEN ou un PGN */}
         <div>
-          <div className="fen-editor-section-title">Importer une FEN</div>
+          <div className="fen-editor-section-title">Importer une FEN / PGN</div>
           <div style={{ display: "flex", gap: "8px" }}>
-            <input
-              type="text"
+            <textarea
               className="fen-editor-select"
-              style={{ flex: 1 }}
-              placeholder="Collez une position FEN..."
+              style={{ flex: 1, minHeight: "42px", maxHeight: "100px", resize: "vertical", fontFamily: "monospace", fontSize: "12px", lineHeight: "1.4" }}
+              placeholder="Collez une position FEN ou un export PGN Lichess..."
               value={importFenText}
               onChange={(e) => setImportFenText(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
+                if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
                   handleLoadFen();
                 }
@@ -398,7 +533,7 @@ const FenEditor = forwardRef(function FenEditor({
             <button
               type="button"
               className="fen-editor-btn fen-editor-btn-secondary"
-              style={{ padding: "8px 14px", whiteSpace: "nowrap" }}
+              style={{ padding: "8px 14px", whiteSpace: "nowrap", alignSelf: "flex-start" }}
               onClick={handleLoadFen}
             >
               Charger
@@ -412,6 +547,7 @@ const FenEditor = forwardRef(function FenEditor({
           <PiecePalette
             selectedPiece={selectedPiece}
             onSelect={setSelectedPiece}
+            pieceSet={pieceSet}
           />
         </div>
 

@@ -94,14 +94,22 @@ class Parcours_Controller {
 				$playlist      = array();
 				if ( is_string( $playlist_meta ) && '' !== $playlist_meta ) {
 					$decoded = json_decode( $playlist_meta, true );
-					if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
-						foreach ( $decoded as &$item ) {
+					if ( ( json_last_error() !== JSON_ERROR_NONE || ! is_array( $decoded ) ) ) {
+						$decoded = json_decode( wp_unslash( $playlist_meta ), true );
+					}
+					if ( is_array( $decoded ) ) {
+						$valid_playlist = array();
+						foreach ( $decoded as $item ) {
 							if ( isset( $item['id'] ) ) {
-								$item['titre'] = get_the_title( (int) $item['id'] );
+								$item_id     = (int) $item['id'];
+								$item_status = get_post_status( $item_id );
+								if ( 'publish' === $item_status ) {
+									$item['titre']    = get_the_title( $item_id );
+									$valid_playlist[] = $item;
+								}
 							}
 						}
-						unset( $item );
-						$playlist = $decoded;
+						$playlist = $valid_playlist;
 					}
 				}
 

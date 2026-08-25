@@ -87,8 +87,8 @@ class TypeVisionChecs implements TypeInterface {
 								<label style="display: block; margin-bottom: 4px; font-size: 12px; color: #50575e;">
 									<strong><?php esc_html_e( 'Aperçu du diagramme (non interactif) :', 'roi' ); ?></strong>
 								</label>
-								<div id="roi_t8_preview_container_<?php echo (int) $i; ?>" style="width: 260px; height: 260px; position: relative; border: 1px solid #ccd0d4; border-radius: 4px; background: #fff; overflow: hidden;">
-									<div id="roi_t8_preview_board_<?php echo (int) $i; ?>" class="roi_t8_preview_board" data-index="<?php echo (int) $i; ?>" style="width: 100%; height: 100%;"></div>
+								<div id="roi_t8_preview_container_<?php echo (int) $i; ?>" class="main-wrap fit-container piece-set-cburnett board-theme-brown" style="width: 260px; height: 260px; position: relative; border: 1px solid #ccd0d4; border-radius: 4px; background: #fff; overflow: hidden;">
+									<div id="roi_t8_preview_board_<?php echo (int) $i; ?>" class="main-board roi_t8_preview_board" data-index="<?php echo (int) $i; ?>" style="width: 100%; height: 100%;"></div>
 								</div>
 							</div>
 						</div>

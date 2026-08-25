@@ -2,17 +2,18 @@ import { __ } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
 import { useEffect, useRef } from '@wordpress/element';
 import RoiPgnEditor from '../../components/PgnEditor';
+import '../../components/PgnEditor/PgnEditor.css';
 import { BoardCore as EgBoardCore } from 'eg-chessboard';
 
-export default function Edit( {
+export default function Edit({
 	attributes,
 	setAttributes,
 	isSelected,
 	clientId,
-} ) {
-	const previewBoardRef = useRef( null );
-	const previewInstanceRef = useRef( null );
-	const editorRef = useRef( null ); // Ref vers l'instance RoiPgnEditor pour redrawBoard()
+}) {
+	const previewBoardRef = useRef(null);
+	const previewInstanceRef = useRef(null);
+	const editorRef = useRef(null); // Ref vers l'instance RoiPgnEditor pour redrawBoard()
 
 	const handleMouseDownCapture = () => {
 		// Forcer le recalcul des bounds Chessground AVANT que Gutenberg traite l'événement.
@@ -24,27 +25,25 @@ export default function Edit( {
 		) {
 			editorRef.current.redrawBoard();
 		}
-		if ( window.wp?.data?.dispatch && clientId ) {
-			window.wp.data
-				.dispatch( 'core/block-editor' )
-				.selectBlock( clientId );
+		if (window.wp?.data?.dispatch && clientId) {
+			window.wp.data.dispatch('core/block-editor').selectBlock(clientId);
 		}
 	};
 
-	const handleSave = ( newPgn ) => {
-		setAttributes( { pgn: newPgn } );
+	const handleSave = (newPgn) => {
+		setAttributes({ pgn: newPgn });
 
 		// Sortir du mode édition en désélectionnant le bloc dans Gutenberg
-		if ( window.wp?.data?.dispatch ) {
-			window.wp.data.dispatch( 'core/block-editor' ).clearSelectedBlock();
+		if (window.wp?.data?.dispatch) {
+			window.wp.data.dispatch('core/block-editor').clearSelectedBlock();
 		}
 	};
 
 	// Preview Board Initialization (when not selected)
-	useEffect( () => {
-		if ( ! isSelected && previewBoardRef.current && EgBoardCore ) {
+	useEffect(() => {
+		if (!isSelected && previewBoardRef.current && EgBoardCore) {
 			// Clean up previous preview if any
-			if ( previewInstanceRef.current ) {
+			if (previewInstanceRef.current) {
 				previewInstanceRef.current.destroy();
 				previewInstanceRef.current = null;
 			}
@@ -88,11 +87,11 @@ export default function Edit( {
 
 			previewInstanceRef.current = boardAPI;
 
-			if ( attributes.pgn ) {
+			if (attributes.pgn) {
 				try {
-					boardAPI.loadPgn( attributes.pgn );
-				} catch ( e ) {
-					console.warn( 'Error loading PGN for preview:', e );
+					boardAPI.loadPgn(attributes.pgn);
+				} catch (e) {
+					console.warn('Error loading PGN for preview:', e);
 				}
 			}
 
@@ -100,9 +99,9 @@ export default function Edit( {
 				boardAPI?.destroy();
 			};
 		}
-	}, [ isSelected, attributes.pgn ] );
+	}, [isSelected, attributes.pgn]);
 
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className: isSelected ? '' : 'roi-bloc-pgn-placeholder',
 		style: isSelected
 			? {}
@@ -112,19 +111,16 @@ export default function Edit( {
 					background: '#f9f9f9',
 					textAlign: 'center',
 					cursor: 'pointer',
-			  },
-	} );
+				},
+	});
 
-	if ( isSelected && RoiPgnEditor ) {
+	if (isSelected && RoiPgnEditor) {
 		return (
-			<div
-				{ ...blockProps }
-				onMouseDownCapture={ handleMouseDownCapture }
-			>
+			<div {...blockProps} onMouseDownCapture={handleMouseDownCapture}>
 				<RoiPgnEditor
-					ref={ editorRef }
-					initialPgn={ attributes.pgn }
-					onSave={ handleSave }
+					ref={editorRef}
+					initialPgn={attributes.pgn}
+					onSave={handleSave}
 				/>
 			</div>
 		);
@@ -132,51 +128,66 @@ export default function Edit( {
 
 	// Preview Mode
 	return (
-		<div { ...blockProps } onMouseDownCapture={ handleMouseDownCapture }>
+		<div {...blockProps} onMouseDownCapture={handleMouseDownCapture}>
 			<div
-				style={ {
+				style={{
 					display: 'flex',
 					flexDirection: 'column',
 					alignItems: 'center',
 					width: '100%',
-				} }
+				}}
 			>
-				{ attributes.pgn ? (
+				{attributes.pgn ? (
 					<>
 						<div
-							style={ {
+							className="main-wrap piece-set-cburnett board-theme-brown"
+							style={{
 								width: '320px',
 								height: '320px',
 								position: 'relative',
-							} }
+								overflow: 'hidden',
+							}}
 						>
 							<div
-								ref={ previewBoardRef }
-								style={ { width: '100%', height: '100%' } }
+								ref={previewBoardRef}
+								style={{
+									width: '100%',
+									height: '100%',
+									position: 'relative',
+								}}
 							/>
 						</div>
 
-						{ /* Boutons de navigation (visuels uniquement pour marquer le type PGN) */ }
+						{/* Boutons de navigation */}
 						<div
 							className="pgn-navigation-bar"
-							style={ {
+							style={{
 								width: '320px',
 								marginTop: '10px',
 								display: 'grid',
 								gridTemplateColumns: 'repeat(4, 1fr)',
 								gap: '6px',
-							} }
+								position: 'relative',
+								zIndex: 20,
+							}}
 						>
 							<button
 								type="button"
 								className="pgn-nav-btn"
 								title="Début"
-								style={ {
+								onClick={(e) => {
+									e.stopPropagation();
+									previewInstanceRef.current?.viewStart();
+								}}
+								style={{
 									cursor: 'pointer',
 									color: '#495057',
 									borderColor: '#ced4da',
 									background: '#ffffff',
-								} }
+									position: 'relative',
+									zIndex: 21,
+									pointerEvents: 'auto',
+								}}
 							>
 								|&lt;
 							</button>
@@ -184,12 +195,19 @@ export default function Edit( {
 								type="button"
 								className="pgn-nav-btn"
 								title="Précédent"
-								style={ {
+								onClick={(e) => {
+									e.stopPropagation();
+									previewInstanceRef.current?.viewPrevious();
+								}}
+								style={{
 									cursor: 'pointer',
 									color: '#495057',
 									borderColor: '#ced4da',
 									background: '#ffffff',
-								} }
+									position: 'relative',
+									zIndex: 21,
+									pointerEvents: 'auto',
+								}}
 							>
 								&lt;
 							</button>
@@ -197,12 +215,19 @@ export default function Edit( {
 								type="button"
 								className="pgn-nav-btn"
 								title="Suivant"
-								style={ {
+								onClick={(e) => {
+									e.stopPropagation();
+									previewInstanceRef.current?.viewNext();
+								}}
+								style={{
 									cursor: 'pointer',
 									color: '#495057',
 									borderColor: '#ced4da',
 									background: '#ffffff',
-								} }
+									position: 'relative',
+									zIndex: 21,
+									pointerEvents: 'auto',
+								}}
 							>
 								&gt;
 							</button>
@@ -210,12 +235,19 @@ export default function Edit( {
 								type="button"
 								className="pgn-nav-btn"
 								title="Fin"
-								style={ {
+								onClick={(e) => {
+									e.stopPropagation();
+									previewInstanceRef.current?.stopViewingHistory();
+								}}
+								style={{
 									cursor: 'pointer',
 									color: '#495057',
 									borderColor: '#ced4da',
 									background: '#ffffff',
-								} }
+									position: 'relative',
+									zIndex: 21,
+									pointerEvents: 'auto',
+								}}
 							>
 								&gt;|
 							</button>
@@ -223,16 +255,16 @@ export default function Edit( {
 					</>
 				) : (
 					<p
-						style={ {
+						style={{
 							fontSize: '12px',
 							color: '#666',
 							fontStyle: 'italic',
 							margin: '15px 0',
-						} }
+						}}
 					>
-						{ __( 'Aucune partie chargée.', 'roi' ) }
+						{__('Aucune partie chargée.', 'roi')}
 					</p>
-				) }
+				)}
 			</div>
 		</div>
 	);

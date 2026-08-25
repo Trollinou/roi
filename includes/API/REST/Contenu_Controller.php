@@ -113,8 +113,13 @@ class Contenu_Controller {
 
 			if ( is_string( $config_meta ) && '' !== $config_meta ) {
 				$decoded = json_decode( $config_meta, true );
-				if ( json_last_error() === JSON_ERROR_NONE ) {
+				if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
 					$data['config'] = $decoded;
+				} else {
+					$decoded_unslashed = json_decode( wp_unslash( $config_meta ), true );
+					if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded_unslashed ) ) {
+						$data['config'] = $decoded_unslashed;
+					}
 				}
 			}
 		} else {

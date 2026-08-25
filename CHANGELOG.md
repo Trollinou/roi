@@ -1,5 +1,46 @@
 # Changelog
 
+## [Unreleased]
+
+## [1.4.3] - 2026-08-25
+
+*   **Gestion des Playlists de Cours & Intégrité des Données (`Builder.php`, `Parcours_Controller.php`) :**
+    *   **Nettoyage Automatique des Playlists :** Ajout des écouteurs `wp_trash_post` et `before_delete_post` pour purger automatiquement les leçons et exercices supprimés ou mis à la corbeille de l'ensemble des cours (`_roi_cours_playlist`).
+    *   **Filtrage Dynamique API REST (`GET /roi/v1/parcours`) :** Sécurisation de l'endpoint pour ne retourner que les éléments de playlist effectivement publiés (`publish`), évitant tout lien orphelin ou erreur de chargement dans la PWA.
+    *   **Décodage Sécurisé du JSON de Configuration (`Contenu_Controller.php`, `Parcours_Controller.php`) :** Ajout d'un fallback `wp_unslash()` garantissant le décodage sans faille des configurations JSON d'exercices et de playlists même en présence d'antislashes d'échappement en base de données.
+
+*   **Standardisation des Thèmes & Aperçus d'Exercices (`eg-chessboard` v1.6.4, `type-2.js`, `type-8.js`, `TypePopEchecs.php`, `TypeVisionChecs.php`) :**
+    *   **Jeu de Pièces & Plateau par Défaut :** Standardisation des styles universels par défaut sur `cburnett` (pièces) et `brown` (fond bois classique).
+    *   **Restauration Visuelle des Pièces dans les Aperçus :** Injection des classes de conteneur `.main-wrap`, `.fit-container`, `.piece-set-cburnett` et `.board-theme-brown` sur les conteneurs d'aperçu statique des constructeurs Type 2 (Pop'Echecs) et Type 8 (Vision'checs), résolvant le masquage des sprites de pièces.
+
+*   **Exercice Type 2 Pop'Echecs — Série de 4 Diagrammes (`TypePopEchecs.php`, `type-2.js`) :**
+    *   **Saisie en Série de 4 Diagrammes :** Refonte de l'interface d'administration pour permettre la configuration d'une série de 4 diagrammes avec consignes individuelles et FEN/shapes dédiés pour chaque position.
+    *   **Aperçus Visuels Directs :** Intégration de 4 plateaux de prévisualisation non-interactifs synchronisés avec les contrôles FEN et shapes.
+    *   **Standard d'Architecture Découplé (CMS / Runtime) :** Établissement du modèle d'architecture où ROI stocke les données échiquéennes pures (FEN + Shapes, ou PGN avec annotations) et les consignes de l'auteur, tandis que le moteur client PWA interprète le diagramme (détection automatique de la pièce via le cercle bleu, masquage/révélation des shapes et orientation selon le trait).
+
+*   **Constructeur d'Exercices Admin (`src/admin-exercice-builder/main.js`) :**
+    *   **Fiabilisation de la Validation des Champs Obligatoires (`checkRequiredFields`) :** Correction du blocage intempestif de la sauvegarde (`lockPostSaving`) lors de l'édition d'exercices existants (notamment lors de la modification de FEN sur le Type 9 Parcours) en vérifiant l'état Gutenberg (`getEditedPostAttribute`, `getCurrentPost`) et les métaboxes classiques du DOM (`#roi_chapitrediv`, `tax_input[roi_chapitre]`, `#post-title-0`, `.editor-post-title__input`). Ajout d'écouteurs d'événements `change` sur les sélecteurs de chapitre pour synchroniser dynamiquement la validation.
+
+*   **Architecture, Typage Strict PHP 8.4 & Optimisations Backend :**
+    *   **Enums Typés PHP 8.4 dans les Métaboxes (`Manager.php`) :** Remplacement de la génération HTML statique des 16 types d'exercices et des niveaux de difficulté par les Enums typés `\ROI\Enums\Exercice_Type::cases()` et `\ROI\Enums\Exercice_Niveau::cases()`. Validation stricte lors de la sauvegarde et du filtre `wp_insert_post_data` via `Exercice_Type::tryFrom()` et `Exercice_Niveau::tryFrom()`.
+    *   **Centralisation des CPT & Taxonomies (`CPT\Manager`) :** Création de la classe `\ROI\CPT\Manager` centralisant l'initialisation modulaire des Custom Post Types (`Lecon`, `Exercice`, `Cours`, `Partie`) et de la taxonomie `Chapitre_Taxonomy`, avec refactorisation du point d'entrée `Plugin.php`.
+    *   **Optimisation des Requêtes SQL Anti-doublons (`Games_Controller.php`) :** Ajout de `'no_found_rows' => true` et `'cache_results' => false` lors de la vérification de doublons PGN afin de supprimer la surcharge SQL `SQL_CALC_FOUND_ROWS` sur les requêtes d'existence.
+    *   **Endpoint REST Paginé de Consultation des Parties (`GET /roi/v1/games`) :** Ajout de la route `GET /roi/v1/games` avec pagination (`page`, `per_page`), filtrage optionnel par `member_id`, contrôle d'accès unifié `Permissions_Helper::check_apprentissage_access()` et retour structuré des métadonnées de pagination.
+*   **Outillage & Automatisation du Versioning :**
+    *   **Script de Synchronisation Multi-fichiers (`scripts/version-sync.cjs`) :** Création du script Node.js natif synchronisant la version sémantique sur l'en-tête `roi.php`, la constante `ROI_VERSION`, le fichier `package.json`, l'ensemble des fichiers `block.json` Gutenberg (`chessboard`, `diagramme`, `pgn`) et effectuant la bascule automatique de la section `[Unreleased]` du `CHANGELOG.md` vers la version ciblée.
+    *   **Commande npm :** Intégration de la commande `npm run version-sync` dans `package.json`.
+
+*   **Correctifs de Navigation & d'Interactivité PGN (`PgnViewer`, `PgnEditor` & Bloc Gutenberg `roi/pgn`) :**
+    *   **Visualiseur de parties admin (`assets/js/admin-partie-viewer.js`) :** Remplacement de la lecture erronée de `boardAPI.boardState` par l'API publique `boardAPI.getHistoryViewerState()`, et simplification des actions de navigation avec les méthodes natives `boardAPI.viewNext()`, `boardAPI.viewPrevious()`, `boardAPI.viewStart()`, `boardAPI.stopViewingHistory()`.
+    *   **Déblocage des événements de clic (Calques SVG Chessground) :** Correction des styles CSS dans `src/blocks/chessboard/style.css`, `src/components/PgnEditor/PgnEditor.css` et `assets/css/admin-style.css` en appliquant `pointer-events: none !important;` et `position: absolute;` sur l'ensemble des calques vectoriels (`.cg-custom-below`, `.cg-shapes-below`, `.cg-custom-svgs`, `.cg-shapes`, `cg-auto-pieces`) pour éviter le masquage et l'interception intempestive des clics au-dessus des boutons de navigation.
+    *   **Priorité d'empilement `z-index` :** Élévation du contexte d'empilement des barres et boutons de navigation (`.pgn-navigation-bar`, `.pgn-nav-btn`) avec `position: relative; z-index: 10/11; pointer-events: auto !important;` directement dans `PgnEditor.jsx`, `PgnEditor.css` et `admin-style.css`.
+    *   **Enregistrement des feuilles de style du bloc Gutenberg PGN (`src/blocks/pgn/block.json` & `index.js`) :** Déclaration de `"editorStyle": "file:./index.css"` et `"style": "file:./index.css"` dans `block.json`, import des CSS nécessaires dans `index.js` et `admin-fen-editor.js`, et confinement du plateau de prévisualisation (`overflow: hidden; position: relative`).
+    *   **Boutons de prévisualisation du bloc PGN (`src/blocks/pgn/edit.js`) :** Ajout des écouteurs `onClick` reliés à l'instance `EgBoardCore` pour permettre la navigation dans le PGN en mode prévisualisation.
+*   **Correctifs d'Intégration `eg-chessboard` (FenEditor & PgnEditor) :**
+    *   **Résolution de la récursion infinie (`RangeError: Maximum call stack size exceeded`) :** Ajout d'une garde de comparaison FEN (`positionRef`) dans `syncPositionFromBoard` et sécurisation du `useEffect` d'orientation dans `FenEditor.jsx`.
+    *   **Restauration des SVG vectoriels des pièces (`pieceSet` & `boardTheme`) :** Application des classes de conteneur `.piece-set-cburnett` et `.board-theme-brown` sur le wrapper `.main-wrap` et sur la palette de pièces `PiecePalette.jsx`.
+    *   **Normalisation du DOM Chessground & Enfilement CSS :** Imbrication directe de l'élément de référence Chessground dans `.main-board` (alignée sur le composant React officiel d'`eg-chessboard`), enfilement de la feuille de style `admin-fen-editor.css` dans `Assets.php` et fiabilisation du calcul des `bounds` / `redraw(true)` via `ResizeObserver` dans `useChessBoard.js`.
+
 ## [1.4.1] - 2026-08-18
 
 *   **Intégration Réactive & Simplification `eg-chessboard` :**

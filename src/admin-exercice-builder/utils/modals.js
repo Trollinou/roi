@@ -2,20 +2,20 @@
  * Modals management for FEN and PGN editors.
  */
 
-export function openFenEditor( initialData, onSaveCallback ) {
-	const modalOverlay = document.getElementById( 'roi_fen_modal_overlay' );
-	const reactRoot = document.getElementById( 'roi_fen_react_root' );
+export function openFenEditor(initialData, onSaveCallback) {
+	const modalOverlay = document.getElementById('roi_fen_modal_overlay');
+	const reactRoot = document.getElementById('roi_fen_react_root');
 
-	if ( ! modalOverlay || ! reactRoot ) {
+	if (!modalOverlay || !reactRoot) {
 		return;
 	}
 
-	const modalCloseBtn = document.getElementById( 'roi_fen_modal_close' );
+	const modalCloseBtn = document.getElementById('roi_fen_modal_close');
 	const cleanedFen =
 		typeof initialData === 'string'
 			? initialData.trim()
 			: initialData?.fen ||
-			  'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+				'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 	const initialShapes =
 		typeof initialData === 'object' && initialData.shapes
 			? initialData.shapes
@@ -25,53 +25,53 @@ export function openFenEditor( initialData, onSaveCallback ) {
 	modalOverlay.style.display = 'flex';
 
 	const cleanClose = () => {
-		if ( window.wp && window.wp.element ) {
-			window.wp.element.unmountComponentAtNode( reactRoot );
+		if (window.wp && window.wp.element) {
+			window.wp.element.unmountComponentAtNode(reactRoot);
 		}
 		modalOverlay.style.display = 'none';
-		if ( modalCloseBtn ) {
-			modalCloseBtn.removeEventListener( 'click', cleanClose );
+		if (modalCloseBtn) {
+			modalCloseBtn.removeEventListener('click', cleanClose);
 		}
-		modalOverlay.removeEventListener( 'click', handleOverlayClick );
+		modalOverlay.removeEventListener('click', handleOverlayClick);
 	};
 
-	const handleOverlayClick = ( e ) => {
-		if ( e.target === modalOverlay ) {
+	const handleOverlayClick = (e) => {
+		if (e.target === modalOverlay) {
 			cleanClose();
 		}
 	};
 
-	if ( modalCloseBtn ) {
-		modalCloseBtn.addEventListener( 'click', cleanClose );
+	if (modalCloseBtn) {
+		modalCloseBtn.addEventListener('click', cleanClose);
 	}
-	modalOverlay.addEventListener( 'click', handleOverlayClick );
+	modalOverlay.addEventListener('click', handleOverlayClick);
 
 	// Monter le composant React
-	if ( window.RoiFenEditor && window.wp && window.wp.element ) {
+	if (window.RoiFenEditor && window.wp && window.wp.element) {
 		const editorComponent =
 			window.RoiFenEditor.default || window.RoiFenEditor;
-		const element = window.wp.element.createElement( editorComponent, {
+		const element = window.wp.element.createElement(editorComponent, {
 			initialFen: cleanedFen,
 			initialShapes,
 			diagram: { fen: cleanedFen, shapes: initialShapes },
-			onSave( result ) {
-				onSaveCallback( result );
+			onSave(result) {
+				onSaveCallback(result);
 				cleanClose();
 			},
-		} );
-		window.wp.element.render( element, reactRoot );
+		});
+		window.wp.element.render(element, reactRoot);
 	}
 }
 
-export function openPgnEditor( initialPgn, onSaveCallback, initialFen = '' ) {
-	const pgnModalOverlay = document.getElementById( 'roi_pgn_modal_overlay' );
-	const pgnReactRoot = document.getElementById( 'roi_pgn_react_root' );
+export function openPgnEditor(initialPgn, onSaveCallback, initialFen = '') {
+	const pgnModalOverlay = document.getElementById('roi_pgn_modal_overlay');
+	const pgnReactRoot = document.getElementById('roi_pgn_react_root');
 
-	if ( ! pgnModalOverlay || ! pgnReactRoot ) {
+	if (!pgnModalOverlay || !pgnReactRoot) {
 		return;
 	}
 
-	const pgnModalCloseBtn = document.getElementById( 'roi_pgn_modal_close' );
+	const pgnModalCloseBtn = document.getElementById('roi_pgn_modal_close');
 	const cleanedPgn = typeof initialPgn === 'string' ? initialPgn.trim() : '';
 	const cleanedFen = typeof initialFen === 'string' ? initialFen.trim() : '';
 
@@ -79,45 +79,45 @@ export function openPgnEditor( initialPgn, onSaveCallback, initialFen = '' ) {
 	pgnModalOverlay.style.display = 'flex';
 
 	const cleanClose = () => {
-		if ( window.wp && window.wp.element ) {
-			window.wp.element.unmountComponentAtNode( pgnReactRoot );
+		if (window.wp && window.wp.element) {
+			window.wp.element.unmountComponentAtNode(pgnReactRoot);
 		}
 		pgnModalOverlay.style.display = 'none';
-		if ( pgnModalCloseBtn ) {
-			pgnModalCloseBtn.removeEventListener( 'click', cleanClose );
+		if (pgnModalCloseBtn) {
+			pgnModalCloseBtn.removeEventListener('click', cleanClose);
 		}
-		pgnModalOverlay.removeEventListener( 'click', handleOverlayClick );
+		pgnModalOverlay.removeEventListener('click', handleOverlayClick);
 	};
 
-	const handleOverlayClick = ( e ) => {
-		if ( e.target === pgnModalOverlay ) {
+	const handleOverlayClick = (e) => {
+		if (e.target === pgnModalOverlay) {
 			cleanClose();
 		}
 	};
 
-	if ( pgnModalCloseBtn ) {
-		pgnModalCloseBtn.addEventListener( 'click', cleanClose );
+	if (pgnModalCloseBtn) {
+		pgnModalCloseBtn.addEventListener('click', cleanClose);
 	}
-	pgnModalOverlay.addEventListener( 'click', handleOverlayClick );
+	pgnModalOverlay.addEventListener('click', handleOverlayClick);
 
 	// Monter le composant React
-	if ( window.RoiPgnEditor && window.wp && window.wp.element ) {
+	if (window.RoiPgnEditor && window.wp && window.wp.element) {
 		const editorComponent =
 			window.RoiPgnEditor.default || window.RoiPgnEditor;
 		const elementProps = {
 			initialPgn: cleanedPgn,
-			onSave( nouveauPgn, finalFen ) {
-				onSaveCallback( nouveauPgn, finalFen );
+			onSave(nouveauPgn, finalFen) {
+				onSaveCallback(nouveauPgn, finalFen);
 				cleanClose();
 			},
 		};
-		if ( cleanedFen ) {
+		if (cleanedFen) {
 			elementProps.initialFen = cleanedFen;
 		}
 		const element = window.wp.element.createElement(
 			editorComponent,
 			elementProps
 		);
-		window.wp.element.render( element, pgnReactRoot );
+		window.wp.element.render(element, pgnReactRoot);
 	}
 }

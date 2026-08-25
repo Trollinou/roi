@@ -4,9 +4,9 @@
 
 import { openPgnEditor } from '../utils/modals';
 
-const textarea = document.getElementById( 'roi_config_json' );
-const t7ModeSelect = document.getElementById( 'roi_t7_mode' );
-const t7SeriesContainer = document.getElementById( 'roi_t7_series_container' );
+const textarea = document.getElementById('roi_config_json');
+const t7ModeSelect = document.getElementById('roi_t7_mode');
+const t7SeriesContainer = document.getElementById('roi_t7_series_container');
 
 let t7Series = [];
 let t7Mode = '3x5';
@@ -15,7 +15,7 @@ let t7Mode = '3x5';
  * Met à jour la configuration globale au format JSON.
  */
 export function updateConfig() {
-	if ( ! textarea ) {
+	if (!textarea) {
 		return;
 	}
 
@@ -23,7 +23,7 @@ export function updateConfig() {
 		mode: t7Mode,
 		series: t7Series,
 	};
-	textarea.value = JSON.stringify( t7Config, null, 4 );
+	textarea.value = JSON.stringify(t7Config, null, 4);
 }
 
 /**
@@ -31,15 +31,15 @@ export function updateConfig() {
  */
 function adjustSeriesLength() {
 	const numSeries = t7Mode === '3x5' ? 3 : 5;
-	while ( t7Series.length < numSeries ) {
-		t7Series.push( {
+	while (t7Series.length < numSeries) {
+		t7Series.push({
 			pgn_data: '',
 			couleur_joueur: 'white',
 			shapes: [],
-		} );
+		});
 	}
-	if ( t7Series.length > numSeries ) {
-		t7Series = t7Series.slice( 0, numSeries );
+	if (t7Series.length > numSeries) {
+		t7Series = t7Series.slice(0, numSeries);
 	}
 }
 
@@ -47,15 +47,15 @@ function adjustSeriesLength() {
  * Génère le rendu HTML des séries de Marche du Héros.
  */
 export function renderT7Series() {
-	if ( ! t7SeriesContainer ) {
+	if (!t7SeriesContainer) {
 		return;
 	}
 	t7SeriesContainer.innerHTML = '';
 
-	t7Series.forEach( function ( serie, i ) {
-		const div = document.createElement( 'div' );
+	t7Series.forEach(function (serie, i) {
+		const div = document.createElement('div');
 		div.className = 'roi-t7-serie-card';
-		div.setAttribute( 'data-index', i );
+		div.setAttribute('data-index', i);
 		div.style.border = '1px solid #ccd0d4';
 		div.style.padding = '15px';
 		div.style.marginBottom = '15px';
@@ -65,7 +65,7 @@ export function renderT7Series() {
 
 		div.innerHTML = `
 			<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-				<strong style="font-size: 14px; color: #1e1e1e;">Série ${ i + 1 }</strong>
+				<strong style="font-size: 14px; color: #1e1e1e;">Série ${i + 1}</strong>
 			</div>
 			<div style="margin-bottom: 10px;">
 				<label style="font-weight: 600; display: block; margin-bottom: 4px;">Orientation :</label>
@@ -92,74 +92,73 @@ export function renderT7Series() {
 		`;
 
 		// Changement d'orientation
-		const selectEl = div.querySelector( '.roi-t7-orientation' );
-		selectEl.addEventListener( 'change', function ( e ) {
-			t7Series[ i ].couleur_joueur = e.target.value;
+		const selectEl = div.querySelector('.roi-t7-orientation');
+		selectEl.addEventListener('change', function (e) {
+			t7Series[i].couleur_joueur = e.target.value;
 			updateConfig();
-		} );
+		});
 
 		// Édition du PGN via la modale
-		div.querySelector( '.btn-edit-pgn' ).addEventListener(
+		div.querySelector('.btn-edit-pgn').addEventListener(
 			'click',
 			function () {
-				openPgnEditor( serie.pgn_data || '', function ( nouveauPgn ) {
-					t7Series[ i ].pgn_data = nouveauPgn;
-					div.querySelector( '.roi-t7-pgn-preview' ).value =
-						nouveauPgn;
+				openPgnEditor(serie.pgn_data || '', function (nouveauPgn) {
+					t7Series[i].pgn_data = nouveauPgn;
+					div.querySelector('.roi-t7-pgn-preview').value = nouveauPgn;
 					updateConfig();
-				} );
+				});
 			}
 		);
 
-		t7SeriesContainer.appendChild( div );
-	} );
+		t7SeriesContainer.appendChild(div);
+	});
 }
 
 /**
  * Initialise le handler.
  */
 export function init() {
-	if ( ! t7SeriesContainer ) {
+	if (!t7SeriesContainer) {
 		return;
 	}
 
 	// Restauration des données depuis le textarea
-	if ( textarea && textarea.value.trim() !== '' ) {
+	if (textarea && textarea.value.trim() !== '') {
 		try {
-			const parsedT7 = JSON.parse( textarea.value );
-			if ( parsedT7 && typeof parsedT7 === 'object' ) {
-				if ( parsedT7.mode ) {
+			const parsedT7 = JSON.parse(textarea.value);
+			if (parsedT7 && typeof parsedT7 === 'object') {
+				if (parsedT7.mode) {
 					t7Mode = parsedT7.mode;
-					if ( t7ModeSelect ) {
+					if (t7ModeSelect) {
 						t7ModeSelect.value = t7Mode;
 					}
 				}
-				if ( Array.isArray( parsedT7.series ) ) {
-					t7Series = parsedT7.series.map( function ( s ) {
+				if (Array.isArray(parsedT7.series)) {
+					t7Series = parsedT7.series.map(function (s) {
 						return {
 							pgn_data: s.pgn_data || '',
 							couleur_joueur:
 								s.couleur_joueur || s.orientation || 'white',
 							shapes: s.shapes || [],
 						};
-					} );
+					});
 				}
 			}
-		} catch ( e ) {
-			console.warn( 'Erreur parsing JSON Type 7 initial :', e );
+		} catch (e) {
+			console.warn('Erreur parsing JSON Type 7 initial :', e);
 		}
 	}
 
-	if ( t7ModeSelect ) {
+	if (t7ModeSelect) {
 		// Supprimer les anciens écouteurs en clonant l'élément
-		const newModeSelect = t7ModeSelect.cloneNode( true );
-		t7ModeSelect.parentNode.replaceChild( newModeSelect, t7ModeSelect );
-		newModeSelect.addEventListener( 'change', function ( e ) {
+		const newModeSelect = t7ModeSelect.cloneNode(true);
+		t7ModeSelect.parentNode.replaceChild(newModeSelect, t7ModeSelect);
+		newModeSelect.addEventListener('change', function (e) {
 			t7Mode = e.target.value;
 			adjustSeriesLength();
 			renderT7Series();
 			updateConfig();
-		} );
+		});
 	}
 
 	adjustSeriesLength();

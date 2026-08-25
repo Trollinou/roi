@@ -19,52 +19,49 @@ import * as type14 from './types/type-14';
 import * as type15 from './types/type-15';
 import * as type16 from './types/type-16';
 
-document.addEventListener( 'DOMContentLoaded', function () {
-	const typeSelect = document.getElementById( 'roi_exercice_type' );
+document.addEventListener('DOMContentLoaded', function () {
+	const typeSelect = document.getElementById('roi_exercice_type');
 
-	if ( ! typeSelect ) {
+	if (!typeSelect) {
 		return;
 	}
 
 	const container = document.querySelector(
 		'.roi-exercice-visual-builder-container'
 	);
-	const builderType1 = document.getElementById( 'roi_builder_type_1' );
-	const builderType2 = document.getElementById( 'roi_builder_type_2' );
-	const builderType4 = document.getElementById( 'roi_builder_type_4' );
-	const builderType5 = document.getElementById( 'roi_builder_type_5' );
-	const builderType6 = document.getElementById( 'roi_builder_type_6' );
-	const builderType7 = document.getElementById( 'roi_builder_type_7' );
-	const builderType8 = document.getElementById( 'roi_builder_type_8' );
-	const builderType9 = document.getElementById( 'roi_builder_type_9' );
-	const builderType10 = document.getElementById( 'roi_builder_type_10' );
-	const builderType11 = document.getElementById( 'roi_builder_type_11' );
-	const builderType12 = document.getElementById( 'roi_builder_type_12' );
-	const builderType13 = document.getElementById( 'roi_builder_type_13' );
-	const builderType14 = document.getElementById( 'roi_builder_type_14' );
-	const builderType15 = document.getElementById( 'roi_builder_type_15' );
-	const builderType16 = document.getElementById( 'roi_builder_type_16' );
-	const builderTitle = document.getElementById( 'roi_visual_builder_title' );
+	const builderType1 = document.getElementById('roi_builder_type_1');
+	const builderType2 = document.getElementById('roi_builder_type_2');
+	const builderType4 = document.getElementById('roi_builder_type_4');
+	const builderType5 = document.getElementById('roi_builder_type_5');
+	const builderType6 = document.getElementById('roi_builder_type_6');
+	const builderType7 = document.getElementById('roi_builder_type_7');
+	const builderType8 = document.getElementById('roi_builder_type_8');
+	const builderType9 = document.getElementById('roi_builder_type_9');
+	const builderType10 = document.getElementById('roi_builder_type_10');
+	const builderType11 = document.getElementById('roi_builder_type_11');
+	const builderType12 = document.getElementById('roi_builder_type_12');
+	const builderType13 = document.getElementById('roi_builder_type_13');
+	const builderType14 = document.getElementById('roi_builder_type_14');
+	const builderType15 = document.getElementById('roi_builder_type_15');
+	const builderType16 = document.getElementById('roi_builder_type_16');
+	const builderTitle = document.getElementById('roi_visual_builder_title');
 
-	const visualTypes = [ '3' ];
+	const visualTypes = ['3'];
 
 	function toggleVisibility() {
 		const val = typeSelect.value;
 
 		// visualTypes (type 3, 7, etc)
-		if ( container ) {
-			if ( visualTypes.includes( val ) ) {
+		if (container) {
+			if (visualTypes.includes(val)) {
 				container.style.display = '';
-				if ( builderTitle ) {
+				if (builderTitle) {
 					const selectedOption =
-						typeSelect.options[ typeSelect.selectedIndex ];
+						typeSelect.options[typeSelect.selectedIndex];
 					const selectedText = selectedOption
 						? selectedOption.text
 						: 'ABCDaire Tactique';
-					const cleanTitle = selectedText.replace(
-						/^\d+\s*-\s*/,
-						''
-					);
+					const cleanTitle = selectedText.replace(/^\d+\s*-\s*/, '');
 					builderTitle.textContent =
 						"Constructeur d'exercice visuel (" + cleanTitle + ')';
 				}
@@ -74,77 +71,77 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		}
 
 		// Type 1
-		if ( builderType1 ) {
+		if (builderType1) {
 			builderType1.style.display = val === '1' ? '' : 'none';
 		}
 
 		// Type 2
-		if ( builderType2 ) {
+		if (builderType2) {
 			builderType2.style.display = val === '2' ? '' : 'none';
 		}
 
 		// Type 4
-		if ( builderType4 ) {
+		if (builderType4) {
 			builderType4.style.display = val === '4' ? '' : 'none';
 		}
 
 		// Type 5
-		if ( builderType5 ) {
+		if (builderType5) {
 			builderType5.style.display = val === '5' ? '' : 'none';
 		}
 
 		// Type 6
-		if ( builderType6 ) {
+		if (builderType6) {
 			builderType6.style.display = val === '6' ? '' : 'none';
 		}
 
 		// Type 7
-		if ( builderType7 ) {
+		if (builderType7) {
 			builderType7.style.display = val === '7' ? '' : 'none';
 		}
 
 		// Type 8
-		if ( builderType8 ) {
+		if (builderType8) {
 			builderType8.style.display = val === '8' ? '' : 'none';
 		}
 
 		// Type 9
-		if ( builderType9 ) {
+		if (builderType9) {
 			builderType9.style.display = val === '9' ? '' : 'none';
 		}
 
 		// Type 10
-		if ( builderType10 ) {
+		if (builderType10) {
 			builderType10.style.display = val === '10' ? '' : 'none';
 		}
 
 		// Type 11
-		if ( builderType11 ) {
+		if (builderType11) {
 			builderType11.style.display = val === '11' ? '' : 'none';
 		}
 
 		// Type 12
-		if ( builderType12 ) {
+		if (builderType12) {
 			builderType12.style.display = val === '12' ? '' : 'none';
 		}
 
 		// Type 13
-		if ( builderType13 ) {
+		if (builderType13) {
 			builderType13.style.display = val === '13' ? '' : 'none';
 		}
 
 		// Type 14
-		if ( builderType14 ) {
+		if (builderType14) {
 			builderType14.style.display = val === '14' ? '' : 'none';
 		}
 
 		// Type 15
-		if ( builderType15 ) {
+		if (builderType15) {
 			builderType15.style.display = val === '15' ? '' : 'none';
 		}
 
 		// Type 16
-		if ( builderType16 ) {
+		if (builderType16) {
 			builderType16.style.display = val === '16' ? '' : 'none';
 		}
 	}
@@ -152,37 +149,37 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	function initSelectedType() {
 		const val = typeSelect.value;
 
-		if ( val === '1' ) {
+		if (val === '1') {
 			type1.init();
-		} else if ( val === '2' ) {
+		} else if (val === '2') {
 			type2.init();
-		} else if ( val === '4' ) {
+		} else if (val === '4') {
 			type4.init();
-		} else if ( val === '5' ) {
+		} else if (val === '5') {
 			type5.init();
-		} else if ( val === '6' ) {
+		} else if (val === '6') {
 			type6.init();
-		} else if ( val === '7' ) {
+		} else if (val === '7') {
 			type7.init();
-		} else if ( val === '8' ) {
+		} else if (val === '8') {
 			type8.init();
-		} else if ( val === '9' ) {
+		} else if (val === '9') {
 			type9.init();
-		} else if ( val === '10' ) {
+		} else if (val === '10') {
 			type10.init();
-		} else if ( val === '11' ) {
+		} else if (val === '11') {
 			type11.init();
-		} else if ( val === '12' ) {
+		} else if (val === '12') {
 			type12.init();
-		} else if ( val === '13' ) {
+		} else if (val === '13') {
 			type13.init();
-		} else if ( val === '14' ) {
+		} else if (val === '14') {
 			type14.init();
-		} else if ( val === '15' ) {
+		} else if (val === '15') {
 			type15.init();
-		} else if ( val === '16' ) {
+		} else if (val === '16') {
 			type16.init();
-		} else if ( visualTypes.includes( val ) ) {
+		} else if (visualTypes.includes(val)) {
 			type3.init();
 		}
 	}
@@ -195,15 +192,34 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			window.wp &&
 			window.wp.data &&
 			window.wp.data.select &&
-			window.wp.data.select( 'core/editor' )
+			window.wp.data.select('core/editor')
 		) {
-			const titleAttr = window.wp.data
-				.select( 'core/editor' )
-				.getEditedPostAttribute( 'title' );
-			hasTitle = titleAttr && titleAttr.trim().length > 0;
-		} else {
-			const titleField = document.getElementById( 'title' );
-			hasTitle = titleField && titleField.value.trim().length > 0;
+			const editor = window.wp.data.select('core/editor');
+			const titleAttr = editor.getEditedPostAttribute('title');
+			const currentPost = editor.getCurrentPost();
+			const currentTitle =
+				typeof currentPost?.title === 'object'
+					? currentPost?.title?.raw
+					: currentPost?.title;
+			hasTitle = Boolean(
+				(titleAttr &&
+					typeof titleAttr === 'string' &&
+					titleAttr.trim().length > 0) ||
+				(currentTitle &&
+					typeof currentTitle === 'string' &&
+					currentTitle.trim().length > 0)
+			);
+		}
+		if (!hasTitle) {
+			const titleField =
+				document.getElementById('title') ||
+				document.getElementById('post-title-0') ||
+				document.querySelector('.editor-post-title__input');
+			hasTitle = Boolean(
+				titleField &&
+				titleField.value &&
+				titleField.value.trim().length > 0
+			);
 		}
 
 		// Chapter
@@ -212,29 +228,38 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			window.wp &&
 			window.wp.data &&
 			window.wp.data.select &&
-			window.wp.data.select( 'core/editor' )
+			window.wp.data.select('core/editor')
 		) {
-			const chapitresAttr =
-				window.wp.data
-					.select( 'core/editor' )
-					.getEditedPostAttribute( 'roi_chapitre' ) || [];
-			hasChapter = Array.isArray( chapitresAttr )
-				? chapitresAttr.length > 0
-				: !! chapitresAttr;
-		} else {
+			const editor = window.wp.data.select('core/editor');
+			const chapitresAttr = editor.getEditedPostAttribute('roi_chapitre');
+			const currentPost = editor.getCurrentPost();
+			const currentChapitres = currentPost?.roi_chapitre;
+
+			if (Array.isArray(chapitresAttr) && chapitresAttr.length > 0) {
+				hasChapter = true;
+			} else if (
+				Array.isArray(currentChapitres) &&
+				currentChapitres.length > 0
+			) {
+				hasChapter = true;
+			} else if (chapitresAttr || currentChapitres) {
+				hasChapter = true;
+			}
+		}
+		if (!hasChapter) {
 			const selectedChapters = document.querySelectorAll(
-				'input[name^="tax_input[roi_chapitre]"]:checked'
+				'input[name^="tax_input[roi_chapitre]"]:checked, #roi_chapitrediv input:checked, #taxonomy-roi_chapitre input:checked'
 			);
 			hasChapter = selectedChapters.length > 0;
 		}
 
 		// Type and difficulty level
-		const typeVal = typeSelect.value;
-		const niveauSelect = document.getElementById( 'roi_exercice_niveau' );
+		const typeVal = typeSelect ? typeSelect.value : '';
+		const niveauSelect = document.getElementById('roi_exercice_niveau');
 		const niveauVal = niveauSelect ? niveauSelect.value : '';
 
-		const hasType = typeVal && typeVal.trim().length > 0;
-		const hasNiveau = niveauVal && niveauVal.trim().length > 0;
+		const hasType = Boolean(typeVal && typeVal.trim().length > 0);
+		const hasNiveau = Boolean(niveauVal && niveauVal.trim().length > 0);
 
 		return hasTitle && hasChapter && hasType && hasNiveau;
 	}
@@ -246,17 +271,17 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			window.wp &&
 			window.wp.data &&
 			window.wp.data.select &&
-			window.wp.data.select( 'core/editor' );
+			window.wp.data.select('core/editor');
 		const isValid = checkRequiredFields();
 
-		if ( isGutenberg ) {
+		if (isGutenberg) {
 			const { dispatch } = window.wp.data;
-			if ( ! isValid ) {
-				if ( ! hasLocked ) {
-					dispatch( 'core/editor' ).lockPostSaving(
+			if (!isValid) {
+				if (!hasLocked) {
+					dispatch('core/editor').lockPostSaving(
 						'roi_exercice_missing_fields'
 					);
-					dispatch( 'core/notices' ).createNotice(
+					dispatch('core/notices').createNotice(
 						'error',
 						"Veuillez renseigner tous les champs obligatoires : Titre, Niveau de difficulté, Type d'exercice et Chapitre.",
 						{
@@ -266,11 +291,11 @@ document.addEventListener( 'DOMContentLoaded', function () {
 					);
 					hasLocked = true;
 				}
-			} else if ( hasLocked ) {
-				dispatch( 'core/editor' ).unlockPostSaving(
+			} else if (hasLocked) {
+				dispatch('core/editor').unlockPostSaving(
 					'roi_exercice_missing_fields'
 				);
-				dispatch( 'core/notices' ).removeNotice(
+				dispatch('core/notices').removeNotice(
 					'roi_exercice_missing_fields_notice'
 				);
 				hasLocked = false;
@@ -283,25 +308,25 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		window.wp &&
 		window.wp.data &&
 		window.wp.data.select &&
-		window.wp.data.select( 'core/editor' )
+		window.wp.data.select('core/editor')
 	) {
 		const { subscribe } = window.wp.data;
-		subscribe( runValidation );
+		subscribe(runValidation);
 	}
 
 	// Classic editor listener
-	const postForm = document.getElementById( 'post' );
-	const publishBtn = document.getElementById( 'publish' );
-	if ( postForm && publishBtn ) {
-		postForm.addEventListener( 'submit', function ( e ) {
+	const postForm = document.getElementById('post');
+	const publishBtn = document.getElementById('publish');
+	if (postForm && publishBtn) {
+		postForm.addEventListener('submit', function (e) {
 			const activeEl = e.target
 				? e.target.ownerDocument.activeElement
 				: null;
 			if (
 				activeEl &&
-				( activeEl.id === 'publish' || activeEl.value === 'Publish' )
+				(activeEl.id === 'publish' || activeEl.value === 'Publish')
 			) {
-				if ( ! checkRequiredFields() ) {
+				if (!checkRequiredFields()) {
 					e.preventDefault();
 					alert(
 						"Veuillez renseigner tous les champs obligatoires : Titre, Niveau de difficulté, Type d'exercice et Chapitre."
@@ -309,28 +334,39 @@ document.addEventListener( 'DOMContentLoaded', function () {
 					const spinner = document.querySelector(
 						'#major-publishing-actions .spinner'
 					);
-					if ( spinner ) {
-						spinner.classList.remove( 'is-active' );
+					if (spinner) {
+						spinner.classList.remove('is-active');
 					}
-					publishBtn.classList.remove( 'button-primary-disabled' );
+					publishBtn.classList.remove('button-primary-disabled');
 				}
 			}
-		} );
+		});
 	}
 
-	typeSelect.addEventListener( 'change', function () {
+	typeSelect.addEventListener('change', function () {
 		toggleVisibility();
 		initSelectedType();
 		runValidation();
-	} );
+	});
 
-	const niveauSelect = document.getElementById( 'roi_exercice_niveau' );
-	if ( niveauSelect ) {
-		niveauSelect.addEventListener( 'change', runValidation );
+	const niveauSelect = document.getElementById('roi_exercice_niveau');
+	if (niveauSelect) {
+		niveauSelect.addEventListener('change', runValidation);
 	}
+
+	document.addEventListener('change', function (e) {
+		if (
+			e.target &&
+			e.target.name &&
+			(e.target.name.includes('roi_chapitre') ||
+				e.target.name.includes('tax_input'))
+		) {
+			runValidation();
+		}
+	});
 
 	// Initialisation
 	toggleVisibility();
 	initSelectedType();
 	runValidation();
-} );
+});

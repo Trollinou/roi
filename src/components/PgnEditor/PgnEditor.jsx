@@ -63,6 +63,9 @@ const PgnEditor = forwardRef(function PgnEditor({
     setTotalPlies(currentPly);
   };
 
+  const pieceSet = boardConfig.pieceSet || "cburnett";
+  const boardTheme = boardConfig.boardTheme || "brown";
+
   // Initialisation et orchestration via custom hook
   const { boardApiRef } = useChessBoard(
     boardElRef,
@@ -72,6 +75,8 @@ const PgnEditor = forwardRef(function PgnEditor({
       const config = {
         mode: "study",
         readOnly: isReadOnly,
+        pieceSet,
+        boardTheme,
         ...boardConfig,
         pgn: initialPgn,
         fen: initialFen || undefined,
@@ -84,6 +89,8 @@ const PgnEditor = forwardRef(function PgnEditor({
 
       const boardState = {
         mode: "study",
+        pieceSet,
+        boardTheme,
         showThreats: false,
         promotionDialogState: { isEnabled: false },
         historyViewerState: { isEnabled: false },
@@ -278,17 +285,19 @@ const PgnEditor = forwardRef(function PgnEditor({
       <div className="pgn-editor-main-layout">
         {/* Colonne de Gauche : Échiquier & Navigation */}
         <div className="pgn-editor-left-col">
-          <div className="pgn-editor-board-wrapper">
-            <div ref={boardElRef} />
-          </div>
+          <section className={`main-wrap piece-set-${pieceSet} board-theme-${boardTheme}`}>
+            <div className="main-board">
+              <div ref={boardElRef} />
+            </div>
+          </section>
 
           {/* Barre de Navigation avec Compteur */}
-          <div className="pgn-navigation-bar" style={{ marginTop: "12px" }}>
-            <button type="button" className="pgn-nav-btn" onClick={handleViewStart} title="Début">|&lt;</button>
-            <button type="button" className="pgn-nav-btn" onClick={handleViewPrevious} title="Précédent">&lt;</button>
-            <span className="pgn-ply-indicator">Coup {plyViewing} / {totalPlies}</span>
-            <button type="button" className="pgn-nav-btn" onClick={handleViewNext} title="Suivant">&gt;</button>
-            <button type="button" className="pgn-nav-btn" onClick={handleViewEnd} title="En direct">&gt;|</button>
+          <div className="pgn-navigation-bar" style={{ marginTop: "12px", position: "relative", zIndex: 10 }}>
+            <button type="button" className="pgn-nav-btn" onClick={handleViewStart} title="Début" style={{ position: "relative", zIndex: 11, pointerEvents: "auto" }}>|&lt;</button>
+            <button type="button" className="pgn-nav-btn" onClick={handleViewPrevious} title="Précédent" style={{ position: "relative", zIndex: 11, pointerEvents: "auto" }}>&lt;</button>
+            <span className="pgn-ply-indicator" style={{ position: "relative", zIndex: 11 }}>Coup {plyViewing} / {totalPlies}</span>
+            <button type="button" className="pgn-nav-btn" onClick={handleViewNext} title="Suivant" style={{ position: "relative", zIndex: 11, pointerEvents: "auto" }}>&gt;</button>
+            <button type="button" className="pgn-nav-btn" onClick={handleViewEnd} title="En direct" style={{ position: "relative", zIndex: 11, pointerEvents: "auto" }}>&gt;|</button>
           </div>
 
           {/* Aide au dessin */}

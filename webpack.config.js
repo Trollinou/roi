@@ -1,6 +1,6 @@
-const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
-const path = require( 'path' );
-const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
+const defaultConfig = require('@wordpress/scripts/config/webpack.config');
+const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
 	...defaultConfig,
@@ -29,56 +29,53 @@ module.exports = {
 			__dirname,
 			'src/blocks/diagramme/index.js'
 		),
-		'pgn/index': path.resolve( __dirname, 'src/blocks/pgn/index.js' ),
-		'suivi/index': path.resolve( __dirname, 'src/suivi/index.js' ),
+		'pgn/index': path.resolve(__dirname, 'src/blocks/pgn/index.js'),
+		'suivi/index': path.resolve(__dirname, 'src/suivi/index.js'),
 	},
 	output: {
 		...defaultConfig.output,
-		path: path.resolve( __dirname, 'build' ),
+		path: path.resolve(__dirname, 'build'),
 		filename: '[name].js',
 	},
 	performance: {
 		hints: 'warning',
 		maxEntrypointSize: 500 * 1024,
 		maxAssetSize: 500 * 1024,
-		assetFilter( assetFilename ) {
-			return ! assetFilename.endsWith( '.wasm' );
+		assetFilter(assetFilename) {
+			return (
+				!assetFilename.endsWith('.wasm') &&
+				!assetFilename.includes('eg-chessboard')
+			);
 		},
 	},
 	plugins: [
 		...defaultConfig.plugins,
-		new CopyWebpackPlugin( {
+		new CopyWebpackPlugin({
 			patterns: [
 				{
 					from: path.resolve(
 						__dirname,
 						'src/blocks/chessboard/style.css'
 					),
-					to: path.resolve( __dirname, 'build/chessboard/style.css' ),
+					to: path.resolve(__dirname, 'build/chessboard/style.css'),
 				},
 				{
 					from: path.resolve(
 						__dirname,
 						'src/blocks/chessboard/block.json'
 					),
-					to: path.resolve(
-						__dirname,
-						'build/chessboard/block.json'
-					),
+					to: path.resolve(__dirname, 'build/chessboard/block.json'),
 				},
 				{
 					from: path.resolve(
 						__dirname,
 						'src/blocks/diagramme/block.json'
 					),
-					to: path.resolve( __dirname, 'build/diagramme/block.json' ),
+					to: path.resolve(__dirname, 'build/diagramme/block.json'),
 				},
 				{
-					from: path.resolve(
-						__dirname,
-						'src/blocks/pgn/block.json'
-					),
-					to: path.resolve( __dirname, 'build/pgn/block.json' ),
+					from: path.resolve(__dirname, 'src/blocks/pgn/block.json'),
+					to: path.resolve(__dirname, 'build/pgn/block.json'),
 				},
 				{
 					from: path.resolve(
@@ -95,16 +92,16 @@ module.exports = {
 						__dirname,
 						'node_modules/eg-chessboard/dist/stockfish.js'
 					),
-					to: path.resolve( __dirname, 'assets/js/stockfish.js' ),
+					to: path.resolve(__dirname, 'assets/js/stockfish.js'),
 				},
 				{
 					from: path.resolve(
 						__dirname,
 						'node_modules/eg-chessboard/dist/stockfish.wasm'
 					),
-					to: path.resolve( __dirname, 'assets/js/stockfish.wasm' ),
+					to: path.resolve(__dirname, 'assets/js/stockfish.wasm'),
 				},
 			],
-		} ),
+		}),
 	],
 };

@@ -61,6 +61,13 @@ class Assets {
 				ROI_VERSION
 			);
 
+			wp_enqueue_style(
+				'roi-admin-fen-editor-style',
+				$chess_url . 'admin-fen-editor.css',
+				array( 'roi-admin-chessboard-style' ),
+				ROI_VERSION
+			);
+
 			$fen_asset_file = $chess_dir . 'admin-fen-editor.asset.php';
 			$fen_asset      = file_exists( $fen_asset_file ) ? include $fen_asset_file : array(
 				'dependencies' => array( 'wp-element' ),

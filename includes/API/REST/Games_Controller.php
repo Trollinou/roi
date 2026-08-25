@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace ROI\API\REST;
 
+use WP_Query;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -58,6 +59,31 @@ class Games_Controller {
 					'callback'            => array( $this, 'save_game' ),
 					'permission_callback' => array( $this, 'save_game_permissions_check' ),
 				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_games' ),
+					'permission_callback' => array( $this, 'get_games_permissions_check' ),
+					'args'                => array(
+						'member_id' => array(
+							'description'       => __( 'ID du membre pour filtrer les parties.', 'roi' ),
+							'type'              => 'integer',
+							'required'          => false,
+							'sanitize_callback' => 'absint',
+						),
+						'per_page'  => array(
+							'description'       => __( 'Nombre de parties par page.', 'roi' ),
+							'type'              => 'integer',
+							'default'           => 10,
+							'sanitize_callback' => 'absint',
+						),
+						'page'      => array(
+							'description'       => __( 'Numéro de la page.', 'roi' ),
+							'type'              => 'integer',
+							'default'           => 1,
+							'sanitize_callback' => 'absint',
+						),
+					),
+				),
 			)
 		);
 	}
@@ -96,6 +122,8 @@ class Games_Controller {
 				'post_type'      => 'roi_partie',
 				'posts_per_page' => 1,
 				'fields'         => 'ids',
+				'no_found_rows'  => true,
+				'cache_results'  => false,
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 				'meta_query'     => array(
 					array(
@@ -172,5 +200,92 @@ class Games_Controller {
 				'message' => __( 'Partie enregistrée avec succès.', 'roi' ),
 			)
 		);
+	}
+
+	/**
+	 * Permission callback for reading games list.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function get_games_permissions_check(): bool|WP_Error {
+		return Permissions_Helper::check_apprentissage_access();
+	}
+
+	/**
+	 * Retrieves a paginated list of saved games.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_games( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		$member_id = (int) $request->get_param( 'member_id' );
+		$per_page  = (int) ( $request->get_param( 'per_page' ) ?: 10 );
+		$page      = (int) ( $request->get_param( 'page' ) ?: 1 );
+
+		if ( $per_page < 1 ) {
+			$per_page = 10;
+		}
+		if ( $per_page > 100 ) {
+			$per_page = 100;
+		}
+		if ( $page < 1 ) {
+			$page = 1;
+		}
+
+		$query_args = array(
+			'post_type'      => 'roi_partie',
+			'post_status'    => 'publish',
+			'posts_per_page' => $per_page,
+			'paged'          => $page,
+			'orderby'        => 'date',
+			'order'          => 'DESC',
+		);
+
+		if ( $member_id > 0 ) {
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			$query_args['meta_query'] = array(
+				array(
+					'key'   => '_roi_member_id',
+					'value' => $member_id,
+				),
+			);
+		}
+
+		$query = new WP_Query( $query_args );
+
+		$games = array();
+		if ( $query->have_posts() ) {
+			foreach ( $query->posts as $post ) {
+				if ( ! $post instanceof \WP_Post ) {
+					continue;
+				}
+
+				$game_id = $post->ID;
+				$games[] = array(
+					'id'               => $game_id,
+					'title'            => $post->post_title,
+					'date'             => (string) get_post_meta( $game_id, '_roi_game_date', true ) ?: $post->post_date,
+					'member_id'        => (int) get_post_meta( $game_id, '_roi_member_id', true ),
+					'difficulty_level' => (int) get_post_meta( $game_id, '_roi_difficulty_level', true ),
+					'hints_count'      => (int) get_post_meta( $game_id, '_roi_hints_count', true ),
+					'takebacks_count'  => (int) get_post_meta( $game_id, '_roi_takebacks_count', true ),
+					'duration'         => (int) get_post_meta( $game_id, '_roi_game_duration', true ),
+					'pgn'              => (string) get_post_meta( $game_id, '_roi_pgn', true ),
+				);
+			}
+		}
+
+		$total_posts = (int) $query->found_posts;
+		$total_pages = (int) ceil( $total_posts / $per_page );
+
+		$response_data = array(
+			'games'       => $games,
+			'total'       => $total_posts,
+			'total_pages' => $total_pages,
+			'page'        => $page,
+			'per_page'    => $per_page,
+		);
+
+		return rest_ensure_response( $response_data );
 	}
 }

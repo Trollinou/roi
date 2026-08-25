@@ -26,14 +26,8 @@ class Plugin {
 		// Gutenberg Blocks.
 		( new \ROI\Blocks\Manager() )->init();
 
-		// Custom Post Types.
-		( new \ROI\CPT\Lecon() )->init();
-		( new \ROI\CPT\Exercice() )->init();
-		( new \ROI\CPT\Cours() )->init();
-		( new \ROI\CPT\Partie() )->init();
-
-		// Taxonomies.
-		( new \ROI\CPT\Chapitre_Taxonomy() )->init();
+		// Custom Post Types & Taxonomies.
+		( new \ROI\CPT\Manager() )->init();
 
 		// Roles & capabilities.
 		$roles = new Roles();
