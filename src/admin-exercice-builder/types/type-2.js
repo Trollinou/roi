@@ -146,8 +146,7 @@ export function init() {
 					for (let i = 0; i < 4; i++) {
 						if (parsedT2.diagrammes[i]) {
 							t2Diagrammes[i] = {
-								consigne:
-									parsedT2.diagrammes[i].consigne || '',
+								consigne: parsedT2.diagrammes[i].consigne || '',
 								fen: parsedT2.diagrammes[i].fen || '',
 								couleur_joueur:
 									parsedT2.diagrammes[i].couleur_joueur ||

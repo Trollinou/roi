@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [1.4.4] - 2026-08-27
+
+*   **Exercice Type 3 ABCDaire Tactique — Série de 4 Mini-PGN (`TypeABCDaire.php`, `type-3.js`, `main.js`) :**
+    *   **Refonte du Constructeur Auteur (Série de 4 PGN) :** Remplacement de l'ancien constructeur à échiquier unique par une saisie en série de 4 Mini-PGN avec `PgnInput` (zone de texte et bouton modal d'édition interactive PGN).
+    *   **Support direct des exports PGN (Lichess, etc.) :** Possibilité de coller directement un PGN complet (contenant les en-têtes `[SetUp "1"] [FEN "..."]`, les coups, commentaires et annotations de shapes `[%csl ...] [%cal ...]`).
+    *   **Aperçus Visuels Statiques avec Shapes :** Intégration de 4 échiquiers d'aperçu non-interactifs affichant la position de départ avec orientation automatique selon le trait initial de la FEN (`cburnett` / `brown`) et restitution en direct des formes annotées (`[%csl ...]`, `[%cal ...]`).
+    *   **Synchronisation du Contrat JSON :** Format standard `{ consigne: "Trouver le meilleur coup.", exercices: [ { pgn: "..." }, ... ] }` avec rétrocompatibilité sur les anciens enregistrements FEN.
+
 ## [1.4.3] - 2026-08-25
 
 *   **Gestion des Playlists de Cours & Intégrité des Données (`Builder.php`, `Parcours_Controller.php`) :**

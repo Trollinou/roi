@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	);
 	const builderType1 = document.getElementById('roi_builder_type_1');
 	const builderType2 = document.getElementById('roi_builder_type_2');
+	const builderType3 = document.getElementById('roi_builder_type_3');
 	const builderType4 = document.getElementById('roi_builder_type_4');
 	const builderType5 = document.getElementById('roi_builder_type_5');
 	const builderType6 = document.getElementById('roi_builder_type_6');
@@ -46,12 +47,12 @@ document.addEventListener('DOMContentLoaded', function () {
 	const builderType16 = document.getElementById('roi_builder_type_16');
 	const builderTitle = document.getElementById('roi_visual_builder_title');
 
-	const visualTypes = ['3'];
+	const visualTypes = [];
 
 	function toggleVisibility() {
 		const val = typeSelect.value;
 
-		// visualTypes (type 3, 7, etc)
+		// visualTypes (type 7, etc)
 		if (container) {
 			if (visualTypes.includes(val)) {
 				container.style.display = '';
@@ -60,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function () {
 						typeSelect.options[typeSelect.selectedIndex];
 					const selectedText = selectedOption
 						? selectedOption.text
-						: 'ABCDaire Tactique';
+						: '';
 					const cleanTitle = selectedText.replace(/^\d+\s*-\s*/, '');
 					builderTitle.textContent =
 						"Constructeur d'exercice visuel (" + cleanTitle + ')';
@@ -78,6 +79,11 @@ document.addEventListener('DOMContentLoaded', function () {
 		// Type 2
 		if (builderType2) {
 			builderType2.style.display = val === '2' ? '' : 'none';
+		}
+
+		// Type 3
+		if (builderType3) {
+			builderType3.style.display = val === '3' ? '' : 'none';
 		}
 
 		// Type 4
@@ -153,6 +159,8 @@ document.addEventListener('DOMContentLoaded', function () {
 			type1.init();
 		} else if (val === '2') {
 			type2.init();
+		} else if (val === '3') {
+			type3.init();
 		} else if (val === '4') {
 			type4.init();
 		} else if (val === '5') {
