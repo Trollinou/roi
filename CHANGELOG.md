@@ -2,14 +2,13 @@
 
 ## [Unreleased]
 
+## [1.4.4] - 2026-08-30
+
 *   **Exercice Type 4 La Partie dont tu es le Héros (`TypePartieHeros.php`, `type-4.js`, `Contenu_Controller.php`) :**
     *   **Refonte du Constructeur Auteur (Étude PGN Unique) :** Simplification radicale de la saisie via un champ `PgnInput` unique (textarea 8 lignes et modale d'édition interactive PGN) pour accueillir une étude PGN complète avec annotations de flèches `[%cal ...]` et variantes.
     *   **Aperçu Visuel Statique Épuré :** Restriction de l'extraction des formes (`[%cal ...]`, `[%csl ...]`) au seul commentaire initial avant le coup 1 dans `type-4.js` et `type-3.js`, évitant d'afficher toutes les flèches des coups futurs sur la position de départ.
     *   **Sécurisation API REST (`GET /roi/v1/contenu/<id>`) :** Prise en charge universelle du format de configuration (tableau PHP, chaîne JSON, unslashed ou fallback `raw_json`).
     *   **Contrat JSON Épuré :** Format standard `{ consigne: "...", pgn: "..." }` allégeant la saisie entraîneur et déléguant l'analyse interactive au moteur PWA runtime.
-
-## [1.4.4] - 2026-08-27
-
 
 *   **Exercice Type 3 ABCDaire Tactique — Série de 4 Mini-PGN (`TypeABCDaire.php`, `type-3.js`, `main.js`) :**
     *   **Refonte du Constructeur Auteur (Série de 4 PGN) :** Remplacement de l'ancien constructeur à échiquier unique par une saisie en série de 4 Mini-PGN avec `PgnInput` (zone de texte et bouton modal d'édition interactive PGN).
