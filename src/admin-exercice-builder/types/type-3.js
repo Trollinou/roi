@@ -52,10 +52,18 @@ function extractFenOrientationAndShapes(pgnString) {
 	const orientation = getActiveColorFromFen(fen);
 	const shapes = [];
 
-	// 2. Extraire les cercles/cases [%csl ...] ou [%cpl ...]
+	// Ne rechercher les formes QUE dans le commentaire initial (avant le premier coup)
+	const bodyWithoutHeaders = trimmed.replace(/\[[^\]]*\]/g, '').trim();
+	const firstMoveMatch = bodyWithoutHeaders.search(/\b\d+\s*\./);
+	const startingCommentText =
+		firstMoveMatch !== -1
+			? bodyWithoutHeaders.substring(0, firstMoveMatch)
+			: bodyWithoutHeaders;
+
+	// 2. Extraire les cercles/cases [%csl ...] ou [%cpl ...] du commentaire initial
 	const cslRegex = /\[%(?:csl|cpl)\s+([^\]]+)\]/gi;
 	let cslMatch;
-	while ((cslMatch = cslRegex.exec(trimmed)) !== null) {
+	while ((cslMatch = cslRegex.exec(startingCommentText)) !== null) {
 		const items = cslMatch[1].split(',');
 		for (const item of items) {
 			const cleanItem = item.trim();
@@ -68,10 +76,10 @@ function extractFenOrientationAndShapes(pgnString) {
 		}
 	}
 
-	// 3. Extraire les flèches [%cal ...]
+	// 3. Extraire les flèches [%cal ...] du commentaire initial
 	const calRegex = /\[%cal\s+([^\]]+)\]/gi;
 	let calMatch;
-	while ((calMatch = calRegex.exec(trimmed)) !== null) {
+	while ((calMatch = calRegex.exec(startingCommentText)) !== null) {
 		const items = calMatch[1].split(',');
 		for (const item of items) {
 			const cleanItem = item.trim();
@@ -188,12 +196,8 @@ function renderPreviewBoard(index) {
 				{ workerUrl: '' }
 			);
 
-			if (
-				shapes &&
-				shapes.length > 0 &&
-				typeof api.setShapes === 'function'
-			) {
-				api.setShapes(shapes);
+			if (typeof api.setShapes === 'function') {
+				api.setShapes(shapes || []);
 			}
 
 			previewAPIs[index] = api;

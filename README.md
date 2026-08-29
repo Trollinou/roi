@@ -54,7 +54,9 @@ Ce plugin nécessite que le plugin **DAME** soit installé et activé. Le plugin
 ### Administration
 
 *   **Sauvegarde et Restauration du Contenu :** Une page d'administration dédiée pour exporter tout le contenu pédagogique (leçons, exercices, cours, catégories) dans un fichier `.json.gz` et le restaurer, prévenant ainsi la perte de données.
-*   **Modèle d'Architecture Découplé (CMS / Runtime PWA) :** ROI stocke les formats standards des échecs (FEN + Shapes, PGN avec annotations `%csl`/`%cal`/variantes) et les consignes rédigées par l'auteur. Le moteur client (PWA) se charge de l'interprétation interactive (détection de la pièce cible via le cercle bleu, orientation selon le trait, masquage initial et révélation des shapes).
+*   **Modèle d'Architecture Découplé (CMS / Runtime PWA) :** ROI stocke les formats standards des échecs (FEN + Shapes, PGN avec annotations `%csl`/`%cal`/variantes) et les consignes rédigées par l'auteur. Le moteur client (PWA) se charge de l'interprétation interactive :
+    *   **Type 3 (ABCDaire Tactique) :** Série de 4 Mini-PGN contenant les variantes tactiques commentées et annotées.
+    *   **Type 4 (La Partie dont tu es le Héros) :** Saisie simplifiée d'une étude PGN complète avec embranchements QCM détectés par les flèches `[%cal ...]` et les 2 variantes d'erreur. Aperçu statique épuré de la position initiale (`cburnett` / `brown`) sans pollution des coups futurs.
 
 ## API REST
 

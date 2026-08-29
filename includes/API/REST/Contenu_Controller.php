@@ -111,7 +111,9 @@ class Contenu_Controller {
 			$data['type']   = is_numeric( $type_meta ) ? (int) $type_meta : 0;
 			$data['config'] = null;
 
-			if ( is_string( $config_meta ) && '' !== $config_meta ) {
+			if ( is_array( $config_meta ) ) {
+				$data['config'] = $config_meta;
+			} elseif ( is_string( $config_meta ) && '' !== trim( $config_meta ) ) {
 				$decoded = json_decode( $config_meta, true );
 				if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
 					$data['config'] = $decoded;
@@ -119,6 +121,8 @@ class Contenu_Controller {
 					$decoded_unslashed = json_decode( wp_unslash( $config_meta ), true );
 					if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded_unslashed ) ) {
 						$data['config'] = $decoded_unslashed;
+					} else {
+						$data['config'] = array( 'raw_json' => $config_meta );
 					}
 				}
 			}
