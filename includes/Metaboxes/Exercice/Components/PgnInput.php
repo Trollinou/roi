@@ -104,6 +104,8 @@ class PgnInput {
 						</div>
 					<?php endif; ?>
 				</div>
+
+				<div id="<?php echo esc_attr( $id ); ?>_status" class="roi-pgn-status" style="display: none;"></div>
 			</div>
 		</div>
 		<?php

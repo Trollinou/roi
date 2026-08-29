@@ -1,6 +1,6 @@
 {
   "name": "roi",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "scripts": {
     "build": "wp-scripts build",
     "start": "wp-scripts start",

@@ -2,7 +2,10 @@
  * Handler for Type 3: ABCDaire Tactique (Série de 4 Mini-PGN).
  */
 
-import { setupPgnControl, getActiveColorFromFen } from '../utils/controls';
+import {
+	setupPgnControl,
+	extractFenOrientationAndShapes,
+} from '../utils/controls';
 
 const textarea = document.getElementById('roi_config_json');
 const t3ConsigneInput = document.getElementById('roi_t3_consigne');
@@ -10,91 +13,6 @@ const t3ConsigneInput = document.getElementById('roi_t3_consigne');
 const t3Exercices = [{ pgn: '' }, { pgn: '' }, { pgn: '' }, { pgn: '' }];
 
 const previewAPIs = [null, null, null, null];
-
-const brushMap = {
-	g: 'green',
-	r: 'red',
-	b: 'blue',
-	y: 'yellow',
-	c: 'green',
-	o: 'yellow',
-};
-
-/**
- * Extrait la FEN initiale, l'orientation et les formes/annotations depuis une chaîne PGN.
- *
- * @param {string} pgnString Chaîne PGN source.
- * @return {{ fen: string, orientation: 'white' | 'black', shapes: Array<{ orig: string, dest?: string, brush: string }> }} FEN, orientation et formes extraites.
- */
-function extractFenOrientationAndShapes(pgnString) {
-	if (!pgnString || typeof pgnString !== 'string') {
-		const defaultFen =
-			'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-		return { fen: defaultFen, orientation: 'white', shapes: [] };
-	}
-
-	const trimmed = pgnString.trim();
-
-	// 1. Recherche de la balise [FEN "..."]
-	const fenMatch = trimmed.match(/\[FEN\s+"([^"]+)"\]/i);
-	let fen = fenMatch
-		? fenMatch[1].trim()
-		: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-
-	// Si FEN non trouvée dans les balises mais passée directement en 1ère ligne
-	if (!fenMatch && trimmed.includes('/') && !trimmed.startsWith('[')) {
-		const firstLine = trimmed.split('\n')[0].trim();
-		if (firstLine.includes('/') && firstLine.split('/').length >= 4) {
-			fen = firstLine;
-		}
-	}
-
-	const orientation = getActiveColorFromFen(fen);
-	const shapes = [];
-
-	// Ne rechercher les formes QUE dans le commentaire initial (avant le premier coup)
-	const bodyWithoutHeaders = trimmed.replace(/\[[^\]]*\]/g, '').trim();
-	const firstMoveMatch = bodyWithoutHeaders.search(/\b\d+\s*\./);
-	const startingCommentText =
-		firstMoveMatch !== -1
-			? bodyWithoutHeaders.substring(0, firstMoveMatch)
-			: bodyWithoutHeaders;
-
-	// 2. Extraire les cercles/cases [%csl ...] ou [%cpl ...] du commentaire initial
-	const cslRegex = /\[%(?:csl|cpl)\s+([^\]]+)\]/gi;
-	let cslMatch;
-	while ((cslMatch = cslRegex.exec(startingCommentText)) !== null) {
-		const items = cslMatch[1].split(',');
-		for (const item of items) {
-			const cleanItem = item.trim();
-			if (cleanItem.length >= 3) {
-				const brushChar = cleanItem[0].toLowerCase();
-				const brush = brushMap[brushChar] || 'green';
-				const orig = cleanItem.substring(1, 3).toLowerCase();
-				shapes.push({ orig, brush });
-			}
-		}
-	}
-
-	// 3. Extraire les flèches [%cal ...] du commentaire initial
-	const calRegex = /\[%cal\s+([^\]]+)\]/gi;
-	let calMatch;
-	while ((calMatch = calRegex.exec(startingCommentText)) !== null) {
-		const items = calMatch[1].split(',');
-		for (const item of items) {
-			const cleanItem = item.trim();
-			if (cleanItem.length >= 5) {
-				const brushChar = cleanItem[0].toLowerCase();
-				const brush = brushMap[brushChar] || 'green';
-				const orig = cleanItem.substring(1, 3).toLowerCase();
-				const dest = cleanItem.substring(3, 5).toLowerCase();
-				shapes.push({ orig, dest, brush });
-			}
-		}
-	}
-
-	return { fen, orientation, shapes };
-}
 
 export function updateConfig() {
 	if (!textarea) {

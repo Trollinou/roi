@@ -4,6 +4,7 @@
  */
 
 import { openFenEditor, openPgnEditor } from './modals';
+import { parsePgn } from 'chessops/pgn';
 
 /**
  * Extracts active player color ('white' or 'black') from a valid FEN string.
@@ -273,24 +274,183 @@ export function setupFenControl({
 }
 
 /**
+ * Checks PGN status: 'empty' | 'valid_with_moves' | 'valid_no_moves' | 'invalid'
+ *
+ * @param {string} pgnString
+ * @return {'empty' | 'valid_with_moves' | 'valid_no_moves' | 'invalid'} PGN validation status code.
+ */
+export function checkPgnStatus(pgnString) {
+	if (!pgnString || typeof pgnString !== 'string') {
+		return 'empty';
+	}
+	const trimmed = pgnString.trim();
+	if (!trimmed) {
+		return 'empty';
+	}
+
+	try {
+		const games = parsePgn(trimmed);
+		if (!games || games.length === 0) {
+			return 'invalid';
+		}
+		const game = games[0];
+		const hasMoves = !!(
+			game.moves &&
+			game.moves.children &&
+			game.moves.children.length > 0
+		);
+
+		if (hasMoves) {
+			return 'valid_with_moves';
+		}
+
+		const hasExplicitHeader = /\[\s*[A-Za-z0-9_]+\s+"[^"]*"\s*\]/.test(
+			trimmed
+		);
+		const hasExplicitComment = /\{[^}]*\}/.test(trimmed);
+
+		if (hasExplicitHeader || hasExplicitComment) {
+			return 'valid_no_moves';
+		}
+
+		return 'invalid';
+	} catch (e) {
+		return 'invalid';
+	}
+}
+
+/**
+ * Checks if a PGN string contains at least one playable move outside of comments and headers.
+ *
+ * @param {string} pgnString
+ * @return {boolean} True if playable move(s) are detected.
+ */
+export function hasPgnMoves(pgnString) {
+	return checkPgnStatus(pgnString) === 'valid_with_moves';
+}
+
+/**
+ * Updates visual validation notice element for a PGN textarea.
+ *
+ * @param {HTMLTextAreaElement|null} textareaEl
+ * @param {HTMLElement|null}         [statusEl]
+ */
+export function updatePgnStatus(textareaEl, statusEl) {
+	if (!textareaEl) {
+		return;
+	}
+	let targetStatusEl = statusEl;
+	if (!targetStatusEl && textareaEl.id) {
+		targetStatusEl = document.getElementById(`${textareaEl.id}_status`);
+	}
+	if (!targetStatusEl) {
+		const wrapper =
+			textareaEl.closest('.roi-control-textarea-wrapper') ||
+			textareaEl.parentElement;
+		if (wrapper) {
+			targetStatusEl = wrapper.querySelector('.roi-pgn-status');
+			if (!targetStatusEl) {
+				targetStatusEl = document.createElement('div');
+				targetStatusEl.className = 'roi-pgn-status';
+				wrapper.appendChild(targetStatusEl);
+			}
+		}
+	}
+
+	if (!targetStatusEl) {
+		return;
+	}
+
+	const status = checkPgnStatus(textareaEl.value);
+
+	if (status === 'empty') {
+		targetStatusEl.style.display = 'none';
+		targetStatusEl.innerHTML = '';
+		return;
+	}
+
+	if (status === 'invalid') {
+		targetStatusEl.style.display = 'block';
+		targetStatusEl.className = 'roi-pgn-status roi-pgn-status-error';
+		targetStatusEl.style.marginTop = '6px';
+		targetStatusEl.style.padding = '6px 10px';
+		targetStatusEl.style.backgroundColor = '#fcf0f1';
+		targetStatusEl.style.border = '1px solid #d63638';
+		targetStatusEl.style.borderLeft = '4px solid #d63638';
+		targetStatusEl.style.borderRadius = '3px';
+		targetStatusEl.style.color = '#8a1f11';
+		targetStatusEl.style.fontSize = '12px';
+		targetStatusEl.style.lineHeight = '1.4';
+		targetStatusEl.innerHTML =
+			'❌ <strong>Format PGN non reconnu</strong> ou invalide. Veuillez coller un PGN valide ou utiliser <em>« Éditer le PGN »</em>.';
+		return;
+	}
+
+	if (status === 'valid_no_moves') {
+		targetStatusEl.style.display = 'block';
+		targetStatusEl.className = 'roi-pgn-status roi-pgn-status-warning';
+		targetStatusEl.style.marginTop = '6px';
+		targetStatusEl.style.padding = '6px 10px';
+		targetStatusEl.style.backgroundColor = '#fff8e5';
+		targetStatusEl.style.border = '1px solid #dba617';
+		targetStatusEl.style.borderLeft = '4px solid #dba617';
+		targetStatusEl.style.borderRadius = '3px';
+		targetStatusEl.style.color = '#614700';
+		targetStatusEl.style.fontSize = '12px';
+		targetStatusEl.style.lineHeight = '1.4';
+		targetStatusEl.innerHTML =
+			'⚠️ <strong>Aucun coup solution détecté</strong> dans ce PGN (uniquement position / commentaires). Cliquez sur <em>« Éditer le PGN »</em> pour jouer le coup attendu.';
+		return;
+	}
+
+	if (status === 'valid_with_moves') {
+		targetStatusEl.style.display = 'block';
+		targetStatusEl.className = 'roi-pgn-status roi-pgn-status-success';
+		targetStatusEl.style.marginTop = '6px';
+		targetStatusEl.style.padding = '4px 8px';
+		targetStatusEl.style.backgroundColor = '#edfaef';
+		targetStatusEl.style.border = '1px solid #68de7c';
+		targetStatusEl.style.borderLeft = '4px solid #00a32a';
+		targetStatusEl.style.borderRadius = '3px';
+		targetStatusEl.style.color = '#135e26';
+		targetStatusEl.style.fontSize = '12px';
+		targetStatusEl.style.lineHeight = '1.4';
+		targetStatusEl.innerHTML =
+			'✓ <strong>Coup(s) solution présent(s)</strong> dans la séquence PGN.';
+	}
+}
+
+/**
  * Sets up a PGN textarea & edit button.
  *
  * @param {Object}                     config
  * @param {string|HTMLTextAreaElement} config.textarea     - Element or ID of PGN textarea
  * @param {string|HTMLButtonElement}   [config.button]     - Element or ID of Edit button
+ * @param {string|HTMLElement}         [config.status]     - Optional element or ID of status notice
  * @param {string|Function}            [config.initialFen] - Initial FEN string or function returning initial FEN
  * @param {Function}                   [config.onChange]   - Callback fired when PGN changes (pgn) => void
  */
-export function setupPgnControl({ textarea, button, initialFen, onChange }) {
+export function setupPgnControl({
+	textarea,
+	button,
+	status,
+	initialFen,
+	onChange,
+}) {
 	const textareaEl =
 		typeof textarea === 'string'
 			? document.getElementById(textarea)
 			: textarea;
 	const buttonEl =
 		typeof button === 'string' ? document.getElementById(button) : button;
+	const statusEl =
+		typeof status === 'string' ? document.getElementById(status) : status;
 
 	if (textareaEl) {
+		updatePgnStatus(textareaEl, statusEl);
+
 		textareaEl.addEventListener('input', function () {
+			updatePgnStatus(textareaEl, statusEl);
 			if (typeof onChange === 'function') {
 				onChange(textareaEl.value);
 			}
@@ -311,6 +471,7 @@ export function setupPgnControl({ textarea, button, initialFen, onChange }) {
 				function (newPgn) {
 					if (textareaEl) {
 						textareaEl.value = newPgn;
+						updatePgnStatus(textareaEl, statusEl);
 					}
 					if (typeof onChange === 'function') {
 						onChange(newPgn);
@@ -320,4 +481,84 @@ export function setupPgnControl({ textarea, button, initialFen, onChange }) {
 			);
 		});
 	}
+}
+
+const BRUSH_MAP = {
+	g: 'green',
+	r: 'red',
+	b: 'blue',
+	y: 'yellow',
+	c: 'green',
+	o: 'yellow',
+};
+
+/**
+ * Extracts initial FEN, orientation, and initial annotation shapes from a PGN string.
+ *
+ * @param {string} pgnString PGN source string.
+ * @return {{ fen: string, orientation: 'white' | 'black', shapes: Array<{ orig: string, dest?: string, brush: string }> }} Extracted FEN, orientation and shapes.
+ */
+export function extractFenOrientationAndShapes(pgnString) {
+	if (!pgnString || typeof pgnString !== 'string') {
+		const defaultFen =
+			'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+		return { fen: defaultFen, orientation: 'white', shapes: [] };
+	}
+
+	const trimmed = pgnString.trim();
+
+	// 1. Balise [FEN "..."]
+	const fenMatch = trimmed.match(/\[FEN\s+"([^"]+)"\]/i);
+	let fen = fenMatch
+		? fenMatch[1].trim()
+		: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+
+	if (!fenMatch && trimmed.includes('/') && !trimmed.startsWith('[')) {
+		const firstLine = trimmed.split('\n')[0].trim();
+		if (firstLine.includes('/') && firstLine.split('/').length >= 4) {
+			fen = firstLine;
+		}
+	}
+
+	const orientation = getActiveColorFromFen(fen);
+	const shapes = [];
+
+	// Extraire tous les blocs de commentaires {...}
+	const commentMatches = trimmed.match(/\{([^}]*)\}/g);
+	if (commentMatches) {
+		const commentsText = commentMatches.join(' ');
+
+		const cslRegex = /\[%(?:csl|cpl)\s+([^\]]+)\]/gi;
+		let cslMatch;
+		while ((cslMatch = cslRegex.exec(commentsText)) !== null) {
+			const items = cslMatch[1].split(',');
+			for (const item of items) {
+				const cleanItem = item.trim();
+				if (cleanItem.length >= 3) {
+					const brushChar = cleanItem[0].toLowerCase();
+					const brush = BRUSH_MAP[brushChar] || 'green';
+					const orig = cleanItem.substring(1, 3).toLowerCase();
+					shapes.push({ orig, brush });
+				}
+			}
+		}
+
+		const calRegex = /\[%cal\s+([^\]]+)\]/gi;
+		let calMatch;
+		while ((calMatch = calRegex.exec(commentsText)) !== null) {
+			const items = calMatch[1].split(',');
+			for (const item of items) {
+				const cleanItem = item.trim();
+				if (cleanItem.length >= 5) {
+					const brushChar = cleanItem[0].toLowerCase();
+					const brush = BRUSH_MAP[brushChar] || 'green';
+					const orig = cleanItem.substring(1, 3).toLowerCase();
+					const dest = cleanItem.substring(3, 5).toLowerCase();
+					shapes.push({ orig, dest, brush });
+				}
+			}
+		}
+	}
+
+	return { fen, orientation, shapes };
 }

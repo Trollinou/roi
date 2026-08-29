@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [1.4.5] - 2026-08-30
+
+*   **Composants Auteur PGN & Validation (`PgnInput.php`, `controls.js`, `type-3.js`, `type-4.js`) :**
+    *   **Contrôle Visuel de Validité PGN (`updatePgnStatus`, `checkPgnStatus`) :** Ajout d'un bandeau de statut temps réel sous chaque champ de saisie PGN (vert pour séquence valide avec coups, jaune si position seule sans coup solution détecté, rouge si format invalide).
+    *   **Aperçus Dynamiques Statiques (`extractFenOrientationAndShapes`) :** Extraction robuste des positions FEN personnalisées (y compris partielles), orientation dynamique selon le trait et restitution visuelle des formes et flèches initiales (`[%csl ...]`, `[%cal ...]`).
+    *   **Synchronisation et Cohérence UI :** Intégration homogène dans les constructeurs Type 3 (ABCDaire Tactique) et Type 4 (La Partie dont tu es le Héros).
+
 ## [1.4.4] - 2026-08-30
 
 *   **Exercice Type 4 La Partie dont tu es le Héros (`TypePartieHeros.php`, `type-4.js`, `Contenu_Controller.php`) :**
