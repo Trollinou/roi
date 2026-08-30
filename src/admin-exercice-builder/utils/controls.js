@@ -523,10 +523,34 @@ export function extractFenOrientationAndShapes(pgnString) {
 	const orientation = getActiveColorFromFen(fen);
 	const shapes = [];
 
-	// Extraire tous les blocs de commentaires {...}
-	const commentMatches = trimmed.match(/\{([^}]*)\}/g);
-	if (commentMatches) {
-		const commentsText = commentMatches.join(' ');
+	// Extraire les formes UNIQUEMENT de la position initiale (commentaires racine / début de PGN avant tout coup)
+	let rootComments = [];
+	try {
+		const games = parsePgn(trimmed);
+		if (games && games.length > 0) {
+			const game = games[0];
+			if (game.headers && typeof game.headers.get === 'function') {
+				const fenHeader = game.headers.get('FEN');
+				if (fenHeader) {
+					fen = fenHeader.trim();
+				}
+			}
+			if (Array.isArray(game.comments) && game.comments.length > 0) {
+				rootComments = game.comments;
+			}
+		}
+	} catch (e) {
+		const firstMoveIndex = trimmed.search(/\b\d+\s*\./);
+		const initialSection =
+			firstMoveIndex !== -1 ? trimmed.slice(0, firstMoveIndex) : trimmed;
+		const fallbackMatches = initialSection.match(/\{([^}]*)\}/g);
+		if (fallbackMatches) {
+			rootComments = fallbackMatches.map((c) => c.slice(1, -1));
+		}
+	}
+
+	if (rootComments.length > 0) {
+		const commentsText = rootComments.join(' ');
 
 		const cslRegex = /\[%(?:csl|cpl)\s+([^\]]+)\]/gi;
 		let cslMatch;

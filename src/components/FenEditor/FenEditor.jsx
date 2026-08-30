@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import { BoardCore } from "eg-chessboard";
+import { parsePgn } from "chessops/pgn";
 import PiecePalette from "./PiecePalette";
 import DrawingLegend from "../DrawingLegend";
 import useChessBoard from "../../hooks/useChessBoard";
@@ -249,40 +250,70 @@ function parsePgnOrFen(text) {
     fen = fenMatch[1].trim();
   }
 
-  // 2. Extraire les cercles [%csl ...] ou [%cpl ...]
-  const cslRegex = /\[%(?:csl|cpl)\s+([^\]]+)\]/gi;
-  let cslMatch;
-  while ((cslMatch = cslRegex.exec(trimmed)) !== null) {
-    const items = cslMatch[1].split(",");
-    for (const item of items) {
-      const cleanItem = item.trim();
-      if (cleanItem.length >= 3) {
-        const brushChar = cleanItem[0].toLowerCase();
-        const brush = brushMap[brushChar] || "green";
-        const orig = cleanItem.substring(1, 3).toLowerCase();
-        shapes.push({ orig, brush });
+  // 2. Récupérer les commentaires racine (position initiale) via parsePgn
+  let rootComments = [];
+  try {
+    const games = parsePgn(trimmed);
+    if (games && games.length > 0) {
+      const game = games[0];
+      if (game.headers && typeof game.headers.get === "function") {
+        const fenHeader = game.headers.get("FEN");
+        if (fenHeader) {
+          fen = fenHeader.trim();
+        }
+      }
+      if (Array.isArray(game.comments) && game.comments.length > 0) {
+        rootComments = game.comments;
+      }
+    }
+  } catch (e) {
+    const firstMoveIndex = trimmed.search(/\b\d+\s*\./);
+    const initialSection =
+      firstMoveIndex !== -1 ? trimmed.slice(0, firstMoveIndex) : trimmed;
+    const fallbackMatches = initialSection.match(/\{([^}]*)\}/g);
+    if (fallbackMatches) {
+      rootComments = fallbackMatches.map((c) => c.slice(1, -1));
+    }
+  }
+
+  if (rootComments.length > 0) {
+    const commentsText = rootComments.join(" ");
+
+    // Extraire les cercles [%csl ...] ou [%cpl ...]
+    const cslRegex = /\[%(?:csl|cpl)\s+([^\]]+)\]/gi;
+    let cslMatch;
+    while ((cslMatch = cslRegex.exec(commentsText)) !== null) {
+      const items = cslMatch[1].split(",");
+      for (const item of items) {
+        const cleanItem = item.trim();
+        if (cleanItem.length >= 3) {
+          const brushChar = cleanItem[0].toLowerCase();
+          const brush = brushMap[brushChar] || "green";
+          const orig = cleanItem.substring(1, 3).toLowerCase();
+          shapes.push({ orig, brush });
+        }
+      }
+    }
+
+    // Extraire les flèches [%cal ...]
+    const calRegex = /\[%cal\s+([^\]]+)\]/gi;
+    let calMatch;
+    while ((calMatch = calRegex.exec(commentsText)) !== null) {
+      const items = calMatch[1].split(",");
+      for (const item of items) {
+        const cleanItem = item.trim();
+        if (cleanItem.length >= 5) {
+          const brushChar = cleanItem[0].toLowerCase();
+          const brush = brushMap[brushChar] || "green";
+          const orig = cleanItem.substring(1, 3).toLowerCase();
+          const dest = cleanItem.substring(3, 5).toLowerCase();
+          shapes.push({ orig, dest, brush });
+        }
       }
     }
   }
 
-  // 3. Extraire les flèches [%cal ...]
-  const calRegex = /\[%cal\s+([^\]]+)\]/gi;
-  let calMatch;
-  while ((calMatch = calRegex.exec(trimmed)) !== null) {
-    const items = calMatch[1].split(",");
-    for (const item of items) {
-      const cleanItem = item.trim();
-      if (cleanItem.length >= 5) {
-        const brushChar = cleanItem[0].toLowerCase();
-        const brush = brushMap[brushChar] || "green";
-        const orig = cleanItem.substring(1, 3).toLowerCase();
-        const dest = cleanItem.substring(3, 5).toLowerCase();
-        shapes.push({ orig, dest, brush });
-      }
-    }
-  }
-
-  // 4. Si aucune FEN n'a été trouvée dans les balises PGN
+  // 3. Si aucune FEN n'a été trouvée dans les balises PGN
   if (!fen) {
     const firstLine = trimmed.split("\n")[0].trim();
     if (firstLine.includes("/") && !firstLine.startsWith("[")) {

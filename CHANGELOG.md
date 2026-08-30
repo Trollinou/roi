@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [1.4.6] - 2026-08-30
+
+*   **Aperçus PGN & Filtrage des Shapes d'Annotation (`controls.js`, `FenEditor.jsx`) :**
+    *   **Isolation Stricte des Annotations Racine :** Correction de la réapparition des formes graphiques (`[%csl ...]`, `[%cal ...]`) de l'ensemble de la partie sur l'échiquier d'aperçu initial lors du collage d'un PGN (Exercices Type 4 et Type 3). L'extraction via `parsePgn` filtre et n'affiche désormais que les formes de la position de départ (`game.comments` à la racine avant tout coup).
+    *   **Alignement de l'Éditeur FEN (`parsePgnOrFen`) :** Application du même filtrage strict sur l'import de PGN dans la modale d'édition FEN / Diagramme.
+
+
 ## [1.4.5] - 2026-08-30
 
 *   **Composants Auteur PGN & Validation (`PgnInput.php`, `controls.js`, `type-3.js`, `type-4.js`) :**
