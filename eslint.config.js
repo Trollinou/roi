@@ -9,8 +9,6 @@ module.exports = [
 			'dist/**',
 			'scratch/**',
 			'scripts/**',
-			'assets/js/stockfish.js',
-			'assets/js/stockfish.wasm',
 		],
 	},
 	...wordpress.configs.recommended,

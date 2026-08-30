@@ -269,6 +269,14 @@ class Partie {
 				true
 			);
 
+			wp_localize_script(
+				'roi-public-chessboard-view',
+				'roiChessConfig',
+				array(
+					'stockfishWorkerUrl' => \ROI\Chess\ChessEngine::get_stockfish_worker_url(),
+				)
+			);
+
 			wp_enqueue_script(
 				'roi-admin-partie-viewer',
 				$plugin_url . 'assets/js/admin-partie-viewer.js',

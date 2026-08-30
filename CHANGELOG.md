@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+*   **Suivi Approfondi des Élèves & Chronométrage des Exercices (`Progression_Controller.php`, `StudentDetailModal.jsx`, `SuiviApp.jsx`, `Suivi_Page.php`) :**
+    *   **Vue Détaillée par Élève (Modale Interactive) :** Déclenchement au clic sur la Card d'un élève ou via le lien `🔍 Détails`. Affiche le taux global, le temps cumulé, des filtres rapides (*Tous / Validés / À faire*), ainsi que l'arborescence complète organisée par Niveau, Chapitre et Cours avec accordéons repliables.
+    *   **Alignement Structuré (Grille CSS) :** Présentation en colonnes parfaitement alignées (Type & Titre avec décodage d'entités HTML, Statut & Date de complétion, Chronomètre & Moyenne du groupe, Bouton d'action).
+    *   **Mesure & Comparaison des Temps :** Enregistrement du temps passé (`time_spent`) et des tentatives dans `_roi_element_valide_{identity}`. Calcul dynamique des moyennes du groupe et affichage d'indicateurs visuels de vitesse (⚡ *Rapide*, *Moyenne*, ⏱ *Plus long*).
+    *   **Réinitialisation Granulaire :** Support du paramètre `element_id` sur la route `POST /roi/v1/progression/reset` permettant à l'entraîneur de réinitialiser un exercice/leçon individuel sans réinitialiser tout le cours.
+    *   **Robustesse du Défilement & Cache Busting :** Défilement vertical fluide de la modale (`overflow-y: auto`, `min-height: 0`) et cache-busting automatique des assets via `filemtime`.
+
+*   **Mutualisation de Stockfish & Allègement du Plugin (`ChessEngine.php`, `view.jsx`, `webpack.config.js`) :**
+    *   **Délégation à DAME-PWA :** Suppression des binaires physiques locaux `stockfish.js` et `stockfish.wasm` (~7.3 Mo) dans `assets/js/` ainsi que des tâches de copie Webpack associées.
+    *   **Suppression du Contrôleur REST :** Élimination de `Stockfish_Controller.php` et de la route `/wp-json/roi/v1/stockfish-wasm` au profit de la gestion native des MIME types WASM par DAME-PWA.
+    *   **Résolution Dynamique du Web Worker :** Consommation du filtre `dame_pwa_stockfish_worker_url` en PHP avec transmission au front-end via `wp_localize_script('roi-public-chessboard-view', 'roiChessConfig')` et attribut HTML `data-stockfish-worker-url`.
+
 ## [1.4.6] - 2026-08-30
 
 *   **Aperçus PGN & Filtrage des Shapes d'Annotation (`controls.js`, `FenEditor.jsx`) :**

@@ -53,14 +53,25 @@ class Suivi_Page {
 			return;
 		}
 
-		$plugin_url = plugin_dir_url( dirname( __DIR__, 2 ) . '/roi.php' );
-		$script_url = $plugin_url . 'build/suivi/index.js';
+		$plugin_dir  = dirname( __DIR__, 2 );
+		$plugin_url  = plugin_dir_url( $plugin_dir . '/roi.php' );
+		$script_url  = $plugin_url . 'build/suivi/index.js';
+		$script_path = $plugin_dir . '/build/suivi/index.js';
+		$asset_file  = $plugin_dir . '/build/suivi/index.asset.php';
+		$asset       = file_exists( $asset_file ) ? include $asset_file : array(
+			'dependencies' => array( 'wp-element' ),
+			'version'      => ROI_VERSION,
+		);
+		$version     = isset( $asset['version'] ) ? (string) $asset['version'] : ROI_VERSION;
+		if ( file_exists( $script_path ) ) {
+			$version .= '.' . filemtime( $script_path );
+		}
 
 		wp_enqueue_script(
 			'roi-suivi-react',
 			$script_url,
-			array( 'wp-element' ),
-			ROI_VERSION,
+			$asset['dependencies'],
+			$version,
 			true
 		);
 

@@ -112,6 +112,27 @@ class ChessEngine {
 			ROI_VERSION,
 			true
 		);
+
+		wp_localize_script(
+			'roi-public-chessboard-view',
+			'roiChessConfig',
+			array(
+				'stockfishWorkerUrl' => self::get_stockfish_worker_url(),
+			)
+		);
+	}
+
+	/**
+	 * Returns the resolved Stockfish worker URL.
+	 *
+	 * @return string
+	 */
+	public static function get_stockfish_worker_url(): string {
+		$url = apply_filters( 'dame_pwa_stockfish_worker_url', '' );
+		if ( empty( $url ) && defined( 'WP_PLUGIN_DIR' ) ) {
+			$url = plugins_url( 'pwa/dist/stockfish/stockfish.js', WP_PLUGIN_DIR . '/dame-pwa/dame-pwa.php' );
+		}
+		return (string) $url;
 	}
 
 	/**

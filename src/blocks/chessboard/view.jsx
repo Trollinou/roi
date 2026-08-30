@@ -293,22 +293,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     };
 
-    // Resolve Stockfish worker URL conforming to AGENTS.md assets structure
-    const viewScript = document.querySelector(
-      'script[src*="chessboard-view.js"]'
-    );
-    let workerUrl = '';
-    if (viewScript) {
-      workerUrl = viewScript.src.replace(
-        'build/chessboard/chessboard-view.js',
-        'assets/js/stockfish.js'
-      );
-    } else {
-      workerUrl = '/wp-content/plugins/roi/assets/js/stockfish.js';
-    }
-
-    // Direct Stockfish to the custom WASM REST endpoint to bypass MIME type issues
-    window.dameWasmUrl = window.location.origin + '/wp-json/roi/v1/stockfish-wasm';
+    // Resolve Stockfish worker URL from DAME-PWA configuration
+    const workerUrl =
+      (typeof window !== 'undefined' && window.roiChessConfig?.stockfishWorkerUrl) ||
+      block.getAttribute('data-stockfish-worker-url') ||
+      '/wp-content/plugins/dame-pwa/pwa/dist/stockfish/stockfish.js';
 
     const boardAPI = new BoardCore(
       mountElement,

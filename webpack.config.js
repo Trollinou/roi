@@ -87,20 +87,6 @@ module.exports = {
 						'build/chessboard/eg-chessboard.css'
 					),
 				},
-				{
-					from: path.resolve(
-						__dirname,
-						'node_modules/eg-chessboard/dist/stockfish.js'
-					),
-					to: path.resolve(__dirname, 'assets/js/stockfish.js'),
-				},
-				{
-					from: path.resolve(
-						__dirname,
-						'node_modules/eg-chessboard/dist/stockfish.wasm'
-					),
-					to: path.resolve(__dirname, 'assets/js/stockfish.wasm'),
-				},
 			],
 		}),
 	],

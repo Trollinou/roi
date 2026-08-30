@@ -204,12 +204,31 @@ class Progression_Controller {
 			}
 		}
 
+		$time_spent = (int) $request->get_param( 'time_spent' );
+		$attempts   = (int) $request->get_param( 'attempts' );
+
 		if ( ! $already_validated ) {
 			$data = array(
 				'element_id' => $element_id,
 				'date'       => current_time( 'mysql' ),
+				'time_spent' => max( 0, $time_spent ),
+				'attempts'   => max( 1, $attempts ),
 			);
 			add_user_meta( $user_id, $meta_key, $data, false );
+		} elseif ( $time_spent > 0 && is_array( $meta_entries ) ) {
+			foreach ( $meta_entries as $entry ) {
+				if ( is_array( $entry ) && isset( $entry['element_id'] ) && (int) $entry['element_id'] === $element_id ) {
+					if ( empty( $entry['time_spent'] ) ) {
+						$updated_entry               = $entry;
+						$updated_entry['time_spent'] = $time_spent;
+						if ( $attempts > 0 ) {
+							$updated_entry['attempts'] = $attempts;
+						}
+						update_user_meta( $user_id, $meta_key, $updated_entry, $entry );
+					}
+					break;
+				}
+			}
 		}
 
 		return new WP_REST_Response(
@@ -267,11 +286,18 @@ class Progression_Controller {
 			foreach ( $progression_keys as $key ) {
 				$meta_entries     = get_user_meta( $user->ID, $key, false );
 				$elements_valides = array();
+				$details          = array();
 
 				if ( is_array( $meta_entries ) ) {
 					foreach ( $meta_entries as $entry ) {
 						if ( is_array( $entry ) && isset( $entry['element_id'] ) ) {
-							$elements_valides[] = (int) $entry['element_id'];
+							$elem_id            = (int) $entry['element_id'];
+							$elements_valides[] = $elem_id;
+							$details[ $elem_id ] = array(
+								'date'       => isset( $entry['date'] ) ? (string) $entry['date'] : '',
+								'time_spent' => isset( $entry['time_spent'] ) ? (int) $entry['time_spent'] : null,
+								'attempts'   => isset( $entry['attempts'] ) ? (int) $entry['attempts'] : null,
+							);
 						}
 					}
 				}
@@ -320,6 +346,7 @@ class Progression_Controller {
 					'prenom'           => $prenom,
 					'display_name'     => $display_name,
 					'elements_valides' => $elements_valides,
+					'details'          => (object) $details,
 				);
 			}
 		}
@@ -373,9 +400,10 @@ class Progression_Controller {
 			$student_id = (int) $student_id_raw;
 		}
 
-		$course_id = (int) $request->get_param( 'course_id' );
+		$course_id  = (int) $request->get_param( 'course_id' );
+		$element_id = (int) $request->get_param( 'element_id' );
 
-		if ( $student_id <= 0 || $course_id <= 0 ) {
+		if ( $student_id <= 0 || ( $course_id <= 0 && $element_id <= 0 ) ) {
 			return new \WP_Error(
 				'invalid_params',
 				__( 'Paramètres invalides.', 'roi' ),
@@ -383,15 +411,20 @@ class Progression_Controller {
 			);
 		}
 
-		// Retrieve course playlist.
-		$playlist_meta = get_post_meta( $course_id, '_roi_cours_playlist', true );
-		$playlist_ids  = array();
-		if ( is_string( $playlist_meta ) && '' !== $playlist_meta ) {
-			$decoded = json_decode( $playlist_meta, true );
-			if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
-				foreach ( $decoded as $item ) {
-					if ( isset( $item['id'] ) ) {
-						$playlist_ids[] = (int) $item['id'];
+		$playlist_ids = array();
+
+		if ( $element_id > 0 ) {
+			$playlist_ids[] = $element_id;
+		} elseif ( $course_id > 0 ) {
+			// Retrieve course playlist.
+			$playlist_meta = get_post_meta( $course_id, '_roi_cours_playlist', true );
+			if ( is_string( $playlist_meta ) && '' !== $playlist_meta ) {
+				$decoded = json_decode( $playlist_meta, true );
+				if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
+					foreach ( $decoded as $item ) {
+						if ( isset( $item['id'] ) ) {
+							$playlist_ids[] = (int) $item['id'];
+						}
 					}
 				}
 			}
@@ -401,7 +434,7 @@ class Progression_Controller {
 			return new WP_REST_Response(
 				array(
 					'success' => true,
-					'message' => __( 'Le cours ne contient aucun élément à réinitialiser.', 'roi' ),
+					'message' => __( 'Aucun élément à réinitialiser.', 'roi' ),
 				),
 				200
 			);

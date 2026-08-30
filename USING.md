@@ -64,15 +64,15 @@ Ces données sont transmises de manière sécurisée via l'API REST de sauvegard
 
 ### 2. Enregistrement d'une réussite (Élève / Membre)
 * **Route :** `POST /wp-json/roi/v1/progression`
-* **Paramètres :** `element_id` (int)
+* **Paramètres :** `element_id` (int), `time_spent` (int, secondes écoulées - optionnel), `attempts` (int, nombre de tentatives - optionnel).
 * **Sécurité :** Authentification requise. L'utilisateur connecté doit posséder l'un des rôles : `membre`, `entraineur`, `staff` ou `administrator`.
 * **Header requis :** `X-Selected-Identity` contenant l'ID de l'identité active (ex: `member_123`).
-* **Fonctionnement :** La réussite est ajoutée aux métadonnées de l'utilisateur sous la clé `_roi_element_valide_{identity_id}` pour isoler la progression de chaque membre de la famille.
+* **Fonctionnement :** La réussite est ajoutée aux métadonnées de l'utilisateur sous la clé `_roi_element_valide_{identity_id}` pour isoler la progression de chaque membre de la famille. Si l'élément avait été validé sans durée, l'envoi ultérieur d'un temps met à jour l'entrée.
 
 ### 3. Consultation des progressions du groupe (Entraîneur)
 * **Route :** `GET /wp-json/roi/v1/progression/groupe`
 * **Sécurité :** Authentification requise. L'utilisateur connecté doit posséder le rôle `entraineur` ou `administrator`.
-* **Fonctionnement :** Retourne les progressions de toutes les identités actives de manière distincte (une ligne par personne, même si elles partagent le même compte WordPress).
+* **Fonctionnement :** Retourne les progressions de toutes les identités actives avec les métriques détaillées par élément (date de validation, temps passé, tentatives) pour alimenter le tableau de bord et la vue détaillée de l'élève.
 * **Réponse JSON :**
   ```json
   [
@@ -81,10 +81,19 @@ Ces données sont transmises de manière sécurisée via l'API REST de sauvegard
       "display_id": 123,
       "nom": "Dupont",
       "prenom": "Jean",
-      "elements_valides": [101, 105, 112]
+      "display_name": "Jean Dupont",
+      "elements_valides": [101, 105, 112],
+      "details": {
+        "101": { "date": "2026-08-30 17:20:00", "time_spent": 45, "attempts": 1 }
+      }
     }
   ]
   ```
+
+### 4. Réinitialisation de progression (Entraîneur)
+* **Route :** `POST /wp-json/roi/v1/progression/reset`
+* **Paramètres :** `student_id` (string/int), `course_id` (int, pour réinitialiser tout un cours) ou `element_id` (int, pour réinitialiser un seul exercice ou leçon de manière granulaire).
+* **Sécurité :** Réservé aux entraîneurs et administrateurs.
 
 ## Arborescence des cours (PWA)
 

@@ -38,7 +38,6 @@ class Plugin {
 			'rest_api_init',
 			function (): void {
 				( new \ROI\API\REST\Games_Controller() )->register_routes();
-				( new \ROI\API\REST\Stockfish_Controller() )->register_routes();
 				( new \ROI\API\REST\Contenu_Controller() )->register_routes();
 				( new \ROI\API\REST\Progression_Controller() )->register_routes();
 				( new \ROI\API\REST\Parcours_Controller() )->register_routes();

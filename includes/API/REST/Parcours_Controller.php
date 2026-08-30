@@ -104,7 +104,7 @@ class Parcours_Controller {
 								$item_id     = (int) $item['id'];
 								$item_status = get_post_status( $item_id );
 								if ( 'publish' === $item_status ) {
-									$item['titre']    = get_the_title( $item_id );
+									$item['titre']    = html_entity_decode( (string) get_the_title( $item_id ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 									$valid_playlist[] = $item;
 								}
 							}
@@ -119,13 +119,13 @@ class Parcours_Controller {
 				$terms            = get_the_terms( $post_id, 'roi_chapitre' );
 				if ( is_array( $terms ) && ! empty( $terms ) ) {
 					$term             = $terms[0];
-					$chapitre_nom     = $term->name;
+					$chapitre_nom     = html_entity_decode( (string) $term->name, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 					$chapitre_couleur = (string) get_term_meta( $term->term_id, '_roi_chapitre_couleur', true );
 				}
 
 				$cours[] = array(
 					'id'               => $post_id,
-					'titre'            => get_the_title(),
+					'titre'            => html_entity_decode( (string) get_the_title(), ENT_QUOTES | ENT_HTML5, 'UTF-8' ),
 					'niveau'           => $niveau,
 					'playlist'         => $playlist,
 					'chapitre_nom'     => $chapitre_nom,

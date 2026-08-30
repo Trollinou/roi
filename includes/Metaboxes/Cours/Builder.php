@@ -257,7 +257,7 @@ class Builder {
 								$post_obj  = get_post( $item_id );
 
 								if ( $post_obj && in_array( $post_obj->post_type, array( 'roi_lecon', 'roi_exercice' ), true ) ) {
-									$title = get_the_title( $post_obj );
+									$title = html_entity_decode( (string) get_the_title( $post_obj ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 
 									// Get color and ID.
 									$color      = 'primary';
@@ -496,7 +496,7 @@ class Builder {
 
 				$results[] = array(
 					'id'         => $post_id,
-					'titre'      => get_the_title(),
+					'titre'      => html_entity_decode( (string) get_the_title(), ENT_QUOTES | ENT_HTML5, 'UTF-8' ),
 					'type'       => $post_type,
 					'color'      => $color,
 					'niveau'     => $level,

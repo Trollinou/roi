@@ -86,7 +86,7 @@ class Contenu_Controller {
 		$terms = get_the_terms( $post->ID, 'roi_chapitre' );
 		if ( is_array( $terms ) && ! empty( $terms ) ) {
 			$term             = $terms[0];
-			$chapitre_nom     = $term->name;
+			$chapitre_nom     = html_entity_decode( (string) $term->name, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 			$chapitre_couleur = (string) get_term_meta( $term->term_id, '_roi_chapitre_couleur', true );
 		}
 
@@ -97,7 +97,7 @@ class Contenu_Controller {
 
 		$data = array(
 			'id'               => $post->ID,
-			'titre'            => $post->post_title,
+			'titre'            => html_entity_decode( (string) $post->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' ),
 			'post_type'        => $post->post_type,
 			'chapitre_nom'     => $chapitre_nom,
 			'chapitre_couleur' => $chapitre_couleur,

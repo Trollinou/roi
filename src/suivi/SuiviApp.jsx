@@ -1,4 +1,6 @@
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useState, useMemo } from '@wordpress/element';
+import { decodeEntities } from '@wordpress/html-entities';
+import StudentDetailModal from './components/StudentDetailModal.jsx';
 
 const CHAPTER_ORDER_MAP = {
 	'Matérialité': 1,
@@ -25,7 +27,8 @@ export default function SuiviApp() {
 	const [ selectedChapter, setSelectedChapter ] = useState( 'all' );
 	const [ loading, setLoading ] = useState( true );
 	const [ error, setError ] = useState( null );
-	const [ resettingCourse, setResettingCourse ] = useState( null ); // { studentId, courseId }
+	const [ resettingAction, setResettingAction ] = useState( null ); // { type: 'course' | 'element', studentId, id }
+	const [ selectedStudentId, setSelectedStudentId ] = useState( null );
 	const [ expandedLevels, setExpandedLevels ] = useState( {} ); // { studentId_level: bool }
 	const [ expandedChapters, setExpandedChapters ] = useState( {} ); // { studentId_level_chapter: bool }
 
@@ -73,8 +76,34 @@ export default function SuiviApp() {
 		fetchData();
 	}, [] );
 
-	const handleResetProgression = async ( studentId, courseId ) => {
-		if ( ! window.confirm( 'Voulez-vous vraiment réinitialiser la progression de ce cours pour cet élève ? L\'élève devra refaire toutes les leçons et exercices associés.' ) ) {
+	// Compute average time spent across all students per element
+	const groupStats = useMemo( () => {
+		const stats = {};
+		students.forEach( ( st ) => {
+			const details = st.details || {};
+			Object.keys( details ).forEach( ( elemId ) => {
+				const d = details[ elemId ];
+				if ( d && typeof d.time_spent === 'number' && d.time_spent > 0 ) {
+					if ( ! stats[ elemId ] ) {
+						stats[ elemId ] = { total_time: 0, count: 0, avg_time_spent: 0 };
+					}
+					stats[ elemId ].total_time += d.time_spent;
+					stats[ elemId ].count += 1;
+				}
+			} );
+		} );
+
+		Object.keys( stats ).forEach( ( elemId ) => {
+			const item = stats[ elemId ];
+			item.avg_time_spent = Math.round( item.total_time / item.count );
+		} );
+
+		return stats;
+	}, [ students ] );
+
+	const handleResetCourse = async ( studentId, courseId, courseName ) => {
+		const label = courseName ? `du cours "${ courseName }"` : 'de ce cours';
+		if ( ! window.confirm( `Voulez-vous vraiment réinitialiser la progression ${ label } pour cet élève ? L'élève devra refaire toutes les leçons et exercices associés.` ) ) {
 			return;
 		}
 
@@ -82,7 +111,7 @@ export default function SuiviApp() {
 		const apiUrl = config.apiUrl || '';
 		const nonce = config.nonce || '';
 
-		setResettingCourse( { studentId, courseId } );
+		setResettingAction( { type: 'course', studentId, id: courseId } );
 
 		try {
 			const response = await fetch( `${ apiUrl }/progression/reset`, {
@@ -107,7 +136,46 @@ export default function SuiviApp() {
 			console.error( 'Reset error', err );
 			alert( 'Erreur réseau ou permission refusée.' );
 		} finally {
-			setResettingCourse( null );
+			setResettingAction( null );
+		}
+	};
+
+	const handleResetElement = async ( studentId, elementId, elementName ) => {
+		const label = elementName ? `"${ elementName }"` : 'cet élément';
+		if ( ! window.confirm( `Voulez-vous vraiment réinitialiser ${ label } pour cet élève ?` ) ) {
+			return;
+		}
+
+		const config = window.roiSuiviConfig || {};
+		const apiUrl = config.apiUrl || '';
+		const nonce = config.nonce || '';
+
+		setResettingAction( { type: 'element', studentId, id: elementId } );
+
+		try {
+			const response = await fetch( `${ apiUrl }/progression/reset`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-WP-Nonce': nonce,
+				},
+				body: JSON.stringify( {
+					student_id: studentId,
+					element_id: elementId,
+				} ),
+			} );
+
+			const resJson = await response.json();
+			if ( response.ok && resJson.success ) {
+				fetchData();
+			} else {
+				alert( resJson.message || 'Une erreur est survenue lors de la réinitialisation.' );
+			}
+		} catch ( err ) {
+			console.error( 'Reset element error', err );
+			alert( 'Erreur réseau ou permission refusée.' );
+		} finally {
+			setResettingAction( null );
 		}
 	};
 
@@ -215,7 +283,7 @@ export default function SuiviApp() {
 					>
 						<option value="all">Tous les Chapitres</option>
 						{ uniqueChapters.map( ( chap ) => (
-							<option key={ chap } value={ chap }>{ chap }</option>
+							<option key={ chap } value={ chap }>{ decodeEntities( chap ) }</option>
 						) ) }
 					</select>
 				</div>
@@ -229,9 +297,10 @@ export default function SuiviApp() {
 				<div style={ { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '20px' } }>
 					{ filteredStudents.map( ( student ) => {
 						const validesSet = new Set( student.elements_valides || [] );
-						const studentName = student.prenom || student.nom
+						const rawStudentName = student.prenom || student.nom
 							? `${ student.prenom || '' } ${ student.nom || '' }`.trim()
 							: student.display_name || `Élève #${ student.id }`;
+						const studentName = decodeEntities( rawStudentName );
 
 						// Filter courses for this student
 						const filteredCourses = courses.filter( ( course ) => {
@@ -276,10 +345,26 @@ export default function SuiviApp() {
 								} }
 							>
 								{ /* CARD HEADER */ }
-								<div style={ { borderBottom: '1px solid #f0f0f1', paddingBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }>
-									<h3 style={ { margin: 0, fontSize: '17px', fontWeight: 600, color: '#1d2327' } }>
-										{ studentName }
-									</h3>
+								<div
+									style={ {
+										borderBottom: '1px solid #f0f0f1',
+										paddingBottom: '10px',
+										display: 'flex',
+										justifyContent: 'space-between',
+										alignItems: 'center',
+										cursor: 'pointer',
+									} }
+									onClick={ () => setSelectedStudentId( student.id ) }
+									title="Cliquer pour afficher la vue détaillée de l'élève"
+								>
+									<div style={ { display: 'flex', alignItems: 'center', gap: '8px' } }>
+										<h3 style={ { margin: 0, fontSize: '17px', fontWeight: 600, color: '#0073aa' } }>
+											{ studentName }
+										</h3>
+										<span style={ { fontSize: '11px', color: '#0073aa', opacity: 0.8 } }>
+											🔍 Détails
+										</span>
+									</div>
 									<span style={ { fontSize: '10px', color: '#646970', background: '#f0f0f1', padding: '2px 6px', borderRadius: '3px', fontWeight: '500' } }>
 										ID: { student.display_id || student.id }
 									</span>
@@ -366,7 +451,7 @@ export default function SuiviApp() {
 																				alignItems: 'center',
 																			} }
 																		>
-																			<span>{ chapter }</span>
+																			<span>{ decodeEntities( chapter ) }</span>
 																			<span style={ { fontSize: '9px', opacity: 0.8 } }>{ isChapterExpanded ? '▲' : '▼' }</span>
 																		</button>
 
@@ -386,14 +471,14 @@ export default function SuiviApp() {
 																					} );
 
 																					const percentage = Math.round( ( validatedCount / totalElements ) * 100 );
-																					const isResetting = resettingCourse && resettingCourse.studentId === student.id && resettingCourse.courseId === course.id;
+																					const isResettingThisCourse = resettingAction && resettingAction.type === 'course' && resettingAction.studentId === student.id && resettingAction.id === course.id;
 
 																					return (
 																						<div key={ course.id } style={ { display: 'flex', flexDirection: 'column', gap: '4px' } }>
 																							{ /* Course Row */ }
 																							<div style={ { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' } }>
-																								<span style={ { fontWeight: '600', fontSize: '13px', color: '#1d2327', maxWidth: '75%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } } title={ course.titre }>
-																									{ course.titre }
+																								<span style={ { fontWeight: '600', fontSize: '13px', color: '#1d2327', maxWidth: '75%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } } title={ decodeEntities( course.titre ) }>
+																									{ decodeEntities( course.titre ) }
 																								</span>
 
 																								<div style={ { display: 'flex', alignItems: 'center', gap: '6px' } }>
@@ -403,8 +488,8 @@ export default function SuiviApp() {
 																									
 																									<button
 																										type="button"
-																										onClick={ () => handleResetProgression( student.id, course.id ) }
-																										disabled={ isResetting || validatedCount === 0 }
+																										onClick={ () => handleResetCourse( student.id, course.id, course.titre ) }
+																										disabled={ isResettingThisCourse || validatedCount === 0 }
 																										title="Réinitialiser la progression de ce cours"
 																										style={ {
 																											background: 'none',
@@ -425,7 +510,7 @@ export default function SuiviApp() {
 																											e.currentTarget.style.backgroundColor = 'transparent';
 																										} }
 																									>
-																										{ isResetting ? '...' : '↺' }
+																										{ isResettingThisCourse ? '...' : '↺' }
 																									</button>
 																								</div>
 																							</div>
@@ -473,6 +558,19 @@ export default function SuiviApp() {
 						);
 					} ) }
 				</div>
+			)}
+
+			{ /* DETAILED STUDENT MODAL */ }
+			{ selectedStudentId && (
+				<StudentDetailModal
+					student={ students.find( ( s ) => s.id === selectedStudentId ) }
+					courses={ courses }
+					groupStats={ groupStats }
+					onClose={ () => setSelectedStudentId( null ) }
+					onResetElement={ handleResetElement }
+					onResetCourse={ handleResetCourse }
+					resettingAction={ resettingAction }
+				/>
 			)}
 		</div>
 	);

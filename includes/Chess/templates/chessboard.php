@@ -32,6 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	data-player-color="<?php echo esc_attr( (string) $atts['playerColor'] ); ?>"
 	data-show-threats="<?php echo $show_threats ? 'true' : 'false'; ?>"
 	data-use-stockfish="<?php echo $use_stockfish ? 'true' : 'false'; ?>"
+	data-stockfish-worker-url="<?php echo esc_url( \ROI\Chess\ChessEngine::get_stockfish_worker_url() ); ?>"
 	data-free-mode="<?php echo $free_mode ? 'true' : 'false'; ?>">
 	<section class="main-wrap">
 		<div class="main-board">

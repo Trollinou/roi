@@ -98,10 +98,6 @@ Le plugin expose plusieurs points de terminaison REST sous le namespace `/wp-jso
     *   **Description :** Enregistre une partie jouée depuis la PWA (authentification requise).
     *   **Paramètres :** `member_id` (int), `difficulty_level` (int), `hints_count` (int), `takebacks_count` (int), `pgn` (string), `duration` (int), `game_date` (string).
 
-### 3. Stockfish
-*   **Servir Stockfish WASM :** `GET /wp-json/roi/v1/stockfish-wasm`
-    *   **Description :** Distribue le fichier WebAssembly de Stockfish avec le type MIME correct (`application/wasm`).
-
 ## Comment Utiliser
 
 ### Création de Contenu
@@ -114,8 +110,9 @@ Le plugin expose plusieurs points de terminaison REST sous le namespace `/wp-jso
 ### Utilisation du Bloc Échiquier
 
 1.  Dans l'éditeur de blocs, ajoutez un nouveau bloc et recherchez "Gutenberg Chessboard" (ou "Échiquier").
-2.  Utilisez les contrôles de la barre latérale du bloc (l'Inspecteur) pour configurer l'apparence et le mode de jeu.
-3.  Utilisez l'éditeur visuel à l'intérieur du bloc pour définir les positions de pièces souhaitées, ou collez une chaîne FEN valide.
+2.  Utilisez les contrôles de la barre latérale du bloc (l'Inspecteur) pour configurer l'apparence et le mode de jeu (IA Stockfish, barre d'évaluation, pendule, etc.).
+3.  Le moteur Stockfish est mutualisé et fourni automatiquement par l'extension **DAME-PWA** via le filtre `dame_pwa_stockfish_worker_url`.
+4.  Utilisez l'éditeur visuel à l'intérieur du bloc pour définir les positions de pièces souhaitées, ou collez une chaîne FEN valide.
 
 ### Shortcodes
 
@@ -128,7 +125,7 @@ Le plugin est organisé dans les répertoires principaux suivants :
 
 *   `/assets`: Contient les fichiers CSS et JS publics et d'administration de ROI.
 *   `/src`: Contient les sources React et Gutenberg du bloc `roi/chessboard`.
-*   `/build`: Contient les assets compilés du bloc d'échecs (CSS, JS, et les workers Stockfish).
+*   `/build`: Contient les assets compilés du bloc d'échecs (CSS, JS).
 *   `/includes`: La logique principale du plugin, structurée selon le standard PSR-4 (namespace `ROI\`).
 *   `/includes/Admin`: Fichiers relatifs à la zone d'administration de WordPress (metaboxes, menus, backup).
 *   `/includes/Core`: Bootstrap, assets, rôles et activation/désactivation.
