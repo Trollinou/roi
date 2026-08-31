@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.4.7] - 2026-08-31
+
 *   **Suivi Approfondi des Élèves & Chronométrage des Exercices (`Progression_Controller.php`, `StudentDetailModal.jsx`, `SuiviApp.jsx`, `Suivi_Page.php`) :**
     *   **Vue Détaillée par Élève (Modale Interactive) :** Déclenchement au clic sur la Card d'un élève ou via le lien `🔍 Détails`. Affiche le taux global, le temps cumulé, des filtres rapides (*Tous / Validés / À faire*), ainsi que l'arborescence complète organisée par Niveau, Chapitre et Cours avec accordéons repliables.
     *   **Alignement Structuré (Grille CSS) :** Présentation en colonnes parfaitement alignées (Type & Titre avec décodage d'entités HTML, Statut & Date de complétion, Chronomètre & Moyenne du groupe, Bouton d'action).
