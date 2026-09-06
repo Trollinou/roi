@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+*   **Assignation de Cours Ciblés & Gestion des Groupes (`Audience.php`, `Parcours_Controller.php`, `Progression_Controller.php`, `SuiviApp.jsx`, `StudentDetailModal.jsx`) :**
+    *   **Metabox d'Audience (`Audience.php`) :** Ajout d'une metabox sur l'écran d'édition des cours (`roi_cours`) pour définir la portée (`all` : Tronc commun, `restricted` : Cours assigné ciblé) et sélectionner les groupes cibles (`dame_group`) ou les élèves nominatifs (`adherent`).
+    *   **Filtrage Dynamique REST (`GET /roi/v1/parcours`) :** Les élèves ne voient que les cours du tronc commun et les cours qui leur sont spécifiquement assignés (individuellement ou via leur groupe d'entraînement). Les cours assignés comportent les indicateurs `is_assigned: true` et `unlocked_by_assignment: true`. Les entraîneurs/administrateurs accèdent à l'intégralité du catalogue avec les métadonnées de ciblage.
+    *   **Assignation Directe depuis le Suivi (`POST /roi/v1/progression/assigner-cours`) :** Permet aux entraîneurs d'assigner ou de retirer un cours en 1 clic directement depuis la fiche détaillée de l'élève (`StudentDetailModal`).
+    *   **Filtre de Groupe dans le Tableau de Bord :** Ajout d'un menu déroulant de sélection par groupe dans la barre d'outils du suivi et affichage des badges de groupe sur chaque carte élève.
+
 *   **Validation Manuelle & Entraînement Club (`Progression_Controller.php`, `StudentDetailModal.jsx`, `SuiviApp.jsx`, `AddStudentModal.jsx`) :**
     *   **Réutilisation & Extension de `POST /roi/v1/progression` :** Prise en charge du paramètre `student_id` pour les entraîneurs/administrateurs (`check_entraineur_permissions`), avec validation granulaire par `element_id` ou de l'ensemble d'un cours via `course_id`.
     *   **Traçabilité Club :** Enregistrement des validations manuelles avec `source: 'club'`, `time_spent: 0`, `attempts: 1`. Affichage du badge `Club` sur les éléments validés dans la vue détaillée.

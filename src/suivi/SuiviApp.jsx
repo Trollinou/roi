@@ -26,6 +26,7 @@ export default function SuiviApp() {
 	const [ searchQuery, setSearchQuery ] = useState( '' );
 	const [ selectedLevel, setSelectedLevel ] = useState( 'all' );
 	const [ selectedChapter, setSelectedChapter ] = useState( 'all' );
+	const [ selectedGroup, setSelectedGroup ] = useState( 'all' );
 	const [ loading, setLoading ] = useState( true );
 	const [ error, setError ] = useState( null );
 	const [ resettingAction, setResettingAction ] = useState( null ); // { type: 'course' | 'element', studentId, id }
@@ -302,9 +303,23 @@ export default function SuiviApp() {
 	const uniqueLevels = [ ...new Set( courses.map( ( c ) => c.niveau ) ) ].sort( ( a, b ) => a - b );
 	const uniqueChapters = [ ...new Set( courses.map( ( c ) => c.chapitre_nom ).filter( Boolean ) ) ];
 
+	const availableGroups = useMemo( () => {
+		const map = new Map();
+		students.forEach( ( s ) => {
+			( s.groups || [] ).forEach( ( g ) => {
+				if ( g && g.id && ! map.has( g.id ) ) {
+					map.set( g.id, g );
+				}
+			} );
+		} );
+		return Array.from( map.values() ).sort( ( a, b ) => a.name.localeCompare( b.name ) );
+	}, [ students ] );
+
 	const filteredStudents = students.filter( ( student ) => {
 		const fullName = `${ student.prenom || '' } ${ student.nom || '' } ${ student.display_name || '' }`.toLowerCase();
-		return fullName.includes( searchQuery.toLowerCase() );
+		const matchesSearch = fullName.includes( searchQuery.toLowerCase() );
+		const matchesGroup = selectedGroup === 'all' || ( student.groups || [] ).some( ( g ) => String( g.id ) === String( selectedGroup ) );
+		return matchesSearch && matchesGroup;
 	} );
 
 	return (
@@ -392,6 +407,25 @@ export default function SuiviApp() {
 							<option key={ chap } value={ chap }>{ decodeEntities( chap ) }</option>
 						) ) }
 					</select>
+
+					{ availableGroups.length > 0 && (
+						<select
+							value={ selectedGroup }
+							onChange={ ( e ) => setSelectedGroup( e.target.value ) }
+							style={ {
+								padding: '6px 12px',
+								border: '1px solid #8c8f94',
+								borderRadius: '4px',
+								fontSize: '13px',
+								background: '#fff',
+							} }
+						>
+							<option value="all">Tous les Groupes</option>
+							{ availableGroups.map( ( g ) => (
+								<option key={ g.id } value={ g.id }>{ decodeEntities( g.name ) }</option>
+							) ) }
+						</select>
+					) }
 				</div>
 			</div>
 
@@ -464,10 +498,42 @@ export default function SuiviApp() {
 									title="Cliquer pour afficher la vue détaillée de l'élève"
 								>
 									<div style={ { display: 'flex', flexDirection: 'column', gap: '2px' } }>
-										<div style={ { display: 'flex', alignItems: 'center', gap: '8px' } }>
+										<div style={ { display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' } }>
 											<h3 style={ { margin: 0, fontSize: '17px', fontWeight: 600, color: '#0073aa' } }>
 												{ studentName }
 											</h3>
+											{ ( student.groups || [] ).map( ( g ) => (
+												<span
+													key={ g.id }
+													style={ {
+														fontSize: '11px',
+														background: '#e0f2fe',
+														color: '#0369a1',
+														border: '1px solid #bae6fd',
+														padding: '1px 6px',
+														borderRadius: '12px',
+														fontWeight: 500,
+													} }
+												>
+													{ decodeEntities( g.name ) }
+												</span>
+											) ) }
+											{ ( student.assigned_course_ids || [] ).length > 0 && (
+												<span
+													style={ {
+														fontSize: '11px',
+														background: '#fef3c7',
+														color: '#92400e',
+														border: '1px solid #fde68a',
+														padding: '1px 6px',
+														borderRadius: '12px',
+														fontWeight: 500,
+													} }
+													title="Cet élève a des cours assignés"
+												>
+													📌 { ( student.assigned_course_ids || [] ).length } assigné{ ( student.assigned_course_ids || [] ).length > 1 ? 's' : '' }
+												</span>
+											) }
 											<span style={ { fontSize: '11px', color: '#0073aa', opacity: 0.8 } }>
 												🔍 Détails
 											</span>
@@ -748,6 +814,7 @@ export default function SuiviApp() {
 					apiUrl={ ( window.roiSuiviConfig && window.roiSuiviConfig.apiUrl ) || '' }
 					nonce={ ( window.roiSuiviConfig && window.roiSuiviConfig.nonce ) || '' }
 					onStudentRemoved={ handleStudentRemoved }
+					onCourseAssigned={ fetchData }
 				/>
 			)}
 

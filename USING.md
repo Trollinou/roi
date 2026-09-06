@@ -115,11 +115,16 @@ Ces données sont transmises de manière sécurisée via l'API REST de sauvegard
 * **Fonctionnement :** Supprime la clé usermeta de suivi associée à cette identité pour la retirer du tableau de bord.
 * **Interface :** Bouton « 🗑 Retirer de la liste de suivi » situé dans le pied de page de la modale détaillée de l'élève (avec confirmation explicite). Les badges `Adhérent #ID` et `Compte WP #ID` sont des liens directs cliquables vers les fiches DAME et profils WordPress pour vérification rapide.
 
-## Arborescence des cours (PWA)
+## Arborescence des cours & Assignation (PWA & Entraîneurs)
 
 ### 1. Récupération des cours et playlists
 * **Route :** `GET /wp-json/roi/v1/parcours`
-* **Sécurité :** Public.
+* **Sécurité :** Authentification requise (`check_apprentissage_access`).
+* **Header :** `X-Selected-Identity` (ex: `member_123`).
+* **Filtrage d'audience :**
+  - Les élèves (`membre`) reçoivent uniquement les cours du tronc commun (`audience_type: 'all'`) ainsi que les cours ciblés (`audience_type: 'restricted'`) affectés à leur identité adhérent ou à l'un de leurs groupes (`dame_group`).
+  - Les cours assignés ciblés comportent `is_assigned: true` et `unlocked_by_assignment: true`.
+  - Les entraîneurs et administrateurs reçoivent tous les cours avec les métadonnées complètes de ciblage.
 * **Réponse JSON :** Un tableau de cours triés par Niveau (ascendant) > Chapitre (ordre personnalisé) > Ordre (menu_order ascendant) :
   ```json
   [
@@ -130,10 +135,22 @@ Ces données sont transmises de manière sécurisée via l'API REST de sauvegard
       "playlist": [101, 105],
       "chapitre_nom": "Structure de Pions",
       "chapitre_couleur": "#FF0000",
-      "ordre": 0
+      "ordre": 0,
+      "is_assigned": false,
+      "unlocked_by_assignment": false,
+      "audience_type": "all",
+      "target_groups": [],
+      "target_members": []
     }
   ]
   ```
+
+### 2. Assignation d'un cours à un élève (Entraîneur)
+* **Route :** `POST /wp-json/roi/v1/progression/assigner-cours`
+* **Paramètres :** `adherent_id` (int), `cours_id` (int), `action` (`'assign'` ou `'unassign'`).
+* **Sécurité :** Réservé aux entraîneurs et administrateurs (`check_entraineur_permissions`).
+* **Interface :** Bouton d'action rapide `＋ Assigner` / `📌 Désassigner` présent sur chaque ligne de cours dans la modale détaillée de l'élève (`StudentDetailModal`).
+* **Filtrage par Groupe :** Le tableau de bord de suivi propose un menu déroulant permettant d'isoler en un clic les élèves appartenant à un groupe d'entraînement spécifique (`dame_group`).
 
 ## Configuration & Restrictions d'accès
 
