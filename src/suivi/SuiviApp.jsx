@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import StudentDetailModal from './components/StudentDetailModal.jsx';
+import AddStudentModal from './components/AddStudentModal.jsx';
 
 const CHAPTER_ORDER_MAP = {
 	'Matérialité': 1,
@@ -28,9 +29,11 @@ export default function SuiviApp() {
 	const [ loading, setLoading ] = useState( true );
 	const [ error, setError ] = useState( null );
 	const [ resettingAction, setResettingAction ] = useState( null ); // { type: 'course' | 'element', studentId, id }
+	const [ validatingAction, setValidatingAction ] = useState( null ); // { type: 'course' | 'element', studentId, id }
 	const [ selectedStudentId, setSelectedStudentId ] = useState( null );
 	const [ expandedLevels, setExpandedLevels ] = useState( {} ); // { studentId_level: bool }
 	const [ expandedChapters, setExpandedChapters ] = useState( {} ); // { studentId_level_chapter: bool }
+	const [ isAddModalOpen, setIsAddModalOpen ] = useState( false );
 
 	const fetchData = () => {
 		const config = window.roiSuiviConfig || {};
@@ -179,6 +182,91 @@ export default function SuiviApp() {
 		}
 	};
 
+	const handleValidateCourse = async ( studentId, courseId, courseName ) => {
+		const label = courseName ? `du cours "${ courseName }"` : 'de ce cours';
+		if ( ! window.confirm( `Valider tous les exercices restants ${ label } pour cet élève (effectués au club) ?` ) ) {
+			return;
+		}
+
+		const config = window.roiSuiviConfig || {};
+		const apiUrl = config.apiUrl || '';
+		const nonce = config.nonce || '';
+
+		setValidatingAction( { type: 'course', studentId, id: courseId } );
+
+		try {
+			const response = await fetch( `${ apiUrl }/progression`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-WP-Nonce': nonce,
+				},
+				body: JSON.stringify( {
+					student_id: studentId,
+					course_id: courseId,
+				} ),
+			} );
+
+			const resJson = await response.json();
+			if ( response.ok && resJson.success ) {
+				fetchData();
+			} else {
+				alert( resJson.message || 'Une erreur est survenue lors de la validation.' );
+			}
+		} catch ( err ) {
+			console.error( 'Validate course error', err );
+			alert( 'Erreur réseau ou permission refusée.' );
+		} finally {
+			setValidatingAction( null );
+		}
+	};
+
+	const handleValidateElement = async ( studentId, elementId, elementName ) => {
+		const config = window.roiSuiviConfig || {};
+		const apiUrl = config.apiUrl || '';
+		const nonce = config.nonce || '';
+
+		setValidatingAction( { type: 'element', studentId, id: elementId } );
+
+		try {
+			const response = await fetch( `${ apiUrl }/progression`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-WP-Nonce': nonce,
+				},
+				body: JSON.stringify( {
+					student_id: studentId,
+					element_id: elementId,
+				} ),
+			} );
+
+			const resJson = await response.json();
+			if ( response.ok && resJson.success ) {
+				fetchData();
+			} else {
+				alert( resJson.message || 'Une erreur est survenue lors de la validation.' );
+			}
+		} catch ( err ) {
+			console.error( 'Validate element error', err );
+			alert( 'Erreur réseau ou permission refusée.' );
+		} finally {
+			setValidatingAction( null );
+		}
+	};
+
+	const handleStudentAdded = ( newStudent ) => {
+		fetchData();
+		if ( newStudent && newStudent.id ) {
+			setSelectedStudentId( newStudent.id );
+		}
+	};
+
+	const handleStudentRemoved = ( studentId ) => {
+		setStudents( ( prev ) => prev.filter( ( s ) => s.id !== studentId ) );
+		setSelectedStudentId( null );
+	};
+
 	const toggleLevelExpanded = ( studentId, level ) => {
 		const key = `${ studentId }_${ level }`;
 		setExpandedLevels( ( prev ) => ( {
@@ -239,6 +327,24 @@ export default function SuiviApp() {
 				<h1 style={ { margin: 0, fontSize: '22px', fontWeight: 600 } }>Suivi des élèves</h1>
 				
 				<div style={ { display: 'flex', gap: '15px', flexWrap: 'wrap', alignItems: 'center' } }>
+					<button
+						type="button"
+						onClick={ () => setIsAddModalOpen( true ) }
+						style={ {
+							padding: '6px 14px',
+							border: '1px solid #0073aa',
+							background: '#0073aa',
+							color: '#fff',
+							borderRadius: '4px',
+							fontSize: '13px',
+							fontWeight: '600',
+							cursor: 'pointer',
+							whiteSpace: 'nowrap',
+						} }
+					>
+						＋ Ajouter un élève
+					</button>
+
 					<input
 						type="search"
 						placeholder="Rechercher un élève..."
@@ -357,17 +463,55 @@ export default function SuiviApp() {
 									onClick={ () => setSelectedStudentId( student.id ) }
 									title="Cliquer pour afficher la vue détaillée de l'élève"
 								>
-									<div style={ { display: 'flex', alignItems: 'center', gap: '8px' } }>
-										<h3 style={ { margin: 0, fontSize: '17px', fontWeight: 600, color: '#0073aa' } }>
-											{ studentName }
-										</h3>
-										<span style={ { fontSize: '11px', color: '#0073aa', opacity: 0.8 } }>
-											🔍 Détails
-										</span>
+									<div style={ { display: 'flex', flexDirection: 'column', gap: '2px' } }>
+										<div style={ { display: 'flex', alignItems: 'center', gap: '8px' } }>
+											<h3 style={ { margin: 0, fontSize: '17px', fontWeight: 600, color: '#0073aa' } }>
+												{ studentName }
+											</h3>
+											<span style={ { fontSize: '11px', color: '#0073aa', opacity: 0.8 } }>
+												🔍 Détails
+											</span>
+										</div>
+										{ student.parent_user && (
+											<span style={ { fontSize: '11px', color: '#646970' } }>
+												Rattaché à :{' '}
+												<a
+													href={ `user-edit.php?user_id=${ student.parent_user.id }` }
+													target="_blank"
+													rel="noopener noreferrer"
+													onClick={ ( e ) => e.stopPropagation() }
+													style={ { color: '#0073aa', textDecoration: 'none' } }
+													title="Ouvrir le profil WordPress parent (nouvel onglet)"
+												>
+													{ decodeEntities( student.parent_user.display_name ) } (#{ student.parent_user.id }) ↗
+												</a>
+											</span>
+										) }
 									</div>
-									<span style={ { fontSize: '10px', color: '#646970', background: '#f0f0f1', padding: '2px 6px', borderRadius: '3px', fontWeight: '500' } }>
-										ID: { student.display_id || student.id }
-									</span>
+									<a
+										href={ student.identity_type === 'member'
+											? `post.php?post=${ student.display_id }&action=edit`
+											: `user-edit.php?user_id=${ student.display_id || student.id }`
+										}
+										target="_blank"
+										rel="noopener noreferrer"
+										onClick={ ( e ) => e.stopPropagation() }
+										style={ {
+											fontSize: '10px',
+											color: student.identity_type === 'member' ? '#0369a1' : '#444',
+											background: student.identity_type === 'member' ? '#e0f2fe' : '#f0f0f1',
+											padding: '3px 8px',
+											borderRadius: '3px',
+											fontWeight: '600',
+											textDecoration: 'none',
+											display: 'inline-flex',
+											alignItems: 'center',
+											gap: '3px',
+										} }
+										title={ student.identity_type === 'member' ? 'Voir la fiche adhérent DAME (nouvel onglet)' : 'Voir le compte utilisateur WP (nouvel onglet)' }
+									>
+										{ student.identity_type === 'member' ? `Adhérent #${ student.display_id } ↗` : `Compte WP #${ student.display_id || student.id } ↗` }
+									</a>
 								</div>
 
 								{ /* CARD CONTENT - LEVEL ACCORDIONS */ }
@@ -472,6 +616,7 @@ export default function SuiviApp() {
 
 																					const percentage = Math.round( ( validatedCount / totalElements ) * 100 );
 																					const isResettingThisCourse = resettingAction && resettingAction.type === 'course' && resettingAction.studentId === student.id && resettingAction.id === course.id;
+																					const isValidatingThisCourse = validatingAction && validatingAction.type === 'course' && validatingAction.studentId === student.id && validatingAction.id === course.id;
 
 																					return (
 																						<div key={ course.id } style={ { display: 'flex', flexDirection: 'column', gap: '4px' } }>
@@ -485,11 +630,38 @@ export default function SuiviApp() {
 																									<span style={ { color: '#646970', fontSize: '11px', fontWeight: '500' } }>
 																										{ validatedCount }/{ totalElements }
 																									</span>
+
+																									{ validatedCount < totalElements && (
+																										<button
+																											type="button"
+																											onClick={ () => handleValidateCourse( student.id, course.id, course.titre ) }
+																											disabled={ isValidatingThisCourse || isResettingThisCourse }
+																											title="Valider tous les exercices restants de ce cours (Club)"
+																											style={ {
+																												background: 'none',
+																												border: 'none',
+																												color: '#00a32a',
+																												cursor: 'pointer',
+																												fontSize: '14px',
+																												padding: '2px 4px',
+																												lineHeight: 1,
+																												borderRadius: '3px',
+																											} }
+																											onMouseOver={ ( e ) => {
+																												e.currentTarget.style.backgroundColor = '#dcfce7';
+																											} }
+																											onMouseOut={ ( e ) => {
+																												e.currentTarget.style.backgroundColor = 'transparent';
+																											} }
+																										>
+																											{ isValidatingThisCourse ? '...' : '✓' }
+																										</button>
+																									) }
 																									
 																									<button
 																										type="button"
 																										onClick={ () => handleResetCourse( student.id, course.id, course.titre ) }
-																										disabled={ isResettingThisCourse || validatedCount === 0 }
+																										disabled={ isResettingThisCourse || isValidatingThisCourse || validatedCount === 0 }
 																										title="Réinitialiser la progression de ce cours"
 																										style={ {
 																											background: 'none',
@@ -570,8 +742,23 @@ export default function SuiviApp() {
 					onResetElement={ handleResetElement }
 					onResetCourse={ handleResetCourse }
 					resettingAction={ resettingAction }
+					onValidateElement={ handleValidateElement }
+					onValidateCourse={ handleValidateCourse }
+					validatingAction={ validatingAction }
+					apiUrl={ ( window.roiSuiviConfig && window.roiSuiviConfig.apiUrl ) || '' }
+					nonce={ ( window.roiSuiviConfig && window.roiSuiviConfig.nonce ) || '' }
+					onStudentRemoved={ handleStudentRemoved }
 				/>
 			)}
+
+			{ /* ADD STUDENT MODAL */ }
+			<AddStudentModal
+				isOpen={ isAddModalOpen }
+				onClose={ () => setIsAddModalOpen( false ) }
+				onStudentAdded={ handleStudentAdded }
+				apiUrl={ ( window.roiSuiviConfig && window.roiSuiviConfig.apiUrl ) || '' }
+				nonce={ ( window.roiSuiviConfig && window.roiSuiviConfig.nonce ) || '' }
+			/>
 		</div>
 	);
 }

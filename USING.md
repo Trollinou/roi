@@ -62,17 +62,21 @@ Ces données sont transmises de manière sécurisée via l'API REST de sauvegard
 * **Header requis :** `X-Selected-Identity` contenant l'ID de l'identité active (ex: `member_123`).
 * **Réponse JSON :** Un tableau d'IDs d'éléments (cours, leçons, exercices) validés par l'identité active : `[101, 105, 112]`.
 
-### 2. Enregistrement d'une réussite (Élève / Membre)
+### 2. Enregistrement d'une réussite (Élève / Membre ou Entraîneur Club)
 * **Route :** `POST /wp-json/roi/v1/progression`
-* **Paramètres :** `element_id` (int), `time_spent` (int, secondes écoulées - optionnel), `attempts` (int, nombre de tentatives - optionnel).
-* **Sécurité :** Authentification requise. L'utilisateur connecté doit posséder l'un des rôles : `membre`, `entraineur`, `staff` ou `administrator`.
-* **Header requis :** `X-Selected-Identity` contenant l'ID de l'identité active (ex: `member_123`).
-* **Fonctionnement :** La réussite est ajoutée aux métadonnées de l'utilisateur sous la clé `_roi_element_valide_{identity_id}` pour isoler la progression de chaque membre de la famille. Si l'élément avait été validé sans durée, l'envoi ultérieur d'un temps met à jour l'entrée.
+* **Paramètres Élève (autonome) :** `element_id` (int), `time_spent` (int, secondes écoulées - optionnel), `attempts` (int, nombre de tentatives - optionnel).
+  * **Header requis :** `X-Selected-Identity` contenant l'ID de l'identité active (ex: `member_123`).
+  * **Fonctionnement :** La réussite est ajoutée aux métadonnées de l'utilisateur sous la clé `_roi_element_valide_{identity_id}` pour isoler la progression de chaque membre de la famille. Si l'élément avait été validé sans durée, l'envoi ultérieur d'un temps met à jour l'entrée.
+* **Paramètres Entraîneur (séance Club) :**
+  * `student_id` (string/int, ex: `42___roi_element_valide_member_123`)
+  * `element_id` (int, pour valider un exercice individuel via le bouton « Effectuer ») ou `course_id` (int, pour valider tous les exercices restants du cours via « Valider le cours ») ou `element_ids` (array).
+  * **Sécurité :** Réservé aux entraîneurs et administrateurs (`check_entraineur_permissions`).
+  * **Traçabilité :** Enregistré avec `source = 'club'`, `time_spent = 0`, `attempts = 1` sans chronométrage. Un badge `Club` s'affiche alors sur l'exercice dans le tableau de bord.
 
 ### 3. Consultation des progressions du groupe (Entraîneur)
 * **Route :** `GET /wp-json/roi/v1/progression/groupe`
 * **Sécurité :** Authentification requise. L'utilisateur connecté doit posséder le rôle `entraineur` ou `administrator`.
-* **Fonctionnement :** Retourne les progressions de toutes les identités actives avec les métriques détaillées par élément (date de validation, temps passé, tentatives) pour alimenter le tableau de bord et la vue détaillée de l'élève.
+* **Fonctionnement :** Retourne les progressions de toutes les identités actives avec les métriques détaillées par élément (date de validation, temps passé, tentatives, source club/mobile) pour alimenter le tableau de bord et la vue détaillée de l'élève.
 * **Réponse JSON :**
   ```json
   [
@@ -84,7 +88,8 @@ Ces données sont transmises de manière sécurisée via l'API REST de sauvegard
       "display_name": "Jean Dupont",
       "elements_valides": [101, 105, 112],
       "details": {
-        "101": { "date": "2026-08-30 17:20:00", "time_spent": 45, "attempts": 1 }
+        "101": { "date": "2026-08-30 17:20:00", "time_spent": 45, "attempts": 1, "source": "" },
+        "105": { "date": "2026-09-06 14:00:00", "time_spent": 0, "attempts": 1, "source": "club" }
       }
     }
   ]
@@ -92,8 +97,23 @@ Ces données sont transmises de manière sécurisée via l'API REST de sauvegard
 
 ### 4. Réinitialisation de progression (Entraîneur)
 * **Route :** `POST /wp-json/roi/v1/progression/reset`
-* **Paramètres :** `student_id` (string/int), `course_id` (int, pour réinitialiser tout un cours) ou `element_id` (int, pour réinitialiser un seul exercice ou leçon de manière granulaire).
+* **Paramètres :** `student_id` (string/int), `course_id` (int, pour réinitialiser tout un cours) ou `element_id` (int, pour réinitialiser un seul exercice ou leçon de manière granulaire via le bouton « ↺ Réinitialiser »).
 * **Sécurité :** Réservé aux entraîneurs et administrateurs.
+
+### 5. Ajout d'un élève au suivi (Entraîneur & DAME)
+* **Route Candidats :** `GET /wp-json/roi/v1/progression/candidats`
+  * Retourne la liste des adhérents DAME (CPT `adherent`) qui ne sont pas encore suivis dans le tableau de bord.
+* **Route Ajout :** `POST /wp-json/roi/v1/progression/ajouter-eleve`
+  * **Paramètres :** `adherent_id` (int).
+  * Associe l'adhérent au compte utilisateur correspondant (compte propre ou compte parent lié aux emails des représentants légaux) et initialise sa clé de suivi pour qu'il apparaisse immédiatement dans le tableau de bord.
+* **Interface :** Bouton « ＋ Ajouter un élève » dans le bandeau supérieur de la page de suivi avec recherche textuelle, affichage de la date de naissance et du représentant légal.
+
+### 6. Retrait d'un élève du suivi (Entraîneur)
+* **Route :** `POST /wp-json/roi/v1/progression/retirer-eleve`
+* **Paramètres :** `student_id` (string/int, ex: `42___roi_element_valide_member_123`).
+* **Sécurité :** Réservé aux entraîneurs et administrateurs.
+* **Fonctionnement :** Supprime la clé usermeta de suivi associée à cette identité pour la retirer du tableau de bord.
+* **Interface :** Bouton « 🗑 Retirer de la liste de suivi » situé dans le pied de page de la modale détaillée de l'élève (avec confirmation explicite). Les badges `Adhérent #ID` et `Compte WP #ID` sont des liens directs cliquables vers les fiches DAME et profils WordPress pour vérification rapide.
 
 ## Arborescence des cours (PWA)
 

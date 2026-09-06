@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+*   **Validation Manuelle & Entraînement Club (`Progression_Controller.php`, `StudentDetailModal.jsx`, `SuiviApp.jsx`, `AddStudentModal.jsx`) :**
+    *   **Réutilisation & Extension de `POST /roi/v1/progression` :** Prise en charge du paramètre `student_id` pour les entraîneurs/administrateurs (`check_entraineur_permissions`), avec validation granulaire par `element_id` ou de l'ensemble d'un cours via `course_id`.
+    *   **Traçabilité Club :** Enregistrement des validations manuelles avec `source: 'club'`, `time_spent: 0`, `attempts: 1`. Affichage du badge `Club` sur les éléments validés dans la vue détaillée.
+    *   **Bouton d'Action Réversible « Effectuer » / « Réinitialiser » :** Sur chaque ligne d'exercice/leçon non complétée, affichage d'un bouton vert « Effectuer » pour valider la réalisation au club en un clic, qui bascule automatiquement en « ↺ Réinitialiser » dès validation.
+    *   **Validation Complète de Cours :** Ajout du bouton vert « ✓ Valider le cours » dans l'en-tête de chaque cours de la modale détaillée et d'un raccourci rapide « ✓ » sur la carte générale de l'élève.
+    *   **Ajout d'Élève au Suivi (« ＋ Ajouter un élève ») & Fiabilisation du Rattachement :** Intégration d'un bouton dans le bandeau supérieur ouvrant une modale interactive (`AddStudentModal`). Affichage enrichi des candidats avec date de naissance et nom du représentant légal (`legal_rep`). Résolution rigoureuse du compte utilisateur WP par compte propre, métadonnées ou emails des représentants légaux (suppression du fallback erroné `post_author`).
+    *   **Retrait d'un Élève du Suivi :** Ajout de la route REST `POST /roi/v1/progression/retirer-eleve` et d'un bouton « 🗑 Retirer de la liste de suivi » dans le pied de page de la modale détaillée avec confirmation explicite.
+    *   **Liens Directs de Vérification :** Rendu cliquable de tous les identifiants affichés (`Adhérent #ID` vers `/wp-admin/post.php?post=ID`, `Compte WP #ID` et `Rattaché à : ... (#ID)` vers `/wp-admin/user-edit.php?user_id=ID`).
+    *   **Dédoublonnage des Comptes Parents :** Masquage automatique de la clé brute historique `_roi_element_valide` sur les comptes conteneurs parentaux dès lors que des profils de membres adhérents (`_roi_element_valide_member_*`) sont suivis.
+    *   **Persistance des Élèves avec 0 Élément Validé :** Maintien dans le tableau de bord des élèves ayant une identité suivie même sans exercice complété (ex: après réinitialisation totale ou nouvel ajout).
+
 ## [1.4.7] - 2026-08-31
 
 *   **Suivi Approfondi des Élèves & Chronométrage des Exercices (`Progression_Controller.php`, `StudentDetailModal.jsx`, `SuiviApp.jsx`, `Suivi_Page.php`) :**

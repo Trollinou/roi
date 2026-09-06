@@ -61,11 +61,51 @@ export default function StudentDetailModal( {
 	onResetElement,
 	onResetCourse,
 	resettingAction,
+	onValidateElement,
+	onValidateCourse,
+	validatingAction,
+	apiUrl,
+	nonce,
+	onStudentRemoved,
 } ) {
 	const [ expandedLevels, setExpandedLevels ] = useState( {} );
 	const [ expandedChapters, setExpandedChapters ] = useState( {} );
 	const [ expandedCourses, setExpandedCourses ] = useState( {} );
 	const [ filterType, setFilterType ] = useState( 'all' ); // 'all', 'validated', 'pending'
+	const [ removing, setRemoving ] = useState( false );
+
+	const handleRemoveFromTracking = async () => {
+		if ( ! student ) return;
+		const nomAffiche = student.display_name || 'cet élève';
+		if ( ! window.confirm( `Êtes-vous sûr de vouloir retirer ${ nomAffiche } de la liste de suivi ?\n\nSa progression sera retirée du tableau de bord.` ) ) {
+			return;
+		}
+		setRemoving( true );
+		try {
+			const res = await fetch( `${ apiUrl }/progression/retirer-eleve`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-WP-Nonce': nonce,
+				},
+				body: JSON.stringify( { student_id: student.id } ),
+			} );
+			const json = await res.json();
+			if ( res.ok && json.success ) {
+				if ( onStudentRemoved ) {
+					onStudentRemoved( student.id );
+				}
+				onClose();
+			} else {
+				alert( json.message || 'Impossible de retirer cet élève.' );
+			}
+		} catch ( err ) {
+			console.error( err );
+			alert( 'Erreur réseau lors du retrait de l\'élève.' );
+		} finally {
+			setRemoving( false );
+		}
+	};
 
 	if ( ! student ) return null;
 
@@ -190,9 +230,42 @@ export default function StudentDetailModal( {
 						<h2 style={ { margin: '0 0 4px 0', fontSize: '18px', fontWeight: '700', color: '#1d2327' } }>
 							{ studentName }
 						</h2>
-						<span style={ { fontSize: '12px', color: '#646970' } }>
-							Identifiant : <strong>#{ student.display_id || student.id }</strong>
-						</span>
+						<div style={ { display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', fontSize: '12px', color: '#646970' } }>
+							<span>
+								{ student.identity_type === 'member' ? (
+									<a
+										href={ `post.php?post=${ student.display_id }&action=edit` }
+										target="_blank"
+										rel="noopener noreferrer"
+										style={ { color: '#0073aa', textDecoration: 'none' } }
+										title="Ouvrir la fiche de l'adhérent dans DAME (nouvel onglet)"
+									>
+										Adhérent DAME : <strong>#{ student.display_id }</strong> ↗
+									</a>
+								) : (
+									<a
+										href={ `user-edit.php?user_id=${ student.display_id || student.id }` }
+										target="_blank"
+										rel="noopener noreferrer"
+										style={ { color: '#0073aa', textDecoration: 'none' } }
+										title="Ouvrir le profil utilisateur WordPress (nouvel onglet)"
+									>
+										Compte WordPress : <strong>#{ student.display_id || student.id }</strong> ↗
+									</a>
+								) }
+							</span>
+							{ student.parent_user && (
+								<a
+									href={ `user-edit.php?user_id=${ student.parent_user.id }` }
+									target="_blank"
+									rel="noopener noreferrer"
+									style={ { background: '#e0e7ff', color: '#3730a3', padding: '1px 6px', borderRadius: '3px', fontSize: '11px', fontWeight: '500', textDecoration: 'none' } }
+									title="Ouvrir le profil utilisateur WordPress parent (nouvel onglet)"
+								>
+									Rattaché au compte parent : { decodeEntities( student.parent_user.display_name ) } (#{ student.parent_user.id }) ↗
+								</a>
+							) }
+						</div>
 					</div>
 
 					<button
@@ -401,6 +474,7 @@ export default function StudentDetailModal( {
 																	const courseValidatedCount = playlist.filter( ( item ) => validesSet.has( Number( item.id ) ) ).length;
 																	const coursePercentage = playlist.length > 0 ? Math.round( ( courseValidatedCount / playlist.length ) * 100 ) : 0;
 																	const isResettingCourse = resettingAction && resettingAction.type === 'course' && resettingAction.id === course.id;
+																	const isValidatingCourse = validatingAction && validatingAction.type === 'course' && validatingAction.id === course.id;
 
 																	if ( displayedItems.length === 0 && filterType !== 'all' ) {
 																		return null;
@@ -431,26 +505,58 @@ export default function StudentDetailModal( {
 																					</span>
 																				</div>
 
-																				<button
-																					type="button"
-																					onClick={ ( e ) => {
-																						e.stopPropagation();
-																						onResetCourse( student.id, course.id, course.titre );
-																					} }
-																					disabled={ courseValidatedCount === 0 || isResettingCourse }
-																					title="Réinitialiser tout le cours"
-																					style={ {
-																						padding: '4px 8px',
-																						fontSize: '11px',
-																						color: courseValidatedCount === 0 ? '#a7aaad' : '#d63638',
-																						border: '1px solid currentColor',
-																						borderRadius: '3px',
-																						background: 'none',
-																						cursor: courseValidatedCount === 0 ? 'default' : 'pointer',
-																					} }
-																				>
-																					{ isResettingCourse ? 'Réinitialisation...' : '↺ Réinitialiser le cours' }
-																				</button>
+																				<div style={ { display: 'flex', alignItems: 'center', gap: '8px' } }>
+																					{ courseValidatedCount < playlist.length && (
+																						<button
+																							type="button"
+																							onClick={ ( e ) => {
+																								e.stopPropagation();
+																								onValidateCourse( student.id, course.id, course.titre );
+																							} }
+																							disabled={ isValidatingCourse || isResettingCourse }
+																							title="Valider tous les exercices restants de ce cours (Club)"
+																							style={ {
+																								padding: '4px 10px',
+																								fontSize: '11px',
+																								fontWeight: '600',
+																								color: '#00a32a',
+																								border: '1px solid #b8e6b8',
+																								borderRadius: '3px',
+																								background: '#f0fdf4',
+																								cursor: 'pointer',
+																							} }
+																							onMouseOver={ ( e ) => {
+																								e.currentTarget.style.backgroundColor = '#dcfce7';
+																							} }
+																							onMouseOut={ ( e ) => {
+																								e.currentTarget.style.backgroundColor = '#f0fdf4';
+																							} }
+																						>
+																							{ isValidatingCourse ? 'Validation...' : '✓ Valider le cours' }
+																						</button>
+																					) }
+
+																					<button
+																						type="button"
+																						onClick={ ( e ) => {
+																							e.stopPropagation();
+																							onResetCourse( student.id, course.id, course.titre );
+																						} }
+																						disabled={ courseValidatedCount === 0 || isResettingCourse || isValidatingCourse }
+																						title="Réinitialiser tout le cours"
+																						style={ {
+																							padding: '4px 8px',
+																							fontSize: '11px',
+																							color: courseValidatedCount === 0 ? '#a7aaad' : '#d63638',
+																							border: '1px solid currentColor',
+																							borderRadius: '3px',
+																							background: 'none',
+																							cursor: courseValidatedCount === 0 ? 'default' : 'pointer',
+																						} }
+																					>
+																						{ isResettingCourse ? 'Réinitialisation...' : '↺ Réinitialiser le cours' }
+																					</button>
+																				</div>
 																			</div>
 
 																			{ /* Item details list */ }
@@ -463,6 +569,7 @@ export default function StudentDetailModal( {
 																						const stat = groupStats && groupStats[ item.id ];
 																						const avgTimeSpent = stat ? stat.avg_time_spent : null;
 																						const isResettingItem = resettingAction && resettingAction.type === 'element' && resettingAction.id === item.id;
+																						const isValidatingItem = validatingAction && validatingAction.type === 'element' && validatingAction.id === item.id;
 
 																						// Determine speed badge
 																						let comparisonBadge = null;
@@ -539,6 +646,11 @@ export default function StudentDetailModal( {
 																										<>
 																											<span style={ { color: '#00a32a', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' } }>
 																												✓ Validé
+																												{ detail.source === 'club' && (
+																													<span style={ { fontSize: '10px', background: '#e6f6e6', color: '#007017', padding: '1px 5px', borderRadius: '3px', fontWeight: 'normal' } } title="Effectué lors de l'entraînement au club">
+																														Club
+																													</span>
+																												) }
 																											</span>
 																											{ detail.date && (
 																												<span style={ { fontSize: '11px', color: '#8c8f94' } }>
@@ -574,7 +686,7 @@ export default function StudentDetailModal( {
 
 																								{ /* Col 4: Action Button */ }
 																								<div style={ { display: 'flex', justifyContent: 'flex-end' } }>
-																									{ isValidated && (
+																									{ isValidated ? (
 																										<button
 																											type="button"
 																											onClick={ () => onResetElement( student.id, item.id, item.titre ) }
@@ -598,6 +710,32 @@ export default function StudentDetailModal( {
 																											} }
 																										>
 																											{ isResettingItem ? '...' : '↺ Réinitialiser' }
+																										</button>
+																									) : (
+																										<button
+																											type="button"
+																											onClick={ () => onValidateElement( student.id, item.id, item.titre ) }
+																											disabled={ isValidatingItem || isResettingItem }
+																											title="Noter la réalisation de cet exercice au club"
+																											style={ {
+																												padding: '3px 10px',
+																												fontSize: '11px',
+																												fontWeight: '600',
+																												color: '#00a32a',
+																												border: '1px solid #b8e6b8',
+																												borderRadius: '3px',
+																												background: '#f0fdf4',
+																												cursor: 'pointer',
+																												whiteSpace: 'nowrap',
+																											} }
+																											onMouseOver={ ( e ) => {
+																												e.currentTarget.style.backgroundColor = '#dcfce7';
+																											} }
+																											onMouseOut={ ( e ) => {
+																												e.currentTarget.style.backgroundColor = '#f0fdf4';
+																											} }
+																										>
+																											{ isValidatingItem ? '...' : 'Effectuer' }
 																										</button>
 																									) }
 																								</div>
@@ -628,11 +766,32 @@ export default function StudentDetailModal( {
 						padding: '12px 24px',
 						borderTop: '1px solid #e0e0e0',
 						display: 'flex',
-						justifyContent: 'flex-end',
+						justifyContent: 'space-between',
+						alignItems: 'center',
 						background: '#f8f9fa',
 						flexShrink: 0,
 					} }
 				>
+					<button
+						type="button"
+						onClick={ handleRemoveFromTracking }
+						disabled={ removing }
+						style={ {
+							background: '#fff',
+							border: '1px solid #d63638',
+							color: '#d63638',
+							padding: '6px 14px',
+							fontSize: '13px',
+							borderRadius: '4px',
+							cursor: removing ? 'default' : 'pointer',
+							display: 'inline-flex',
+							alignItems: 'center',
+							gap: '6px',
+						} }
+					>
+						{ removing ? 'Retrait en cours...' : '🗑 Retirer de la liste de suivi' }
+					</button>
+
 					<button
 						type="button"
 						onClick={ onClose }
