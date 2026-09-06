@@ -150,7 +150,11 @@ Ces données sont transmises de manière sécurisée via l'API REST de sauvegard
 * **Paramètres :** `adherent_id` (int), `cours_id` (int), `action` (`'assign'` ou `'unassign'`).
 * **Sécurité :** Réservé aux entraîneurs et administrateurs (`check_entraineur_permissions`).
 * **Interface :** Bouton d'action rapide `＋ Assigner` / `📌 Désassigner` présent sur chaque ligne de cours dans la modale détaillée de l'élève (`StudentDetailModal`).
-* **Filtrage par Groupe :** Le tableau de bord de suivi propose un menu déroulant permettant d'isoler en un clic les élèves appartenant à un groupe d'entraînement spécifique (`dame_group`).
+### 3. Ciblage depuis l'Édition du Cours (Metabox WordPress)
+* Lors de la création ou l'édition d'un cours (`roi_cours`), le panneau latéral « **Audience & Assignation** » permet de choisir entre :
+  - **Tous les membres** (tronc commun public pour le club).
+  - **Cours assigné** (restreint à des groupes ciblés et/ou des élèves spécifiques).
+* **Filtrage textuel des apprenants :** Un champ textuel dynamique *« Filtrer par nom... »* permet d'isoler instantanément un élève parmi la liste des adhérents sans avoir à faire défiler toute la liste. Les adhérents déjà assignés sont automatiquement remontés en haut de liste.
 
 ## Configuration & Restrictions d'accès
 

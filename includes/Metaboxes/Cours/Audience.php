@@ -184,6 +184,18 @@ class Audience {
 				$available_members,
 				fn( $a, $b ) => strcasecmp( $a['label'], $b['label'] )
 			);
+
+			// Éléments sélectionnés placés en premier (comme dans Dame pour les participants).
+			$selected_list   = array();
+			$unselected_list = array();
+			foreach ( $available_members as $m ) {
+				if ( in_array( (int) $m['id'], $target_members, true ) ) {
+					$selected_list[] = $m;
+				} else {
+					$unselected_list[] = $m;
+				}
+			}
+			$available_members = array_merge( $selected_list, $unselected_list );
 		}
 		?>
 		<div class="roi-audience-metabox-wrapper">
@@ -226,13 +238,18 @@ class Audience {
 				<?php if ( ! empty( $available_members ) ) : ?>
 					<div>
 						<strong style="display: block; font-size: 12px; margin-bottom: 4px;"><?php esc_html_e( 'Élèves assignés individuellement :', 'roi' ); ?></strong>
-						<div style="max-height: 150px; overflow-y: auto; border: 1px solid #dcdcde; padding: 6px; background: #fff; border-radius: 3px;">
-							<?php foreach ( $available_members as $m ) : ?>
-								<label style="display: block; font-size: 12px; margin-bottom: 3px; cursor: pointer;">
-									<input type="checkbox" name="roi_cours_target_members[]" value="<?php echo (int) $m['id']; ?>" <?php checked( in_array( (int) $m['id'], $target_members, true ) ); ?>>
-									<?php echo esc_html( $m['label'] ); ?>
-								</label>
-							<?php endforeach; ?>
+						<input type="text" id="roi_audience_member_filter" placeholder="<?php esc_attr_e( 'Filtrer par nom...', 'roi' ); ?>" style="width: 100%; margin-bottom: 6px; font-size: 12px; padding: 3px 8px; border: 1px solid #8c8f94; border-radius: 4px;" oninput="roiFilterAudienceMembers(this.value)" onkeydown="if(event.key === 'Enter'){event.preventDefault(); return false;}">
+						<div class="roi-audience-members-checklist" style="max-height: 180px; overflow-y: auto; border: 1px solid #dcdcde; padding: 6px; background: #fff; border-radius: 3px;">
+							<ul id="roi_audience_members_list" style="margin: 0; padding: 0; list-style: none;">
+								<?php foreach ( $available_members as $m ) : ?>
+									<li style="margin-bottom: 3px;">
+										<label style="display: block; font-size: 12px; cursor: pointer;">
+											<input type="checkbox" name="roi_cours_target_members[]" value="<?php echo (int) $m['id']; ?>" <?php checked( in_array( (int) $m['id'], $target_members, true ) ); ?>>
+											<?php echo esc_html( $m['label'] ); ?>
+										</label>
+									</li>
+								<?php endforeach; ?>
+							</ul>
 						</div>
 					</div>
 				<?php endif; ?>
@@ -244,6 +261,15 @@ class Audience {
 			var c = document.getElementById('roi-audience-restricted-container');
 			if (c) {
 				c.style.display = (val === 'restricted') ? 'block' : 'none';
+			}
+		}
+
+		function roiFilterAudienceMembers(val) {
+			var filter = (val || '').toLowerCase().trim();
+			var items = document.querySelectorAll('#roi_audience_members_list li');
+			for (var i = 0; i < items.length; i++) {
+				var text = (items[i].textContent || items[i].innerText || '').toLowerCase();
+				items[i].style.display = (text.indexOf(filter) > -1) ? '' : 'none';
 			}
 		}
 		</script>
