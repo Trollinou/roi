@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-09-07
+
 *   **Refonte et Stabilisation des Blocs Gutenberg Diagramme & PGN (`diagramme`, `pgn`, `useChessBoard.js`, `FenEditor`, `PgnEditor`) :**
     *   **Architecture en Modales Dédiées (`@wordpress/components`) :** Remplacement de l'édition inline dans le canevas Gutenberg par des fenêtres modales isolées (`<Modal>`) portées directement sur `document.body` à l'identique du constructeur d'Exercice. Résout définitivement les conflits de référentiel géométrique, les décalages de drag & drop des pièces vers l'extérieur de l'échiquier et rétablit une séparation claire entre l'aperçu du bloc et l'interface d'édition.
     *   **Suppression du Redimensionnement Différé / Saut de l'Échiquier :** Neutralisation de l'animation de zoom native des modales Gutenberg (`scale(0.9) -> scale(1)`) via une transition en fondu propre (`roiModalFadeIn`, `transform: none !important`), verrouillage synchrone des dimensions de l'échiquier à 380px et élimination des `setTimeout` de recalcul différé dans `useChessBoard.js`. L'échiquier s'affiche instantanément à sa taille finale sans saccade ni saut visuel.
