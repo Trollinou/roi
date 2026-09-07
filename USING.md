@@ -156,6 +156,17 @@ Ces données sont transmises de manière sécurisée via l'API REST de sauvegard
   - **Cours assigné** (restreint à des groupes ciblés et/ou des élèves spécifiques).
 * **Filtrage textuel des apprenants :** Un champ textuel dynamique *« Filtrer par nom... »* permet d'isoler instantanément un élève parmi la liste des adhérents sans avoir à faire défiler toute la liste. Les adhérents déjà assignés sont automatiquement remontés en haut de liste.
 
+### 4. Visualisation & Onglets dans la Liste des Cours (Administration WordPress)
+* Sur la page de gestion des cours (**Apprentissage > Cours**) :
+  - **Onglets de filtrage rapide (en haut de table) :**
+    - **Tous les cours** : Vue globale de tous les cours avec pagination.
+    - **📚 EEF** *(Méthode École d'Échecs à la Française)* : Isole en 1 clic l'ensemble des cours du tronc commun public.
+    - **📌 Cours assignés** : Isole les cours ciblés prescrits par les entraîneurs.
+  - **Colonne « Audience » :**
+    - Affiche le badge bleu `📚 EEF` pour les cours classiques.
+    - Affiche le badge rouge `📌 Assigné` pour les cours ciblés, avec les étiquettes de groupes (`👥 Nom du groupe`) et les noms d'élèves (`👤 Nom` ou `👤 X élèves ℹ️` avec infobulle déroulante).
+  - **Menu déroulant de filtre :** Sélecteur d'audience intégré à la barre d'outils de tri de WordPress (`restrict_manage_posts`).
+
 ## Configuration & Restrictions d'accès
 
 ### 1. Réglages du Back-office

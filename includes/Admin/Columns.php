@@ -28,6 +28,9 @@ class Columns {
 		}
 		add_filter( 'request', array( $this, 'trier_colonnes' ) );
 		add_filter( 'posts_clauses', array( $this, 'trier_liste_cours_defaut' ), 10, 2 );
+		add_filter( 'views_edit-roi_cours', array( $this, 'ajouter_onglets_audience' ) );
+		add_action( 'pre_get_posts', array( $this, 'filtrer_requete_audience' ) );
+		add_action( 'restrict_manage_posts', array( $this, 'filtrer_dropdown_audience' ) );
 	}
 
 	/**
@@ -44,7 +47,8 @@ class Columns {
 				$new_columns['roi_niveau']   = __( 'Niveau', 'roi' );
 				$new_columns['roi_chapitre'] = __( 'Chapitre', 'roi' );
 				if ( 'roi_cours' === $post_type ) {
-					$new_columns['roi_ordre'] = __( 'Ordre', 'roi' );
+					$new_columns['roi_audience'] = __( 'Audience', 'roi' );
+					$new_columns['roi_ordre']    = __( 'Ordre', 'roi' );
 				}
 			}
 			$new_columns[ $key ] = $value;
@@ -97,6 +101,67 @@ class Columns {
 		if ( 'roi_ordre' === $column ) {
 			$post = get_post( $post_id );
 			echo $post ? (int) $post->menu_order : 0;
+		}
+
+		if ( 'roi_audience' === $column ) {
+			$audience_type = (string) get_post_meta( $post_id, '_roi_cours_audience_type', true );
+			if ( empty( $audience_type ) || 'all' === $audience_type ) {
+				echo '<span title="' . esc_attr__( 'Méthode École d\'Échecs à la Française', 'roi' ) . '" style="display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; padding:2px 8px; border-radius:10px; background:#e7f3ff; color:#0073aa; border:1px solid #cce5ff;">📚 EEF</span>';
+				return;
+			}
+
+			echo '<div style="line-height: 1.4;">';
+			echo '<span style="display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; padding:2px 8px; border-radius:10px; background:#fcf0f0; color:#b32d2e; border:1px solid #f5c6cb; margin-bottom:4px;">📌 ' . esc_html__( 'Assigné', 'roi' ) . '</span>';
+
+			// Groupes ciblés.
+			$raw_groups = get_post_meta( $post_id, '_roi_cours_target_groups', true );
+			$groups     = is_string( $raw_groups ) ? json_decode( $raw_groups, true ) : array();
+			if ( is_array( $groups ) && ! empty( $groups ) ) {
+				echo '<div style="margin-top:2px; font-size:11px; color:#50575e;">';
+				foreach ( $groups as $gid ) {
+					$term = get_term( (int) $gid, 'dame_group' );
+					if ( $term instanceof \WP_Term ) {
+						echo '<span style="display:inline-block; background:#f0f0f1; border-radius:3px; padding:1px 5px; margin-right:3px; margin-bottom:2px;">👥 ' . esc_html( $term->name ) . '</span>';
+					}
+				}
+				echo '</div>';
+			}
+
+			// Élèves ciblés.
+			$raw_members = get_post_meta( $post_id, '_roi_cours_target_members', true );
+			$members     = is_string( $raw_members ) ? json_decode( $raw_members, true ) : array();
+			if ( is_array( $members ) && ! empty( $members ) ) {
+				$names = array();
+				foreach ( $members as $mid ) {
+					$prenom = (string) ( get_post_meta( (int) $mid, '_dame_first_name', true ) ?: get_post_meta( (int) $mid, '_dame_prenom', true ) );
+					$nom    = (string) ( get_post_meta( (int) $mid, '_dame_last_name', true ) ?: ( get_post_meta( (int) $mid, '_dame_birth_name', true ) ?: get_post_meta( (int) $mid, '_dame_nom', true ) ) );
+					$label  = trim( $prenom . ' ' . $nom );
+					if ( empty( $label ) ) {
+						$p     = get_post( (int) $mid );
+						$label = $p ? $p->post_title : '#' . $mid;
+					}
+					$names[] = $label;
+				}
+
+				$count = count( $names );
+				echo '<div style="margin-top:2px; font-size:11px; color:#2c3338;">';
+				if ( $count <= 2 ) {
+					foreach ( $names as $n ) {
+						echo '<span style="display:inline-block; background:#edf7ed; color:#1e4620; border-radius:3px; padding:1px 5px; margin-right:3px; margin-bottom:2px;">👤 ' . esc_html( $n ) . '</span>';
+					}
+				} else {
+					$summary = sprintf( esc_html__( '%d élèves', 'roi' ), $count );
+					$tooltip = implode( ', ', $names );
+					echo '<span title="' . esc_attr( $tooltip ) . '" style="display:inline-block; background:#edf7ed; color:#1e4620; border-radius:3px; padding:1px 5px; cursor:help; font-weight:600;">👤 ' . esc_html( $summary ) . ' ℹ️</span>';
+				}
+				echo '</div>';
+			}
+
+			if ( ( empty( $groups ) || ! is_array( $groups ) ) && ( empty( $members ) || ! is_array( $members ) ) ) {
+				echo '<div style="font-size:10px; color:#8c8f94; font-style:italic;">' . esc_html__( 'Aucune cible définie', 'roi' ) . '</div>';
+			}
+
+			echo '</div>';
 		}
 	}
 
@@ -179,5 +244,146 @@ class Columns {
 		}
 
 		return $clauses;
+	}
+
+	/**
+	 * Adds audience view tabs to edit.php?post_type=roi_cours.
+	 *
+	 * @param array<string, string> $views Existing views.
+	 * @return array<string, string> Updated views.
+	 */
+	public function ajouter_onglets_audience( array $views ): array {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$current = isset( $_GET['roi_audience'] ) ? sanitize_key( (string) $_GET['roi_audience'] ) : '';
+
+		$total_cours = (int) $wpdb->get_var(
+			"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'roi_cours' AND post_status NOT IN ('trash', 'auto-draft')"
+		);
+
+		$assigned_cours = (int) $wpdb->get_var(
+			"SELECT COUNT(DISTINCT p.ID) 
+			 FROM {$wpdb->posts} p
+			 INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+			 WHERE p.post_type = 'roi_cours'
+			   AND p.post_status NOT IN ('trash', 'auto-draft')
+			   AND pm.meta_key = '_roi_cours_audience_type'
+			   AND pm.meta_value = 'restricted'"
+		);
+
+		$eef_cours = max( 0, $total_cours - $assigned_cours );
+
+		$base_url = admin_url( 'edit.php?post_type=roi_cours' );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['post_status'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$base_url = add_query_arg( 'post_status', sanitize_key( (string) $_GET['post_status'] ), $base_url );
+		}
+
+		$class_all      = ( '' === $current ) ? ' class="current"' : '';
+		$class_eef      = ( 'eef' === $current ) ? ' class="current"' : '';
+		$class_assigned = ( 'restricted' === $current ) ? ' class="current"' : '';
+
+		$custom_views = array(
+			'all_audience' => sprintf(
+				'<a href="%s"%s>%s <span class="count">(%d)</span></a>',
+				esc_url( remove_query_arg( 'roi_audience', $base_url ) ),
+				$class_all,
+				esc_html__( 'Tous les cours', 'roi' ),
+				$total_cours
+			),
+			'eef'          => sprintf(
+				'<a href="%s"%s title="%s">%s <span class="count">(%d)</span></a>',
+				esc_url( add_query_arg( 'roi_audience', 'eef', $base_url ) ),
+				$class_eef,
+				esc_attr__( 'Méthode École d\'Échecs à la Française', 'roi' ),
+				'📚 EEF',
+				$eef_cours
+			),
+			'restricted'   => sprintf(
+				'<a href="%s"%s>%s <span class="count">(%d)</span></a>',
+				esc_url( add_query_arg( 'roi_audience', 'restricted', $base_url ) ),
+				$class_assigned,
+				'📌 ' . esc_html__( 'Cours assignés', 'roi' ),
+				$assigned_cours
+			),
+		);
+
+		// Si une vue d'audience spécifique est sélectionnée, retirer la classe 'current' de la vue 'all' de base.
+		if ( '' !== $current && isset( $views['all'] ) ) {
+			$views['all'] = str_replace( 'class="current"', '', $views['all'] );
+			$views['all'] = str_replace( "class='current'", '', $views['all'] );
+		}
+
+		return array_merge( $custom_views, $views );
+	}
+
+	/**
+	 * Filters query in WP_List_Table for roi_cours audience.
+	 *
+	 * @param \WP_Query $query Main query.
+	 * @return void
+	 */
+	public function filtrer_requete_audience( \WP_Query $query ): void {
+		if ( ! is_admin() || ! $query->is_main_query() ) {
+			return;
+		}
+
+		$post_type = $query->get( 'post_type' );
+		if ( 'roi_cours' !== $post_type ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$audience = isset( $_GET['roi_audience'] ) ? sanitize_key( (string) $_GET['roi_audience'] ) : '';
+		if ( 'eef' === $audience ) {
+			$raw_mq       = $query->get( 'meta_query' );
+			$meta_query   = is_array( $raw_mq ) ? $raw_mq : array();
+			$meta_query[] = array(
+				'relation' => 'OR',
+				array(
+					'key'     => '_roi_cours_audience_type',
+					'value'   => 'all',
+					'compare' => '=',
+				),
+				array(
+					'key'     => '_roi_cours_audience_type',
+					'compare' => 'NOT EXISTS',
+				),
+			);
+			$query->set( 'meta_query', $meta_query );
+		} elseif ( 'restricted' === $audience ) {
+			$raw_mq       = $query->get( 'meta_query' );
+			$meta_query   = is_array( $raw_mq ) ? $raw_mq : array();
+			$meta_query[] = array(
+				'key'     => '_roi_cours_audience_type',
+				'value'   => 'restricted',
+				'compare' => '=',
+			);
+			$query->set( 'meta_query', $meta_query );
+		}
+	}
+
+	/**
+	 * Displays audience dropdown filter in restrict_manage_posts.
+	 *
+	 * @param string $post_type Current post type.
+	 * @return void
+	 */
+	public function filtrer_dropdown_audience( string $post_type ): void {
+		if ( 'roi_cours' !== $post_type ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$current = isset( $_GET['roi_audience'] ) ? sanitize_key( (string) $_GET['roi_audience'] ) : '';
+		?>
+		<select name="roi_audience">
+			<option value=""><?php esc_html_e( 'Toutes les audiences', 'roi' ); ?></option>
+			<option value="eef" <?php selected( $current, 'eef' ); ?>><?php esc_html_e( '📚 EEF (Tronc commun)', 'roi' ); ?></option>
+			<option value="restricted" <?php selected( $current, 'restricted' ); ?>><?php esc_html_e( '📌 Cours assignés', 'roi' ); ?></option>
+		</select>
+		<?php
 	}
 }
