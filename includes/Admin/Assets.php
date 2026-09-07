@@ -33,8 +33,8 @@ class Assets {
 	public function enqueue_admin_assets( string $hook ): void {
 		global $post_type;
 
-		// Only load on CPT Exercice, Lecon or Cours post editing screen.
-		if ( ! in_array( $post_type, array( 'roi_exercice', 'roi_cours', 'roi_lecon' ), true ) || ( 'post.php' !== $hook && 'post-new.php' !== $hook ) ) {
+		// Only load on CPT Exercice, Lecon, Cours or Video post editing screen.
+		if ( ! in_array( $post_type, array( 'roi_exercice', 'roi_cours', 'roi_lecon', 'roi_video' ), true ) || ( 'post.php' !== $hook && 'post-new.php' !== $hook ) ) {
 			return;
 		}
 
@@ -118,6 +118,20 @@ class Assets {
 				array(
 					'nonce' => wp_create_nonce( 'roi_search_cours_items_nonce' ),
 				)
+			);
+		} elseif ( 'roi_video' === $post_type ) {
+			$video_asset_file = $chess_dir . 'admin-video-settings.asset.php';
+			$video_asset      = file_exists( $video_asset_file ) ? include $video_asset_file : array(
+				'dependencies' => array(),
+				'version'      => ROI_VERSION,
+			);
+
+			wp_enqueue_script(
+				'roi-admin-video-settings',
+				$chess_url . 'admin-video-settings.js',
+				$video_asset['dependencies'],
+				$video_asset['version'],
+				true
 			);
 		}
 	}

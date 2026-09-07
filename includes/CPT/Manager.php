@@ -25,6 +25,7 @@ class Manager {
 		Exercice::class,
 		Cours::class,
 		Partie::class,
+		Video::class,
 		Chapitre_Taxonomy::class,
 	);
 

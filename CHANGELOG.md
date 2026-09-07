@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+*   **Nouveau Type de Contenu Vidéo Pédagogique (`roi_video`) :**
+    *   **CPT `roi_video` & Taxonomie (`Video.php`, `Manager.php`, `Chapitre_Taxonomy.php`) :** Création du CPT dédié aux vidéos YouTube avec rattachement natif à la taxonomie `roi_chapitre` et icône Dashicons `dashicons-video-alt3`.
+    *   **Metabox Paramètres Vidéo (`Settings.php`) :** Saisie de l'URL YouTube, extraction automatique de l'identifiant YouTube (11 caractères), durée indicative, niveau (1 à 4) et lecteur d'aperçu intégré dans l'administration.
+    *   **Constructeur de Cours & Playlist (`Builder.php`, `main.js`) :** Prise en charge complète du type `roi_video` dans le catalogue AJAX, les filtres par niveau/chapitre, la playlist par glisser-déposer avec badge distinctif « Vidéo », et le nettoyage automatique en cas de suppression.
+    *   **API REST & Progression (`Contenu_Controller.php`, `Progression_Controller.php`) :** Exposition des champs `video_url`, `video_id`, `duree` et validation de la progression d'étape vidéo par les élèves et les entraîneurs.
+    *   **Colonnes Admin & Suivi (`Columns.php`, `StudentDetailModal.jsx`, `Backup.php`, `uninstall.php`) :** Prise en compte dans les colonnes d'administration triables, l'export/import JSON, la désinstallation complète et les badges du tableau de bord de suivi.
+
 *   **Assignation de Cours Ciblés & Gestion des Groupes (`Audience.php`, `Parcours_Controller.php`, `Progression_Controller.php`, `SuiviApp.jsx`, `StudentDetailModal.jsx`) :**
     *   **Metabox d'Audience (`Audience.php`) :** Ajout d'une metabox sur l'écran d'édition des cours (`roi_cours`) pour définir la portée (`all` : Tronc commun, `restricted` : Cours assigné ciblé) et sélectionner les groupes cibles (`dame_group`) ou les élèves nominatifs (`adherent`). Intègre un champ de recherche/filtrage textuel instantané insensible aux accents (ex: « maelle » trouve « Maëlle ») et le tri plaçant les élèves sélectionnés en tête de liste pour une sélection rapide.
     *   **Recherche Insensible aux Accents dans le Suivi (`SuiviApp.jsx`, `AddStudentModal.jsx`) :** Normalisation Unicode NFD appliquée aux barres de recherche d'élèves et de candidats au suivi.

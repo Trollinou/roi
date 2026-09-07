@@ -257,7 +257,7 @@ class Builder {
 								$item_type = sanitize_text_field( $item['type'] );
 								$post_obj  = get_post( $item_id );
 
-								if ( $post_obj && in_array( $post_obj->post_type, array( 'roi_lecon', 'roi_exercice' ), true ) ) {
+								if ( $post_obj && in_array( $post_obj->post_type, array( 'roi_lecon', 'roi_exercice', 'roi_video' ), true ) ) {
 									$title = html_entity_decode( (string) get_the_title( $post_obj ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 
 									// Get color and ID.
@@ -273,13 +273,23 @@ class Builder {
 										}
 									}
 
-									$meta_key = ( 'roi_lecon' === $item_type ) ? '_roi_lecon_niveau' : '_roi_exercice_niveau';
-									$level    = (int) get_post_meta( $item_id, $meta_key, true );
+									$meta_key = '_roi_exercice_niveau';
+									if ( 'roi_lecon' === $item_type ) {
+										$meta_key = '_roi_lecon_niveau';
+									} elseif ( 'roi_video' === $item_type ) {
+										$meta_key = '_roi_video_niveau';
+									}
+									$level = (int) get_post_meta( $item_id, $meta_key, true );
 									if ( 0 === $level ) {
 										$level = 1;
 									}
 
-									$type_label = ( 'roi_lecon' === $item_type ) ? 'Leçon' : 'Exercice';
+									$type_label = 'Exercice';
+									if ( 'roi_lecon' === $item_type ) {
+										$type_label = 'Leçon';
+									} elseif ( 'roi_video' === $item_type ) {
+										$type_label = 'Vidéo';
+									}
 
 									// Color style details.
 									$color_palette = array(
@@ -377,8 +387,13 @@ class Builder {
 					$first_id   = (int) $first_item['id'];
 					$first_type = sanitize_text_field( $first_item['type'] );
 
-					$meta_key = ( 'roi_lecon' === $first_type ) ? '_roi_lecon_niveau' : '_roi_exercice_niveau';
-					$niveau   = (int) get_post_meta( $first_id, $meta_key, true );
+					$meta_key = '_roi_exercice_niveau';
+					if ( 'roi_lecon' === $first_type ) {
+						$meta_key = '_roi_lecon_niveau';
+					} elseif ( 'roi_video' === $first_type ) {
+						$meta_key = '_roi_video_niveau';
+					}
+					$niveau = (int) get_post_meta( $first_id, $meta_key, true );
 					if ( $niveau > 0 ) {
 						update_post_meta( $post_id, '_roi_cours_niveau', $niveau );
 					}
@@ -422,7 +437,7 @@ class Builder {
 		$niveau   = isset( $_GET['level'] ) ? (int) $_GET['level'] : 0;
 
 		$args = array(
-			'post_type'      => array( 'roi_lecon', 'roi_exercice' ),
+			'post_type'      => array( 'roi_lecon', 'roi_exercice', 'roi_video' ),
 			'post_status'    => 'publish',
 			'posts_per_page' => 50,
 			's'              => $search,
@@ -455,10 +470,16 @@ class Builder {
 					'compare' => '=',
 					'type'    => 'NUMERIC',
 				),
+				array(
+					'key'     => '_roi_video_niveau',
+					'value'   => $niveau,
+					'compare' => '=',
+					'type'    => 'NUMERIC',
+				),
 			);
 		}
 
-		$query   = new \WP_Query( $args );
+		$query = new \WP_Query( $args );
 		$results = array();
 
 		if ( $query->have_posts() ) {
@@ -489,8 +510,13 @@ class Builder {
 				}
 
 				// Retrieve the level from CPT specific meta key.
-				$meta_key = ( 'roi_lecon' === $post_type ) ? '_roi_lecon_niveau' : '_roi_exercice_niveau';
-				$level    = (int) get_post_meta( $post_id, $meta_key, true );
+				$meta_key = '_roi_exercice_niveau';
+				if ( 'roi_lecon' === $post_type ) {
+					$meta_key = '_roi_lecon_niveau';
+				} elseif ( 'roi_video' === $post_type ) {
+					$meta_key = '_roi_video_niveau';
+				}
+				$level = (int) get_post_meta( $post_id, $meta_key, true );
 				if ( 0 === $level ) {
 					$level = 1;
 				}
@@ -511,14 +537,14 @@ class Builder {
 	}
 
 	/**
-	 * Removes deleted or trashed lessons and exercises from all course playlists.
+	 * Removes deleted or trashed lessons, exercises and videos from all course playlists.
 	 *
 	 * @param int $post_id The post ID being deleted or trashed.
 	 * @return void
 	 */
 	public function nettoyer_element_supprime( int $post_id ): void {
 		$post_type = get_post_type( $post_id );
-		if ( ! in_array( $post_type, array( 'roi_exercice', 'roi_lecon' ), true ) ) {
+		if ( ! in_array( $post_type, array( 'roi_exercice', 'roi_lecon', 'roi_video' ), true ) ) {
 			return;
 		}
 

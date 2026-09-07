@@ -322,7 +322,7 @@ class Progression_Controller {
 
 		foreach ( $elements_todo as $elem_id ) {
 			$post = get_post( $elem_id );
-			if ( ! $post || ! in_array( $post->post_type, array( 'roi_exercice', 'roi_lecon' ), true ) ) {
+			if ( ! $post || ! in_array( $post->post_type, array( 'roi_exercice', 'roi_lecon', 'roi_video' ), true ) ) {
 				continue;
 			}
 

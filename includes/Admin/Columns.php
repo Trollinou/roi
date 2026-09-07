@@ -21,7 +21,7 @@ class Columns {
 	 * @return void
 	 */
 	public function init(): void {
-		foreach ( array( 'roi_exercice', 'roi_lecon', 'roi_cours' ) as $post_type ) {
+		foreach ( array( 'roi_exercice', 'roi_lecon', 'roi_cours', 'roi_video' ) as $post_type ) {
 			add_filter( "manage_{$post_type}_posts_columns", array( $this, 'ajouter_colonnes' ) );
 			add_action( "manage_{$post_type}_posts_custom_column", array( $this, 'afficher_colonnes' ), 10, 2 );
 			add_filter( "manage_edit-{$post_type}_sortable_columns", array( $this, 'colonnes_triables' ) );
@@ -72,6 +72,8 @@ class Columns {
 				$meta_key = '_roi_exercice_niveau';
 			} elseif ( 'roi_lecon' === $post_type ) {
 				$meta_key = '_roi_lecon_niveau';
+			} elseif ( 'roi_video' === $post_type ) {
+				$meta_key = '_roi_video_niveau';
 			} elseif ( 'roi_cours' === $post_type ) {
 				$meta_key = '_roi_cours_niveau';
 			}
@@ -194,6 +196,8 @@ class Columns {
 				$meta_key = '_roi_exercice_niveau';
 			} elseif ( 'roi_lecon' === $post_type ) {
 				$meta_key = '_roi_lecon_niveau';
+			} elseif ( 'roi_video' === $post_type ) {
+				$meta_key = '_roi_video_niveau';
 			} elseif ( 'roi_cours' === $post_type ) {
 				$meta_key = '_roi_cours_niveau';
 			}

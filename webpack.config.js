@@ -25,6 +25,10 @@ module.exports = {
 			__dirname,
 			'src/admin-cours-builder/main.js'
 		),
+		'chessboard/admin-video-settings': path.resolve(
+			__dirname,
+			'src/admin-video-settings.js'
+		),
 		'diagramme/index': path.resolve(
 			__dirname,
 			'src/blocks/diagramme/index.js'

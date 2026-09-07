@@ -50,7 +50,7 @@ class Backup {
 	 * @return array<string, mixed> The complete export data.
 	 */
 	public function get_apprentissage_export_data(): array {
-		$post_types = array( 'roi_lecon', 'roi_exercice', 'roi_cours' );
+		$post_types = array( 'roi_lecon', 'roi_exercice', 'roi_cours', 'roi_video' );
 		$taxonomy   = 'roi_chapitre';
 
 		$export_data = array(
@@ -206,7 +206,7 @@ class Backup {
 		}
 
 		// Clear existing data.
-		$post_types = array( 'roi_lecon', 'roi_exercice', 'roi_cours' );
+		$post_types = array( 'roi_lecon', 'roi_exercice', 'roi_cours', 'roi_video' );
 		$taxonomy   = 'roi_chapitre';
 
 		$existing_posts = get_posts(

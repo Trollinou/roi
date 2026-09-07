@@ -32,7 +32,8 @@ Ce plugin nécessite que le plugin **DAME** soit installé et activé. Le plugin
 *   **Types de Publication Personnalisés :**
     *   **Leçons (`roi_lecon`) :** Créez des leçons d'échecs détaillées avec du texte, des images et des échiquiers intégrés.
     *   **Exercices (`roi_exercice`) :** Concevez des questions interactives à choix multiples ou vrai/faux, souvent accompagnées d'un échiquier pour le contexte.
-    *   **Cours (`roi_cours`) :** Construisez des parcours d'apprentissage structurés en assemblant des leçons et des exercices dans un ordre précis.
+    *   **Vidéos (`roi_video`) :** Intégrez des vidéos YouTube (Fédération, méthode EEF, ouvertures, tactiques) avec niveau (1 à 4), durée et lien direct.
+    *   **Cours (`roi_cours`) :** Construisez des parcours d'apprentissage structurés en assemblant des leçons, des exercices et des vidéos dans un ordre précis.
     *   **Parties (`roi_partie`) :** Historique et enregistrement des parties d'échecs jouées par les membres depuis la PWA.
 *   **API REST de Sauvegarde des Parties :** 
     *   Expose une route sécurisée `POST /wp-json/roi/v1/games` permettant d'enregistrer les détails d'une partie (ID de membre, difficulté, aides, annulations, PGN, durée et date de fin).

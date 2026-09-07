@@ -18,8 +18,8 @@ delete_option( 'roi_apprentissage_allowed_roles' );
 
 global $wpdb;
 
-// Delete all ROI custom post types (lecon, exercice, cours, partie).
-$cpts = array( 'roi_lecon', 'roi_exercice', 'roi_cours', 'roi_partie' );
+// Delete all ROI custom post types (lecon, exercice, cours, partie, video).
+$cpts = array( 'roi_lecon', 'roi_exercice', 'roi_cours', 'roi_partie', 'roi_video' );
 
 foreach ( $cpts as $cpt ) {
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching

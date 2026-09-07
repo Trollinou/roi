@@ -156,7 +156,12 @@ document.addEventListener('DOMContentLoaded', () => {
 			el.style.justifyContent = 'space-between';
 			el.style.alignItems = 'center';
 
-			const typeLabel = item.type === 'roi_lecon' ? 'Leçon' : 'Exercice';
+			let typeLabel = 'Exercice';
+			if (item.type === 'roi_lecon') {
+				typeLabel = 'Leçon';
+			} else if (item.type === 'roi_video') {
+				typeLabel = 'Vidéo';
+			}
 			el.innerHTML = `
 				<span style="word-break: break-word; overflow-wrap: anywhere;">${item.titre}</span>
 				<div style="display: flex; gap: 5px; align-items: center; flex-shrink: 0;">
@@ -223,7 +228,12 @@ document.addEventListener('DOMContentLoaded', () => {
 		el.style.alignItems = 'center';
 		el.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
 
-		const typeLabel = type === 'roi_lecon' ? 'Leçon' : 'Exercice';
+		let typeLabel = 'Exercice';
+		if (type === 'roi_lecon') {
+			typeLabel = 'Leçon';
+		} else if (type === 'roi_video') {
+			typeLabel = 'Vidéo';
+		}
 		el.innerHTML = `
 			<span style="word-break: break-word; overflow-wrap: anywhere;">${title}</span>
 			<div style="display: flex; gap: 5px; align-items: center; flex-shrink: 0;">

@@ -701,11 +701,11 @@ export default function StudentDetailModal( {
 																											fontWeight: '600',
 																											textTransform: 'uppercase',
 																											flexShrink: 0,
-																											background: item.type === 'roi_lecon' ? '#e7f3ff' : '#f4ebff',
-																											color: item.type === 'roi_lecon' ? '#0073aa' : '#8224e3',
+																											background: item.type === 'roi_lecon' ? '#e7f3ff' : ( item.type === 'roi_video' ? '#ffebee' : '#f4ebff' ),
+																											color: item.type === 'roi_lecon' ? '#0073aa' : ( item.type === 'roi_video' ? '#c62828' : '#8224e3' ),
 																										} }
 																									>
-																										{ item.type === 'roi_lecon' ? 'Leçon' : 'Exercice' }
+																										{ item.type === 'roi_lecon' ? 'Leçon' : ( item.type === 'roi_video' ? 'Vidéo' : 'Exercice' ) }
 																									</span>
 																									<span
 																										style={ {

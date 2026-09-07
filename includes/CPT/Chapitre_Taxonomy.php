@@ -63,7 +63,7 @@ class Chapitre_Taxonomy {
 			),
 		);
 
-		register_taxonomy( 'roi_chapitre', array( 'roi_exercice', 'roi_lecon', 'roi_cours' ), $args );
+		register_taxonomy( 'roi_chapitre', array( 'roi_exercice', 'roi_lecon', 'roi_cours', 'roi_video' ), $args );
 	}
 
 	/**

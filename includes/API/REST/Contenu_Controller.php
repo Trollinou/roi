@@ -72,7 +72,7 @@ class Contenu_Controller {
 		$id   = (int) $request->get_param( 'id' );
 		$post = get_post( $id );
 
-		if ( ! $post || 'publish' !== $post->post_status || ! in_array( $post->post_type, array( 'roi_exercice', 'roi_lecon' ), true ) ) {
+		if ( ! $post || 'publish' !== $post->post_status || ! in_array( $post->post_type, array( 'roi_exercice', 'roi_lecon', 'roi_video' ), true ) ) {
 			return new WP_Error(
 				'rest_contenu_not_found',
 				__( 'Contenu non trouvé ou non publié.', 'roi' ),
@@ -91,9 +91,17 @@ class Contenu_Controller {
 		}
 
 		$is_exercice = 'roi_exercice' === $post->post_type;
+		$is_video    = 'roi_video' === $post->post_type;
 
-		$niveau_meta = get_post_meta( $post->ID, $is_exercice ? '_roi_exercice_niveau' : '_roi_lecon_niveau', true );
-		$niveau      = is_numeric( $niveau_meta ) ? (int) $niveau_meta : 1;
+		$niveau_meta = '';
+		if ( $is_exercice ) {
+			$niveau_meta = get_post_meta( $post->ID, '_roi_exercice_niveau', true );
+		} elseif ( $is_video ) {
+			$niveau_meta = get_post_meta( $post->ID, '_roi_video_niveau', true );
+		} else {
+			$niveau_meta = get_post_meta( $post->ID, '_roi_lecon_niveau', true );
+		}
+		$niveau = is_numeric( $niveau_meta ) ? (int) $niveau_meta : 1;
 
 		$data = array(
 			'id'               => $post->ID,
@@ -126,6 +134,11 @@ class Contenu_Controller {
 					}
 				}
 			}
+		} elseif ( $is_video ) {
+			$data['video_url']    = (string) get_post_meta( $post->ID, '_roi_video_url', true );
+			$data['video_id']     = (string) get_post_meta( $post->ID, '_roi_video_id', true );
+			$data['duree']        = (string) get_post_meta( $post->ID, '_roi_video_duree', true );
+			$data['contenu_html'] = apply_filters( 'the_content', $post->post_content );
 		} else {
 			$data['contenu_html'] = apply_filters( 'the_content', $post->post_content );
 		}

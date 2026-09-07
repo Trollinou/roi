@@ -62,6 +62,7 @@ class Plugin {
 		new \ROI\Metaboxes\Cours\Builder();
 		new \ROI\Metaboxes\Cours\Audience();
 		new \ROI\Metaboxes\Lecon\Settings();
+		new \ROI\Metaboxes\Video\Settings();
 		( new \ROI\Metaboxes\Partie() )->init();
 
 		// Admin pages & assets UI.
