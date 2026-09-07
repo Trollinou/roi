@@ -19,6 +19,12 @@ const CHAPTER_COLOR_MAP = {
 	tertiary: '#8224e3',
 };
 
+const normalizeText = ( str ) =>
+	( str || '' )
+		.normalize( 'NFD' )
+		.replace( /[\u0300-\u036f]/g, '' )
+		.toLowerCase()
+		.trim();
 
 export default function SuiviApp() {
 	const [ students, setStudents ] = useState( [] );
@@ -316,8 +322,8 @@ export default function SuiviApp() {
 	}, [ students ] );
 
 	const filteredStudents = students.filter( ( student ) => {
-		const fullName = `${ student.prenom || '' } ${ student.nom || '' } ${ student.display_name || '' }`.toLowerCase();
-		const matchesSearch = fullName.includes( searchQuery.toLowerCase() );
+		const fullName = normalizeText( `${ student.prenom || '' } ${ student.nom || '' } ${ student.display_name || '' }` );
+		const matchesSearch = fullName.includes( normalizeText( searchQuery ) );
 		const matchesGroup = selectedGroup === 'all' || ( student.groups || [] ).some( ( g ) => String( g.id ) === String( selectedGroup ) );
 		return matchesSearch && matchesGroup;
 	} );

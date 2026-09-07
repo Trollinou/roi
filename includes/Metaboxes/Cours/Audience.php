@@ -264,11 +264,19 @@ class Audience {
 			}
 		}
 
+		function roiNormalizeText(str) {
+			return (str || '')
+				.normalize('NFD')
+				.replace(/[\u0300-\u036f]/g, '')
+				.toLowerCase()
+				.trim();
+		}
+
 		function roiFilterAudienceMembers(val) {
-			var filter = (val || '').toLowerCase().trim();
+			var filter = roiNormalizeText(val);
 			var items = document.querySelectorAll('#roi_audience_members_list li');
 			for (var i = 0; i < items.length; i++) {
-				var text = (items[i].textContent || items[i].innerText || '').toLowerCase();
+				var text = roiNormalizeText(items[i].textContent || items[i].innerText);
 				items[i].style.display = (text.indexOf(filter) > -1) ? '' : 'none';
 			}
 		}

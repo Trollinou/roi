@@ -1,6 +1,13 @@
 import { useState, useEffect } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 
+const normalizeText = ( str ) =>
+	( str || '' )
+		.normalize( 'NFD' )
+		.replace( /[\u0300-\u036f]/g, '' )
+		.toLowerCase()
+		.trim();
+
 export default function AddStudentModal( {
 	isOpen,
 	onClose,
@@ -41,8 +48,8 @@ export default function AddStudentModal( {
 	if ( ! isOpen ) return null;
 
 	const filteredCandidates = candidates.filter( ( cand ) => {
-		const name = `${ cand.prenom || '' } ${ cand.nom || '' } ${ cand.display_name || '' } ${ cand.email || '' }`.toLowerCase();
-		return name.includes( searchQuery.toLowerCase() );
+		const name = normalizeText( `${ cand.prenom || '' } ${ cand.nom || '' } ${ cand.display_name || '' } ${ cand.email || '' }` );
+		return name.includes( normalizeText( searchQuery ) );
 	} );
 
 	const handleAdd = async ( adherentId ) => {
