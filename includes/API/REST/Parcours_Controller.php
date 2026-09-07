@@ -68,7 +68,36 @@ class Parcours_Controller {
 	 * @param WP_REST_Request $request The request object.
 	 * @return WP_REST_Response
 	 */
-	public function get_parcours( WP_REST_Request $request ): WP_REST_Response { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+	public function get_parcours( WP_REST_Request $request ): WP_REST_Response {
+		$user                = wp_get_current_user();
+		$roles               = (array) $user->roles;
+		$is_trainer_or_admin = in_array( 'administrator', $roles, true ) || in_array( 'entraineur', $roles, true );
+
+		// Identifier l'adhérent actif via l'en-tête X-Selected-Identity ou le compte utilisateur.
+		$selected_identity  = (string) $request->get_header( 'X-Selected-Identity' );
+		$active_adherent_id = 0;
+		if ( ! empty( $selected_identity ) && str_starts_with( $selected_identity, 'member_' ) ) {
+			$active_adherent_id = (int) str_replace( 'member_', '', $selected_identity );
+		} elseif ( ! empty( $selected_identity ) && is_numeric( $selected_identity ) ) {
+			$active_adherent_id = (int) $selected_identity;
+		}
+
+		if ( $active_adherent_id <= 0 && $user->ID > 0 ) {
+			$meta_adh = get_user_meta( $user->ID, '_dame_adherent_id', true );
+			if ( ! empty( $meta_adh ) && is_numeric( $meta_adh ) ) {
+				$active_adherent_id = (int) $meta_adh;
+			}
+		}
+
+		// Récupérer les groupes associés à l'adhérent actif (taxonomie dame_group).
+		$student_group_ids = array();
+		if ( $active_adherent_id > 0 && taxonomy_exists( 'dame_group' ) ) {
+			$terms = wp_get_object_terms( $active_adherent_id, 'dame_group', array( 'fields' => 'ids' ) );
+			if ( is_array( $terms ) && ! empty( $terms ) ) {
+				$student_group_ids = array_map( 'intval', $terms );
+			}
+		}
+
 		$args = array(
 			'post_type'      => 'roi_cours',
 			'post_status'    => 'publish',
@@ -84,6 +113,49 @@ class Parcours_Controller {
 				$post_id = get_the_ID();
 				$post    = get_post( $post_id );
 				$ordre   = $post ? (int) $post->menu_order : 0;
+
+				// Retrieve audience targeting metadata.
+				$audience_type = (string) get_post_meta( $post_id, '_roi_cours_audience_type', true );
+				if ( empty( $audience_type ) ) {
+					$audience_type = 'all';
+				}
+
+				$raw_target_groups = get_post_meta( $post_id, '_roi_cours_target_groups', true );
+				$target_groups     = array();
+				if ( is_string( $raw_target_groups ) && '' !== $raw_target_groups ) {
+					$decoded = json_decode( $raw_target_groups, true );
+					if ( is_array( $decoded ) ) {
+						$target_groups = array_map( 'intval', $decoded );
+					}
+				}
+
+				$raw_target_members = get_post_meta( $post_id, '_roi_cours_target_members', true );
+				$target_members     = array();
+				if ( is_string( $raw_target_members ) && '' !== $raw_target_members ) {
+					$decoded = json_decode( $raw_target_members, true );
+					if ( is_array( $decoded ) ) {
+						$target_members = array_map( 'intval', $decoded );
+					}
+				}
+
+				// Vérification de l'éligibilité pour cet utilisateur.
+				$is_assigned            = ( 'restricted' === $audience_type );
+				$unlocked_by_assignment = false;
+
+				if ( ! $is_trainer_or_admin ) {
+					if ( 'restricted' === $audience_type ) {
+						$in_group  = ! empty( array_intersect( $student_group_ids, $target_groups ) );
+						$is_member = ( $active_adherent_id > 0 && in_array( $active_adherent_id, $target_members, true ) );
+
+						if ( ! $in_group && ! $is_member ) {
+							// L'élève ne fait pas partie des cibles de ce cours.
+							continue;
+						}
+						$unlocked_by_assignment = true;
+					}
+				} else {
+					$unlocked_by_assignment = $is_assigned;
+				}
 
 				// Retrieve level.
 				$niveau_meta = get_post_meta( $post_id, '_roi_cours_niveau', true );
@@ -124,13 +196,18 @@ class Parcours_Controller {
 				}
 
 				$cours[] = array(
-					'id'               => $post_id,
-					'titre'            => html_entity_decode( (string) get_the_title(), ENT_QUOTES | ENT_HTML5, 'UTF-8' ),
-					'niveau'           => $niveau,
-					'playlist'         => $playlist,
-					'chapitre_nom'     => $chapitre_nom,
-					'chapitre_couleur' => $chapitre_couleur,
-					'ordre'            => $ordre,
+					'id'                     => $post_id,
+					'titre'                  => html_entity_decode( (string) get_the_title(), ENT_QUOTES | ENT_HTML5, 'UTF-8' ),
+					'niveau'                 => $niveau,
+					'playlist'               => $playlist,
+					'chapitre_nom'           => $chapitre_nom,
+					'chapitre_couleur'       => $chapitre_couleur,
+					'ordre'                  => $ordre,
+					'is_assigned'            => $is_assigned,
+					'unlocked_by_assignment' => $unlocked_by_assignment,
+					'audience_type'          => $audience_type,
+					'target_groups'          => $target_groups,
+					'target_members'         => $target_members,
 				);
 			}
 			wp_reset_postdata();

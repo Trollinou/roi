@@ -115,11 +115,16 @@ Ces données sont transmises de manière sécurisée via l'API REST de sauvegard
 * **Fonctionnement :** Supprime la clé usermeta de suivi associée à cette identité pour la retirer du tableau de bord.
 * **Interface :** Bouton « 🗑 Retirer de la liste de suivi » situé dans le pied de page de la modale détaillée de l'élève (avec confirmation explicite). Les badges `Adhérent #ID` et `Compte WP #ID` sont des liens directs cliquables vers les fiches DAME et profils WordPress pour vérification rapide.
 
-## Arborescence des cours (PWA)
+## Arborescence des cours & Assignation (PWA & Entraîneurs)
 
 ### 1. Récupération des cours et playlists
 * **Route :** `GET /wp-json/roi/v1/parcours`
-* **Sécurité :** Public.
+* **Sécurité :** Authentification requise (`check_apprentissage_access`).
+* **Header :** `X-Selected-Identity` (ex: `member_123`).
+* **Filtrage d'audience :**
+  - Les élèves (`membre`) reçoivent uniquement les cours du tronc commun (`audience_type: 'all'`) ainsi que les cours ciblés (`audience_type: 'restricted'`) affectés à leur identité adhérent ou à l'un de leurs groupes (`dame_group`).
+  - Les cours assignés ciblés comportent `is_assigned: true` et `unlocked_by_assignment: true`.
+  - Les entraîneurs et administrateurs reçoivent tous les cours avec les métadonnées complètes de ciblage.
 * **Réponse JSON :** Un tableau de cours triés par Niveau (ascendant) > Chapitre (ordre personnalisé) > Ordre (menu_order ascendant) :
   ```json
   [
@@ -130,10 +135,37 @@ Ces données sont transmises de manière sécurisée via l'API REST de sauvegard
       "playlist": [101, 105],
       "chapitre_nom": "Structure de Pions",
       "chapitre_couleur": "#FF0000",
-      "ordre": 0
+      "ordre": 0,
+      "is_assigned": false,
+      "unlocked_by_assignment": false,
+      "audience_type": "all",
+      "target_groups": [],
+      "target_members": []
     }
   ]
   ```
+
+### 2. Assignation d'un cours à un élève (Entraîneur)
+* **Route :** `POST /wp-json/roi/v1/progression/assigner-cours`
+* **Paramètres :** `adherent_id` (int), `cours_id` (int), `action` (`'assign'` ou `'unassign'`).
+* **Sécurité :** Réservé aux entraîneurs et administrateurs (`check_entraineur_permissions`).
+* **Interface :** Bouton d'action rapide `＋ Assigner` / `📌 Désassigner` présent sur chaque ligne de cours dans la modale détaillée de l'élève (`StudentDetailModal`).
+### 3. Ciblage depuis l'Édition du Cours (Metabox WordPress)
+* Lors de la création ou l'édition d'un cours (`roi_cours`), le panneau latéral « **Audience & Assignation** » permet de choisir entre :
+  - **Tous les membres** (tronc commun public pour le club).
+  - **Cours assigné** (restreint à des groupes ciblés et/ou des élèves spécifiques).
+* **Filtrage textuel des apprenants :** Un champ textuel dynamique *« Filtrer par nom... »* permet d'isoler instantanément un élève parmi la liste des adhérents sans avoir à faire défiler toute la liste. Les adhérents déjà assignés sont automatiquement remontés en haut de liste.
+
+### 4. Visualisation & Onglets dans la Liste des Cours (Administration WordPress)
+* Sur la page de gestion des cours (**Apprentissage > Cours**) :
+  - **Onglets de filtrage rapide (en haut de table) :**
+    - **Tous les cours** : Vue globale de tous les cours avec pagination.
+    - **📚 EEF** *(Méthode École d'Échecs à la Française)* : Isole en 1 clic l'ensemble des cours du tronc commun public.
+    - **📌 Cours assignés** : Isole les cours ciblés prescrits par les entraîneurs.
+  - **Colonne « Audience » :**
+    - Affiche le badge bleu `📚 EEF` pour les cours classiques.
+    - Affiche le badge rouge `📌 Assigné` pour les cours ciblés, avec les étiquettes de groupes (`👥 Nom du groupe`) et les noms d'élèves (`👤 Nom` ou `👤 X élèves ℹ️` avec infobulle déroulante).
+  - **Menu déroulant de filtre :** Sélecteur d'audience intégré à la barre d'outils de tri de WordPress (`restrict_manage_posts`).
 
 ## Configuration & Restrictions d'accès
 

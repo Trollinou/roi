@@ -60,6 +60,7 @@ class Plugin {
 		// Metaboxes & Meta handlers (must run for both Admin UI and REST API requests).
 		new \ROI\Metaboxes\Exercice\Manager();
 		new \ROI\Metaboxes\Cours\Builder();
+		new \ROI\Metaboxes\Cours\Audience();
 		new \ROI\Metaboxes\Lecon\Settings();
 		( new \ROI\Metaboxes\Partie() )->init();
 

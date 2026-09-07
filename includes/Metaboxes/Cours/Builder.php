@@ -71,6 +71,7 @@ class Builder {
 		$desired_order = array(
 			'pageparentdiv',
 			'roi_cours_level_box',
+			'roi_cours_audience_box',
 			'roi_chapitrediv',
 			'taxonomy-roi_chapitre',
 		);

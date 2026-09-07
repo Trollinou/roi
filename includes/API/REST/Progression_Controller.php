@@ -132,6 +132,32 @@ class Progression_Controller {
 				),
 			)
 		);
+
+		// Route des groupes d'adhérents (Entraîneur) - GET /wp-json/roi/v1/progression/groupes.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/groupes',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'obtenir_groupes_eleves' ),
+					'permission_callback' => array( $this, 'check_entraineur_permissions' ),
+				),
+			)
+		);
+
+		// Route d'assignation d'un cours à un élève (Entraîneur) - POST /wp-json/roi/v1/progression/assigner-cours.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/assigner-cours',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'assigner_cours_eleve' ),
+					'permission_callback' => array( $this, 'check_entraineur_permissions' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -362,6 +388,34 @@ class Progression_Controller {
 		$users  = $query->get_results();
 		$groupe = array();
 
+		// Pré-chargement des cours assignés (restreints) pour identifier les cours affectés par élève.
+		$restricted_courses_query = get_posts(
+			array(
+				'post_type'      => 'roi_cours',
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				'meta_query'     => array(
+					array(
+						'key'   => '_roi_cours_audience_type',
+						'value' => 'restricted',
+					),
+				),
+			)
+		);
+		$restricted_courses = array();
+		foreach ( $restricted_courses_query as $c_post ) {
+			$raw_groups  = get_post_meta( $c_post->ID, '_roi_cours_target_groups', true );
+			$c_groups    = ( is_string( $raw_groups ) && '' !== $raw_groups ) ? ( json_decode( $raw_groups, true ) ?: array() ) : array();
+			$raw_members = get_post_meta( $c_post->ID, '_roi_cours_target_members', true );
+			$c_members   = ( is_string( $raw_members ) && '' !== $raw_members ) ? ( json_decode( $raw_members, true ) ?: array() ) : array();
+
+			$restricted_courses[] = array(
+				'id'      => $c_post->ID,
+				'groups'  => array_map( 'intval', (array) $c_groups ),
+				'members' => array_map( 'intval', (array) $c_members ),
+			);
+		}
+
 		foreach ( $users as $user ) {
 			$user_meta = get_user_meta( $user->ID );
 			if ( ! is_array( $user_meta ) ) {
@@ -431,6 +485,7 @@ class Progression_Controller {
 				$display_id    = $user->ID;
 				$identity_type = 'user';
 				$parent_user   = null;
+				$adherent_id   = 0;
 
 				if ( '_roi_element_valide' !== $key ) {
 					$identity = str_replace( '_roi_element_valide_', '', $key );
@@ -470,16 +525,46 @@ class Progression_Controller {
 					$nom    = '';
 				}
 
+				// Récupération des groupes dame_group et des cours assignés pour l'élève.
+				$student_groups      = array();
+				$assigned_course_ids = array();
+
+				if ( 'member' === $identity_type && $adherent_id > 0 ) {
+					if ( taxonomy_exists( 'dame_group' ) ) {
+						$terms = wp_get_object_terms( $adherent_id, 'dame_group' );
+						if ( is_array( $terms ) && ! empty( $terms ) ) {
+							foreach ( $terms as $t ) {
+								if ( $t instanceof \WP_Term ) {
+									$student_groups[] = array(
+										'id'   => (int) $t->term_id,
+										'name' => html_entity_decode( (string) $t->name, ENT_QUOTES | ENT_HTML5, 'UTF-8' ),
+										'slug' => (string) $t->slug,
+									);
+								}
+							}
+						}
+					}
+
+					$group_ids = array_column( $student_groups, 'id' );
+					foreach ( $restricted_courses as $rc ) {
+						if ( in_array( $adherent_id, $rc['members'], true ) || ! empty( array_intersect( $group_ids, $rc['groups'] ) ) ) {
+							$assigned_course_ids[] = $rc['id'];
+						}
+					}
+				}
+
 				$groupe[] = array(
-					'id'               => $user->ID . '__' . $key, // ID unique pour le tableau React (double underscore).
-					'display_id'       => $display_id,
-					'identity_type'    => $identity_type,
-					'parent_user'      => $parent_user,
-					'nom'              => $nom,
-					'prenom'           => $prenom,
-					'display_name'     => $display_name,
-					'elements_valides' => $elements_valides,
-					'details'          => (object) $details,
+					'id'                  => $user->ID . '__' . $key, // ID unique pour le tableau React (double underscore).
+					'display_id'          => $display_id,
+					'identity_type'       => $identity_type,
+					'parent_user'         => $parent_user,
+					'nom'                 => $nom,
+					'prenom'              => $prenom,
+					'display_name'        => $display_name,
+					'groups'              => $student_groups,
+					'assigned_course_ids' => $assigned_course_ids,
+					'elements_valides'    => $elements_valides,
+					'details'             => (object) $details,
 				);
 			}
 		}
@@ -891,5 +976,97 @@ class Progression_Controller {
 			),
 			200
 		);
+	}
+
+	/**
+	 * Assigne ou retire un cours ciblé pour un élève (Entraîneur).
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return WP_REST_Response|\WP_Error
+	 */
+	public function assigner_cours_eleve( WP_REST_Request $request ): WP_REST_Response|\WP_Error {
+		$adherent_id = (int) $request->get_param( 'adherent_id' );
+		$cours_id    = (int) $request->get_param( 'cours_id' );
+		$action      = sanitize_key( (string) ( $request->get_param( 'action' ) ?: 'assign' ) );
+
+		if ( $adherent_id <= 0 || $cours_id <= 0 ) {
+			return new \WP_Error(
+				'invalid_params',
+				__( 'Identifiant d\'élève ou de cours invalide.', 'roi' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$cours_post = get_post( $cours_id );
+		if ( ! $cours_post || 'roi_cours' !== $cours_post->post_type ) {
+			return new \WP_Error(
+				'course_not_found',
+				__( 'Cours introuvable.', 'roi' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		// Récupérer les membres cibles actuels.
+		$raw_members    = get_post_meta( $cours_id, '_roi_cours_target_members', true );
+		$target_members = array();
+		if ( is_string( $raw_members ) && '' !== $raw_members ) {
+			$decoded = json_decode( $raw_members, true );
+			if ( is_array( $decoded ) ) {
+				$target_members = array_map( 'intval', $decoded );
+			}
+		}
+
+		if ( 'assign' === $action ) {
+			if ( ! in_array( $adherent_id, $target_members, true ) ) {
+				$target_members[] = $adherent_id;
+			}
+			update_post_meta( $cours_id, '_roi_cours_audience_type', 'restricted' );
+		} else {
+			$target_members = array_values( array_diff( $target_members, array( $adherent_id ) ) );
+		}
+
+		update_post_meta( $cours_id, '_roi_cours_target_members', wp_json_encode( array_values( array_unique( $target_members ) ) ) );
+
+		return new WP_REST_Response(
+			array(
+				'success'        => true,
+				'message'        => ( 'assign' === $action ) ? __( 'Cours assigné avec succès.', 'roi' ) : __( 'Cours retiré des assignations.', 'roi' ),
+				'cours_id'       => $cours_id,
+				'adherent_id'    => $adherent_id,
+				'target_members' => $target_members,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Retourne la liste des groupes dame_group actifs.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return WP_REST_Response
+	 */
+	public function obtenir_groupes_eleves( WP_REST_Request $request ): WP_REST_Response { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		$groups = array();
+		if ( taxonomy_exists( 'dame_group' ) ) {
+			$terms = get_terms(
+				array(
+					'taxonomy'   => 'dame_group',
+					'hide_empty' => false,
+				)
+			);
+			if ( is_array( $terms ) ) {
+				foreach ( $terms as $t ) {
+					if ( $t instanceof \WP_Term ) {
+						$groups[] = array(
+							'id'    => (int) $t->term_id,
+							'name'  => html_entity_decode( (string) $t->name, ENT_QUOTES | ENT_HTML5, 'UTF-8' ),
+							'slug'  => (string) $t->slug,
+							'count' => (int) $t->count,
+						);
+					}
+				}
+			}
+		}
+		return new WP_REST_Response( $groups, 200 );
 	}
 }

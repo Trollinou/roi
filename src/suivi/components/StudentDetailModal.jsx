@@ -67,12 +67,47 @@ export default function StudentDetailModal( {
 	apiUrl,
 	nonce,
 	onStudentRemoved,
+	onCourseAssigned,
 } ) {
 	const [ expandedLevels, setExpandedLevels ] = useState( {} );
 	const [ expandedChapters, setExpandedChapters ] = useState( {} );
 	const [ expandedCourses, setExpandedCourses ] = useState( {} );
 	const [ filterType, setFilterType ] = useState( 'all' ); // 'all', 'validated', 'pending'
 	const [ removing, setRemoving ] = useState( false );
+	const [ isAssignModalOpen, setIsAssignModalOpen ] = useState( false );
+	const [ assigningCourseId, setAssigningCourseId ] = useState( null );
+
+	const handleToggleCourseAssignment = async ( courseId, isCurrentlyAssigned ) => {
+		if ( ! student || student.identity_type !== 'member' ) return;
+		setAssigningCourseId( courseId );
+		try {
+			const res = await fetch( `${ apiUrl }/progression/assigner-cours`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-WP-Nonce': nonce,
+				},
+				body: JSON.stringify( {
+					adherent_id: student.display_id,
+					cours_id: courseId,
+					action: isCurrentlyAssigned ? 'unassign' : 'assign',
+				} ),
+			} );
+			const json = await res.json();
+			if ( res.ok && json.success ) {
+				if ( onCourseAssigned ) {
+					onCourseAssigned();
+				}
+			} else {
+				alert( json.message || 'Erreur lors de l\'assignation du cours.' );
+			}
+		} catch ( err ) {
+			console.error( 'Assign course error', err );
+			alert( 'Erreur réseau ou permission refusée.' );
+		} finally {
+			setAssigningCourseId( null );
+		}
+	};
 
 	const handleRemoveFromTracking = async () => {
 		if ( ! student ) return;
@@ -227,9 +262,27 @@ export default function StudentDetailModal( {
 					} }
 				>
 					<div>
-						<h2 style={ { margin: '0 0 4px 0', fontSize: '18px', fontWeight: '700', color: '#1d2327' } }>
-							{ studentName }
-						</h2>
+						<div style={ { display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' } }>
+							<h2 style={ { margin: 0, fontSize: '18px', fontWeight: '700', color: '#1d2327' } }>
+								{ studentName }
+							</h2>
+							{ ( student.groups || [] ).map( ( g ) => (
+								<span
+									key={ g.id }
+									style={ {
+										fontSize: '11px',
+										background: '#e0f2fe',
+										color: '#0369a1',
+										border: '1px solid #bae6fd',
+										padding: '1px 6px',
+										borderRadius: '12px',
+										fontWeight: 500,
+									} }
+								>
+									{ decodeEntities( g.name ) }
+								</span>
+							) ) }
+						</div>
 						<div style={ { display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', fontSize: '12px', color: '#646970' } }>
 							<span>
 								{ student.identity_type === 'member' ? (
@@ -495,17 +548,46 @@ export default function StudentDetailModal( {
 																				} }
 																				onClick={ () => toggleCourse( course.id ) }
 																			>
-																				<div style={ { display: 'flex', alignItems: 'center', gap: '8px' } }>
+																				<div style={ { display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' } }>
 																					<span style={ { fontSize: '12px', color: '#888' } }>{ isExpanded ? '▲' : '▼' }</span>
 																					<span style={ { fontWeight: '600', fontSize: '13px', color: '#1d2327' } }>
 																						{ decodeEntities( course.titre ) }
 																					</span>
+																					{ ( course.is_assigned || ( student.assigned_course_ids || [] ).includes( course.id ) ) && (
+																						<span style={ { fontSize: '10px', background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a', padding: '1px 6px', borderRadius: '3px', fontWeight: '600' } }>
+																							📌 Assigné
+																						</span>
+																					) }
 																					<span style={ { fontSize: '11px', color: '#646970', background: '#f0f0f1', padding: '2px 6px', borderRadius: '3px' } }>
 																						{ courseValidatedCount }/{ playlist.length } ({ coursePercentage }%)
 																					</span>
 																				</div>
 
 																				<div style={ { display: 'flex', alignItems: 'center', gap: '8px' } }>
+																					{ student.identity_type === 'member' && (
+																						<button
+																							type="button"
+																							onClick={ ( e ) => {
+																								e.stopPropagation();
+																								const isAssigned = ( student.assigned_course_ids || [] ).includes( course.id );
+																								handleToggleCourseAssignment( course.id, isAssigned );
+																							} }
+																							disabled={ assigningCourseId === course.id }
+																							title={ ( student.assigned_course_ids || [] ).includes( course.id ) ? 'Retirer ce cours des assignations de cet élève' : 'Assigner ce cours à cet élève' }
+																							style={ {
+																								padding: '4px 8px',
+																								fontSize: '11px',
+																								fontWeight: '600',
+																								borderRadius: '3px',
+																								border: ( student.assigned_course_ids || [] ).includes( course.id ) ? '1px solid #f59e0b' : '1px solid #c3c4c7',
+																								background: ( student.assigned_course_ids || [] ).includes( course.id ) ? '#fffbeb' : '#fff',
+																								color: ( student.assigned_course_ids || [] ).includes( course.id ) ? '#b45309' : '#50575e',
+																								cursor: 'pointer',
+																							} }
+																						>
+																							{ assigningCourseId === course.id ? '...' : ( ( student.assigned_course_ids || [] ).includes( course.id ) ? '📌 Désassigner' : '＋ Assigner' ) }
+																						</button>
+																					) }
 																					{ courseValidatedCount < playlist.length && (
 																						<button
 																							type="button"
