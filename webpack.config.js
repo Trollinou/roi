@@ -66,6 +66,26 @@ module.exports = {
 				{
 					from: path.resolve(
 						__dirname,
+						'src/blocks/chessboard/style.css'
+					),
+					to: path.resolve(
+						__dirname,
+						'build/diagramme/chessboard-style.css'
+					),
+				},
+				{
+					from: path.resolve(
+						__dirname,
+						'src/blocks/chessboard/style.css'
+					),
+					to: path.resolve(
+						__dirname,
+						'build/pgn/chessboard-style.css'
+					),
+				},
+				{
+					from: path.resolve(
+						__dirname,
 						'src/blocks/chessboard/block.json'
 					),
 					to: path.resolve(__dirname, 'build/chessboard/block.json'),

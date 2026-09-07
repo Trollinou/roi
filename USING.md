@@ -28,6 +28,27 @@ Pour afficher un échiquier interactif n'importe où sur votre site (article, pa
 - `coordinates` : Affiche les coordonnées des cases (`true` ou `false`).
 - `freeMode` : Active le mode libre permettant de bouger toutes les pièces sans règle de tour de jeu (`true` ou `false`).
 
+## Blocs Gutenberg
+
+Le plugin fournit trois blocs Gutenberg pour l'éditeur de contenu de WordPress :
+
+### 1. Bloc Échiquier Interactif (`roi/chessboard`)
+Permet d'insérer un échiquier jouable en front-office avec plusieurs modes configurables via l'Inspecteur de bloc :
+* **Démonstration :** Affichage d'une position statique.
+* **Mode libre :** Déplacement libre des pièces pour analyse ou résolution de problèmes.
+* **Partie vs IA Stockfish :** Jeu direct contre le moteur d'échecs (mutualisé via l'extension DAME-PWA) avec réglage du niveau ELO (1320 à 2800), barre d'évaluation et pendule de jeu.
+
+### 2. Bloc Diagramme (`roi/diagramme`)
+Permet d'insérer un diagramme d'échecs (position statique issue d'un format FEN) avec formes et flèches d'annotation :
+* **Aperçu dans le canevas :** Affichage centré et fidèle de l'échiquier.
+* **Édition en modale dédiée :** Cliquez sur l'échiquier ou sur le bouton « ✏️ Modifier le diagramme » pour ouvrir `RoiFenEditor` dans une modale isolée. Vous pouvez y déposer ou déplacer les pièces par glisser-déposer, vider l'échiquier, définir les roques et tracer des flèches/cases colorées.
+* **Enregistrement :** Cliquez sur « Appliquer cette position » pour valider et fermer la modale.
+
+### 3. Bloc Partie PGN (`roi/pgn`)
+Permet d'afficher et de rejouer une partie d'échecs complète :
+* **Navigation intégrée :** L'aperçu dans l'éditeur et l'affichage en front-office disposent d'une barre de navigation rapide (⏮ Début, ◀ Coup précédent, ▶ Coup suivant, ⏭ Fin de partie).
+* **Édition en modale dédiée :** Le bouton « ✏️ Modifier la partie PGN » ouvre `RoiPgnEditor` pour charger ou coller une séquence PGN avec validation syntaxique instantanée.
+
 ## Rôles
 
 Ce plugin ajoute les capacités suivantes au rôle "Entraineur":

@@ -158,10 +158,13 @@ const PgnEditor = forwardRef(function PgnEditor({
     []
   );
 
-  // Exposer redrawBoard() au composant parent via ref
+  // Exposer clearDomBounds() et redrawBoard() au composant parent via ref
   useImperativeHandle(ref, () => ({
+    clearDomBounds() {
+      boardApiRef.current?.clearDomBounds();
+    },
     redrawBoard() {
-      boardApiRef.current?.redraw(true);
+      boardApiRef.current?.clearDomBounds();
     }
   }));
 

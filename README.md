@@ -45,15 +45,18 @@ Ce plugin nécessite que le plugin **DAME** soit installé et activé. Le plugin
 *   **Suivi de la Progression des Utilisateurs :** Les membres connectés peuvent marquer les leçons comme terminées. (Note : Les fonctionnalités de suivi complètes sont gérées par le plugin DAME).
 *   **Interface d'Exercices Interactifs :** Un shortcode `[roi_exercices]` qui génère un système de quiz public avec des retours immédiats.
 
-### Bloc d'Échiquier Interactif (`roi/chessboard`)
+### Blocs Gutenberg
 
-*   **Modes Multiples :**
-    *   **Démonstration :** Un échiquier statique pour afficher des positions.
-    *   **Mode libre (Free Move) :** Permet le déplacement libre et alterné/consécutif des pièces pour la mise en place et la résolution de problèmes sans restriction de tour.
-    *   **Partie vs IA :** Jouez contre le moteur Stockfish intégré avec une force ELO réglable, une boîte de dialogue de démarrage et une barre d'évaluation dynamique.
-*   **Éditeur de FEN Visuel :** Un outil puissant dans l'éditeur pour créer visuellement n'importe quelle position sur l'échiquier. L'éditeur fournit une validation FEN en temps réel.
-*   **Haute Personnalisation :** Contrôlez l'orientation de l'échiquier, les coordonnées et les menaces.
-*   **Moteur Robuste :** Propulsé par `chessops` pour la logique de jeu et `Chessground` pour le rendu, garantissant un comportement moderne, tactile et fiable.
+*   **Échiquier Interactif (`roi/chessboard`) :**
+    *   **Modes Multiples :** Démonstration statique, Mode libre (Free Move), ou Partie vs IA Stockfish avec force ELO réglable, barre d'évaluation et pendule.
+    *   **Éditeur Visuel :** Édition visuelle complète de la position avec validation FEN en temps réel.
+    *   **Moteur Robuste :** Propulsé par `chessops` pour la logique et `Chessground` pour le rendu tactile et réactif.
+*   **Diagramme FEN (`roi/diagramme`) :**
+    *   Aperçu épuré et centré du diagramme avec orientation dynamique selon le trait.
+    *   Éditeur visuel dédié ouvert en modale isolée (`RoiFenEditor`) permettant de poser/déplacer les pièces par glisser-déposer, vider l'échiquier, définir les roques et dessiner flèches et surbrillances sans perturbation de layout.
+*   **Lecteur / Éditeur PGN (`roi/pgn`) :**
+    *   Aperçu interactif dans l'éditeur avec barre de navigation coup par coup (⏮, ◀, ▶, ⏭).
+    *   Modale d'édition dédiée (`RoiPgnEditor`) avec import PGN, validation syntaxique temps réel, exécution des coups et enregistrement direct dans le bloc.
 
 ### Administration
 
@@ -119,12 +122,20 @@ Le plugin expose plusieurs points de terminaison REST sous le namespace `/wp-jso
 3.  Utilisez les champs personnalisés pour définir la difficulté et d'autres détails pertinents.
 4.  Pour les cours, utilisez la meta box **Constructeur de Cours** pour assembler votre programme.
 
-### Utilisation du Bloc Échiquier
+### Utilisation des Blocs Gutenberg
 
-1.  Dans l'éditeur de blocs, ajoutez un nouveau bloc et recherchez "Gutenberg Chessboard" (ou "Échiquier").
-2.  Utilisez les contrôles de la barre latérale du bloc (l'Inspecteur) pour configurer l'apparence et le mode de jeu (IA Stockfish, barre d'évaluation, pendule, etc.).
-3.  Le moteur Stockfish est mutualisé et fourni automatiquement par l'extension **DAME-PWA** via le filtre `dame_pwa_stockfish_worker_url`.
-4.  Utilisez l'éditeur visuel à l'intérieur du bloc pour définir les positions de pièces souhaitées, ou collez une chaîne FEN valide.
+1.  **Bloc Échiquier (`roi/chessboard`) :**
+    - Ajoutez le bloc "Échiquier" (ou "Gutenberg Chessboard").
+    - Utilisez les contrôles de la barre latérale (Inspecteur) pour régler le mode de jeu (IA Stockfish, barre d'évaluation, pendule, orientation).
+    - Le moteur Stockfish est mutualisé et fourni automatiquement par l'extension **DAME-PWA** via le filtre `dame_pwa_stockfish_worker_url`.
+2.  **Bloc Diagramme (`roi/diagramme`) :**
+    - Ajoutez le bloc "Diagramme d'échecs".
+    - Cliquez sur l'échiquier ou sur le bouton « ✏️ Modifier le diagramme » pour ouvrir la modale d'édition `FenEditor`.
+    - Ajustez la position (glisser-déposer, palette de pièces), ajoutez vos flèches/cases colorées, puis validez avec « Appliquer cette position ».
+3.  **Bloc PGN (`roi/pgn`) :**
+    - Ajoutez le bloc "Partie PGN".
+    - Cliquez sur « ✏️ Modifier la partie PGN » pour charger votre fichier ou texte PGN dans la modale `PgnEditor`.
+    - Naviguez directement dans la partie sur l'aperçu du bloc grâce aux boutons Début, Précédent, Suivant, Fin.
 
 ### Shortcodes
 

@@ -10,10 +10,13 @@
   padding-bottom: 100%;
   width: 100%;
   cursor: pointer;
+  container-type: inline-size;
 }
 
 .cg-wrap {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
 }
@@ -99,7 +102,8 @@ cg-board square.current-premove {
   background-color: rgba(20, 30, 85, 0.5);
 }
 
-cg-board piece {
+cg-board piece,
+.cg-wrap piece {
   position: absolute;
   top: 0;
   left: 0;
@@ -108,11 +112,12 @@ cg-board piece {
   background-size: cover;
   z-index: 2;
   will-change: transform;
+  pointer-events: none;
 }
 
 cg-board piece.dragging {
   cursor: move;
-  z-index: 9;
+  z-index: 11 !important;
 }
 
 cg-board piece.anim {
@@ -141,7 +146,7 @@ cg-container {
   height: 100%;
   display: block;
   top: 0;
-  right: 0;
+  left: 0;
 }
 
 cg-board {
@@ -389,28 +394,72 @@ cg-board .king.black {
   }
 }
 
-/* Promotion Dialog Styles */
-
-.promotion-dialog {
-  padding: 0.8rem;
-  position: absolute;
-  background-color: #f0d9b5;
-  width: 60%;
-  z-index: 999;
-  top: 41%;
-  height: 13%;
-  min-height: 40px;
-  display: flex;
-  border: 2px solid #333;
+.fen-editor-board-col .main-wrap,
+.pgn-editor-left-col .main-wrap {
+  width: 100% !important;
+  max-width: 380px !important;
+  margin: 0 !important;
 }
 
-.promotion-dialog button {
-  pointer-events: all;
-  background: none;
-  border: none;
+/* Promotion Dialog Styles */
+
+dialog.promotion-dialog,
+.promotion-dialog {
+  all: unset;
+  z-index: 1000;
+  box-sizing: border-box;
+  background: #f0d9b5;
+  border: clamp(2px, 0.4cqw, 4px) solid #b58863;
+  border-radius: clamp(6px, 1.8cqw, 14px);
+  width: max-content;
+  max-width: 90%;
+  height: auto;
+  margin: 0;
+  padding: 1.5cqw 2cqw;
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  pointer-events: auto !important;
+}
+
+.promotion-pieces {
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 1.8cqw;
+  display: flex;
+}
+
+.promotion-dialog button,
+.promotion-piece-btn {
   cursor: pointer;
-  width: 100%;
-  height: 100%;
+  background: #fff 50%/92% 92% no-repeat;
+  border: clamp(1px, 0.35cqw, 3px) solid #b58863;
+  border-radius: clamp(4px, 1.5cqw, 10px);
+  justify-content: center;
+  align-items: center;
+  width: 11.25cqw;
+  height: 11.25cqw;
+  min-width: 36px;
+  min-height: 36px;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  pointer-events: auto !important;
+}
+
+.promotion-dialog button:hover,
+.promotion-piece-btn:hover {
+  background-color: #e6c89c;
+  border-color: #8b5a2b;
+  transform: scale(1.08);
+}
+
+.promotion-dialog button:active,
+.promotion-piece-btn:active {
+  transform: scale(0.95);
 }
 
 /* Editor Piece Palette Styles */
@@ -844,3 +893,59 @@ cg-board.editor-palette-board {
   background: #15781B !important;
   color: #fff !important;
 }
+
+/* Modales Gutenberg pour FenEditor et PgnEditor */
+@keyframes roiModalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.components-modal__frame.roi-fen-editor-modal,
+.components-modal__frame.roi-pgn-editor-modal {
+  animation: roiModalFadeIn 0.15s ease-out !important;
+  transform: none !important;
+  max-width: 860px !important;
+  width: 95% !important;
+  max-height: 92vh !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
+  overflow: hidden !important;
+}
+
+.components-modal__frame.roi-fen-editor-modal .components-modal__header,
+.components-modal__frame.roi-pgn-editor-modal .components-modal__header {
+  padding: 16px 24px !important;
+  border-bottom: 1px solid #eee !important;
+}
+
+.components-modal__frame.roi-fen-editor-modal .components-modal__header-heading,
+.components-modal__frame.roi-pgn-editor-modal .components-modal__header-heading {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+}
+
+.components-modal__frame.roi-fen-editor-modal .components-modal__content,
+.components-modal__frame.roi-pgn-editor-modal .components-modal__content {
+  padding: 20px 25px 25px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.fen-editor-board-col .main-board,
+.pgn-editor-left-col .main-board {
+  width: 380px !important;
+  height: 380px !important;
+  max-width: 380px !important;
+  max-height: 380px !important;
+  padding-bottom: 0 !important;
+  aspect-ratio: 1 / 1 !important;
+  position: relative !important;
+}
+
+

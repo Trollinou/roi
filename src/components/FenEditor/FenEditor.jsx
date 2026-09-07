@@ -22,6 +22,7 @@ import "./FenEditor.css";
 const FenEditor = forwardRef(function FenEditor({
   initialFen,
   fen,
+  orientation: propOrientation,
   onSave,
   boardConfig = {},
   initialShapes = [],
@@ -37,13 +38,13 @@ const FenEditor = forwardRef(function FenEditor({
   const initialPlacement = parts[0] || "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
   const initialTurn = parts[1] || "w";
   const initialCastling = parts[2] || "KQkq";
-  const initialOrientation = initialTurn === "b" ? "black" : "white";
+  const effectiveOrientation = diagram?.orientation || initialDiagram?.orientation || propOrientation || (initialTurn === "b" ? "black" : "white");
 
   // États de la FEN
   const [position, setPosition] = useState(initialPlacement);
   const [turn, setTurn] = useState(initialTurn);
   const [castling, setCastling] = useState(initialCastling);
-  const [orientation, setOrientation] = useState(initialOrientation);
+  const [orientation, setOrientation] = useState(effectiveOrientation);
   const [importFenText, setImportFenText] = useState("");
   const [selectedPiece, setSelectedPiece] = useState(null); // { role, color } ou "eraser" ou null
   const [currentShapes, setCurrentShapes] = useState(effectiveShapes);
@@ -330,8 +331,11 @@ function parsePgnOrFen(text) {
 
   // Exposer redrawBoard(), getDiagram() et setDiagram() au composant parent via ref
   useImperativeHandle(ref, () => ({
+    clearDomBounds() {
+      boardApiRef.current?.clearDomBounds();
+    },
     redrawBoard() {
-      boardApiRef.current?.redraw(true);
+      boardApiRef.current?.clearDomBounds();
     },
     getDiagram() {
       const finalFen = `${position} ${turn} ${castling} - 0 1`;

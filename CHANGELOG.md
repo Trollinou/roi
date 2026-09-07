@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+*   **Refonte et Stabilisation des Blocs Gutenberg Diagramme & PGN (`diagramme`, `pgn`, `useChessBoard.js`, `FenEditor`, `PgnEditor`) :**
+    *   **Architecture en Modales Dédiées (`@wordpress/components`) :** Remplacement de l'édition inline dans le canevas Gutenberg par des fenêtres modales isolées (`<Modal>`) portées directement sur `document.body` à l'identique du constructeur d'Exercice. Résout définitivement les conflits de référentiel géométrique, les décalages de drag & drop des pièces vers l'extérieur de l'échiquier et rétablit une séparation claire entre l'aperçu du bloc et l'interface d'édition.
+    *   **Suppression du Redimensionnement Différé / Saut de l'Échiquier :** Neutralisation de l'animation de zoom native des modales Gutenberg (`scale(0.9) -> scale(1)`) via une transition en fondu propre (`roiModalFadeIn`, `transform: none !important`), verrouillage synchrone des dimensions de l'échiquier à 380px et élimination des `setTimeout` de recalcul différé dans `useChessBoard.js`. L'échiquier s'affiche instantanément à sa taille finale sans saccade ni saut visuel.
+    *   **Fluidité du Glisser-Déposer & Synchronisation Événements :** Pont automatique des événements de souris/toucher (`pointerdown`, `mousemove`, `mouseup`) et invalidation ciblée du cache géométrique `clearDomBounds()` au début du déplacement.
+    *   **Correction de la Boîte de Promotion :** Restauration de l'alignement horizontal (`flex-direction: row`) et des styles des pièces de promotion dans `FenEditor.css`.
+    *   **Compatibilité & Assets :** Feuilles de style déclarées (`editorStyle`, `style`) avec `apiVersion: 2` préservé et duplication automatisée de `chessboard-style.css` via Webpack pour l'éditeur et le front-office.
+
 *   **Nouveau Type de Contenu Vidéo Pédagogique (`roi_video`) :**
     *   **CPT `roi_video` & Taxonomie (`Video.php`, `Manager.php`, `Chapitre_Taxonomy.php`) :** Création du CPT dédié aux vidéos YouTube avec rattachement natif à la taxonomie `roi_chapitre` et icône Dashicons `dashicons-video-alt3`.
     *   **Metabox Paramètres Vidéo (`Settings.php`) :** Saisie de l'URL YouTube, extraction automatique de l'identifiant YouTube (11 caractères), durée indicative, niveau (1 à 4) et lecteur d'aperçu intégré dans l'administration.

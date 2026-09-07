@@ -1,32 +1,19 @@
-import { useBlockProps } from '@wordpress/block-editor';
-import { useEffect, useRef } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, BlockControls } from '@wordpress/block-editor';
+import {
+	Modal,
+	Button,
+	ToolbarGroup,
+	ToolbarButton,
+} from '@wordpress/components';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import RoiFenEditor from '../../components/FenEditor';
 import { BoardCore as EgBoardCore } from 'eg-chessboard';
 
-export default function Edit({
-	attributes,
-	setAttributes,
-	isSelected,
-	clientId,
-}) {
+export default function Edit({ attributes, setAttributes }) {
+	const [isModalOpen, setIsModalOpen] = useState(false);
 	const previewBoardRef = useRef(null);
 	const previewInstanceRef = useRef(null);
-	const editorRef = useRef(null); // Ref vers l'instance RoiFenEditor pour redrawBoard()
-
-	const handleMouseDownCapture = () => {
-		// Forcer le recalcul des bounds Chessground AVANT que Gutenberg traite l'événement.
-		// Nécessaire car la toolbar Gutenberg décale la position du bloc dans l'iFrame
-		// après le premier rendu, invalidant les coordonnées mémoïsées par Chessground.
-		if (
-			editorRef.current &&
-			typeof editorRef.current.redrawBoard === 'function'
-		) {
-			editorRef.current.redrawBoard();
-		}
-		if (window.wp?.data?.dispatch && clientId) {
-			window.wp.data.dispatch('core/block-editor').selectBlock(clientId);
-		}
-	};
 
 	const handleSave = (data) => {
 		if (typeof data === 'object' && data !== null) {
@@ -42,17 +29,12 @@ export default function Edit({
 		} else if (typeof data === 'string') {
 			setAttributes({ fen: data });
 		}
-
-		// Sortir du mode édition en désélectionnant le bloc dans Gutenberg
-		if (window.wp?.data?.dispatch) {
-			window.wp.data.dispatch('core/block-editor').clearSelectedBlock();
-		}
+		setIsModalOpen(false);
 	};
 
-	// Preview Board Initialization (when not selected)
+	// Preview Board Initialization
 	useEffect(() => {
-		if (!isSelected && previewBoardRef.current && EgBoardCore) {
-			// Clean up previous preview if any
+		if (previewBoardRef.current && EgBoardCore) {
 			if (previewInstanceRef.current) {
 				previewInstanceRef.current.destroy();
 				previewInstanceRef.current = null;
@@ -72,7 +54,7 @@ export default function Edit({
 					enabled: false,
 				},
 				drawable: {
-					enabled: true,
+					enabled: false,
 				},
 			};
 
@@ -105,58 +87,83 @@ export default function Edit({
 				boardAPI?.destroy();
 			};
 		}
-	}, [isSelected, attributes.fen, attributes.orientation, attributes.shapes]);
+	}, [attributes.fen, attributes.orientation, attributes.shapes]);
 
 	const blockProps = useBlockProps({
-		className: isSelected ? '' : 'roi-bloc-diagramme-preview',
-		style: isSelected
-			? {}
-			: {
-					cursor: 'pointer',
-					background: 'transparent',
-					display: 'flex',
-					justifyContent: 'center',
-				},
+		className: 'roi-bloc-diagramme-preview',
+		style: {
+			display: 'flex',
+			flexDirection: 'column',
+			alignItems: 'center',
+			width: '100%',
+		},
 	});
 
-	if (isSelected && RoiFenEditor) {
-		return (
-			<div {...blockProps} onMouseDownCapture={handleMouseDownCapture}>
-				<RoiFenEditor
-					ref={editorRef}
-					fen={attributes.fen}
-					orientation={attributes.orientation}
-					initialShapes={attributes.shapes || []}
-					onSave={handleSave}
-				/>
-			</div>
-		);
-	}
-
-	// Preview Mode - Only displays the board, clean and centered
 	return (
-		<div {...blockProps} onMouseDownCapture={handleMouseDownCapture}>
-			<div
-				style={{
-					pointerEvents: 'none',
-					display: 'flex',
-					justifyContent: 'center',
-					width: '100%',
-				}}
-			>
+		<>
+			<BlockControls>
+				<ToolbarGroup>
+					<ToolbarButton
+						icon="edit"
+						label={__('Modifier le diagramme', 'roi')}
+						onClick={() => setIsModalOpen(true)}
+					/>
+				</ToolbarGroup>
+			</BlockControls>
+
+			<div {...blockProps}>
 				<div
+					className="main-wrap piece-set-cburnett board-theme-brown"
 					style={{
 						width: '320px',
 						height: '320px',
 						position: 'relative',
+						overflow: 'hidden',
+						cursor: 'pointer',
+					}}
+					onClick={() => setIsModalOpen(true)}
+					title={__('Cliquer pour modifier le diagramme', 'roi')}
+					role="button"
+					tabIndex={0}
+					onKeyDown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') {
+							setIsModalOpen(true);
+						}
 					}}
 				>
 					<div
 						ref={previewBoardRef}
-						style={{ width: '100%', height: '100%' }}
+						style={{
+							width: '100%',
+							height: '100%',
+							position: 'relative',
+						}}
 					/>
 				</div>
+
+				<Button
+					variant="secondary"
+					onClick={() => setIsModalOpen(true)}
+					style={{ marginTop: '12px' }}
+				>
+					{__('✏️ Modifier le diagramme', 'roi')}
+				</Button>
 			</div>
-		</div>
+
+			{isModalOpen && (
+				<Modal
+					title={__('Éditeur de Position FEN', 'roi')}
+					onRequestClose={() => setIsModalOpen(false)}
+					className="roi-fen-editor-modal"
+				>
+					<RoiFenEditor
+						fen={attributes.fen}
+						orientation={attributes.orientation}
+						initialShapes={attributes.shapes || []}
+						onSave={handleSave}
+					/>
+				</Modal>
+			)}
+		</>
 	);
 }
