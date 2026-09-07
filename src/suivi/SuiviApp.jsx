@@ -111,6 +111,18 @@ export default function SuiviApp() {
 		return stats;
 	}, [ students ] );
 
+	const availableGroups = useMemo( () => {
+		const map = new Map();
+		students.forEach( ( s ) => {
+			( s.groups || [] ).forEach( ( g ) => {
+				if ( g && g.id && ! map.has( g.id ) ) {
+					map.set( g.id, g );
+				}
+			} );
+		} );
+		return Array.from( map.values() ).sort( ( a, b ) => a.name.localeCompare( b.name ) );
+	}, [ students ] );
+
 	const handleResetCourse = async ( studentId, courseId, courseName ) => {
 		const label = courseName ? `du cours "${ courseName }"` : 'de ce cours';
 		if ( ! window.confirm( `Voulez-vous vraiment réinitialiser la progression ${ label } pour cet élève ? L'élève devra refaire toutes les leçons et exercices associés.` ) ) {
@@ -308,18 +320,6 @@ export default function SuiviApp() {
 
 	const uniqueLevels = [ ...new Set( courses.map( ( c ) => c.niveau ) ) ].sort( ( a, b ) => a - b );
 	const uniqueChapters = [ ...new Set( courses.map( ( c ) => c.chapitre_nom ).filter( Boolean ) ) ];
-
-	const availableGroups = useMemo( () => {
-		const map = new Map();
-		students.forEach( ( s ) => {
-			( s.groups || [] ).forEach( ( g ) => {
-				if ( g && g.id && ! map.has( g.id ) ) {
-					map.set( g.id, g );
-				}
-			} );
-		} );
-		return Array.from( map.values() ).sort( ( a, b ) => a.name.localeCompare( b.name ) );
-	}, [ students ] );
 
 	const filteredStudents = students.filter( ( student ) => {
 		const fullName = normalizeText( `${ student.prenom || '' } ${ student.nom || '' } ${ student.display_name || '' }` );
