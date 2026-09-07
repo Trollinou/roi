@@ -38,6 +38,9 @@ Ce plugin nécessite que le plugin **DAME** soit installé et activé. Le plugin
     *   Expose une route sécurisée `POST /wp-json/roi/v1/games` permettant d'enregistrer les détails d'une partie (ID de membre, difficulté, aides, annulations, PGN, durée et date de fin).
 *   **Système de Difficulté Unifié :** Attribuez un niveau de difficulté (de "Très Facile" à "Expert") à tout le contenu, permettant un apprentissage filtré.
 *   **Constructeur de Cours Visuel :** Une interface intuitive à double liste pour glisser-déposer des leçons et des exercices dans un cours.
+*   **Ciblage & Assignation des Cours :** Définissez la portée de chaque cours soit pour l'ensemble des membres (Méthode EEF), soit restreinte à des groupes d'entraînement (`dame_group`) ou à des adhérents précis (`adherent`) avec recherche insensible aux accents.
+*   **Onglets d'Audience & Colonne Dédiée (Administration) :** Onglets de filtrage rapide au sommet du tableau (*Tous les cours*, *📚 EEF*, *📌 Cours assignés*), colonne d'audience détaillée avec badges de groupes et d'élèves, et sélecteur déroulant de tri.
+*   **Tableau de Bord Suivi Enseignant :** Application React moderne avec filtrage par groupe, prescription de cours en 1 clic, validation manuelle club et comparaison des temps de réflexion.
 *   **Suivi de la Progression des Utilisateurs :** Les membres connectés peuvent marquer les leçons comme terminées. (Note : Les fonctionnalités de suivi complètes sont gérées par le plugin DAME).
 *   **Interface d'Exercices Interactifs :** Un shortcode `[roi_exercices]` qui génère un système de quiz public avec des retours immédiats.
 
@@ -97,6 +100,14 @@ Le plugin expose plusieurs points de terminaison REST sous le namespace `/wp-jso
 *   **Enregistrer une partie :** `POST /wp-json/roi/v1/games`
     *   **Description :** Enregistre une partie jouée depuis la PWA (authentification requise).
     *   **Paramètres :** `member_id` (int), `difficulty_level` (int), `hints_count` (int), `takebacks_count` (int), `pgn` (string), `duration` (int), `game_date` (string).
+
+### 3. Parcours & Progression
+*   **Catalogue des cours :** `GET /wp-json/roi/v1/parcours`
+    *   **Description :** Récupère la liste des cours et playlists ordonnés, filtrés automatiquement selon le profil et les groupes de l'élève (avec indicateurs `is_assigned` et `unlocked_by_assignment`).
+*   **Assigner ou retirer un cours :** `POST /wp-json/roi/v1/progression/assigner-cours`
+    *   **Description :** Permet à un entraîneur d'assigner ou retirer un cours à un élève (`adherent_id`, `cours_id`, `action: 'assign' | 'unassign'`).
+*   **Groupes d'entraînement :** `GET /wp-json/roi/v1/progression/groupes`
+    *   **Description :** Récupère la liste des groupes d'entraînement (`dame_group`) avec le nombre d'élèves rattachés.
 
 ## Comment Utiliser
 
