@@ -10,7 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	const idPreview = document.getElementById('roi_video_id_preview');
 	const dureeInput = document.getElementById('roi_video_duree');
-	const playerContainer = document.getElementById('roi_video_player_container');
+	const playerContainer = document.getElementById(
+		'roi_video_player_container'
+	);
 	const statusNotice = document.getElementById('roi_video_fetch_status');
 	const titleInput = document.getElementById('title');
 
@@ -18,7 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// Extraction Regex for YouTube ID (standard, short, embed)
 	const extractYouTubeId = (url) => {
-		if (!url) return '';
+		if (!url) {
+			return '';
+		}
 		const trimmed = url.trim();
 		const match = trimmed.match(
 			/(?:youtube(?:-nocookie)?\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i
@@ -29,7 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	// Format seconds into MM:SS or HH:MM:SS
 	const formatDuration = (seconds) => {
 		const totalSec = Math.round(seconds);
-		if (isNaN(totalSec) || totalSec <= 0) return '';
+		if (isNaN(totalSec) || totalSec <= 0) {
+			return '';
+		}
 
 		const hrs = Math.floor(totalSec / 3600);
 		const mins = Math.floor((totalSec % 3600) / 60);
@@ -53,7 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
 				const tag = document.createElement('script');
 				tag.id = 'youtube-iframe-api';
 				tag.src = 'https://www.youtube.com/iframe_api';
-				const firstScriptTag = document.getElementsByTagName('script')[0];
+				const firstScriptTag =
+					document.getElementsByTagName('script')[0];
 				firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 			}
 
@@ -81,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (ytPlayer && typeof ytPlayer.destroy === 'function') {
 			try {
 				ytPlayer.destroy();
-			} catch (e) {
+			} catch (_e) {
 				// ignore
 			}
 		}
@@ -89,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		ytPlayer = new window.YT.Player('roi_yt_iframe_mount', {
 			height: '100%',
 			width: '100%',
-			videoId: videoId,
+			videoId,
 			playerVars: {
 				playsinline: 1,
 				rel: 0,
@@ -102,19 +109,22 @@ document.addEventListener('DOMContentLoaded', () => {
 						if (dur > 0 && dureeInput && !dureeInput.value) {
 							dureeInput.value = formatDuration(dur);
 						}
-					} catch (e) {
+					} catch (_e) {
 						// ignore
 					}
 				},
 				onStateChange: (event) => {
 					// Also detect duration on first play/cue
-					if (event.data === window.YT.PlayerState.PLAYING || event.data === window.YT.PlayerState.CUED) {
+					if (
+						event.data === window.YT.PlayerState.PLAYING ||
+						event.data === window.YT.PlayerState.CUED
+					) {
 						try {
 							const dur = event.target.getDuration();
 							if (dur > 0 && dureeInput && !dureeInput.value) {
 								dureeInput.value = formatDuration(dur);
 							}
-						} catch (e) {
+						} catch (_e) {
 							// ignore
 						}
 					}
@@ -125,19 +135,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// Fetch YouTube oEmbed metadata (Title, Author)
 	const fetchOEmbedMetadata = async (url) => {
-		if (!url) return;
+		if (!url) {
+			return;
+		}
 		if (statusNotice) {
-			statusNotice.textContent = 'Récupération des informations YouTube...';
+			statusNotice.textContent =
+				'Récupération des informations YouTube...';
 			statusNotice.style.display = 'inline-block';
 		}
 
 		try {
-			const res = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(url)}`);
+			const res = await fetch(
+				`https://noembed.com/embed?url=${encodeURIComponent(url)}`
+			);
 			if (res.ok) {
 				const data = await res.json();
 				if (data && data.title) {
 					// Pre-fill Title if empty
-					if (titleInput && (!titleInput.value || titleInput.value.trim() === '')) {
+					if (
+						titleInput &&
+						(!titleInput.value || titleInput.value.trim() === '')
+					) {
 						titleInput.value = data.title;
 					}
 					if (statusNotice) {
@@ -148,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					statusNotice.style.display = 'none';
 				}
 			}
-		} catch (e) {
+		} catch (_e) {
 			if (statusNotice) {
 				statusNotice.style.display = 'none';
 			}
@@ -169,7 +187,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			initPlayer(videoId);
 			fetchOEmbedMetadata(val);
 		} else if (playerContainer) {
-			playerContainer.innerHTML = '<div style="position: absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#888;">Collez une URL YouTube valide pour afficher l\'aperçu.</div>';
+			playerContainer.innerHTML =
+				'<div style="position: absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#888;">Collez une URL YouTube valide pour afficher l\'aperçu.</div>';
 		}
 	};
 

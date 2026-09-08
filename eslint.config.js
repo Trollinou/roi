@@ -26,6 +26,8 @@ module.exports = [
 				clearInterval: 'readonly',
 				setInterval: 'readonly',
 				setTimeout: 'readonly',
+				clearTimeout: 'readonly',
+				fetch: 'readonly',
 				parseInt: 'readonly',
 				isNaN: 'readonly',
 				jQuery: 'readonly',
@@ -37,7 +39,14 @@ module.exports = [
 		},
 		rules: {
 			'no-console': ['warn', { allow: ['warn', 'error'] }],
-			'no-unused-vars': 'warn',
+			'no-unused-vars': [
+				'warn',
+				{
+					argsIgnorePattern: '^_',
+					varsIgnorePattern: '^_',
+					caughtErrorsIgnorePattern: '^_',
+				},
+			],
 			eqeqeq: 'warn',
 			'import/no-unresolved': 'off',
 			'import/no-extraneous-dependencies': 'off',
