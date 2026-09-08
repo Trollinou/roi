@@ -1,121 +1,143 @@
 /**
- * Handler for Type 6: Associ'Plan.
+ * Handler for Type 6: Associ'Plan (Série de 4 PGNs complets).
  */
 
-import { setupFenControl, setupPgnControl } from '../utils/controls';
+import {
+	setupPgnControl,
+	extractFenOrientationAndShapes,
+} from '../utils/controls';
 
 const textarea = document.getElementById('roi_config_json');
-const builderType6 = document.getElementById('roi_builder_type_6');
 
-let t6Paires = [
-	{
-		fen: '',
-		couleur_joueur: 'white',
-		description: '',
-		pgn_data: '',
-		shapes: [],
-	},
-	{
-		fen: '',
-		couleur_joueur: 'white',
-		description: '',
-		pgn_data: '',
-		shapes: [],
-	},
-	{
-		fen: '',
-		couleur_joueur: 'white',
-		description: '',
-		pgn_data: '',
-		shapes: [],
-	},
-	{
-		fen: '',
-		couleur_joueur: 'white',
-		description: '',
-		pgn_data: '',
-		shapes: [],
-	},
-];
+const t6Paires = [{ pgn: '' }, { pgn: '' }, { pgn: '' }, { pgn: '' }];
+
+const previewAPIs = [null, null, null, null];
 
 export function updateConfig() {
-	if (!builderType6 || !textarea) {
+	if (!textarea) {
 		return;
 	}
-	const fenInputs = builderType6.querySelectorAll('.roi_t6_fen');
-	const colorSelects = builderType6.querySelectorAll('.roi_t6_couleur');
-	const descTextareas = builderType6.querySelectorAll('.roi_t6_desc');
-	const pgnTextareas = builderType6.querySelectorAll('.roi_t6_pgn');
 
-	const config = {
-		paires: t6Paires.map(function (paire, idx) {
-			return {
-				fen: fenInputs[idx] ? fenInputs[idx].value.trim() : paire.fen,
-				couleur_joueur: colorSelects[idx]
-					? colorSelects[idx].value
-					: paire.couleur_joueur,
-				description: descTextareas[idx]
-					? descTextareas[idx].value
-					: paire.description,
-				pgn_data: pgnTextareas[idx]
-					? pgnTextareas[idx].value
-					: paire.pgn_data,
-				shapes: paire.shapes || [],
-			};
-		}),
+	const configData = {
+		paires: t6Paires.map((paire) => ({
+			pgn: paire && paire.pgn ? paire.pgn.trim() : '',
+		})),
 	};
-	t6Paires = config.paires;
-	textarea.value = JSON.stringify(config, null, 4);
+
+	textarea.value = JSON.stringify(configData, null, 4);
 }
 
-function fillT6HTML() {
-	if (!builderType6) {
+function renderPreviewBoard(index) {
+	const boardEl = document.getElementById(`roi_t6_preview_board_${index}`);
+	if (!boardEl) {
 		return;
 	}
-	const fenInputs = builderType6.querySelectorAll('.roi_t6_fen');
-	const colorSelects = builderType6.querySelectorAll('.roi_t6_couleur');
-	const descTextareas = builderType6.querySelectorAll('.roi_t6_desc');
-	const pgnTextareas = builderType6.querySelectorAll('.roi_t6_pgn');
 
-	for (let idx = 0; idx < 4; idx++) {
-		if (fenInputs[idx]) {
-			fenInputs[idx].value = t6Paires[idx].fen || '';
+	const currentPaire = t6Paires[index];
+	const pgn = currentPaire ? currentPaire.pgn.trim() : '';
+
+	if (!pgn) {
+		if (previewAPIs[index]) {
+			previewAPIs[index].destroy();
+			previewAPIs[index] = null;
 		}
-		if (colorSelects[idx]) {
-			colorSelects[idx].value = t6Paires[idx].couleur_joueur || 'white';
-		}
-		if (descTextareas[idx]) {
-			descTextareas[idx].value = t6Paires[idx].description || '';
-		}
-		if (pgnTextareas[idx]) {
-			pgnTextareas[idx].value = t6Paires[idx].pgn_data || '';
-		}
+		boardEl.innerHTML = '';
+		return;
 	}
+
+	const { fen, orientation, shapes } = extractFenOrientationAndShapes(pgn);
+
+	if (previewAPIs[index]) {
+		previewAPIs[index].setPosition(fen);
+		if (typeof previewAPIs[index].setConfig === 'function') {
+			previewAPIs[index].setConfig({ orientation });
+		}
+		if (typeof previewAPIs[index].setShapes === 'function') {
+			previewAPIs[index].setShapes(shapes);
+		}
+		if (typeof previewAPIs[index].redraw === 'function') {
+			previewAPIs[index].redraw(true);
+		}
+		return;
+	}
+
+	const checkInterval = setInterval(function () {
+		if (window.EgBoardCore) {
+			clearInterval(checkInterval);
+
+			if (boardEl.parentElement) {
+				boardEl.parentElement.classList.add(
+					'main-wrap',
+					'fit-container',
+					'piece-set-cburnett',
+					'board-theme-brown'
+				);
+			}
+			boardEl.classList.add('main-board');
+
+			const boardConfig = {
+				mode: 'game',
+				fen,
+				orientation,
+				coordinates: true,
+				viewOnly: true,
+				movable: {
+					free: false,
+					color: 'none',
+				},
+				drawable: {
+					enabled: false,
+				},
+			};
+
+			const boardState = {
+				mode: 'game',
+				pieceSet: 'cburnett',
+				boardTheme: 'brown',
+				showThreats: false,
+				promotionDialogState: { isEnabled: false },
+				historyViewerState: { isEnabled: false },
+			};
+
+			const api = new window.EgBoardCore(
+				boardEl,
+				boardState,
+				function () {},
+				function () {},
+				boardConfig,
+				{ workerUrl: '' }
+			);
+
+			if (typeof api.setShapes === 'function') {
+				api.setShapes(shapes || []);
+			}
+
+			previewAPIs[index] = api;
+		}
+	}, 50);
 }
 
 export function init() {
-	if (!builderType6) {
+	if (!textarea) {
 		return;
 	}
 
-	// Initialisation des données
-	if (textarea && textarea.value.trim() !== '') {
+	// Chargement des données existantes
+	if (textarea.value.trim() !== '') {
 		try {
-			const parsedT6 = JSON.parse(textarea.value);
+			const parsed = JSON.parse(textarea.value);
 			if (
-				parsedT6 &&
-				typeof parsedT6 === 'object' &&
-				Array.isArray(parsedT6.paires)
+				parsed &&
+				typeof parsed === 'object' &&
+				Array.isArray(parsed.paires)
 			) {
-				for (let idx = 0; idx < 4; idx++) {
-					if (parsedT6.paires[idx]) {
-						t6Paires[idx] = {
-							fen: parsedT6.paires[idx].fen || '',
-							couleur_joueur:
-								parsedT6.paires[idx].couleur_joueur || 'white',
-							description: parsedT6.paires[idx].description || '',
-							pgn_data: parsedT6.paires[idx].pgn_data || '',
-							shapes: parsedT6.paires[idx].shapes || [],
+				for (let i = 0; i < 4; i++) {
+					if (parsed.paires[i]) {
+						t6Paires[i] = {
+							pgn:
+								parsed.paires[i].pgn ||
+								parsed.paires[i].pgn_data ||
+								'',
 						};
 					}
 				}
@@ -125,85 +147,39 @@ export function init() {
 		}
 	}
 
-	fillT6HTML();
-
-	const fenInputs = builderType6.querySelectorAll('.roi_t6_fen');
-	const colorSelects = builderType6.querySelectorAll('.roi_t6_couleur');
-	const descTextareas = builderType6.querySelectorAll('.roi_t6_desc');
-	const pgnTextareas = builderType6.querySelectorAll('.roi_t6_pgn');
-
-	fenInputs.forEach(function (input, idx) {
-		input.addEventListener('input', function () {
-			t6Paires[idx].fen = input.value.trim();
-			updateConfig();
-		});
-	});
-
-	colorSelects.forEach(function (select, idx) {
-		select.addEventListener('change', function () {
-			t6Paires[idx].couleur_joueur = select.value;
-			updateConfig();
-		});
-	});
-
-	descTextareas.forEach(function (textareaEl, idx) {
-		textareaEl.addEventListener('input', function () {
-			t6Paires[idx].description = textareaEl.value;
-			updateConfig();
-		});
-	});
-
-	// Setup 4 pairs of FEN and PGN controls
+	// Synchroniser les champs DOM et configurer les 4 PGN controls
 	for (let i = 0; i < 4; i++) {
-		const fenInp =
-			document.getElementById(`roi_t6_fen_${i}`) || fenInputs[i];
-		const colorSel =
-			document.getElementById(`roi_t6_couleur_${i}`) || colorSelects[i];
-		const btnFen =
-			document.getElementById(`btn_open_fen_editor_t6_${i}`) ||
-			builderType6.querySelector(
-				`.btn_open_fen_editor[data-index="${i}"]`
-			);
-
-		setupFenControl({
-			input: fenInp,
-			button: btnFen,
-			colorSelect: colorSel,
-			getShapes() {
-				return t6Paires[i] ? t6Paires[i].shapes || [] : [];
-			},
-			onChange(fen, color, shapes) {
-				if (t6Paires[i]) {
-					t6Paires[i].fen = fen;
-					t6Paires[i].couleur = color;
-					if (shapes) {
-						t6Paires[i].shapes = shapes;
-					}
-					updateConfig();
-				}
-			},
-		});
-
-		const pgnTxt =
-			document.getElementById(`roi_t6_pgn_${i}`) || pgnTextareas[i];
-		const btnPgn =
+		const pgnTextarea =
+			document.getElementById(`roi_t6_pgn_${i}`) ||
+			document.querySelector(`.roi_t6_pgn[data-index="${i}"]`);
+		const btnPgnEditor =
 			document.getElementById(`btn_open_pgn_editor_t6_${i}`) ||
-			builderType6.querySelector(
-				`.btn_open_pgn_editor[data-index="${i}"]`
+			document.querySelector(
+				`.btn_open_pgn_editor_t6[data-index="${i}"]`
 			);
+
+		if (pgnTextarea) {
+			pgnTextarea.value = t6Paires[i] ? t6Paires[i].pgn || '' : '';
+		}
 
 		setupPgnControl({
-			textarea: pgnTxt,
-			button: btnPgn,
+			textarea: pgnTextarea,
+			button: btnPgnEditor,
 			initialFen() {
-				return fenInp ? fenInp.value : '';
+				const currentPgn = t6Paires[i] ? t6Paires[i].pgn : '';
+				const { fen } = extractFenOrientationAndShapes(currentPgn);
+				return fen;
 			},
-			onChange(pgn) {
+			onChange(newPgn) {
 				if (t6Paires[i]) {
-					t6Paires[i].pgn_data = pgn;
+					t6Paires[i].pgn = newPgn;
 					updateConfig();
+					renderPreviewBoard(i);
 				}
 			},
 		});
+
+		// Initialiser l'aperçu du diagramme
+		renderPreviewBoard(i);
 	}
 }

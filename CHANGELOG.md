@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+*   **Refonte du Constructeur d'Exercice Type 6 (Associ'Plan) (`TypeAssociPlan.php`, `type-6.js`) :**
+    *   **Architecture à 4 PGN Purs :** Remplacement de la saisie fragmentée (FEN, orientation, description, PGN) par 4 champs PGN standardisés (`paire_pgn_0` à `3`) dotés du bouton d'ouverture de la modale `PgnEditor` et de la validation syntaxique en temps réel (calqué sur le Type 3 ABCDaire).
+    *   **Mini-Aperçus Dynamiques :** Intégration de 4 échiquiers d'aperçu synchrones (`cburnett` / `brown`, coordonnées activées, lecture seule) reflétant automatiquement la position de départ (`[FEN "..."]`), l'orientation déduite du trait et les formes géométriques (`[%csl]`, `[%cal]`).
+    *   **Format JSON Épuré :** Schéma de configuration simplifié `{ paires: [ { pgn: "..." }, ... ] }` enregistré dans `roi_exercice_config`.
+
 ## [1.5.0] - 2026-09-07
 
 *   **Refonte et Stabilisation des Blocs Gutenberg Diagramme & PGN (`diagramme`, `pgn`, `useChessBoard.js`, `FenEditor`, `PgnEditor`) :**
