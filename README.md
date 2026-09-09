@@ -117,7 +117,7 @@ Le plugin expose plusieurs points de terminaison REST sous le namespace `/wp-jso
 
 ### Création de Contenu
 
-1.  Accédez au menu **Apprentissage** dans le tableau de bord d'administration de WordPress.
+1.  Accédez au menu **ROI** dans le tableau de bord d'administration de WordPress.
 2.  Sélectionnez **Leçons**, **Exercices**, ou **Cours** pour créer du nouveau contenu.
 3.  Utilisez les champs personnalisés pour définir la difficulté et d'autres détails pertinents.
 4.  Pour les cours, utilisez la meta box **Constructeur de Cours** pour assembler votre programme.

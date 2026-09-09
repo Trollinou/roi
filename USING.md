@@ -178,7 +178,7 @@ Ces données sont transmises de manière sécurisée via l'API REST de sauvegard
 * **Filtrage textuel des apprenants :** Un champ textuel dynamique *« Filtrer par nom... »* permet d'isoler instantanément un élève parmi la liste des adhérents sans avoir à faire défiler toute la liste. Les adhérents déjà assignés sont automatiquement remontés en haut de liste.
 
 ### 4. Visualisation & Onglets dans la Liste des Cours (Administration WordPress)
-* Sur la page de gestion des cours (**Apprentissage > Cours**) :
+* Sur la page de gestion des cours (**ROI > Tous les cours**) :
   - **Onglets de filtrage rapide (en haut de table) :**
     - **Tous les cours** : Vue globale de tous les cours avec pagination.
     - **📚 EEF** *(Méthode École d'Échecs à la Française)* : Isole en 1 clic l'ensemble des cours du tronc commun public.
@@ -191,7 +191,7 @@ Ces données sont transmises de manière sécurisée via l'API REST de sauvegard
 ## Configuration & Restrictions d'accès
 
 ### 1. Réglages du Back-office
-Les administrateurs peuvent configurer les rôles autorisés à accéder au module d'apprentissage depuis **Apprentissage > Configuration** dans l'administration WordPress.
+Les administrateurs peuvent configurer les rôles autorisés à accéder au module d'apprentissage depuis **ROI > Réglage** dans l'administration WordPress.
 
 ### 2. Récupération de la configuration (Public)
 * **Route :** `GET /wp-json/roi/v1/config`

@@ -47,8 +47,8 @@ class Main {
 	public function register_settings_page(): void {
 		add_submenu_page(
 			'roi-apprentissage',
-			__( 'Configuration', 'roi' ),
-			__( 'Configuration', 'roi' ),
+			__( 'Réglage', 'roi' ),
+			__( 'Réglage', 'roi' ),
 			'manage_options',
 			'roi-settings',
 			array( $this, 'render' )

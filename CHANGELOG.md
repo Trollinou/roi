@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+*   **Réorganisation et Modernisation des Menus d'Administration (`Menu.php`, `Main.php`, `Suivi_Page.php`) :**
+    *   **Ordonnancement Strict des Sous-menus :** Tri maîtrisé des sous-menus sous l'élément parent principal avec suppression de l'entrée dupliquée native de WordPress :
+        1. *Suivi des élèves* (`roi-suivi-eleves`)
+        2. *Tous les cours* (`edit.php?post_type=roi_cours`)
+        3. *Toutes les leçons* (`edit.php?post_type=roi_lecon`)
+        4. *Toutes les vidéos* (`edit.php?post_type=roi_video`)
+        5. *Tous les exercices* (`edit.php?post_type=roi_exercice`)
+        6. *Toutes les parties* (`edit.php?post_type=roi_partie`)
+        7. *Sauvegarde / Restauration* (`roi-backup-restore`)
+        8. *Réglage* (`roi-settings`)
+    *   **Renommage « Configuration » en « Réglage » :** Modification du libellé de menu et du titre de page d'administration dans `Main.php`.
+    *   **Renommage du Menu Principal en « ROI » :** Personnalisation du libellé visible dans la barre latérale WordPress (`menu_title: 'ROI'`) tout en préservant le titre de page sous-jacent.
+    *   **Robustesse du Chargement de Suivi des Élèves :** Détection dynamique et résiliente du hook d'administration WordPress (`$hook_suffix`, `roi_page_roi-suivi-eleves`, paramètre `$_GET['page']`) dans `Suivi_Page.php` pour garantir l'injection sans rupture des bundles React du tableau de bord d'entraînement quel que soit le libellé du menu parent.
+
+## [1.5.1] - 2026-09-09
+
 *   **Refonte du Constructeur d'Exercice Type 6 (Associ'Plan) (`TypeAssociPlan.php`, `type-6.js`) :**
     *   **Architecture à 4 PGN Purs :** Remplacement de la saisie fragmentée (FEN, orientation, description, PGN) par 4 champs PGN standardisés (`paire_pgn_0` à `3`) dotés du bouton d'ouverture de la modale `PgnEditor` et de la validation syntaxique en temps réel (calqué sur le Type 3 ABCDaire).
     *   **Mini-Aperçus Dynamiques :** Intégration de 4 échiquiers d'aperçu synchrones (`cburnett` / `brown`, coordonnées activées, lecture seule) reflétant automatiquement la position de départ (`[FEN "..."]`), l'orientation déduite du trait et les formes géométriques (`[%csl]`, `[%cal]`).

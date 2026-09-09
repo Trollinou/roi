@@ -16,6 +16,13 @@ namespace ROI\Admin;
 class Suivi_Page {
 
 	/**
+	 * Hook suffix for the admin page.
+	 *
+	 * @var string
+	 */
+	private string $hook_suffix = '';
+
+	/**
 	 * Initialize hooks.
 	 *
 	 * @return void
@@ -31,7 +38,7 @@ class Suivi_Page {
 	 * @return void
 	 */
 	public function add_suivi_menu(): void {
-		add_submenu_page(
+		$hook = add_submenu_page(
 			'roi-apprentissage',
 			__( 'Suivi des élèves', 'roi' ),
 			__( 'Suivi des élèves', 'roi' ),
@@ -40,6 +47,10 @@ class Suivi_Page {
 			'roi-suivi-eleves',
 			array( $this, 'render_suivi_page' )
 		);
+
+		if ( is_string( $hook ) ) {
+			$this->hook_suffix = $hook;
+		}
 	}
 
 	/**
@@ -49,7 +60,14 @@ class Suivi_Page {
 	 * @return void
 	 */
 	public function enqueue_suivi_assets( string $hook ): void {
-		if ( 'apprentissage_page_roi-suivi-eleves' !== $hook ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$current_page  = isset( $_GET['page'] ) ? sanitize_key( (string) $_GET['page'] ) : '';
+		$is_suivi_page = ( '' !== $this->hook_suffix && $this->hook_suffix === $hook )
+			|| 'apprentissage_page_roi-suivi-eleves' === $hook
+			|| 'roi_page_roi-suivi-eleves' === $hook
+			|| 'roi-suivi-eleves' === $current_page;
+
+		if ( ! $is_suivi_page ) {
 			return;
 		}
 
