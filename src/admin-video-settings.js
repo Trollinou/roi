@@ -50,11 +50,23 @@ document.addEventListener('DOMContentLoaded', () => {
 	};
 
 	// Load YouTube IFrame Player API if not already present
+	let ytApiPromise = null;
 	const ensureYouTubeApi = () => {
 		if (window.YT && window.YT.Player) {
 			return Promise.resolve();
 		}
-		return new Promise((resolve) => {
+		if (ytApiPromise) {
+			return ytApiPromise;
+		}
+		ytApiPromise = new Promise((resolve) => {
+			const prevCallback = window.onYouTubeIframeAPIReady;
+			window.onYouTubeIframeAPIReady = () => {
+				if (typeof prevCallback === 'function') {
+					prevCallback();
+				}
+				resolve();
+			};
+
 			if (!document.getElementById('youtube-iframe-api')) {
 				const tag = document.createElement('script');
 				tag.id = 'youtube-iframe-api';
@@ -63,15 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
 					document.getElementsByTagName('script')[0];
 				firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 			}
-
-			const prevCallback = window.onYouTubeIframeAPIReady;
-			window.onYouTubeIframeAPIReady = () => {
-				if (typeof prevCallback === 'function') {
-					prevCallback();
-				}
-				resolve();
-			};
 		});
+		return ytApiPromise;
 	};
 
 	// Initialize or reload YouTube player to read duration
@@ -82,8 +87,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		await ensureYouTubeApi();
 
-		// Empty container and create iframe mount point
-		playerContainer.innerHTML = '<div id="roi_yt_iframe_mount"></div>';
+		// Empty container and create iframe mount point with full absolute dimensions
+		playerContainer.innerHTML =
+			'<div id="roi_yt_iframe_mount" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"></div>';
 
 		if (ytPlayer && typeof ytPlayer.destroy === 'function') {
 			try {
@@ -94,6 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 
 		ytPlayer = new window.YT.Player('roi_yt_iframe_mount', {
+			host: 'https://www.youtube-nocookie.com',
 			height: '100%',
 			width: '100%',
 			videoId,

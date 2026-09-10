@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+*   **Correction de la Prévisualisation Vidéo YouTube (`admin-video-settings.js`, `admin-style.css`) :**
+    *   **Positionnement & Rendu du Lecteur IFrame :** Application du positionnement absolu (`position: absolute; top: 0; left: 0; width: 100%; height: 100%;`) sur le point de montage `#roi_yt_iframe_mount` et via CSS sur `#roi_video_player_container iframe`. Résout le problème du carré noir d'aperçu causé par le calcul de hauteur à 0px dans le conteneur responsive à ratio 16:9.
+    *   **Fiabilisation de l'API YouTube :** Initialisation asynchrone sécurisée avec promesse singleton (`ytApiPromise`) et utilisation de l'hôte `https://www.youtube-nocookie.com`.
+
 *   **Réorganisation et Modernisation des Menus d'Administration (`Menu.php`, `Main.php`, `Suivi_Page.php`) :**
     *   **Ordonnancement Strict des Sous-menus :** Tri maîtrisé des sous-menus sous l'élément parent principal avec suppression de l'entrée dupliquée native de WordPress :
         1. *Suivi des élèves* (`roi-suivi-eleves`)
