@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+*   **Pédagogie & Mise en Évidence des Pièces d'Étude (Type 2 et Type 3) (`TypePopEchecs.php`, `TypeABCDaire.php`) :**
+    *   **Guidage des Entraîneurs :** Ajout d'instructions explicites dans les constructeurs Pop'Echecs (Type 2) et ABCDaire Tactique (Type 3) sur l'usage du cercle jaune (`brush: 'yellow'` ou `[%csl Y...]`) pour désigner une pièce d'étude (attaquée, clouée, etc.) à observer par l'élève.
+    *   **Cohérence Multi-Types :** Documentation de la règle distinguant le cercle bleu (pièce cible obligatoire en Type 2) du cercle jaune (pièce d'étude visible dès la recherche en Types 2 et 3).
+
 *   **Correction de la Prévisualisation Vidéo YouTube (`admin-video-settings.js`, `admin-style.css`) :**
     *   **Positionnement & Rendu du Lecteur IFrame :** Application du positionnement absolu (`position: absolute; top: 0; left: 0; width: 100%; height: 100%;`) sur le point de montage `#roi_yt_iframe_mount` et via CSS sur `#roi_video_player_container iframe`. Résout le problème du carré noir d'aperçu causé par le calcul de hauteur à 0px dans le conteneur responsive à ratio 16:9.
     *   **Fiabilisation de l'API YouTube :** Initialisation asynchrone sécurisée avec promesse singleton (`ytApiPromise`) et utilisation de l'hôte `https://www.youtube-nocookie.com`.

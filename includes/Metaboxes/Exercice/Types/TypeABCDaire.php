@@ -45,7 +45,8 @@ class TypeABCDaire implements TypeInterface {
 		<div id="roi_builder_type_3" class="roi-builder-section" style="display:none; margin-top: 15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
 			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice (ABCDaire Tactique - Série de 4)", 'roi' ); ?></h4>
 			<p class="description" style="margin-bottom: 15px; color: #1d2327; background: #f0f6fc; border-left: 4px solid #72aee6; padding: 10px 12px; border-radius: 2px;">
-				<strong><?php esc_html_e( 'Format :', 'roi' ); ?></strong> <?php esc_html_e( "Série de 4 Mini-PGN (1 coup ou un enchaînement de coups). Vous pouvez coller directement un export PGN de Lichess ou utiliser l'éditeur interactif.", 'roi' ); ?>
+				<strong><?php esc_html_e( 'Format :', 'roi' ); ?></strong> <?php esc_html_e( "Série de 4 Mini-PGN (1 coup ou un enchaînement de coups). Vous pouvez coller directement un export PGN de Lichess ou utiliser l'éditeur interactif.", 'roi' ); ?><br>
+				• <strong><?php esc_html_e( 'Pièce d\'étude (cercle jaune, optionnel) :', 'roi' ); ?></strong> <?php esc_html_e( "Pour attirer l'attention de l'élève sur une pièce dont la situation doit être analysée (menacée, clouée...), tracez un cercle jaune sur sa case dans l'éditeur avant le 1er coup (ou balise {%csl Ye4} à la racine). Ce cercle jaune restera affiché pendant la recherche.", 'roi' ); ?>
 			</p>
 
 			<div style="margin-bottom: 20px;">

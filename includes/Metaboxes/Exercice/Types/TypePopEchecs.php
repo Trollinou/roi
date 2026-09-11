@@ -31,7 +31,9 @@ class TypePopEchecs implements TypeInterface {
 		<div id="roi_builder_type_2" class="roi-builder-section" style="display:none; margin-top: 15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
 			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice (Pop'Echecs - Série de 4)", 'roi' ); ?></h4>
 			<p class="description" style="margin-bottom: 15px; color: #1d2327; background: #f0f6fc; border-left: 4px solid #72aee6; padding: 10px 12px; border-radius: 2px;">
-				<strong><?php esc_html_e( 'Note :', 'roi' ); ?></strong> <?php esc_html_e( "Pour chaque diagramme, la pièce à placer doit être entourée d'un cercle bleu dans l'éditeur d'échiquier.", 'roi' ); ?>
+				<strong><?php esc_html_e( 'Règles visuelles :', 'roi' ); ?></strong><br>
+				• <strong><?php esc_html_e( 'Cercle bleu (obligatoire) :', 'roi' ); ?></strong> <?php esc_html_e( "Entourez en bleu la pièce à placer dans l'éditeur. Elle sera masquée de l'échiquier et proposée au joueur.", 'roi' ); ?><br>
+				• <strong><?php esc_html_e( 'Cercle jaune (optionnel) :', 'roi' ); ?></strong> <?php esc_html_e( "Entourez en jaune une pièce d'étude (pièce attaquée, clouée, repère tactique). Ce cercle reste affiché pendant toute la phase de recherche pour guider l'élève.", 'roi' ); ?>
 			</p>
 
 			<div style="margin-bottom: 20px;">
