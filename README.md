@@ -62,8 +62,9 @@ Ce plugin nécessite que le plugin **DAME** soit installé et activé. Le plugin
 
 *   **Sauvegarde et Restauration du Contenu :** Une page d'administration dédiée pour exporter tout le contenu pédagogique (leçons, exercices, cours, catégories) dans un fichier `.json.gz` et le restaurer, prévenant ainsi la perte de données.
     *   **Type 2 (Pop'Echecs) :** Série de 4 diagrammes FEN avec pièce à placer (cercle bleu `[%csl B...]`). Possibilité de définir un cercle jaune (`[%csl Y...]`) sur une pièce d'étude persistant dès la phase de recherche.
-    *   **Type 3 (ABCDaire Tactique) :** Série de 4 Mini-PGN contenant les variantes tactiques commentées et annotées. Prise en charge d'un cercle jaune (`[%csl Y...]`) à la racine pour mettre en évidence la pièce d'étude dès la recherche.
-    *   **Type 4 (La Partie dont tu es le Héros) :** Saisie simplifiée d'une étude PGN complète avec embranchements QCM détectés par les flèches `[%cal ...]` et les 2 variantes d'erreur. Aperçu statique épuré de la position initiale (`cburnett` / `brown`) sans pollution des coups futurs.
+    *   **Type 3 (ABCDaire Tactique) :** Série de 4 Mini-PGN contenant les variantes tactiques commentées et annotées, avec prévisualisation PGN interactive et navigation pas-à-pas des coups. Prise en charge d'un cercle jaune (`[%csl Y...]`) à la racine pour mettre en évidence la pièce d'étude dès la recherche.
+    *   **Type 4 (La Partie dont tu es le Héros) :** Saisie d'une étude PGN complète avec embranchements QCM détectés par les flèches `[%cal ...]` et les variantes d'erreur. Prévisualisation interactive pas-à-pas avec coups et commentaires synchronisés.
+    *   **Type 7 (La Marche du Héros) :** Définition de 3 séries de 5 cartes (mode 3x5) ou 5 séries de 3 cartes (mode 5x3). Détection automatique de l'orientation et prévisualisation PGN interactive individuelle par série.
 
 ## API REST
 

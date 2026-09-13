@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+*   **Composant Partagé de Prévisualisation PGN Interactive (Style Lichess) & Harmonisation Type 7 (`pgn-viewer.js`, `type-7.js`, `type-4.js`, `type-3.js`, `admin-style.css`) :**
+    *   **Composant `PgnPreviewViewer` :** Création d'un viewer interactif lecture seule réutilisable dans tous les constructeurs d'exercices acceptant du PGN. Comprend un échiquier à gauche (orientation automatique selon le trait du PGN, synchronisation dynamique des flèches/cercles à chaque coup) et un panneau latéral droit aligné en hauteur (liste des coups numérotés avec surbrillance et clic direct, commentaires textuels, variantes alternatives, et barre de navigation `|◀`, `◀`, `▶`, `▶|`).
+    *   **Harmonisation du Type 7 (Marche du Héros) :** Suppression du sélecteur manuel d'orientation superflu au profit d'une détection automatique d'après la position initiale du PGN. Intégration du composant de prévisualisation interactif pour chaque série d'exercices.
+    *   **Mutualisation avec les Types 3 et 4 :** Remplacement des anciens aperçus statiques dans l'ABCDaire Tactique (Type 3) et la Partie dont tu es le Héros (Type 4) par le nouveau composant interactif.
+
+
 *   **Pédagogie & Mise en Évidence des Pièces d'Étude (Type 2 et Type 3) (`TypePopEchecs.php`, `TypeABCDaire.php`) :**
     *   **Guidage des Entraîneurs :** Ajout d'instructions explicites dans les constructeurs Pop'Echecs (Type 2) et ABCDaire Tactique (Type 3) sur l'usage du cercle jaune (`brush: 'yellow'` ou `[%csl Y...]`) pour désigner une pièce d'étude (attaquée, clouée, etc.) à observer par l'élève.
     *   **Cohérence Multi-Types :** Documentation de la règle distinguant le cercle bleu (pièce cible obligatoire en Type 2) du cercle jaune (pièce d'étude visible dès la recherche en Types 2 et 3).

@@ -6,13 +6,14 @@ import {
 	setupPgnControl,
 	extractFenOrientationAndShapes,
 } from '../utils/controls';
+import { createPgnPreviewViewer } from '../utils/pgn-viewer';
 
 const textarea = document.getElementById('roi_config_json');
 const t4ConsigneInput = document.getElementById('roi_t4_consigne');
 const t4PgnTextarea = document.getElementById('roi_t4_pgn');
 const btnPgnEditor = document.getElementById('btn_open_pgn_editor_t4');
 
-let previewAPI = null;
+let previewViewer = null;
 
 export function updateConfig() {
 	if (!textarea) {
@@ -35,92 +36,21 @@ export function updateConfig() {
 }
 
 function renderPreviewBoard() {
-	const boardEl = document.getElementById('roi_t4_preview_board');
-	if (!boardEl) {
+	const container = document.getElementById('roi_t4_preview_container');
+	if (!container) {
 		return;
 	}
 
 	const pgn = t4PgnTextarea ? t4PgnTextarea.value.trim() : '';
 
-	if (!pgn) {
-		if (previewAPI) {
-			previewAPI.destroy();
-			previewAPI = null;
-		}
-		boardEl.innerHTML = '';
-		return;
+	if (!previewViewer) {
+		previewViewer = createPgnPreviewViewer(container, {
+			pgn,
+			boardSize: 260,
+		});
+	} else {
+		previewViewer.update(pgn);
 	}
-
-	const { fen, orientation, shapes } = extractFenOrientationAndShapes(pgn);
-
-	if (previewAPI) {
-		previewAPI.setPosition(fen);
-		if (typeof previewAPI.setConfig === 'function') {
-			previewAPI.setConfig({ orientation });
-		}
-		if (typeof previewAPI.setShapes === 'function') {
-			previewAPI.setShapes(shapes);
-		}
-		if (typeof previewAPI.redraw === 'function') {
-			previewAPI.redraw(true);
-		}
-		return;
-	}
-
-	const checkInterval = setInterval(function () {
-		if (window.EgBoardCore) {
-			clearInterval(checkInterval);
-
-			if (boardEl.parentElement) {
-				boardEl.parentElement.classList.add(
-					'main-wrap',
-					'fit-container',
-					'piece-set-cburnett',
-					'board-theme-brown'
-				);
-			}
-			boardEl.classList.add('main-board');
-
-			const boardConfig = {
-				mode: 'game',
-				fen,
-				orientation,
-				coordinates: true,
-				viewOnly: true,
-				movable: {
-					free: false,
-					color: 'none',
-				},
-				drawable: {
-					enabled: false,
-				},
-			};
-
-			const boardState = {
-				mode: 'game',
-				pieceSet: 'cburnett',
-				boardTheme: 'brown',
-				showThreats: false,
-				promotionDialogState: { isEnabled: false },
-				historyViewerState: { isEnabled: false },
-			};
-
-			const api = new window.EgBoardCore(
-				boardEl,
-				boardState,
-				function () {},
-				function () {},
-				boardConfig,
-				{ workerUrl: '' }
-			);
-
-			if (typeof api.setShapes === 'function') {
-				api.setShapes(shapes || []);
-			}
-
-			previewAPI = api;
-		}
-	}, 50);
 }
 
 export function init() {

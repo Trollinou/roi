@@ -72,14 +72,12 @@ class TypePartieHeros implements TypeInterface {
 				);
 				?>
 
-				<!-- Aperçu visuel statique non-interactif du diagramme initial -->
-				<div style="margin-top: 10px;">
-					<label style="display: block; margin-bottom: 4px; font-size: 12px; color: #50575e;">
-						<strong><?php esc_html_e( 'Aperçu de la position initiale (non interactif) :', 'roi' ); ?></strong>
+				<!-- Aperçu interactif du PGN avec navigation et commentaires -->
+				<div style="margin-top: 15px;">
+					<label style="display: block; margin-bottom: 6px; font-size: 12px; color: #50575e;">
+						<strong><?php esc_html_e( 'Aperçu interactif & navigation des coups (lecture seule) :', 'roi' ); ?></strong>
 					</label>
-					<div id="roi_t4_preview_container" class="main-wrap fit-container piece-set-cburnett board-theme-brown" style="width: 260px; height: 260px; position: relative; border: 1px solid #ccd0d4; border-radius: 4px; background: #fff; overflow: hidden;">
-						<div id="roi_t4_preview_board" class="main-board roi_t4_preview_board" style="width: 100%; height: 100%;"></div>
-					</div>
+					<div id="roi_t4_preview_container" class="roi-t4-preview-container"></div>
 				</div>
 			</div>
 		</div>

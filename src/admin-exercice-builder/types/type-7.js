@@ -2,7 +2,11 @@
  * Handler pour le Type 7 : Marche du Héros.
  */
 
-import { openPgnEditor } from '../utils/modals';
+import {
+	setupPgnControl,
+	extractFenOrientationAndShapes,
+} from '../utils/controls';
+import { createPgnPreviewViewer } from '../utils/pgn-viewer';
 
 const textarea = document.getElementById('roi_config_json');
 const t7ModeSelect = document.getElementById('roi_t7_mode');
@@ -10,6 +14,7 @@ const t7SeriesContainer = document.getElementById('roi_t7_series_container');
 
 let t7Series = [];
 let t7Mode = '3x5';
+let previewViewers = [];
 
 /**
  * Met à jour la configuration globale au format JSON.
@@ -21,7 +26,17 @@ export function updateConfig() {
 
 	const t7Config = {
 		mode: t7Mode,
-		series: t7Series,
+		series: t7Series.map((s) => {
+			const { orientation, shapes } = extractFenOrientationAndShapes(
+				s.pgn_data || ''
+			);
+			return {
+				pgn_data: s.pgn_data || '',
+				couleur_joueur: orientation || 'white',
+				orientation: orientation || 'white',
+				shapes: shapes || [],
+			};
+		}),
 	};
 	textarea.value = JSON.stringify(t7Config, null, 4);
 }
@@ -50,6 +65,14 @@ export function renderT7Series() {
 	if (!t7SeriesContainer) {
 		return;
 	}
+
+	// Nettoyer les anciens viewers
+	previewViewers.forEach((v) => {
+		if (v && typeof v.destroy === 'function') {
+			v.destroy();
+		}
+	});
+	previewViewers = [];
 	t7SeriesContainer.innerHTML = '';
 
 	t7Series.forEach(function (serie, i) {
@@ -58,59 +81,108 @@ export function renderT7Series() {
 		div.setAttribute('data-index', i);
 		div.style.border = '1px solid #ccd0d4';
 		div.style.padding = '15px';
-		div.style.marginBottom = '15px';
+		div.style.marginBottom = '20px';
 		div.style.background = '#fafafa';
 		div.style.borderRadius = '6px';
 		div.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
 
 		div.innerHTML = `
-			<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-				<strong style="font-size: 14px; color: #1e1e1e;">Série ${i + 1}</strong>
+			<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">
+				<strong style="font-size: 15px; color: #1e1e1e;">Série ${i + 1}</strong>
+				<span class="roi-t7-orientation-badge" style="font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 12px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;">
+					Orientation : ${serie.couleur_joueur === 'black' ? 'Noirs' : 'Blancs'}
+				</span>
 			</div>
-			<div style="margin-bottom: 10px;">
-				<label style="font-weight: 600; display: block; margin-bottom: 4px;">Orientation :</label>
-				<select class="roi-t7-orientation" style="width: 120px;">
-					<option value="white" ${
-						serie.couleur_joueur === 'white' ? 'selected' : ''
-					}>Blancs</option>
-					<option value="black" ${
-						serie.couleur_joueur === 'black' ? 'selected' : ''
-					}>Noirs</option>
-				</select>
+
+			<!-- Groupe de contrôle PGN standardisé -->
+			<div class="roi-control-group roi-control-pgn" style="margin-bottom: 15px;">
+				<label for="roi_t7_pgn_${i}" class="roi-control-label">
+					<strong>Séquence PGN (Partie / Séquence tactique) :</strong>
+				</label>
+				<div class="roi-control-textarea-wrapper">
+					<textarea id="roi_t7_pgn_${i}" 
+						rows="4" 
+						class="large-text code roi-control-textarea roi_t7_pgn" 
+						placeholder="Collez un PGN ou utilisez 'Éditer le PGN'..." 
+						data-index="${i}">${serie.pgn_data || ''}</textarea>
+
+					<div class="roi-control-actions" style="margin-top: 6px; display: flex; gap: 8px;">
+						<button type="button" 
+							id="btn_open_pgn_editor_t7_${i}" 
+							class="button btn_open_pgn_editor_t7" 
+							title="Éditer le PGN dans l'éditeur interactif" 
+							data-index="${i}">
+							<span class="dashicons dashicons-edit"></span>
+							<span class="roi-btn-text">Éditer le PGN</span>
+						</button>
+					</div>
+				</div>
 			</div>
-			<div style="margin-bottom: 10px;">
-				<label style="font-weight: 600; display: block; margin-bottom: 4px;">Séquence PGN :</label>
-				<textarea class="roi-t7-pgn-preview" readonly style="width: 100%; height: 60px; font-family: monospace; font-size: 12px; background: #f0f0f1; resize: none; border: 1px solid #ccd0d4; border-radius: 4px; padding: 8px; color: #50575e;">${
-					serie.pgn_data || ''
-				}</textarea>
-			</div>
-			<div>
-				<button type="button" class="button btn-edit-pgn" style="display: inline-flex; align-items: center; gap: 4px;">
-					<span class="dashicons dashicons-edit" style="font-size: 16px; width: 16px; height: 16px; line-height: 1;"></span> Éditer le PGN
-				</button>
+
+			<!-- Prévisualisation interactive avec coups et navigation -->
+			<div style="margin-top: 10px;">
+				<label style="display: block; margin-bottom: 6px; font-size: 12px; color: #50575e;">
+					<strong>Aperçu interactif & navigation des coups (lecture seule) :</strong>
+				</label>
+				<div id="roi_t7_preview_container_${i}" class="roi-t7-preview-container"></div>
 			</div>
 		`;
 
-		// Changement d'orientation
-		const selectEl = div.querySelector('.roi-t7-orientation');
-		selectEl.addEventListener('change', function (e) {
-			t7Series[i].couleur_joueur = e.target.value;
-			updateConfig();
+		t7SeriesContainer.appendChild(div);
+
+		const pgnTextarea = div.querySelector(`#roi_t7_pgn_${i}`);
+		const btnEditPgn = div.querySelector(`#btn_open_pgn_editor_t7_${i}`);
+		const previewContainer = div.querySelector(
+			`#roi_t7_preview_container_${i}`
+		);
+		const orientationBadge = div.querySelector('.roi-t7-orientation-badge');
+
+		// Créer le viewer interactif
+		const viewer = createPgnPreviewViewer(previewContainer, {
+			pgn: serie.pgn_data || '',
+			boardSize: 260,
+		});
+		previewViewers[i] = viewer;
+
+		const updateOrientationBadge = (pgn) => {
+			if (!orientationBadge) {
+				return;
+			}
+			const { orientation } = extractFenOrientationAndShapes(pgn);
+			const isBlack = orientation === 'black';
+			orientationBadge.textContent = `Orientation : ${isBlack ? 'Noirs' : 'Blancs'}`;
+			orientationBadge.style.background = isBlack ? '#f1f5f9' : '#e0f2fe';
+			orientationBadge.style.color = isBlack ? '#334155' : '#0369a1';
+			orientationBadge.style.borderColor = isBlack
+				? '#cbd5e1'
+				: '#bae6fd';
+		};
+
+		// Configurer le contrôle PGN avec validation et modal
+		setupPgnControl({
+			textarea: pgnTextarea,
+			button: btnEditPgn,
+			initialFen() {
+				const currentPgn = t7Series[i] ? t7Series[i].pgn_data : '';
+				const { fen } = extractFenOrientationAndShapes(currentPgn);
+				return fen;
+			},
+			onChange(newPgn) {
+				if (t7Series[i]) {
+					t7Series[i].pgn_data = newPgn;
+					const { orientation } =
+						extractFenOrientationAndShapes(newPgn);
+					t7Series[i].couleur_joueur = orientation;
+					updateOrientationBadge(newPgn);
+					updateConfig();
+					if (viewer && typeof viewer.update === 'function') {
+						viewer.update(newPgn);
+					}
+				}
+			},
 		});
 
-		// Édition du PGN via la modale
-		div.querySelector('.btn-edit-pgn').addEventListener(
-			'click',
-			function () {
-				openPgnEditor(serie.pgn_data || '', function (nouveauPgn) {
-					t7Series[i].pgn_data = nouveauPgn;
-					div.querySelector('.roi-t7-pgn-preview').value = nouveauPgn;
-					updateConfig();
-				});
-			}
-		);
-
-		t7SeriesContainer.appendChild(div);
+		updateOrientationBadge(serie.pgn_data || '');
 	});
 }
 
@@ -135,11 +207,17 @@ export function init() {
 				}
 				if (Array.isArray(parsedT7.series)) {
 					t7Series = parsedT7.series.map(function (s) {
+						const pgn = s.pgn_data || '';
+						const { orientation, shapes } =
+							extractFenOrientationAndShapes(pgn);
 						return {
-							pgn_data: s.pgn_data || '',
+							pgn_data: pgn,
 							couleur_joueur:
-								s.couleur_joueur || s.orientation || 'white',
-							shapes: s.shapes || [],
+								s.couleur_joueur ||
+								s.orientation ||
+								orientation ||
+								'white',
+							shapes: s.shapes || shapes || [],
 						};
 					});
 				}
@@ -150,7 +228,6 @@ export function init() {
 	}
 
 	if (t7ModeSelect) {
-		// Supprimer les anciens écouteurs en clonant l'élément
 		const newModeSelect = t7ModeSelect.cloneNode(true);
 		t7ModeSelect.parentNode.replaceChild(newModeSelect, t7ModeSelect);
 		newModeSelect.addEventListener('change', function (e) {

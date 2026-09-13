@@ -346,6 +346,36 @@
 	border: 0 !important;
 }
 
+/* PgnPreviewViewer Shared Component */
+.roi-pgn-preview-viewer {
+	display: flex;
+	gap: 14px;
+	align-items: stretch;
+	width: 100%;
+	max-width: 720px;
+	box-sizing: border-box;
+	background: #fff;
+	border: 1px solid #ccd0d4;
+	border-radius: 6px;
+	padding: 12px;
+	overflow: hidden;
+}
+
+.roi-pgn-preview-viewer .roi-pgn-move-item:hover {
+	background-color: #f0f6fc;
+}
+
+.roi-pgn-preview-viewer .roi-nav-first,
+.roi-pgn-preview-viewer .roi-nav-prev,
+.roi-pgn-preview-viewer .roi-nav-next,
+.roi-pgn-preview-viewer .roi-nav-last {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+}
+
+
 
 
 
