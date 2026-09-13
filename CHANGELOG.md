@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+*   **Refonte du Constructeur d'Exercices Type 14 — Cap ou pas Cap ? en Série de 5 Mini-PGN (`TypeCapOuPasCap.php`, `type-14.js`) :**
+    *   **Architecture en Série de 5 Mini-PGN :** Remplacement de l'ancien format FEN basique par des `PgnInput` (supportant FEN statique ou 1 coup avec flèches/cercles pédagogiques) et prévisualisation interactive en direct `createPgnPreviewViewer` pour chaque position.
+    *   **Gestion Modulaire des Variantes :**
+        *   `qcm_multiple` : Gestionnaire dynamique de propositions globales pour la série avec sélecteur OUI / NON pour chaque proposition sur chacun des 5 mini-PGN.
+        *   `qcm_oui_non` : Saisie d'une question commune à la série avec sélecteur OUI / NON par mini-PGN.
+        *   `move` : Saisie du coup attendu (SAN) et explication si erreur.
+    *   **Rétrocompatibilité Totale :** Prise en charge transparente des anciens schémas JSON (`diagrammes`, `type_reponse`, `fen`).
+
 *   **Refonte du Constructeur d'Exercices Type 9 — Parcours en Série de 3 & Support de la Variante Traces (`TypeParcours.php`, `type-9.js`) :**
     *   **Configuration en Série de 3 Parcours :** Mise à niveau de la metabox d'administration pour permettre la définition de 3 parcours indépendants (variante, description/consigne spécifique, position FEN & formes, cases départ/arrivée déduites et prévisualisation statique).
     *   **Support & Extensibilité des Variantes :** Intégration des 4 variantes : `standard` (respect des obstacles rouges et arrivée), `pacman` (manger toutes les pièces), `stealth` (cases non surveillées par l'adversaire) et `traces` (*« Mais qui a bien pu laisser ces traces ? »*).
