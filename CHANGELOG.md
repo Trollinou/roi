@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.6.1] - 2026-09-13
+
 *   **Parcours en Boucle Fermée & Détection de Tour Complet (Type 9 - Variante Stealth) (`LoopTracker.js`, `TypeParcours.php`, `type-9.js`) :**
     *   **Algorithme d'Enroulement Angulaire (*Winding Number*) & 4 Quadrants :** Création du module `LoopTracker` calculant en temps réel l'enroulement angulaire ($\Delta \theta$ cumulé $\ge 360^\circ$ en sens horaire ou anti-horaire) et le passage par les 4 quadrants autour de la pièce adverse pour valider les tours complets (ex: faire le tour de la Dame avec le Cavalier sans se faire voir).
     *   **Résolution du Conflit Départ/Arrivée :** Prise en charge automatique des parcours en boucle où seul le cercle bleu de départ est défini (`is_loop: true`), évitant la superposition impossible de cercles bleu et vert sur la même case et empêchant les allers-retours frauduleux.
