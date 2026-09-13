@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-09-13
+
 *   **Refonte du Constructeur d'Exercices Type 14 — Cap ou pas Cap ? en Série de 5 Mini-PGN (`TypeCapOuPasCap.php`, `type-14.js`) :**
     *   **Architecture en Série de 5 Mini-PGN :** Remplacement de l'ancien format FEN basique par des `PgnInput` (supportant FEN statique ou 1 coup avec flèches/cercles pédagogiques) et prévisualisation interactive en direct `createPgnPreviewViewer` pour chaque position.
     *   **Gestion Modulaire des Variantes :**
