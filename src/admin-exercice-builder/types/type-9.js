@@ -16,6 +16,7 @@ const t9Series = [
 		case_depart: '',
 		case_arrivee: '',
 		piece_attendue: '',
+		is_loop: false,
 		shapes: [],
 	},
 	{
@@ -26,6 +27,7 @@ const t9Series = [
 		case_depart: '',
 		case_arrivee: '',
 		piece_attendue: '',
+		is_loop: false,
 		shapes: [],
 	},
 	{
@@ -36,6 +38,7 @@ const t9Series = [
 		case_depart: '',
 		case_arrivee: '',
 		piece_attendue: '',
+		is_loop: false,
 		shapes: [],
 	},
 ];
@@ -102,6 +105,7 @@ export function updateConfig() {
 			case_depart: s.case_depart || '',
 			case_arrivee: s.case_arrivee || '',
 			piece_attendue: s.piece_attendue || '',
+			is_loop: !!s.is_loop,
 			shapes: s.shapes || [],
 		})),
 	};
@@ -128,8 +132,11 @@ function updateSquareDeductions(index) {
 		});
 	}
 
+	const isLoop = !!caseDep && (!caseArr || caseDep.toLowerCase() === caseArr.toLowerCase());
+
 	current.case_depart = caseDep;
-	current.case_arrivee = caseArr;
+	current.case_arrivee = isLoop ? caseDep : caseArr;
+	current.is_loop = isLoop;
 
 	const pieceRole = extractPieceRoleFromFen(current.fen_depart);
 	current.piece_attendue = pieceRole;
@@ -148,7 +155,11 @@ function updateSquareDeductions(index) {
 		depInput.value = caseDep;
 	}
 	if (arrInput) {
-		arrInput.value = caseArr;
+		if (isLoop && caseDep) {
+			arrInput.value = `${caseDep} (Boucle / Tour complet)`;
+		} else {
+			arrInput.value = caseArr;
+		}
 	}
 	if (pieceInput) {
 		pieceInput.value = pieceRole
@@ -277,6 +288,7 @@ export function init() {
 									parsed.series[i].case_arrivee || '',
 								piece_attendue:
 									parsed.series[i].piece_attendue || '',
+								is_loop: !!parsed.series[i].is_loop,
 								shapes: Array.isArray(parsed.series[i].shapes)
 									? parsed.series[i].shapes
 									: [],

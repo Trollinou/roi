@@ -34,7 +34,7 @@ class TypeParcours implements TypeInterface {
 			<p class="description" style="margin-bottom: 15px; color: #1d2327; background: #f0f6fc; border-left: 4px solid #72aee6; padding: 10px 12px; border-radius: 2px;">
 				<strong><?php esc_html_e( 'Règles visuelles & parcours :', 'roi' ); ?></strong><br>
 				• <strong><?php esc_html_e( 'Cercle bleu (obligatoire) :', 'roi' ); ?></strong> <?php esc_html_e( 'Case de départ du parcours.', 'roi' ); ?><br>
-				• <strong><?php esc_html_e( 'Cercle vert (obligatoire) :', 'roi' ); ?></strong> <?php esc_html_e( "Case d'arrivée / cible.", 'roi' ); ?><br>
+				• <strong><?php esc_html_e( 'Cercle vert (optionnel si boucle) :', 'roi' ); ?></strong> <?php esc_html_e( "Case d'arrivée / cible. Si aucun cercle vert n'est tracé, le parcours est configuré en tour complet (boucle fermée avec arrivée = départ).", 'roi' ); ?><br>
 				• <strong><?php esc_html_e( 'Cercles rouges (optionnel) :', 'roi' ); ?></strong> <?php esc_html_e( 'Cases piégées / interdites.', 'roi' ); ?>
 			</p>
 

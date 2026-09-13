@@ -150,7 +150,7 @@ Le plugin expose plusieurs points de terminaison REST sous le namespace `/wp-jso
 Le plugin est organisé dans les répertoires principaux suivants :
 
 *   `/assets`: Contient les fichiers CSS et JS publics et d'administration de ROI.
-*   `/src`: Contient les sources React et Gutenberg du bloc `roi/chessboard`.
+*   `/src`: Contient les sources React et Gutenberg du bloc `roi/chessboard`, les constructeurs d'exercices (`admin-exercice-builder`) et les utilitaires mathématiques/d'échecs (`src/utils/LoopTracker.js`, `src/utils/chessUtils.js`).
 *   `/build`: Contient les assets compilés du bloc d'échecs (CSS, JS).
 *   `/includes`: La logique principale du plugin, structurée selon le standard PSR-4 (namespace `ROI\`).
 *   `/includes/Admin`: Fichiers relatifs à la zone d'administration de WordPress (metaboxes, menus, backup).

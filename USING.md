@@ -199,6 +199,19 @@ Ces données sont transmises de manière sécurisée via l'API REST de sauvegard
     - Affiche le badge rouge `📌 Assigné` pour les cours ciblés, avec les étiquettes de groupes (`👥 Nom du groupe`) et les noms d'élèves (`👤 Nom` ou `👤 X élèves ℹ️` avec infobulle déroulante).
   - **Menu déroulant de filtre :** Sélecteur d'audience intégré à la barre d'outils de tri de WordPress (`restrict_manage_posts`).
 
+## Constructeur d'Exercices — Type 9 : Parcours (Série de 3)
+
+### Variantes disponibles
+* **`standard` (Parcours classique) :** Déplacement de la case de départ (cercle bleu) à la case d'arrivée (cercle vert) en évitant les cases piégées (cercles rouges).
+* **`pacman` (Manger toutes les pièces) :** Capturer l'ensemble des pièces adverses avant de rejoindre la case d'arrivée.
+* **`stealth` (Pas vu, pas pris) :** Infiltrer la zone cible sans jamais poser le pied sur une case contrôlée par une pièce adverse.
+* **`traces` (Retrouver la pièce) :** Retrouver la pièce d'après ses traces sur l'échiquier.
+
+### Parcours en Boucle Fermée (Tour complet d'une pièce)
+* **Configuration :** Pour créer un parcours en tour complet (ex: contourner une Dame ennemie avec un Cavalier), placez **uniquement un cercle bleu** sur la case de départ (`c3`). Ne placez aucun cercle vert.
+* **Détection automatique :** Le constructeur déduit automatiquement `is_loop: true` et positionne la case d'arrivée sur la case de départ.
+* **Validation mathématique (Winding Number) :** Le moteur suit l'enroulement angulaire ($\ge 360^\circ$) et le passage par les 4 quadrants autour de la pièce centrale. Un aller-retour frauduleux est automatiquement rejeté.
+
 ## Configuration & Restrictions d'accès
 
 ### 1. Réglages du Back-office
@@ -213,3 +226,4 @@ Les administrateurs peuvent configurer les rôles autorisés à accéder au modu
     "apprentissage_allowed_roles": ["administrator", "staff", "entraineur", "editor", "membre"]
   }
   ```
+
