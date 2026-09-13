@@ -49,6 +49,17 @@ Permet d'afficher et de rejouer une partie d'échecs complète :
 * **Navigation intégrée :** L'aperçu dans l'éditeur et l'affichage en front-office disposent d'une barre de navigation rapide (⏮ Début, ◀ Coup précédent, ▶ Coup suivant, ⏭ Fin de partie).
 * **Édition en modale dédiée :** Le bouton « ✏️ Modifier la partie PGN » ouvre `RoiPgnEditor` pour charger ou coller une séquence PGN avec validation syntaxique instantanée.
 
+## Types d'Exercices (Administration)
+
+### Type 9 — Parcours (Série de 3)
+* **Configuration :** Chaque exercice de type 9 permet de renseigner une série de 3 parcours indépendants.
+* **Variantes supportées :**
+  * `standard` (Parcours classique) : Relever le défi en rejoignant la case cible sans s'arrêter sur les cases rouges.
+  * `pacman` (Gourmand) : Obligation de manger toutes les pièces adverses avant d'atteindre l'arrivée.
+  * `stealth` (Pas vu, pas pris) : Se déplacer vers la case cible sans jamais s'arrêter sur une case surveillée par l'adversaire ou rouge.
+  * `traces` (Mais qui a bien pu laisser ces traces ?) : Déduction de la pièce responsable des traces représentées par les formes géométriques. La pièce attendue est déduite automatiquement de la position FEN.
+* **Édition :** Bouton FEN/Shapes ouvrant l'éditeur visuel `RoiFenEditor`, détection automatique des cases de départ (bleu) et d'arrivée (vert), et synchronisation automatique du JSON de configuration `roi_config_json`.
+
 ## Rôles
 
 Ce plugin ajoute les capacités suivantes au rôle "Entraineur":

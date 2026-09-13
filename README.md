@@ -65,6 +65,7 @@ Ce plugin nécessite que le plugin **DAME** soit installé et activé. Le plugin
     *   **Type 3 (ABCDaire Tactique) :** Série de 4 Mini-PGN contenant les variantes tactiques commentées et annotées, avec prévisualisation PGN interactive et navigation pas-à-pas des coups. Prise en charge d'un cercle jaune (`[%csl Y...]`) à la racine pour mettre en évidence la pièce d'étude dès la recherche.
     *   **Type 4 (La Partie dont tu es le Héros) :** Saisie d'une étude PGN complète avec embranchements QCM détectés par les flèches `[%cal ...]` et les variantes d'erreur. Prévisualisation interactive pas-à-pas avec coups et commentaires synchronisés.
     *   **Type 7 (La Marche du Héros) :** Définition de 3 séries de 5 cartes (mode 3x5) ou 5 séries de 3 cartes (mode 5x3). Détection automatique de l'orientation et prévisualisation PGN interactive individuelle par série.
+    *   **Type 9 (Parcours) :** Configuration de séries de 3 parcours progressifs avec choix de variante (`standard`, `pacman`, `stealth`, `traces`), FEN de départ, case de départ/arrivée, formes/traces géométriques et déduction automatique de la pièce pour le mode traces.
 
 ## API REST
 

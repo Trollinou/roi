@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+*   **Refonte du Constructeur d'Exercices Type 9 — Parcours en Série de 3 & Support de la Variante Traces (`TypeParcours.php`, `type-9.js`) :**
+    *   **Configuration en Série de 3 Parcours :** Mise à niveau de la metabox d'administration pour permettre la définition de 3 parcours indépendants (variante, description/consigne spécifique, position FEN & formes, cases départ/arrivée déduites et prévisualisation statique).
+    *   **Support & Extensibilité des Variantes :** Intégration des 4 variantes : `standard` (respect des obstacles rouges et arrivée), `pacman` (manger toutes les pièces), `stealth` (cases non surveillées par l'adversaire) et `traces` (*« Mais qui a bien pu laisser ces traces ? »*).
+    *   **Variante Traces & Déduction Automatique de Pièce :** Détection automatique de la pièce attendue (`piece_attendue`) extraite de la position FEN renseignée, saisie des cercles de traces (`shapes`), et persistance dans le contrat JSON `{ consigne, series: [ { variante, description, fen_depart, couleur_joueur, piece_attendue, case_arrivee, shapes }, ... ] }`.
+    *   **Déductions & Aperçu Automatisés :** Déduction automatique des cases de départ (cercle bleu) et d'arrivée (cercle vert) et actualisation réactive des aperçus d'échiquier.
+
 *   **Composant Partagé de Prévisualisation PGN Interactive (Style Lichess) & Harmonisation Type 7 (`pgn-viewer.js`, `type-7.js`, `type-4.js`, `type-3.js`, `admin-style.css`) :**
     *   **Composant `PgnPreviewViewer` :** Création d'un viewer interactif lecture seule réutilisable dans tous les constructeurs d'exercices acceptant du PGN. Comprend un échiquier à gauche (orientation automatique selon le trait du PGN, synchronisation dynamique des flèches/cercles à chaque coup) et un panneau latéral droit aligné en hauteur (liste des coups numérotés avec surbrillance et clic direct, commentaires textuels, variantes alternatives, et barre de navigation `|◀`, `◀`, `▶`, `▶|`).
     *   **Harmonisation du Type 7 (Marche du Héros) :** Suppression du sélecteur manuel d'orientation superflu au profit d'une détection automatique d'après la position initiale du PGN. Intégration du composant de prévisualisation interactif pour chaque série d'exercices.
