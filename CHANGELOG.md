@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+*   **Filtrage des Éléments Non Assignés dans le Constructeur de Cours (`Builder.php`, `main.js`) :**
+    *   **Option « Non assignés uniquement » cochée par défaut :** Ajout d'une case à cocher sous la barre de filtres du panneau « Catalogue des leçons & exercices » pour masquer automatiquement les leçons, exercices et vidéos déjà assignés à d'autres cours.
+    *   **Filtrage Dynamique AJAX (`roi_search_cours_items`) :** Prise en compte des paramètres `unassigned` et `course_id` pour exclure via `post__not_in` les IDs d'éléments présents dans les playlists des cours publiés actifs (hors cours en cours d'édition).
+    *   **Règle d'Affichage du Cours Actif :** Maintien strict de l'exclusion des éléments déjà présents dans la playlist du cours en cours de construction (colonne de droite), que la case soit cochée ou non.
+
+
 *   **Colonnes Type et Variante dans la Liste d'Exercices (`Columns.php`, `Exercice_Type.php`, `Exercice_Config_DTO.php`, `Manager.php`) :**
     *   **Nouvelles Colonnes d'Administration (`edit.php?post_type=roi_exercice`) :** Ajout des colonnes **Type** et **Variante** insérées immédiatement avant la colonne **Niveau** pour une meilleure visibilité et organisation du catalogue d'exercices.
     *   **Uniformisation & Détection des Variantes Globales :** Prise en charge des sous-types/variantes globales pour le *Type 14 (Cap ou pas cap ? : QCM Multiple, QCM Oui/Non, Move)* et le *Type 12 (Qui-suis-je ? : Pièces, Cases)* avec gestion automatique des rétrocompatibilités, affichage d'un tiret (`—`) pour les types sans variante globale (y compris le Type 9 dont les variantes sont locales à chaque diagramme de la série), et persistance de la post meta `_roi_exercice_variante`.

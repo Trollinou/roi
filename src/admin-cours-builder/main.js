@@ -13,6 +13,16 @@ document.addEventListener('DOMContentLoaded', () => {
 	const catalogLevelFilter = document.getElementById(
 		'roi_catalog_level_filter'
 	);
+	const catalogUnassignedFilter = document.getElementById(
+		'roi_catalog_unassigned_only'
+	);
+	const builderContainer = document.querySelector(
+		'.roi-cours-builder-container'
+	);
+	const courseId =
+		builderContainer && builderContainer.getAttribute('data-course-id')
+			? builderContainer.getAttribute('data-course-id')
+			: '0';
 	const availableItemsContainer = document.getElementById(
 		'roi_available_items'
 	);
@@ -78,6 +88,10 @@ document.addEventListener('DOMContentLoaded', () => {
 		const query = catalogSearch.value.trim();
 		const chapter = catalogFilter.value;
 		const level = catalogLevelFilter ? catalogLevelFilter.value : '';
+		const unassigned =
+			catalogUnassignedFilter && catalogUnassignedFilter.checked
+				? '1'
+				: '0';
 
 		availableItemsContainer.innerHTML = `<div style="padding: 10px; color: #888;">Recherche en cours...</div>`;
 
@@ -87,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					roi_cours_builder.nonce
 				}&q=${encodeURIComponent(
 					query
-				)}&chapter=${chapter}&level=${level}`
+				)}&chapter=${chapter}&level=${level}&unassigned=${unassigned}&course_id=${courseId}`
 			);
 			const resJson = await response.json();
 
@@ -493,6 +507,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	catalogFilter.addEventListener('change', searchCatalog);
 	if (catalogLevelFilter) {
 		catalogLevelFilter.addEventListener('change', searchCatalog);
+	}
+	if (catalogUnassignedFilter) {
+		catalogUnassignedFilter.addEventListener('change', searchCatalog);
 	}
 
 	// Initialize items list with constraint checks and initial count

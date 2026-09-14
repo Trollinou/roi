@@ -205,7 +205,7 @@ class Builder {
 				background: #a8a8a8;
 			}
 		</style>
-		<div class="roi-cours-builder-container" data-course-chapter-id="<?php echo esc_attr( (string) $course_chapter_id ); ?>" data-course-level="<?php echo esc_attr( (string) $course_level ); ?>">
+		<div class="roi-cours-builder-container" data-course-id="<?php echo esc_attr( (string) $post->ID ); ?>" data-course-chapter-id="<?php echo esc_attr( (string) $course_chapter_id ); ?>" data-course-level="<?php echo esc_attr( (string) $course_level ); ?>">
 			<input type="hidden" name="roi_cours_playlist_json" id="roi_cours_playlist_json" value="<?php echo esc_attr( $playlist ); ?>">
 
 			<div class="roi-cours-builder-columns">
@@ -234,6 +234,13 @@ class Builder {
 								<option value="<?php echo (int) $i; ?>"><?php echo (int) $i; ?></option>
 							<?php endfor; ?>
 						</select>
+					</div>
+
+					<div class="roi-cours-catalog-options" style="margin-bottom: 12px; display: flex; align-items: center;">
+						<label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #50575e; cursor: pointer; user-select: none;">
+							<input type="checkbox" id="roi_catalog_unassigned_only" value="1" checked style="margin: 0;">
+							<span><?php esc_html_e( 'Non assignés uniquement', 'roi' ); ?></span>
+						</label>
 					</div>
 
 					<div id="roi_available_items" class="roi-scrollable-container" style="display: flex; flex-direction: column; gap: 8px; padding-right: 4px;">
@@ -432,9 +439,11 @@ class Builder {
 	public function ajax_recherche_elements(): void {
 		check_ajax_referer( 'roi_search_cours_items_nonce', 'security', false );
 
-		$search   = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : '';
-		$chapitre = isset( $_GET['chapter'] ) ? (int) $_GET['chapter'] : 0;
-		$niveau   = isset( $_GET['level'] ) ? (int) $_GET['level'] : 0;
+		$search          = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : '';
+		$chapitre        = isset( $_GET['chapter'] ) ? (int) $_GET['chapter'] : 0;
+		$niveau          = isset( $_GET['level'] ) ? (int) $_GET['level'] : 0;
+		$unassigned_only = isset( $_GET['unassigned'] ) && '1' === (string) $_GET['unassigned'];
+		$course_id       = isset( $_GET['course_id'] ) ? (int) $_GET['course_id'] : 0;
 
 		$args = array(
 			'post_type'      => array( 'roi_lecon', 'roi_exercice', 'roi_video' ),
@@ -442,6 +451,52 @@ class Builder {
 			'posts_per_page' => 50,
 			's'              => $search,
 		);
+
+		if ( $unassigned_only ) {
+			global $wpdb;
+
+			if ( $course_id > 0 ) {
+				$playlists = $wpdb->get_col(
+					$wpdb->prepare(
+						"SELECT pm.meta_value 
+						 FROM {$wpdb->postmeta} pm
+						 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+						 WHERE pm.meta_key = '_roi_cours_playlist'
+						   AND p.post_type = 'roi_cours'
+						   AND p.post_status NOT IN ('trash', 'auto-draft')
+						   AND p.ID != %d",
+						$course_id
+					)
+				);
+			} else {
+				$playlists = $wpdb->get_col(
+					"SELECT pm.meta_value 
+					 FROM {$wpdb->postmeta} pm
+					 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+					 WHERE pm.meta_key = '_roi_cours_playlist'
+					   AND p.post_type = 'roi_cours'
+					   AND p.post_status NOT IN ('trash', 'auto-draft')"
+				);
+			}
+
+			$assigned_ids = array();
+			if ( is_array( $playlists ) ) {
+				foreach ( $playlists as $raw_json ) {
+					$items = json_decode( (string) $raw_json, true );
+					if ( is_array( $items ) ) {
+						foreach ( $items as $item ) {
+							if ( isset( $item['id'] ) && (int) $item['id'] > 0 ) {
+								$assigned_ids[ (int) $item['id'] ] = true;
+							}
+						}
+					}
+				}
+			}
+
+			if ( ! empty( $assigned_ids ) ) {
+				$args['post__not_in'] = array_keys( $assigned_ids );
+			}
+		}
 
 		if ( $chapitre > 0 ) {
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query

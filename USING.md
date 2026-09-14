@@ -205,6 +205,12 @@ Ces données sont transmises de manière sécurisée via l'API REST de sauvegard
     - Affiche le badge rouge `📌 Assigné` pour les cours ciblés, avec les étiquettes de groupes (`👥 Nom du groupe`) et les noms d'élèves (`👤 Nom` ou `👤 X élèves ℹ️` avec infobulle déroulante).
   - **Menu déroulant de filtre :** Sélecteur d'audience intégré à la barre d'outils de tri de WordPress (`restrict_manage_posts`).
 
+### 5. Constructeur de Cours (Playlist & Catalogue des leçons, exercices et vidéos)
+* Lors de l'édition d'un cours (`roi_cours`), le panneau **Constructeur de Cours** organise la séquence pédagogique en deux colonnes :
+  - **Catalogue (colonne de gauche) :** Permet de rechercher des contenus par mot-clé, de filtrer par chapitre et par niveau de difficulté (1 à 4).
+  - **Option « Non assignés uniquement » :** Case à cocher présente sous les filtres (activée par défaut) pour n'afficher que les exercices, leçons et vidéos qui ne sont pas encore assignés à un autre cours. Si elle est décochée, l'ensemble des éléments du chapitre/niveau redevient accessible.
+  - **Contenu du cours / Playlist (colonne de droite) :** Glisser-déposer (Drag & Drop) pour ordonner la playlist. Les éléments présents dans la playlist du cours en cours d'édition restent masqués du catalogue de gauche en permanence.
+
 ## Constructeur d'Exercices — Type 9 : Parcours (Série de 3)
 
 ### Variantes disponibles
