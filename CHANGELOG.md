@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+*   **Refonte du Type 12 (Qui-suis-je ?) en Série de 6 Cartes avec Variantes (`TypeQuiSuisJe.php`, `type-12.js`) :**
+    *   **Série de 6 Cartes :** Transformation de la structure d'exercice en une série standardisée de 6 cartes avec gestion de consigne globale.
+    *   **Variante Pièces (`pieces`) :** Saisie multiligne des indices et sélection de la pièce blanche cible via une palette visuelle en notation française (R, D, T, F, C, P) avec support des notations complètes (`Da1`, `Tf4`).
+    *   **Variante Cases (`cases`) :** Saisie multiligne des indices et placement de la case attendue via l'éditeur FEN avec cercle vert, prévisualisation statique et déduction automatique de la case cible.
+
 ## [1.6.2] - 2026-09-14
 
 *   **Horodatage et Invalidation de Cache dans l'API REST (`Contenu_Controller.php`, `Parcours_Controller.php`) :**

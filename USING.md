@@ -60,6 +60,12 @@ Permet d'afficher et de rejouer une partie d'échecs complète :
   * `traces` (Mais qui a bien pu laisser ces traces ?) : Déduction de la pièce responsable des traces représentées par les formes géométriques. La pièce attendue est déduite automatiquement de la position FEN.
 * **Édition :** Bouton FEN/Shapes ouvrant l'éditeur visuel `RoiFenEditor`, détection automatique des cases de départ (bleu) et d'arrivée (vert), et synchronisation automatique du JSON de configuration `roi_config_json`.
 
+### Type 12 — Qui-suis-je ? (Série de 6)
+* **Configuration :** Chaque exercice de type 12 configure une série de 6 cartes d'indices.
+* **Variantes supportées :**
+  * `pieces` (Pièces) : Déduire la pièce blanche attendue parmi les 6 pièces (Roi, Dame, Tour, Fou, Cavalier, Pion) à partir d'indices textuels multilignes. Sélection de la pièce attendue via une palette de boutons dédiée.
+  * `cases` (Cases) : Déduire une case spécifique de l'échiquier à partir d'indices textuels multilignes. Placement de la case attendue via l'éditeur FEN avec un cercle vert, prévisualisation non-interactive et déduction automatique de la case cible.
+
 ## Rôles
 
 Ce plugin ajoute les capacités suivantes au rôle "Entraineur":

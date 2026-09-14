@@ -66,6 +66,7 @@ Ce plugin nécessite que le plugin **DAME** soit installé et activé. Le plugin
     *   **Type 4 (La Partie dont tu es le Héros) :** Saisie d'une étude PGN complète avec embranchements QCM détectés par les flèches `[%cal ...]` et les variantes d'erreur. Prévisualisation interactive pas-à-pas avec coups et commentaires synchronisés.
     *   **Type 7 (La Marche du Héros) :** Définition de 3 séries de 5 cartes (mode 3x5) ou 5 séries de 3 cartes (mode 5x3). Détection automatique de l'orientation et prévisualisation PGN interactive individuelle par série.
     *   **Type 9 (Parcours) :** Configuration de séries de 3 parcours progressifs avec choix de variante (`standard`, `pacman`, `stealth`, `traces`), FEN de départ, case de départ/arrivée, formes/traces géométriques et déduction automatique de la pièce pour le mode traces.
+    *   **Type 12 (Qui-suis-je ?) :** Configuration de séries de 6 cartes avec sélection de variante (`pieces` pour deviner une pièce blanche parmi 6 avec palette visuelle, ou `cases` pour deviner une case de l'échiquier via un cercle vert dans l'éditeur FEN) et saisie multiligne des indices.
     *   **Type 14 (Cap ou pas Cap ?) :** Configuration de séries de 5 Mini-PGN avec sélection de variante (`qcm_multiple`, `qcm_oui_non`, `move`), gestionnaire de propositions globales ou question commune, et prévisualisation PGN interactive.
 
 ## API REST
