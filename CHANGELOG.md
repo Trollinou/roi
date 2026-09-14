@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.6.2] - 2026-09-14
+
 *   **Horodatage et Invalidation de Cache dans l'API REST (`Contenu_Controller.php`, `Parcours_Controller.php`) :**
     *   **Date de Modification sur le Contenu (`/roi/v1/contenu/<id>`) :** Ajout du champ `modified` (`$post->post_modified`) dans la réponse JSON pour permettre aux clients (PWA) de détecter instantanément les mises à jour d'exercices, leçons et vidéos.
     *   **Horodatage des Éléments de Playlist (`/roi/v1/parcours`) :** Ajout du champ `modified` sur chaque élément de playlist de cours pour autoriser la synchronisation différentielle et l'invalidation sélective du cache client.
