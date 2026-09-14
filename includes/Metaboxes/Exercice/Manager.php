@@ -205,15 +205,29 @@ class Manager {
 			}
 		}
 
-		// Save raw JSON config.
+		// Save raw JSON config and update variant meta if applicable.
 		if ( isset( $_POST['roi_exercice_config'] ) ) {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$json_raw = wp_unslash( $_POST['roi_exercice_config'] );
 
 			// Validate JSON structure.
-			json_decode( $json_raw );
-			if ( json_last_error() === JSON_ERROR_NONE ) {
+			$decoded = json_decode( $json_raw, true );
+			if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
 				update_post_meta( $post_id, '_roi_exercice_config', wp_slash( $json_raw ) );
+
+				$type_id   = isset( $_POST['roi_exercice_type'] ) ? (int) $_POST['roi_exercice_type'] : (int) get_post_meta( $post_id, '_roi_exercice_type', true );
+				$type_enum = Exercice_Type::tryFrom( $type_id );
+				if ( null !== $type_enum && $type_enum->has_variantes() ) {
+					$raw_var        = $decoded['variante'] ?? ( $decoded['type_reponse'] ?? null );
+					$normalized_var = is_string( $raw_var ) ? $type_enum->normalize_variante_slug( $raw_var ) : null;
+					if ( null !== $normalized_var ) {
+						update_post_meta( $post_id, '_roi_exercice_variante', $normalized_var );
+					} else {
+						delete_post_meta( $post_id, '_roi_exercice_variante' );
+					}
+				} else {
+					delete_post_meta( $post_id, '_roi_exercice_variante' );
+				}
 			} else {
 				// Save anyway but avoid corruption by preserving raw layout.
 				update_post_meta( $post_id, '_roi_exercice_config', wp_slash( $json_raw ) );

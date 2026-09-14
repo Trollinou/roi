@@ -56,4 +56,98 @@ enum Exercice_Type: int {
 			self::DESTINATION_FINALE => '16 - Destination finale',
 		};
 	}
+
+	/**
+	 * Determines if this exercise type has global exercise variants.
+	 *
+	 * @return bool
+	 */
+	public function has_variantes(): bool {
+		return match ( $this ) {
+			self::QUI_SUIS_JE, self::CAP_OU_PAS_CAP => true,
+			default                                 => false,
+		};
+	}
+
+	/**
+	 * Returns the dictionary of supported variants and their labels for this exercise type.
+	 *
+	 * @return array<string, string>
+	 */
+	public function variantes_labels(): array {
+		return match ( $this ) {
+			self::QUI_SUIS_JE    => array(
+				'pieces' => __( 'Pièces', 'roi' ),
+				'cases'  => __( 'Cases', 'roi' ),
+			),
+			self::CAP_OU_PAS_CAP => array(
+				'qcm_multiple' => __( 'QCM Multiple', 'roi' ),
+				'qcm_oui_non'  => __( 'QCM Oui/Non', 'roi' ),
+				'move'         => __( 'Move', 'roi' ),
+			),
+			default              => array(),
+		};
+	}
+
+	/**
+	 * Normalizes legacy variant slugs to standardized slugs.
+	 *
+	 * @param string|null $slug The raw variant slug.
+	 * @return string|null The normalized slug or null if not applicable.
+	 */
+	public function normalize_variante_slug( ?string $slug ): ?string {
+		if ( null === $slug || '' === trim( $slug ) ) {
+			return null;
+		}
+
+		$slug = trim( $slug );
+
+		if ( self::QUI_SUIS_JE === $this ) {
+			if ( 'piece' === $slug ) {
+				return 'pieces';
+			}
+			if ( 'case' === $slug || 'square' === $slug ) {
+				return 'cases';
+			}
+			return $slug;
+		}
+
+		if ( self::CAP_OU_PAS_CAP === $this ) {
+			if ( 'qcm' === $slug ) {
+				return 'qcm_oui_non';
+			}
+			return $slug;
+		}
+
+		return $slug;
+	}
+
+	/**
+	 * Extracts and resolves the human-readable variant label from a config array.
+	 *
+	 * @param array<string, mixed>|null $config Decoded JSON configuration data.
+	 * @return string The human readable variant label, or empty string if not applicable.
+	 */
+	public function extract_variante_label( ?array $config ): string {
+		if ( ! $this->has_variantes() || null === $config ) {
+			return '';
+		}
+
+		$raw_slug = null;
+		if ( self::QUI_SUIS_JE === $this ) {
+			$raw_slug = isset( $config['variante'] ) && is_string( $config['variante'] ) ? $config['variante'] : 'pieces';
+		} elseif ( self::CAP_OU_PAS_CAP === $this ) {
+			$raw_slug = isset( $config['variante'] ) && is_string( $config['variante'] )
+				? $config['variante']
+				: ( isset( $config['type_reponse'] ) && is_string( $config['type_reponse'] ) ? $config['type_reponse'] : 'qcm_oui_non' );
+		}
+
+		$normalized = $this->normalize_variante_slug( $raw_slug );
+		if ( null === $normalized ) {
+			return '';
+		}
+
+		$labels = $this->variantes_labels();
+		return $labels[ $normalized ] ?? $normalized;
+	}
 }

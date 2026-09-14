@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+*   **Colonnes Type et Variante dans la Liste d'Exercices (`Columns.php`, `Exercice_Type.php`, `Exercice_Config_DTO.php`, `Manager.php`) :**
+    *   **Nouvelles Colonnes d'Administration (`edit.php?post_type=roi_exercice`) :** Ajout des colonnes **Type** et **Variante** insérées immédiatement avant la colonne **Niveau** pour une meilleure visibilité et organisation du catalogue d'exercices.
+    *   **Uniformisation & Détection des Variantes Globales :** Prise en charge des sous-types/variantes globales pour le *Type 14 (Cap ou pas cap ? : QCM Multiple, QCM Oui/Non, Move)* et le *Type 12 (Qui-suis-je ? : Pièces, Cases)* avec gestion automatique des rétrocompatibilités, affichage d'un tiret (`—`) pour les types sans variante globale (y compris le Type 9 dont les variantes sont locales à chaque diagramme de la série), et persistance de la post meta `_roi_exercice_variante`.
+    *   **Tri et Filtrage d'Administration :** Activation du tri par type d'exercice et ajout d'un menu déroulant de filtrage par type dans la barre d'outils de la liste des exercices.
+
 *   **Refonte du Type 12 (Qui-suis-je ?) en Série de 6 Cartes avec Variantes (`TypeQuiSuisJe.php`, `type-12.js`) :**
     *   **Série de 6 Cartes :** Transformation de la structure d'exercice en une série standardisée de 6 cartes avec gestion de consigne globale.
     *   **Variante Pièces (`pieces`) :** Saisie multiligne des indices et sélection de la pièce blanche cible via une palette visuelle en notation française (R, D, T, F, C, P) avec support des notations complètes (`Da1`, `Tf4`).

@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace ROI\Admin;
 
+use ROI\Enums\Chapitre_Couleur;
+use ROI\Enums\Exercice_Type;
+
 /**
  * Class Columns
  * Handles displaying and sorting difficulty level and chapter columns in admin lists.
@@ -31,6 +34,8 @@ class Columns {
 		add_filter( 'views_edit-roi_cours', array( $this, 'ajouter_onglets_audience' ) );
 		add_action( 'pre_get_posts', array( $this, 'filtrer_requete_audience' ) );
 		add_action( 'restrict_manage_posts', array( $this, 'filtrer_dropdown_audience' ) );
+		add_action( 'restrict_manage_posts', array( $this, 'filtrer_dropdown_type_exercice' ) );
+		add_action( 'pre_get_posts', array( $this, 'filtrer_requete_type_exercice' ) );
 	}
 
 	/**
@@ -44,6 +49,10 @@ class Columns {
 		$new_columns = array();
 		foreach ( $columns as $key => $value ) {
 			if ( 'date' === $key ) {
+				if ( 'roi_exercice' === $post_type ) {
+					$new_columns['roi_type']     = __( 'Type', 'roi' );
+					$new_columns['roi_variante'] = __( 'Variante', 'roi' );
+				}
 				$new_columns['roi_niveau']   = __( 'Niveau', 'roi' );
 				$new_columns['roi_chapitre'] = __( 'Chapitre', 'roi' );
 				if ( 'roi_cours' === $post_type ) {
@@ -65,6 +74,39 @@ class Columns {
 	 */
 	public function afficher_colonnes( string $column, int $post_id ): void {
 		$post_type = get_post_type( $post_id );
+
+		if ( 'roi_type' === $column ) {
+			$type_meta = (int) get_post_meta( $post_id, '_roi_exercice_type', true );
+			$type_enum = Exercice_Type::tryFrom( $type_meta );
+			echo $type_enum ? esc_html( $type_enum->label() ) : '—';
+		}
+
+		if ( 'roi_variante' === $column ) {
+			$type_meta = (int) get_post_meta( $post_id, '_roi_exercice_type', true );
+			$type_enum = Exercice_Type::tryFrom( $type_meta );
+			if ( $type_enum && $type_enum->has_variantes() ) {
+				$var_meta = (string) get_post_meta( $post_id, '_roi_exercice_variante', true );
+				if ( '' !== $var_meta ) {
+					$labels = $type_enum->variantes_labels();
+					echo esc_html( $labels[ $var_meta ] ?? $var_meta );
+				} else {
+					$config_meta = get_post_meta( $post_id, '_roi_exercice_config', true );
+					$config_data = null;
+					if ( is_string( $config_meta ) && '' !== $config_meta ) {
+						$decoded = json_decode( $config_meta, true );
+						if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
+							$config_data = $decoded;
+						}
+					} elseif ( is_array( $config_meta ) ) {
+						$config_data = $config_meta;
+					}
+					$label = $type_enum->extract_variante_label( $config_data );
+					echo '' !== $label ? esc_html( $label ) : '—';
+				}
+			} else {
+				echo '—';
+			}
+		}
 
 		if ( 'roi_niveau' === $column ) {
 			$meta_key = '';
@@ -176,6 +218,9 @@ class Columns {
 	public function colonnes_triables( array $columns ): array {
 		global $post_type;
 		$columns['roi_niveau'] = 'roi_niveau';
+		if ( 'roi_exercice' === $post_type ) {
+			$columns['roi_type'] = 'roi_type';
+		}
 		if ( 'roi_cours' === $post_type ) {
 			$columns['roi_ordre'] = 'menu_order';
 		}
@@ -183,12 +228,23 @@ class Columns {
 	}
 
 	/**
-	 * Configures custom sorting queries for difficulty level.
+	 * Configures custom sorting queries for difficulty level and exercise type.
 	 *
 	 * @param array<string, mixed> $vars Query variables.
 	 * @return array<string, mixed> Query variables.
 	 */
 	public function trier_colonnes( array $vars ): array {
+		if ( isset( $vars['orderby'] ) && 'roi_type' === $vars['orderby'] ) {
+			$vars = array_merge(
+				$vars,
+				array(
+					// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_key' => '_roi_exercice_type',
+					'orderby'  => 'meta_value_num',
+				)
+			);
+		}
+
 		if ( isset( $vars['orderby'] ) && 'roi_niveau' === $vars['orderby'] ) {
 			$post_type = $vars['post_type'] ?? '';
 			$meta_key  = '';
@@ -389,5 +445,61 @@ class Columns {
 			<option value="restricted" <?php selected( $current, 'restricted' ); ?>><?php esc_html_e( '📌 Cours assignés', 'roi' ); ?></option>
 		</select>
 		<?php
+	}
+
+	/**
+	 * Displays exercise type dropdown filter in restrict_manage_posts.
+	 *
+	 * @param string $post_type Current post type.
+	 * @return void
+	 */
+	public function filtrer_dropdown_type_exercice( string $post_type ): void {
+		if ( 'roi_exercice' !== $post_type ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$current = isset( $_GET['roi_exercice_type'] ) && '' !== $_GET['roi_exercice_type'] ? (int) $_GET['roi_exercice_type'] : 0;
+		?>
+		<select name="roi_exercice_type">
+			<option value=""><?php esc_html_e( "Tous les types d'exercices", 'roi' ); ?></option>
+			<?php foreach ( Exercice_Type::cases() as $enum_type ) : ?>
+				<option value="<?php echo esc_attr( (string) $enum_type->value ); ?>" <?php selected( $current, $enum_type->value ); ?>>
+					<?php echo esc_html( $enum_type->label() ); ?>
+				</option>
+			<?php endforeach; ?>
+		</select>
+		<?php
+	}
+
+	/**
+	 * Filters query in WP_List_Table for roi_exercice type.
+	 *
+	 * @param \WP_Query $query Main query.
+	 * @return void
+	 */
+	public function filtrer_requete_type_exercice( \WP_Query $query ): void {
+		if ( ! is_admin() || ! $query->is_main_query() ) {
+			return;
+		}
+
+		if ( 'roi_exercice' !== $query->get( 'post_type' ) ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['roi_exercice_type'] ) && '' !== $_GET['roi_exercice_type'] && is_numeric( $_GET['roi_exercice_type'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$type_val     = (int) $_GET['roi_exercice_type'];
+			$raw_mq       = $query->get( 'meta_query' );
+			$meta_query   = is_array( $raw_mq ) ? $raw_mq : array();
+			$meta_query[] = array(
+				'key'     => '_roi_exercice_type',
+				'value'   => $type_val,
+				'compare' => '=',
+				'type'    => 'NUMERIC',
+			);
+			$query->set( 'meta_query', $meta_query );
+		}
 	}
 }

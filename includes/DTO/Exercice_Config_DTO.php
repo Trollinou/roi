@@ -21,11 +21,12 @@ readonly class Exercice_Config_DTO {
 	/**
 	 * Constructor property promotion.
 	 *
-	 * @param int                       $id           Post ID of the exercise.
-	 * @param string                    $title        Title of the exercise.
-	 * @param Exercice_Type             $type         Exercise type.
-	 * @param Exercice_Niveau           $niveau       Difficulty level.
-	 * @param array<string, mixed>|null $config Config array decoded from JSON.
+	 * @param int                       $id       Post ID of the exercise.
+	 * @param string                    $title    Title of the exercise.
+	 * @param Exercice_Type             $type     Exercise type.
+	 * @param Exercice_Niveau           $niveau   Difficulty level.
+	 * @param array<string, mixed>|null $config   Config array decoded from JSON.
+	 * @param string|null               $variante Normalized variant slug or null.
 	 */
 	public function __construct(
 		public int $id,
@@ -33,7 +34,17 @@ readonly class Exercice_Config_DTO {
 		public Exercice_Type $type,
 		public Exercice_Niveau $niveau,
 		public ?array $config = null,
+		public ?string $variante = null,
 	) {}
+
+	/**
+	 * Returns the human-readable variant label.
+	 *
+	 * @return string
+	 */
+	public function get_variante_label(): string {
+		return $this->type->extract_variante_label( $this->config );
+	}
 
 	/**
 	 * Creates a DTO instance from a WP_Post object and raw post meta.
@@ -57,12 +68,20 @@ readonly class Exercice_Config_DTO {
 			}
 		}
 
+		$variante_meta = (string) get_post_meta( $post->ID, '_roi_exercice_variante', true );
+		$variante      = '' !== $variante_meta ? $variante_meta : null;
+		if ( null === $variante && $type->has_variantes() && is_array( $config ) ) {
+			$raw_var  = $config['variante'] ?? ( $config['type_reponse'] ?? null );
+			$variante = is_string( $raw_var ) ? $type->normalize_variante_slug( $raw_var ) : null;
+		}
+
 		return new self(
 			id: $post->ID,
 			title: $post->post_title,
 			type: $type,
 			niveau: $niveau,
-			config: $config
+			config: $config,
+			variante: $variante
 		);
 	}
 }
