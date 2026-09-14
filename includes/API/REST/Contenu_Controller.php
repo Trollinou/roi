@@ -110,6 +110,7 @@ class Contenu_Controller {
 			'chapitre_nom'     => $chapitre_nom,
 			'chapitre_couleur' => $chapitre_couleur,
 			'niveau'           => $niveau,
+			'modified'         => (string) $post->post_modified,
 		);
 
 		if ( $is_exercice ) {

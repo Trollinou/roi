@@ -2,38 +2,11 @@
 
 ## [Unreleased]
 
+*   **Horodatage et Invalidation de Cache dans l'API REST (`Contenu_Controller.php`, `Parcours_Controller.php`) :**
+    *   **Date de Modification sur le Contenu (`/roi/v1/contenu/<id>`) :** Ajout du champ `modified` (`$post->post_modified`) dans la réponse JSON pour permettre aux clients (PWA) de détecter instantanément les mises à jour d'exercices, leçons et vidéos.
+    *   **Horodatage des Éléments de Playlist (`/roi/v1/parcours`) :** Ajout du champ `modified` sur chaque élément de playlist de cours pour autoriser la synchronisation différentielle et l'invalidation sélective du cache client.
+
 ## [1.6.1] - 2026-09-13
-
-*   **Parcours en Boucle Fermée & Détection de Tour Complet (Type 9 - Variante Stealth) (`LoopTracker.js`, `TypeParcours.php`, `type-9.js`) :**
-    *   **Algorithme d'Enroulement Angulaire (*Winding Number*) & 4 Quadrants :** Création du module `LoopTracker` calculant en temps réel l'enroulement angulaire ($\Delta \theta$ cumulé $\ge 360^\circ$ en sens horaire ou anti-horaire) et le passage par les 4 quadrants autour de la pièce adverse pour valider les tours complets (ex: faire le tour de la Dame avec le Cavalier sans se faire voir).
-    *   **Résolution du Conflit Départ/Arrivée :** Prise en charge automatique des parcours en boucle où seul le cercle bleu de départ est défini (`is_loop: true`), évitant la superposition impossible de cercles bleu et vert sur la même case et empêchant les allers-retours frauduleux.
-
-
-## [1.6.0] - 2026-09-13
-
-*   **Refonte du Constructeur d'Exercices Type 14 — Cap ou pas Cap ? en Série de 5 Mini-PGN (`TypeCapOuPasCap.php`, `type-14.js`) :**
-    *   **Architecture en Série de 5 Mini-PGN :** Remplacement de l'ancien format FEN basique par des `PgnInput` (supportant FEN statique ou 1 coup avec flèches/cercles pédagogiques) et prévisualisation interactive en direct `createPgnPreviewViewer` pour chaque position.
-    *   **Gestion Modulaire des Variantes :**
-        *   `qcm_multiple` : Gestionnaire dynamique de propositions globales pour la série avec sélecteur OUI / NON pour chaque proposition sur chacun des 5 mini-PGN.
-        *   `qcm_oui_non` : Saisie d'une question commune à la série avec sélecteur OUI / NON par mini-PGN.
-        *   `move` : Saisie du coup attendu (SAN) et explication si erreur.
-    *   **Rétrocompatibilité Totale :** Prise en charge transparente des anciens schémas JSON (`diagrammes`, `type_reponse`, `fen`).
-
-*   **Refonte du Constructeur d'Exercices Type 9 — Parcours en Série de 3 & Support de la Variante Traces (`TypeParcours.php`, `type-9.js`) :**
-    *   **Configuration en Série de 3 Parcours :** Mise à niveau de la metabox d'administration pour permettre la définition de 3 parcours indépendants (variante, description/consigne spécifique, position FEN & formes, cases départ/arrivée déduites et prévisualisation statique).
-    *   **Support & Extensibilité des Variantes :** Intégration des 4 variantes : `standard` (respect des obstacles rouges et arrivée), `pacman` (manger toutes les pièces), `stealth` (cases non surveillées par l'adversaire) et `traces` (*« Mais qui a bien pu laisser ces traces ? »*).
-    *   **Variante Traces & Déduction Automatique de Pièce :** Détection automatique de la pièce attendue (`piece_attendue`) extraite de la position FEN renseignée, saisie des cercles de traces (`shapes`), et persistance dans le contrat JSON `{ consigne, series: [ { variante, description, fen_depart, couleur_joueur, piece_attendue, case_arrivee, shapes }, ... ] }`.
-    *   **Déductions & Aperçu Automatisés :** Déduction automatique des cases de départ (cercle bleu) et d'arrivée (cercle vert) et actualisation réactive des aperçus d'échiquier.
-
-*   **Composant Partagé de Prévisualisation PGN Interactive (Style Lichess) & Harmonisation Type 7 (`pgn-viewer.js`, `type-7.js`, `type-4.js`, `type-3.js`, `admin-style.css`) :**
-    *   **Composant `PgnPreviewViewer` :** Création d'un viewer interactif lecture seule réutilisable dans tous les constructeurs d'exercices acceptant du PGN. Comprend un échiquier à gauche (orientation automatique selon le trait du PGN, synchronisation dynamique des flèches/cercles à chaque coup) et un panneau latéral droit aligné en hauteur (liste des coups numérotés avec surbrillance et clic direct, commentaires textuels, variantes alternatives, et barre de navigation `|◀`, `◀`, `▶`, `▶|`).
-    *   **Harmonisation du Type 7 (Marche du Héros) :** Suppression du sélecteur manuel d'orientation superflu au profit d'une détection automatique d'après la position initiale du PGN. Intégration du composant de prévisualisation interactif pour chaque série d'exercices.
-    *   **Mutualisation avec les Types 3 et 4 :** Remplacement des anciens aperçus statiques dans l'ABCDaire Tactique (Type 3) et la Partie dont tu es le Héros (Type 4) par le nouveau composant interactif.
-
-
-*   **Pédagogie & Mise en Évidence des Pièces d'Étude (Type 2 et Type 3) (`TypePopEchecs.php`, `TypeABCDaire.php`) :**
-    *   **Guidage des Entraîneurs :** Ajout d'instructions explicites dans les constructeurs Pop'Echecs (Type 2) et ABCDaire Tactique (Type 3) sur l'usage du cercle jaune (`brush: 'yellow'` ou `[%csl Y...]`) pour désigner une pièce d'étude (attaquée, clouée, etc.) à observer par l'élève.
-    *   **Cohérence Multi-Types :** Documentation de la règle distinguant le cercle bleu (pièce cible obligatoire en Type 2) du cercle jaune (pièce d'étude visible dès la recherche en Types 2 et 3).
 
 *   **Correction de la Prévisualisation Vidéo YouTube (`admin-video-settings.js`, `admin-style.css`) :**
     *   **Positionnement & Rendu du Lecteur IFrame :** Application du positionnement absolu (`position: absolute; top: 0; left: 0; width: 100%; height: 100%;`) sur le point de montage `#roi_yt_iframe_mount` et via CSS sur `#roi_video_player_container iframe`. Résout le problème du carré noir d'aperçu causé par le calcul de hauteur à 0px dans le conteneur responsive à ratio 16:9.

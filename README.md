@@ -108,9 +108,27 @@ Le plugin expose plusieurs points de terminaison REST sous le namespace `/wp-jso
     *   **Description :** Enregistre une partie jouée depuis la PWA (authentification requise).
     *   **Paramètres :** `member_id` (int), `difficulty_level` (int), `hints_count` (int), `takebacks_count` (int), `pgn` (string), `duration` (int), `game_date` (string).
 
-### 3. Parcours & Progression
+### 3. Contenus Pédagogiques (Exercices, Leçons, Vidéos)
+*   **Contenu individuel :** `GET /wp-json/roi/v1/contenu/<id>`
+    *   **Description :** Récupère les détails unifiés d'un exercice, d'une leçon ou d'une vidéo avec date de modification (`modified`) pour synchronisation client.
+    *   **Format de réponse :**
+        ```json
+        {
+          "id": 123,
+          "titre": "Mat du couloir",
+          "post_type": "roi_exercice",
+          "chapitre_nom": "Tactique",
+          "chapitre_couleur": "danger",
+          "niveau": 1,
+          "modified": "2026-09-14 11:55:00",
+          "type": 3,
+          "config": { ... }
+        }
+        ```
+
+### 4. Parcours & Progression
 *   **Catalogue des cours :** `GET /wp-json/roi/v1/parcours`
-    *   **Description :** Récupère la liste des cours et playlists ordonnés, filtrés automatiquement selon le profil et les groupes de l'élève (avec indicateurs `is_assigned` et `unlocked_by_assignment`).
+    *   **Description :** Récupère la liste des cours et playlists ordonnés, filtrés automatiquement selon le profil et les groupes de l'élève (avec indicateurs `is_assigned`, `unlocked_by_assignment` et date `modified` sur chaque élément de playlist).
 *   **Assigner ou retirer un cours :** `POST /wp-json/roi/v1/progression/assigner-cours`
     *   **Description :** Permet à un entraîneur d'assigner ou retirer un cours à un élève (`adherent_id`, `cours_id`, `action: 'assign' | 'unassign'`).
 *   **Groupes d'entraînement :** `GET /wp-json/roi/v1/progression/groupes`

@@ -177,6 +177,7 @@ class Parcours_Controller {
 								$item_status = get_post_status( $item_id );
 								if ( 'publish' === $item_status ) {
 									$item['titre']    = html_entity_decode( (string) get_the_title( $item_id ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+									$item['modified'] = (string) get_post_field( 'post_modified', $item_id );
 									$valid_playlist[] = $item;
 								}
 							}
