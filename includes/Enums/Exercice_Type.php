@@ -84,6 +84,7 @@ enum Exercice_Type: int {
 				'qcm_multiple' => __( 'QCM Multiple', 'roi' ),
 				'qcm_oui_non'  => __( 'QCM Oui/Non', 'roi' ),
 				'move'         => __( 'Move', 'roi' ),
+				'notation'     => __( 'Notation', 'roi' ),
 			),
 			default              => array(),
 		};

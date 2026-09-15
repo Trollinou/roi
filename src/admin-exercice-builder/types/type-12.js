@@ -12,8 +12,8 @@ const t12VarianteSelect = document.getElementById('roi_t12_variante');
  * Normalizes piece string or SAN-like notation to French piece code (R, D, T, F, C, P).
  * E.g. 'Da1' -> 'D', 'TF4' -> 'T', 'wQ' -> 'D', 'wK' -> 'R'.
  *
- * @param {string} val
- * @return {string}
+ * @param {string} val Value to normalize.
+ * @return {string} Normalized French piece code (R, D, T, F, C, P).
  */
 export function normalizeFrPiece(val) {
 	if (!val) {
@@ -297,10 +297,7 @@ export function init() {
 		try {
 			const parsed = JSON.parse(textarea.value);
 			if (parsed && typeof parsed === 'object') {
-				if (
-					typeof parsed.consigne === 'string' &&
-					t12ConsigneInput
-				) {
+				if (typeof parsed.consigne === 'string' && t12ConsigneInput) {
 					t12ConsigneInput.value = parsed.consigne;
 				}
 
@@ -321,8 +318,8 @@ export function init() {
 								indices: parsed.series[i].indices || '',
 								piece: normalizeFrPiece(
 									parsed.series[i].piece ||
-									parsed.series[i].piece_attendue ||
-									'R'
+										parsed.series[i].piece_attendue ||
+										'R'
 								),
 								fen:
 									parsed.series[i].fen ||
@@ -463,4 +460,3 @@ export function init() {
 	updateVisibility();
 	updateConfig();
 }
-

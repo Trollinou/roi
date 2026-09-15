@@ -132,7 +132,9 @@ function updateSquareDeductions(index) {
 		});
 	}
 
-	const isLoop = !!caseDep && (!caseArr || caseDep.toLowerCase() === caseArr.toLowerCase());
+	const isLoop =
+		!!caseDep &&
+		(!caseArr || caseDep.toLowerCase() === caseArr.toLowerCase());
 
 	current.case_depart = caseDep;
 	current.case_arrivee = isLoop ? caseDep : caseArr;

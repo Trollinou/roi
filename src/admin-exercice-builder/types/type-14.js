@@ -84,6 +84,7 @@ function updateVisibility() {
 		'.roi_t14_bloc_qcm_oui_non'
 	);
 	const moveBlocs = document.querySelectorAll('.roi_t14_bloc_move');
+	const notationBlocs = document.querySelectorAll('.roi_t14_bloc_notation');
 
 	qcmMultipleBlocs.forEach((bloc) => {
 		bloc.style.display = variante === 'qcm_multiple' ? 'block' : 'none';
@@ -95,6 +96,10 @@ function updateVisibility() {
 
 	moveBlocs.forEach((bloc) => {
 		bloc.style.display = variante === 'move' ? 'block' : 'none';
+	});
+
+	notationBlocs.forEach((bloc) => {
+		bloc.style.display = variante === 'notation' ? 'block' : 'none';
 	});
 }
 

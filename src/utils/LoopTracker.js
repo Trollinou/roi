@@ -26,7 +26,7 @@ export function squareToCoords(sq) {
 /**
  * Extrait la position de la première pièce ennemie trouvée dans un FEN.
  *
- * @param {string} fen - FEN de la position
+ * @param {string}          fen         - FEN de la position
  * @param {'white'|'black'} playerColor - Couleur du joueur
  * @return {string|null} Case de la pièce ennemie (ex: 'd5')
  */
@@ -58,7 +58,9 @@ export function extractOpponentPieceSquare(fen, playerColor) {
 				colIndex += parseInt(ch, 10);
 			} else {
 				if (isOpponentChar(ch)) {
-					const file = String.fromCharCode('a'.charCodeAt(0) + colIndex);
+					const file = String.fromCharCode(
+						'a'.charCodeAt(0) + colIndex
+					);
 					return `${file}${rank}`;
 				}
 				colIndex++;
@@ -74,7 +76,7 @@ export function extractOpponentPieceSquare(fen, playerColor) {
 export class LoopTracker {
 	/**
 	 * @param {string} targetSquare - Case centrale à contourner (ex: 'd5')
-	 * @param {string} startSquare - Case de départ et d'arrivée (ex: 'c3')
+	 * @param {string} startSquare  - Case de départ et d'arrivée (ex: 'c3')
 	 */
 	constructor(targetSquare, startSquare) {
 		this.targetSquare = targetSquare.toLowerCase();
@@ -122,10 +124,18 @@ export class LoopTracker {
 		const dx = coords.x - this.targetCoords.x;
 		const dy = coords.y - this.targetCoords.y;
 
-		if (dx >= 0 && dy > 0) return 1;
-		if (dx < 0 && dy >= 0) return 2;
-		if (dx <= 0 && dy < 0) return 3;
-		if (dx > 0 && dy <= 0) return 4;
+		if (dx >= 0 && dy > 0) {
+			return 1;
+		}
+		if (dx < 0 && dy >= 0) {
+			return 2;
+		}
+		if (dx <= 0 && dy < 0) {
+			return 3;
+		}
+		if (dx > 0 && dy <= 0) {
+			return 4;
+		}
 		return 0;
 	}
 
@@ -133,7 +143,7 @@ export class LoopTracker {
 	 * Enregistre un déplacement vers une nouvelle case.
 	 *
 	 * @param {string} toSquare - Case de destination (ex: 'a4')
-	 * @return {{isFinished: boolean, totalAngleDeg: number, rotations: number, progressPercent: number}}
+	 * @return {{isFinished: boolean, totalAngleDeg: number, rotations: number, progressPercent: number}} Résultat du déplacement.
 	 */
 	onMove(toSquare) {
 		const sq = toSquare.toLowerCase();
@@ -141,8 +151,12 @@ export class LoopTracker {
 		let delta = newAngle - this.lastAngle;
 
 		// Normalisation dans [-PI, PI]
-		while (delta > Math.PI) delta -= 2 * Math.PI;
-		while (delta < -Math.PI) delta += 2 * Math.PI;
+		while (delta > Math.PI) {
+			delta -= 2 * Math.PI;
+		}
+		while (delta < -Math.PI) {
+			delta += 2 * Math.PI;
+		}
 
 		this.totalAngle += delta;
 		this.lastAngle = newAngle;
@@ -158,11 +172,16 @@ export class LoopTracker {
 		const hasFullTurn = rotations >= 0.95;
 		const hasAllQuadrants = this.quadrantsVisited.size >= 4;
 		const isAtStart = sq === this.startSquare;
-		const isFinished = hasFullTurn && hasAllQuadrants && isAtStart && this.movesCount >= 4;
+		const isFinished =
+			hasFullTurn && hasAllQuadrants && isAtStart && this.movesCount >= 4;
 
 		const progressPercent = Math.min(
 			100,
-			Math.round((Math.min(rotations, 1) * 0.7 + (this.quadrantsVisited.size / 4) * 0.3) * 100)
+			Math.round(
+				(Math.min(rotations, 1) * 0.7 +
+					(this.quadrantsVisited.size / 4) * 0.3) *
+					100
+			)
 		);
 
 		return {

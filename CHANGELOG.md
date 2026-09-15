@@ -8,9 +8,14 @@
     *   **Règle d'Affichage du Cours Actif :** Maintien strict de l'exclusion des éléments déjà présents dans la playlist du cours en cours de construction (colonne de droite), que la case soit cochée ou non.
 
 
+*   **Nouvelle Variante « Notation » pour le Type 14 (Cap ou pas cap ?) (`Exercice_Type.php`, `TypeCapOuPasCap.php`, `type-14.js`, `README.md`) :**
+    *   **Ajout de la variante `notation` :** Permet la création d'exercices d'apprentissage du repérage et de la notation des pièces en notation française (`Tc2`, `Dd4`, `c3`, etc.).
+    *   **Déduction automatique des cibles :** L'auteur renseigne la consigne générale et la position FEN de chaque diagramme ; les pièces et leurs coordonnées sont extraites et validées automatiquement sans saisie redondante.
+    *   **Interface d'administration réactive :** Masquage automatique des blocs de saisie de réponses spécifiques aux variantes QCM/Move lors de la sélection de la variante Notation.
+
 *   **Colonnes Type et Variante dans la Liste d'Exercices (`Columns.php`, `Exercice_Type.php`, `Exercice_Config_DTO.php`, `Manager.php`) :**
     *   **Nouvelles Colonnes d'Administration (`edit.php?post_type=roi_exercice`) :** Ajout des colonnes **Type** et **Variante** insérées immédiatement avant la colonne **Niveau** pour une meilleure visibilité et organisation du catalogue d'exercices.
-    *   **Uniformisation & Détection des Variantes Globales :** Prise en charge des sous-types/variantes globales pour le *Type 14 (Cap ou pas cap ? : QCM Multiple, QCM Oui/Non, Move)* et le *Type 12 (Qui-suis-je ? : Pièces, Cases)* avec gestion automatique des rétrocompatibilités, affichage d'un tiret (`—`) pour les types sans variante globale (y compris le Type 9 dont les variantes sont locales à chaque diagramme de la série), et persistance de la post meta `_roi_exercice_variante`.
+    *   **Uniformisation & Détection des Variantes Globales :** Prise en charge des sous-types/variantes globales pour le *Type 14 (Cap ou pas cap ? : QCM Multiple, QCM Oui/Non, Move, Notation)* et le *Type 12 (Qui-suis-je ? : Pièces, Cases)* avec gestion automatique des rétrocompatibilités, affichage d'un tiret (`—`) pour les types sans variante globale (y compris le Type 9 dont les variantes sont locales à chaque diagramme de la série), et persistance de la post meta `_roi_exercice_variante`.
     *   **Tri et Filtrage d'Administration :** Activation du tri par type d'exercice et ajout d'un menu déroulant de filtrage par type dans la barre d'outils de la liste des exercices.
 
 *   **Refonte du Type 12 (Qui-suis-je ?) en Série de 6 Cartes avec Variantes (`TypeQuiSuisJe.php`, `type-12.js`) :**

@@ -48,13 +48,14 @@ class TypeCapOuPasCap implements TypeInterface {
 				<strong><?php esc_html_e( 'Format :', 'roi' ); ?></strong> <?php esc_html_e( "Série de 5 Mini-PGN (position FEN ou 1 coup avec flèches/cercles). La variante et la consigne s'appliquent pour l'ensemble de la série de 5.", 'roi' ); ?><br>
 				• <strong><?php esc_html_e( 'QCM Multiple :', 'roi' ); ?></strong> <?php esc_html_e( "Définissez les affirmations globales, puis pour chaque diagramme indiquez si chaque affirmation est OUI ou NON.", 'roi' ); ?><br>
 				• <strong><?php esc_html_e( 'QCM Oui/Non :', 'roi' ); ?></strong> <?php esc_html_e( "Définissez une question commune à la série, puis pour chaque diagramme indiquez la réponse attendue (OUI ou NON).", 'roi' ); ?><br>
-				• <strong><?php esc_html_e( 'Move :', 'roi' ); ?></strong> <?php esc_html_e( "Indiquez pour chaque diagramme le coup attendu sur l'échiquier.", 'roi' ); ?>
+				• <strong><?php esc_html_e( 'Move :', 'roi' ); ?></strong> <?php esc_html_e( "Indiquez pour chaque diagramme le coup attendu sur l'échiquier.", 'roi' ); ?><br>
+				• <strong><?php esc_html_e( 'Notation :', 'roi' ); ?></strong> <?php esc_html_e( "L'élève doit saisir la position de chaque pièce en notation française (ex: Tc2, Dd4, c3). Les pièces et cases attendues sont automatiquement déduites de la position FEN.", 'roi' ); ?>
 			</p>
 
 			<div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
 				<div>
 					<label for="roi_t14_consigne"><strong><?php esc_html_e( 'Consigne générale :', 'roi' ); ?></strong></label><br>
-					<input type="text" id="roi_t14_consigne" value="<?php echo esc_attr( $consigne ); ?>" style="width:100%; height: 30px;" placeholder="<?php esc_attr_e( 'ex: Cap ou pas cap de roquer ?', 'roi' ); ?>">
+					<input type="text" id="roi_t14_consigne" value="<?php echo esc_attr( $consigne ); ?>" style="width:100%; height: 30px;" placeholder="<?php esc_attr_e( 'ex: Donnez la position de chaque pièce présente sur l\'échiquier.', 'roi' ); ?>">
 				</div>
 
 				<div>
@@ -63,6 +64,7 @@ class TypeCapOuPasCap implements TypeInterface {
 						<option value="qcm_multiple" <?php selected( $variante, 'qcm_multiple' ); ?>><?php esc_html_e( 'QCM Multiple (Plusieurs propositions Oui/Non)', 'roi' ); ?></option>
 						<option value="qcm_oui_non" <?php selected( $variante, 'qcm_oui_non' ); ?>><?php esc_html_e( 'QCM Oui/Non (Une question commune)', 'roi' ); ?></option>
 						<option value="move" <?php selected( $variante, 'move' ); ?>><?php esc_html_e( 'Move (Déplacement sur l\'échiquier)', 'roi' ); ?></option>
+						<option value="notation" <?php selected( $variante, 'notation' ); ?>><?php esc_html_e( 'Notation (Saisie des coordonnées des pièces)', 'roi' ); ?></option>
 					</select>
 				</div>
 
@@ -165,6 +167,14 @@ class TypeCapOuPasCap implements TypeInterface {
 							<div style="display: flex; gap: 10px;">
 								<input type="text" class="roi_t14_move_san" data-index="<?php echo (int) $i; ?>" value="<?php echo esc_attr( $move_san ); ?>" placeholder="<?php esc_attr_e( 'Coup attendu (ex: Nxf7)', 'roi' ); ?>" style="flex: 1; height: 30px;">
 								<input type="text" class="roi_t14_move_explication" data-index="<?php echo (int) $i; ?>" value="<?php echo esc_attr( $move_explication ); ?>" placeholder="<?php esc_attr_e( 'Explication si erreur', 'roi' ); ?>" style="flex: 2; height: 30px;">
+							</div>
+						</div>
+
+						<!-- Bloc Notation -->
+						<div class="roi_t14_bloc_notation" data-index="<?php echo (int) $i; ?>" style="display: <?php echo 'notation' === $variante ? 'block' : 'none'; ?>; border-top: 1px dashed #ccc; padding-top: 12px; margin-top: 10px;">
+							<div style="font-size: 12px; color: #50575e; background: #e7f3fe; border-left: 3px solid #2271b1; padding: 8px 10px; border-radius: 2px;">
+								<span class="dashicons dashicons-info" style="font-size: 16px; width: 16px; height: 16px; vertical-align: text-bottom; margin-right: 4px; color: #2271b1;"></span>
+								<?php esc_html_e( "Variante Notation : Les pièces et leurs coordonnées cibles sont automatiquement extraites de la position FEN.", 'roi' ); ?>
 							</div>
 						</div>
 					</div>
