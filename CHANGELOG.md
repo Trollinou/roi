@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.6.4] - 2026-09-16
+
 *   **Extension des Variantes du Type 14 (Cap ou pas cap ?) (`Exercice_Type.php`, `TypeCapOuPasCap.php`, `type-14.js`, `README.md`) :**
     *   **Nouvelle Variante « Clic / Sélection » (`clic`) :** Permet la sélection/cerclage de pièces ou cases directement sur l'échiquier. Trois sous-modes supportés :
         *   *Cases cibles (`cibles`)* : Validation stricte des cases annotées dans le tag `[%csl ...]` du PGN (pièces non protégées, attaques ou défenses du coup joué). Support des repères visuels d'observation (cercle jaune/orange `[%csl Y...]` maintenu visible pendant la réflexion sans être compté parmi les cibles, et révélation complète de toutes les flèches d'attaque et de défense à la résolution).
