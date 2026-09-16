@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+*   **Extension des Variantes du Type 14 (Cap ou pas cap ?) (`Exercice_Type.php`, `TypeCapOuPasCap.php`, `type-14.js`, `README.md`) :**
+    *   **Nouvelle Variante « Clic / Sélection » (`clic`) :** Permet la sélection/cerclage de pièces ou cases directement sur l'échiquier. Trois sous-modes supportés :
+        *   *Cases cibles (`cibles`)* : Validation stricte des cases annotées dans le tag `[%csl ...]` du PGN (pièces non protégées, attaques du dernier coup).
+        *   *Prises possibles & Meilleur coup (`prises_meilleur_coup`)* : Déroulement en 2 étapes (identification au clic de toutes les prises possibles des deux camps annotées dans `[%csl ...]`, puis exécution sur l'échiquier de la meilleure prise indiquée en vert).
+        *   *Différentiel de matériel (`materiel`)* : Validation d'inventaire libre sur les pièces excédentaires et gestion du cas d'égalité matérielle.
+    *   **Nouvelle Variante « Reconstitution / Setup » (`setup`) :** Reconstitution de position sur échiquier vierge à l'aide d'une palette de 12 pièces :
+        *   *Mémorisation (`memoire`)* : Carte flash à mémoriser puis masquer, avec champ conseil optionnel au verso et bouton pour revoir la position.
+        *   *Description textuelle (`texte`)* : Description textuelle de la position à reproduire.
+    *   **Support des Multi-coups dans la Variante Move (`move`) :** Prise en charge automatique des variantes de coups multiples du PGN (`1. Nd5+ (1. Bh4+)`) pour les exercices du type *Quels sont les échecs possibles ?*.
+    *   **Enrichissement des Colonnes d'Administration :** Affichage contextuel de la variante et de son sous-mode dans la liste des exercices (ex: `Clic (Cibles)`, `Clic (Matériel)`, `Setup (Mémoire)`).
+
+
 ## [1.6.3] - 2026-09-15
 
 *   **Filtrage des Éléments Non Assignés dans le Constructeur de Cours (`Builder.php`, `main.js`) :**

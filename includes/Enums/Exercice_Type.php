@@ -85,6 +85,8 @@ enum Exercice_Type: int {
 				'qcm_oui_non'  => __( 'QCM Oui/Non', 'roi' ),
 				'move'         => __( 'Move', 'roi' ),
 				'notation'     => __( 'Notation', 'roi' ),
+				'clic'         => __( 'Clic / Sélection', 'roi' ),
+				'setup'        => __( 'Reconstitution (Setup)', 'roi' ),
 			),
 			default              => array(),
 		};
@@ -149,6 +151,26 @@ enum Exercice_Type: int {
 		}
 
 		$labels = $this->variantes_labels();
-		return $labels[ $normalized ] ?? $normalized;
+		$base_label = $labels[ $normalized ] ?? $normalized;
+
+		// Si Cap ou pas cap avec sous-mode, enrichir le label affiché
+		if ( self::CAP_OU_PAS_CAP === $this ) {
+			if ( 'clic' === $normalized ) {
+				$mode = isset( $config['mode_clic'] ) && is_string( $config['mode_clic'] ) ? $config['mode_clic'] : 'cibles';
+				$sub_label = match ( $mode ) {
+					'materiel'             => __( 'Matériel', 'roi' ),
+					'prises_meilleur_coup' => __( 'Prises & Meilleur coup', 'roi' ),
+					default                => __( 'Cibles', 'roi' ),
+				};
+				return sprintf( '%s (%s)', $base_label, $sub_label );
+			}
+			if ( 'setup' === $normalized ) {
+				$mode = isset( $config['mode_setup'] ) && is_string( $config['mode_setup'] ) ? $config['mode_setup'] : 'memoire';
+				$sub_label = 'texte' === $mode ? __( 'Texte', 'roi' ) : __( 'Mémoire', 'roi' );
+				return sprintf( '%s (%s)', $base_label, $sub_label );
+			}
+		}
+
+		return $base_label;
 	}
 }
