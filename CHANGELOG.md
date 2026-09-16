@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.6.3] - 2026-09-15
+
 *   **Filtrage des Éléments Non Assignés dans le Constructeur de Cours (`Builder.php`, `main.js`) :**
     *   **Option « Non assignés uniquement » cochée par défaut :** Ajout d'une case à cocher sous la barre de filtres du panneau « Catalogue des leçons & exercices » pour masquer automatiquement les leçons, exercices et vidéos déjà assignés à d'autres cours.
     *   **Filtrage Dynamique AJAX (`roi_search_cours_items`) :** Prise en compte des paramètres `unassigned` et `course_id` pour exclure via `post__not_in` les IDs d'éléments présents dans les playlists des cours publiés actifs (hors cours en cours d'édition).
