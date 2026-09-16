@@ -12,6 +12,8 @@ const textarea = document.getElementById('roi_config_json');
 
 let t14Consigne = '';
 let t14Variante = 'qcm_oui_non';
+let t14ModeClic = 'cibles';
+let t14ModeSetup = 'memoire';
 let t14Propositions = [];
 let t14Question = '';
 const t14Exercices = [
@@ -21,6 +23,7 @@ const t14Exercices = [
 		reponse_oui_non: true,
 		move_san: '',
 		move_explication: '',
+		conseil: '',
 	},
 	{
 		pgn: '',
@@ -28,6 +31,7 @@ const t14Exercices = [
 		reponse_oui_non: true,
 		move_san: '',
 		move_explication: '',
+		conseil: '',
 	},
 	{
 		pgn: '',
@@ -35,6 +39,7 @@ const t14Exercices = [
 		reponse_oui_non: true,
 		move_san: '',
 		move_explication: '',
+		conseil: '',
 	},
 	{
 		pgn: '',
@@ -42,6 +47,7 @@ const t14Exercices = [
 		reponse_oui_non: true,
 		move_san: '',
 		move_explication: '',
+		conseil: '',
 	},
 	{
 		pgn: '',
@@ -49,6 +55,7 @@ const t14Exercices = [
 		reponse_oui_non: true,
 		move_san: '',
 		move_explication: '',
+		conseil: '',
 	},
 ];
 
@@ -67,6 +74,12 @@ function updateVisibility() {
 	const blocQuestion = document.getElementById(
 		'roi_t14_bloc_global_question'
 	);
+	const blocClic = document.getElementById(
+		'roi_t14_bloc_global_clic'
+	);
+	const blocSetup = document.getElementById(
+		'roi_t14_bloc_global_setup'
+	);
 
 	if (blocPropositions) {
 		blocPropositions.style.display =
@@ -75,6 +88,14 @@ function updateVisibility() {
 	if (blocQuestion) {
 		blocQuestion.style.display =
 			variante === 'qcm_oui_non' ? 'block' : 'none';
+	}
+	if (blocClic) {
+		blocClic.style.display =
+			variante === 'clic' ? 'block' : 'none';
+	}
+	if (blocSetup) {
+		blocSetup.style.display =
+			variante === 'setup' ? 'block' : 'none';
 	}
 
 	const qcmMultipleBlocs = document.querySelectorAll(
@@ -85,6 +106,8 @@ function updateVisibility() {
 	);
 	const moveBlocs = document.querySelectorAll('.roi_t14_bloc_move');
 	const notationBlocs = document.querySelectorAll('.roi_t14_bloc_notation');
+	const clicBlocs = document.querySelectorAll('.roi_t14_bloc_clic');
+	const setupBlocs = document.querySelectorAll('.roi_t14_bloc_setup');
 
 	qcmMultipleBlocs.forEach((bloc) => {
 		bloc.style.display = variante === 'qcm_multiple' ? 'block' : 'none';
@@ -100,6 +123,14 @@ function updateVisibility() {
 
 	notationBlocs.forEach((bloc) => {
 		bloc.style.display = variante === 'notation' ? 'block' : 'none';
+	});
+
+	clicBlocs.forEach((bloc) => {
+		bloc.style.display = variante === 'clic' ? 'block' : 'none';
+	});
+
+	setupBlocs.forEach((bloc) => {
+		bloc.style.display = variante === 'setup' ? 'block' : 'none';
 	});
 }
 
@@ -119,9 +150,25 @@ export function updateConfig() {
 	t14Variante = varianteSelect ? varianteSelect.value : 'qcm_oui_non';
 	t14Question = questionInput ? questionInput.value.trim() : '';
 
+	const checkedModeClic = document.querySelector(
+		'input[name="roi_t14_mode_clic"]:checked'
+	);
+	if (checkedModeClic) {
+		t14ModeClic = checkedModeClic.value;
+	}
+
+	const checkedModeSetup = document.querySelector(
+		'input[name="roi_t14_mode_setup"]:checked'
+	);
+	if (checkedModeSetup) {
+		t14ModeSetup = checkedModeSetup.value;
+	}
+
 	const configData = {
 		consigne: t14Consigne,
 		variante: t14Variante,
+		mode_clic: t14ModeClic,
+		mode_setup: t14ModeSetup,
 		propositions: t14Propositions,
 		question: t14Question,
 		exercices: t14Exercices.map((exo) => ({
@@ -135,6 +182,7 @@ export function updateConfig() {
 					: true,
 			move_san: exo.move_san || '',
 			move_explication: exo.move_explication || '',
+			conseil: exo.conseil || '',
 		})),
 	};
 
@@ -341,6 +389,26 @@ export function init() {
 					varianteSelect.value = t14Variante;
 				}
 
+				if (typeof parsed.mode_clic === 'string') {
+					t14ModeClic = parsed.mode_clic;
+				}
+				const modeClicRadio = document.querySelector(
+					`input[name="roi_t14_mode_clic"][value="${t14ModeClic}"]`
+				);
+				if (modeClicRadio) {
+					modeClicRadio.checked = true;
+				}
+
+				if (typeof parsed.mode_setup === 'string') {
+					t14ModeSetup = parsed.mode_setup;
+				}
+				const modeSetupRadio = document.querySelector(
+					`input[name="roi_t14_mode_setup"][value="${t14ModeSetup}"]`
+				);
+				if (modeSetupRadio) {
+					modeSetupRadio.checked = true;
+				}
+
 				if (Array.isArray(parsed.propositions)) {
 					t14Propositions = [...parsed.propositions];
 				}
@@ -382,6 +450,7 @@ export function init() {
 							reponse_oui_non: reponseOuiNon,
 							move_san: raw.move_san || '',
 							move_explication: raw.move_explication || '',
+							conseil: raw.conseil || '',
 						};
 					}
 				}
@@ -407,6 +476,27 @@ export function init() {
 			updateConfig();
 		});
 	}
+
+	// Mode clic & setup listeners
+	const modeClicRadios = document.querySelectorAll(
+		'input[name="roi_t14_mode_clic"]'
+	);
+	modeClicRadios.forEach((radio) => {
+		radio.addEventListener('change', (e) => {
+			t14ModeClic = e.target.value;
+			updateConfig();
+		});
+	});
+
+	const modeSetupRadios = document.querySelectorAll(
+		'input[name="roi_t14_mode_setup"]'
+	);
+	modeSetupRadios.forEach((radio) => {
+		radio.addEventListener('change', (e) => {
+			t14ModeSetup = e.target.value;
+			updateConfig();
+		});
+	});
 
 	// Update visibility of blocks initially
 	updateVisibility();
@@ -506,6 +596,18 @@ export function init() {
 			moveExpInput.value = t14Exercices[i].move_explication || '';
 			moveExpInput.addEventListener('input', () => {
 				t14Exercices[i].move_explication = moveExpInput.value.trim();
+				updateConfig();
+			});
+		}
+
+		// Setup conseil input
+		const conseilInput = document.querySelector(
+			`.roi_t14_conseil[data-index="${i}"]`
+		);
+		if (conseilInput) {
+			conseilInput.value = t14Exercices[i].conseil || '';
+			conseilInput.addEventListener('input', () => {
+				t14Exercices[i].conseil = conseilInput.value.trim();
 				updateConfig();
 			});
 		}
