@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import { BoardCore } from "eg-chessboard";
 import DrawingLegend from "../DrawingLegend";
-import { ensurePgnFenHeader } from "../../utils/chessUtils";
+import { ensurePgnFenHeader, toFrenchNotation } from "../../utils/chessUtils";
 import useChessBoard from "../../hooks/useChessBoard";
 import "./PgnEditor.css";
 
@@ -371,7 +371,7 @@ const PgnEditor = forwardRef(function PgnEditor({
                         className="pgn-var-san-btn"
                         onClick={() => handleSelectVariation(v.index ?? idx)}
                       >
-                        {v.san || `Variante ${idx + 1}`}
+                        {toFrenchNotation(v.san) || `Variante ${idx + 1}`}
                       </button>
                       {v.isMainline && <span className="pgn-var-main-badge">Principale</span>}
                     </div>

@@ -96,9 +96,7 @@ export function init() {
 						if (parsed.exercices[i]) {
 							const exo = parsed.exercices[i];
 							const pgn =
-								typeof exo === 'string'
-									? exo
-									: exo.pgn || '';
+								typeof exo === 'string' ? exo : exo.pgn || '';
 							t13Exercices[i].pgn = pgn;
 
 							const pgnInput = document.getElementById(

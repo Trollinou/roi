@@ -8,6 +8,7 @@
  */
 
 import { extractFenOrientationAndShapes } from './controls';
+import { toFrenchNotation } from '../../utils/chessUtils';
 
 /**
  * Crée un PgnPreviewViewer sur un élément DOM cible.
@@ -214,7 +215,7 @@ export function createPgnPreviewViewer(container, options = {}) {
 			const branchPrefix = m.hasBranches ? '›' : '';
 			const branchSuffix = m.hasBranches ? '‹' : '';
 
-			html += `<span class="roi-pgn-move-item" data-ply="${m.ply}"${branchTitle} style="cursor: pointer; padding: 1px 4px; border-radius: 3px; display: inline-block; transition: all 0.15s; margin-right: 2px; ${branchStyle}">${branchPrefix}${m.san}${branchSuffix}</span> `;
+			html += `<span class="roi-pgn-move-item" data-ply="${m.ply}"${branchTitle} style="cursor: pointer; padding: 1px 4px; border-radius: 3px; display: inline-block; transition: all 0.15s; margin-right: 2px; ${branchStyle}">${branchPrefix}${toFrenchNotation(m.san)}${branchSuffix}</span> `;
 		}
 
 		movesListEl.innerHTML = html;
@@ -296,7 +297,7 @@ export function createPgnPreviewViewer(container, options = {}) {
 					const isCurrent = v.isActive;
 
 					let labelText =
-						v.san ||
+						toFrenchNotation(v.san) ||
 						(isMain ? 'Ligne principale' : `Var ${v.index}`);
 					if (isMain) {
 						labelText += ' ★';

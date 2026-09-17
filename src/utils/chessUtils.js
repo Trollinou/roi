@@ -42,3 +42,24 @@ export function ensurePgnFenHeader(pgn, fen) {
 
 	return `${setupHeaders}\n${cleanedPgn}`;
 }
+
+/**
+ * Convertit un coup SAN de notation internationale (K, Q, R, B, N)
+ * en notation française (R, D, T, F, C).
+ *
+ * @param {string} san - Coup SAN en notation internationale.
+ * @return {string} Coup SAN en notation française.
+ */
+export function toFrenchNotation(san) {
+	if (!san || typeof san !== 'string') {
+		return '';
+	}
+	const pieceMap = {
+		K: 'R', // Roi
+		Q: 'D', // Dame
+		R: 'T', // Tour
+		B: 'F', // Fou
+		N: 'C', // Cavalier
+	};
+	return san.replace(/[KQRBN]/g, (match) => pieceMap[match] || match);
+}
