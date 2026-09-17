@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.6.5] - 2026-09-17
+
 *   **Refonte du Constructeur d'Exercice Type 13 (Ouvre'boîte) en Série de 6 Mini-PGN (`TypeOuvreBoite.php`, `type-13.js`) :**
     *   **Structure Série de 6 Mini-PGN :** Passage d'une configuration statique mono-diagramme à une séquence de 6 Mini-PGN.
     *   **Intégration `PgnInput` & Aperçu Interactif :** Chaque carte dispose d'un champ de saisie PGN avec support des annotations `[%cal]`, de la branche principale (bonne réponse et son explication) et des variantes (mauvais coups et explications d'erreur), accompagné de son visualiseur de prévisualisation interactif en temps réel.
