@@ -1,133 +1,113 @@
 /**
- * Handler for Type 13: Ouvre'boîte.
+ * Handler for Type 13: Ouvre'boîte (Série de 6 Mini-PGN).
  */
 
-import {
-	setupFenControl,
-	updateOrientationDisplay,
-	getOrientationColor,
-} from '../utils/controls';
+import { setupPgnControl } from '../utils/controls';
+import { createPgnPreviewViewer } from '../utils/pgn-viewer';
 
 const textarea = document.getElementById('roi_config_json');
-let t13Shapes = [];
 
+let t13Consigne = '';
+const t13Exercices = [
+	{ pgn: '' },
+	{ pgn: '' },
+	{ pgn: '' },
+	{ pgn: '' },
+	{ pgn: '' },
+	{ pgn: '' },
+];
+
+const previewViewers = [null, null, null, null, null, null];
+
+/**
+ * Updates the JSON textarea config.
+ */
 export function updateConfig() {
 	if (!textarea) {
 		return;
 	}
 
-	const fenInput = document.getElementById('roi_t13_fen_depart');
-	const couleurSelect = document.getElementById('roi_t13_couleur');
-	const questionInput = document.getElementById('roi_t13_question');
-	const correctRadio = document.querySelector(
-		'input[name="roi_t13_correct"]:checked'
-	);
+	const consigneInput = document.getElementById('roi_t13_consigne');
+	t13Consigne = consigneInput ? consigneInput.value.trim() : '';
 
-	const fenDepart = fenInput
-		? fenInput.value.trim()
-		: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-	const couleurJoueur = getOrientationColor(couleurSelect, fenDepart);
-	const questionText = questionInput ? questionInput.value.trim() : '';
-	const bonneReponseIndex = correctRadio
-		? parseInt(correctRadio.value, 10)
-		: 0;
-
-	const choixList = [];
-	for (let i = 0; i < 3; i++) {
-		const texteInput = document.querySelector(
-			`.t13-choix-texte[data-index="${i}"]`
-		);
-		const sanInput = document.querySelector(
-			`.t13-choix-san[data-index="${i}"]`
-		);
-		const explicationInput = document.querySelector(
-			`.t13-choix-explication[data-index="${i}"]`
-		);
-
-		choixList.push({
-			texte: texteInput ? texteInput.value.trim() : '',
-			san: sanInput ? sanInput.value.trim() : '',
-			explication: explicationInput ? explicationInput.value.trim() : '',
-		});
+	for (let i = 0; i < 6; i++) {
+		const pgnInput = document.getElementById(`roi_t13_pgn_${i}`);
+		if (pgnInput) {
+			t13Exercices[i].pgn = pgnInput.value.trim();
+		}
 	}
 
 	const configData = {
-		fen_depart: fenDepart,
-		couleur_joueur: couleurJoueur,
-		shapes: t13Shapes,
-		question: questionText,
-		choix: choixList,
-		bonne_reponse: bonneReponseIndex,
+		consigne: t13Consigne,
+		exercices: t13Exercices,
 	};
 
 	textarea.value = JSON.stringify(configData, null, 4);
 }
 
+/**
+ * Renders interactive preview for a mini-PGN diagram.
+ *
+ * @param {number} index Diagram index (0..5).
+ */
+function renderPreviewBoard(index) {
+	const container = document.getElementById(
+		`roi_t13_preview_container_${index}`
+	);
+	if (!container) {
+		return;
+	}
+
+	const currentExo = t13Exercices[index];
+	const pgn = currentExo ? currentExo.pgn.trim() : '';
+
+	if (!previewViewers[index]) {
+		previewViewers[index] = createPgnPreviewViewer(container, {
+			pgn,
+			boardSize: 260,
+		});
+	} else {
+		previewViewers[index].update(pgn);
+	}
+}
+
+/**
+ * Initializes Type 13 handlers.
+ */
 export function init() {
 	if (!textarea) {
 		return;
 	}
 
-	const fenInput = document.getElementById('roi_t13_fen_depart');
-	const couleurSelect = document.getElementById('roi_t13_couleur');
-	const questionInput = document.getElementById('roi_t13_question');
-	const btnFenEditor = document.getElementById('btn_open_fen_editor_t13');
+	const consigneInput = document.getElementById('roi_t13_consigne');
 
-	// Restauration des données JSON si présent
+	// Restauration des données JSON si présentes
 	if (textarea.value.trim() !== '') {
 		try {
 			const parsed = JSON.parse(textarea.value);
 			if (parsed && typeof parsed === 'object') {
-				if (parsed.fen_depart && fenInput) {
-					fenInput.value = parsed.fen_depart;
+				if (typeof parsed.consigne === 'string' && consigneInput) {
+					consigneInput.value = parsed.consigne;
+					t13Consigne = parsed.consigne;
 				}
-				if (couleurSelect) {
-					updateOrientationDisplay(
-						couleurSelect,
-						parsed.couleur_joueur || parsed.fen_depart || 'white'
-					);
-				}
-				if (Array.isArray(parsed.shapes)) {
-					t13Shapes = parsed.shapes;
-				}
-				if (typeof parsed.question === 'string' && questionInput) {
-					questionInput.value = parsed.question;
-				}
-				if (Array.isArray(parsed.choix)) {
-					for (let i = 0; i < 3; i++) {
-						if (parsed.choix[i]) {
-							const item = parsed.choix[i];
-							const texteInput = document.querySelector(
-								`.t13-choix-texte[data-index="${i}"]`
-							);
-							const sanInput = document.querySelector(
-								`.t13-choix-san[data-index="${i}"]`
-							);
-							const explicationInput = document.querySelector(
-								`.t13-choix-explication[data-index="${i}"]`
-							);
 
-							if (texteInput && typeof item.texte === 'string') {
-								texteInput.value = item.texte;
-							}
-							if (sanInput && typeof item.san === 'string') {
-								sanInput.value = item.san;
-							}
-							if (
-								explicationInput &&
-								typeof item.explication === 'string'
-							) {
-								explicationInput.value = item.explication;
+				if (Array.isArray(parsed.exercices)) {
+					for (let i = 0; i < 6; i++) {
+						if (parsed.exercices[i]) {
+							const exo = parsed.exercices[i];
+							const pgn =
+								typeof exo === 'string'
+									? exo
+									: exo.pgn || '';
+							t13Exercices[i].pgn = pgn;
+
+							const pgnInput = document.getElementById(
+								`roi_t13_pgn_${i}`
+							);
+							if (pgnInput) {
+								pgnInput.value = pgn;
 							}
 						}
-					}
-				}
-				if (typeof parsed.bonne_reponse === 'number') {
-					const radioToSelect = document.querySelector(
-						`input[name="roi_t13_correct"][value="${parsed.bonne_reponse}"]`
-					);
-					if (radioToSelect) {
-						radioToSelect.checked = true;
 					}
 				}
 			}
@@ -136,32 +116,37 @@ export function init() {
 		}
 	}
 
-	// FEN Control Setup
-	setupFenControl({
-		input: fenInput,
-		button: btnFenEditor,
-		colorSelect: couleurSelect,
-		getShapes() {
-			return t13Shapes || [];
-		},
-		onChange(fen, color, shapes) {
-			if (shapes) {
-				t13Shapes = shapes;
-			}
-			updateConfig();
-		},
-	});
+	if (consigneInput) {
+		consigneInput.addEventListener('input', updateConfig);
+		consigneInput.addEventListener('change', updateConfig);
+	}
 
-	// Écouteurs sur les éléments d'entrée pour la mise à jour temps réel
-	const inputsToWatch = document.querySelectorAll(
-		'#roi_builder_type_13 input, #roi_builder_type_13 select'
-	);
+	for (let i = 0; i < 6; i++) {
+		const pgnInput = document.getElementById(`roi_t13_pgn_${i}`);
+		const btnPgnEditor = document.getElementById(
+			`btn_open_pgn_editor_t13_${i}`
+		);
 
-	inputsToWatch.forEach((input) => {
-		input.addEventListener('input', updateConfig);
-		input.addEventListener('change', updateConfig);
-	});
+		if (pgnInput && btnPgnEditor) {
+			setupPgnControl({
+				input: pgnInput,
+				button: btnPgnEditor,
+				onChange(pgn) {
+					t13Exercices[i].pgn = pgn;
+					renderPreviewBoard(i);
+					updateConfig();
+				},
+			});
 
-	// Mise à jour initiale de la config JSON
+			pgnInput.addEventListener('input', () => {
+				t13Exercices[i].pgn = pgnInput.value.trim();
+				renderPreviewBoard(i);
+				updateConfig();
+			});
+		}
+
+		renderPreviewBoard(i);
+	}
+
 	updateConfig();
 }

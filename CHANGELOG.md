@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+*   **Refonte du Constructeur d'Exercice Type 13 (Ouvre'boîte) en Série de 6 Mini-PGN (`TypeOuvreBoite.php`, `type-13.js`) :**
+    *   **Structure Série de 6 Mini-PGN :** Passage d'une configuration statique mono-diagramme à une séquence de 6 Mini-PGN.
+    *   **Intégration `PgnInput` & Aperçu Interactif :** Chaque carte dispose d'un champ de saisie PGN avec support des annotations `[%cal]`, de la branche principale (bonne réponse et son explication) et des variantes (mauvais coups et explications d'erreur), accompagné de son visualiseur de prévisualisation interactif en temps réel.
+    *   **Synchronisation JSON :** Sérialisation automatique dans `roi_config_json` sous la structure `{ consigne, exercices: [ { pgn: '...' }, ... ] }`.
+
 *   **Smart Paste & Auto-Ingestion PGN sur les composants `FenInput` (`controls.js`) :**
     *   **Détection automatique au collage direct (`paste` / `input`) :** Permet de coller directement un export PGN complet de Lichess (avec métadonnées et annotations `[%cal]` / `[%csl]`) dans n'importe quel champ de saisie `FenInput` sans devoir ouvrir la modale `FenEditor`.
     *   **Extraction instantanée :** Extraction automatique de la FEN propre, détection du trait et synchronisation de l'orientation, et extraction de l'ensemble des flèches et cercles dans les formes graphiques (`shapes`).
