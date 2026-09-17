@@ -190,6 +190,32 @@ export function setupFenControl({
 		}
 	}
 
+	function flashFeedback(inputElement, summaryElement) {
+		if (!inputElement) {
+			return;
+		}
+		inputElement.style.transition =
+			'background-color 0.3s, border-color 0.3s';
+		inputElement.style.backgroundColor = '#e7f7ed';
+		inputElement.style.borderColor = '#00a32a';
+		if (summaryElement) {
+			summaryElement.style.transition =
+				'background-color 0.3s, color 0.3s';
+			summaryElement.style.backgroundColor = '#e7f7ed';
+			summaryElement.style.color = '#00a32a';
+			summaryElement.style.fontWeight = 'bold';
+		}
+		setTimeout(() => {
+			inputElement.style.backgroundColor = '';
+			inputElement.style.borderColor = '';
+			if (summaryElement) {
+				summaryElement.style.backgroundColor = '';
+				summaryElement.style.color = '';
+				summaryElement.style.fontWeight = '';
+			}
+		}, 1200);
+	}
+
 	if (inputEl) {
 		const initialFen = inputEl.value.trim();
 		let initialShapes = [];
@@ -204,10 +230,53 @@ export function setupFenControl({
 		}
 		syncFields(initialFen, initialShapes, false);
 
-		// Event: typing/pasting directly into the FEN text input (resets shapes to [] and "0 ◯ - 0 ➔")
+		// Event: Smart Paste auto-detecting PGN or raw FEN
+		inputEl.addEventListener('paste', function (e) {
+			const pastedText = (
+				e.clipboardData || window.clipboardData
+			)?.getData('text');
+			if (pastedText && typeof pastedText === 'string') {
+				const trimmed = pastedText.trim();
+				const isPgnOrComplex =
+					trimmed.includes('[') ||
+					trimmed.includes('{') ||
+					trimmed.includes('\n') ||
+					/\[%(?:csl|cpl|cal)/i.test(trimmed) ||
+					/\b\d+\s*\./.test(trimmed);
+
+				if (isPgnOrComplex) {
+					e.preventDefault();
+					const extracted = extractFenOrientationAndShapes(trimmed);
+					if (extracted && extracted.fen) {
+						inputEl.value = extracted.fen;
+						syncFields(extracted.fen, extracted.shapes || [], true);
+						flashFeedback(inputEl, shapesSummaryEl);
+					}
+				}
+			}
+		});
+
+		// Event: typing/pasting directly into the FEN text input
 		inputEl.addEventListener('input', function () {
-			const fenVal = inputEl.value.trim();
-			syncFields(fenVal, [], true);
+			const currentVal = inputEl.value.trim();
+			const isPgnOrComplex =
+				currentVal.includes('[') ||
+				currentVal.includes('{') ||
+				currentVal.includes('\n') ||
+				/\[%(?:csl|cpl|cal)/i.test(currentVal) ||
+				/\b\d+\s*\./.test(currentVal);
+
+			if (isPgnOrComplex) {
+				const extracted = extractFenOrientationAndShapes(currentVal);
+				if (extracted && extracted.fen) {
+					inputEl.value = extracted.fen;
+					syncFields(extracted.fen, extracted.shapes || [], true);
+					flashFeedback(inputEl, shapesSummaryEl);
+					return;
+				}
+			}
+
+			syncFields(currentVal, [], true);
 		});
 
 		// Expose Diagram API on inputEl for consuming components
@@ -514,10 +583,18 @@ export function extractFenOrientationAndShapes(pgnString) {
 		: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
 	if (!fenMatch && trimmed.includes('/') && !trimmed.startsWith('[')) {
-		const firstLine = trimmed.split('\n')[0].trim();
+		let firstLine = trimmed.split('\n')[0].trim();
+		if (firstLine.includes('{')) {
+			firstLine = firstLine.split('{')[0].trim();
+		}
 		if (firstLine.includes('/') && firstLine.split('/').length >= 4) {
 			fen = firstLine;
 		}
+	}
+
+	const fenParts = fen.split(/\s+/);
+	if (fenParts.length === 1 && fenParts[0].includes('/')) {
+		fen = `${fenParts[0]} w - - 0 1`;
 	}
 
 	const orientation = getActiveColorFromFen(fen);

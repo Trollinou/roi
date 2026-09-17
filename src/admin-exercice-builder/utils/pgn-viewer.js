@@ -419,7 +419,8 @@ export function createPgnPreviewViewer(container, options = {}) {
 			return;
 		}
 
-		const { fen, orientation } = extractFenOrientationAndShapes(trimmed);
+		const { fen, orientation, shapes } =
+			extractFenOrientationAndShapes(trimmed);
 
 		if (boardApi) {
 			try {
@@ -435,6 +436,13 @@ export function createPgnPreviewViewer(container, options = {}) {
 				if (typeof boardApi.redraw === 'function') {
 					boardApi.redraw(true);
 				}
+				window.requestAnimationFrame(() => {
+					if (boardApi && typeof boardApi.redraw === 'function') {
+						boardApi.redraw(true);
+					}
+					syncDataFromBoard();
+					renderView();
+				});
 			} catch (e) {
 				console.warn('[PgnPreviewViewer] Erreur reload PGN:', e);
 				boardApi.setPosition(fen);
@@ -459,6 +467,8 @@ export function createPgnPreviewViewer(container, options = {}) {
 					},
 					drawable: {
 						enabled: false,
+						visible: true,
+						shapes: shapes || [],
 					},
 				};
 
@@ -495,6 +505,14 @@ export function createPgnPreviewViewer(container, options = {}) {
 				}
 
 				goToPly(0);
+
+				window.requestAnimationFrame(() => {
+					if (boardApi && typeof boardApi.redraw === 'function') {
+						boardApi.redraw(true);
+					}
+					syncDataFromBoard();
+					renderView();
+				});
 			}
 		}, 50);
 	}

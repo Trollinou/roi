@@ -74,12 +74,8 @@ function updateVisibility() {
 	const blocQuestion = document.getElementById(
 		'roi_t14_bloc_global_question'
 	);
-	const blocClic = document.getElementById(
-		'roi_t14_bloc_global_clic'
-	);
-	const blocSetup = document.getElementById(
-		'roi_t14_bloc_global_setup'
-	);
+	const blocClic = document.getElementById('roi_t14_bloc_global_clic');
+	const blocSetup = document.getElementById('roi_t14_bloc_global_setup');
 
 	if (blocPropositions) {
 		blocPropositions.style.display =
@@ -90,12 +86,10 @@ function updateVisibility() {
 			variante === 'qcm_oui_non' ? 'block' : 'none';
 	}
 	if (blocClic) {
-		blocClic.style.display =
-			variante === 'clic' ? 'block' : 'none';
+		blocClic.style.display = variante === 'clic' ? 'block' : 'none';
 	}
 	if (blocSetup) {
-		blocSetup.style.display =
-			variante === 'setup' ? 'block' : 'none';
+		blocSetup.style.display = variante === 'setup' ? 'block' : 'none';
 	}
 
 	const qcmMultipleBlocs = document.querySelectorAll(

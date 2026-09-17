@@ -61,6 +61,9 @@ Ce plugin nécessite que le plugin **DAME** soit installé et activé. Le plugin
 ### Administration
 
 *   **Sauvegarde et Restauration du Contenu :** Une page d'administration dédiée pour exporter tout le contenu pédagogique (leçons, exercices, cours, catégories) dans un fichier `.json.gz` et le restaurer, prévenant ainsi la perte de données.
+*   **Composants de Saisie Unifiés (`FenInput` & `PgnInput`) :**
+    *   **Smart Paste PGN sur `FenInput` :** Possibilité de coller directement un export PGN complet Lichess dans n'importe quel champ FEN sans ouvrir l'éditeur modal. Extraction automatique de la FEN, de l'orientation et des formes graphiques (`[%cal]` / `[%csl]`) avec feedback visuel immédiat.
+    *   **Gestionnaire de Séquences `PgnInput` :** Zone de saisie rapide PGN avec validation de syntaxe en direct (`checkPgnStatus`), support des annotations et ouverture de la modale d'édition `RoiPgnEditor`.
     *   **Type 2 (Pop'Echecs) :** Série de 4 diagrammes FEN avec pièce à placer (cercle bleu `[%csl B...]`). Possibilité de définir un cercle jaune (`[%csl Y...]`) sur une pièce d'étude persistant dès la phase de recherche.
     *   **Type 3 (ABCDaire Tactique) :** Série de 4 Mini-PGN contenant les variantes tactiques commentées et annotées, avec prévisualisation PGN interactive et navigation pas-à-pas des coups. Prise en charge d'un cercle jaune (`[%csl Y...]`) à la racine pour mettre en évidence la pièce d'étude dès la recherche.
     *   **Type 4 (La Partie dont tu es le Héros) :** Saisie d'une étude PGN complète avec embranchements QCM détectés par les flèches `[%cal ...]` et les variantes d'erreur. Prévisualisation interactive pas-à-pas avec coups et commentaires synchronisés.
