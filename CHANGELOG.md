@@ -7,6 +7,10 @@
     *   **Extraction instantanée :** Extraction automatique de la FEN propre, détection du trait et synchronisation de l'orientation, et extraction de l'ensemble des flèches et cercles dans les formes graphiques (`shapes`).
     *   **Feedback visuel :** Animation discrète de confirmation verte sur le champ et le badge de formes pour confirmer la prise en compte immédiate.
 
+*   **Rendu Immédiat des Formes PGN dans la Prévisualisation (`pgn-viewer.js`) :**
+    *   **Affichage instantané des flèches et cercles (`[%cal]` / `[%csl]`) :** Correction d'un défaut de synchronisation SVG lors du collage direct d'un PGN dans les constructeurs d'exercices (Type 14, Type 3, Type 4, Type 7).
+    *   **Transmission initiale et rafraîchissement différé :** Passage des formes initiales dans `boardConfig.drawable.shapes` et déclenchement d'un `window.requestAnimationFrame()` après instanciation pour forcer le recalcul géométrique (`redraw`) dès la stabilisation du layout DOM sans nécessiter de modification textuelle ultérieure.
+
 ## [1.6.4] - 2026-09-16
 
 *   **Extension des Variantes du Type 14 (Cap ou pas cap ?) (`Exercice_Type.php`, `TypeCapOuPasCap.php`, `type-14.js`, `README.md`) :**
