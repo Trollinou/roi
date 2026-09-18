@@ -22,6 +22,8 @@ class Assets {
 	 */
 	public function init(): void {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+		add_filter( 'get_user_metadata', array( $this, 'sanitize_meta_box_order_user_meta' ), 10, 4 );
+		add_action( 'current_screen', array( $this, 'register_screen_meta_box_sanitizer' ) );
 	}
 
 	/**
@@ -134,5 +136,56 @@ class Assets {
 				true
 			);
 		}
+	}
+
+	/**
+	 * Sanitizes meta-box-order user options to prevent PHP Warnings in WordPress Core template.php.
+	 *
+	 * WordPress Core assumes meta-box-order_$page is always an array when truthy.
+	 * If corrupted or stored as a non-array value, this filter returns false.
+	 *
+	 * @param mixed  $value     The value to return.
+	 * @param int    $object_id ID of the object metadata is for.
+	 * @param string $meta_key  Metadata key.
+	 * @param bool   $single    Whether to return only the first value.
+	 * @return mixed
+	 */
+	public function sanitize_meta_box_order_user_meta( mixed $value, int $object_id, string $meta_key, bool $single ): mixed {
+		if ( str_contains( $meta_key, 'meta-box-order_' ) ) {
+			$meta_cache = wp_cache_get( $object_id, 'user_meta' );
+			if ( is_array( $meta_cache ) && isset( $meta_cache[ $meta_key ][0] ) ) {
+				$raw = maybe_unserialize( $meta_cache[ $meta_key ][0] );
+				if ( ! empty( $raw ) && ! is_array( $raw ) ) {
+					return $single ? false : array( false );
+				}
+			}
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Registers a filter on get_user_option for the current admin screen's meta box order.
+	 *
+	 * Ensures that get_user_option("meta-box-order_{$screen->id}") always returns an array or false,
+	 * preventing PHP Warnings in WordPress Core template.php:1327.
+	 *
+	 * @param \WP_Screen $screen Current WP_Screen object.
+	 * @return void
+	 */
+	public function register_screen_meta_box_sanitizer( \WP_Screen $screen ): void {
+		if ( empty( $screen->id ) ) {
+			return;
+		}
+
+		add_filter(
+			"get_user_option_meta-box-order_{$screen->id}",
+			static function ( mixed $result ): mixed {
+				if ( ! empty( $result ) && ! is_array( $result ) ) {
+					return false;
+				}
+				return $result;
+			}
+		);
 	}
 }
