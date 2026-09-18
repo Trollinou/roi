@@ -9,15 +9,16 @@ declare(strict_types=1);
 
 namespace ROI\API\REST;
 
+use ROI\Services\Progression\Progression_Service;
+use ROI\Services\Progression\Group_Service;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use WP_Error;
-use WP_User_Query;
 
 /**
  * Class Progression_Controller
- * Handles saving and retrieving student exercise and lesson progression.
+ * Handles REST API operations for saving and retrieving student and group progression.
  */
 class Progression_Controller {
 
@@ -34,6 +35,34 @@ class Progression_Controller {
 	 * @var string
 	 */
 	protected string $rest_base = 'progression';
+
+	/**
+	 * Progression service.
+	 *
+	 * @var Progression_Service
+	 */
+	protected Progression_Service $progression_service;
+
+	/**
+	 * Group service.
+	 *
+	 * @var Group_Service
+	 */
+	protected Group_Service $group_service;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param Progression_Service|null $progression_service Progression service.
+	 * @param Group_Service|null       $group_service       Group service.
+	 */
+	public function __construct(
+		?Progression_Service $progression_service = null,
+		?Group_Service $group_service = null
+	) {
+		$this->progression_service = $progression_service ?? new Progression_Service();
+		$this->group_service       = $group_service ?? new Group_Service();
+	}
 
 	/**
 	 * Initialize the class and register hooks.
@@ -163,7 +192,7 @@ class Progression_Controller {
 	/**
 	 * Permission callback for students to manage progression.
 	 *
-	 * @return bool|\WP_Error
+	 * @return bool|WP_Error
 	 */
 	public function check_adherent_permissions(): bool|WP_Error {
 		return Permissions_Helper::check_apprentissage_access();
@@ -202,7 +231,6 @@ class Progression_Controller {
 		}
 
 		$intersect = array_intersect( $allowed_roles, $roles );
-
 		if ( empty( $intersect ) ) {
 			return new WP_Error(
 				'rest_forbidden',
@@ -305,53 +333,16 @@ class Progression_Controller {
 			);
 		}
 
-		// Récupérer les éléments déjà validés pour cette identité.
-		$meta_entries    = get_user_meta( $user_id, $meta_key, false );
-		$already_val_map = array();
-		if ( is_array( $meta_entries ) ) {
-			foreach ( $meta_entries as $entry ) {
-				if ( is_array( $entry ) && isset( $entry['element_id'] ) ) {
-					$already_val_map[ (int) $entry['element_id'] ] = $entry;
-				}
-			}
-		}
-
 		$time_spent      = (int) $request->get_param( 'time_spent' );
 		$attempts        = (int) $request->get_param( 'attempts' );
-		$validated_count = 0;
-
-		foreach ( $elements_todo as $elem_id ) {
-			$post = get_post( $elem_id );
-			if ( ! $post || ! in_array( $post->post_type, array( 'roi_exercice', 'roi_lecon', 'roi_video' ), true ) ) {
-				continue;
-			}
-
-			if ( ! isset( $already_val_map[ $elem_id ] ) ) {
-				$data = array(
-					'element_id' => $elem_id,
-					'date'       => current_time( 'mysql' ),
-					'time_spent' => max( 0, $time_spent ),
-					'attempts'   => max( 1, $attempts ),
-				);
-				if ( $is_trainer ) {
-					$data['source'] = 'club';
-				}
-				add_user_meta( $user_id, $meta_key, $data, false );
-				$already_val_map[ $elem_id ] = $data;
-				$validated_count++;
-			} elseif ( ! $is_trainer && $time_spent > 0 ) {
-				$old_entry = $already_val_map[ $elem_id ];
-				if ( empty( $old_entry['time_spent'] ) ) {
-					$updated_entry               = $old_entry;
-					$updated_entry['time_spent'] = $time_spent;
-					if ( $attempts > 0 ) {
-						$updated_entry['attempts'] = $attempts;
-					}
-					update_user_meta( $user_id, $meta_key, $updated_entry, $old_entry );
-					$already_val_map[ $elem_id ] = $updated_entry;
-				}
-			}
-		}
+		$validated_count = $this->progression_service->enregistrer(
+			$user_id,
+			$meta_key,
+			$elements_todo,
+			$time_spent,
+			$attempts,
+			$is_trainer
+		);
 
 		return new WP_REST_Response(
 			array(
@@ -377,197 +368,7 @@ class Progression_Controller {
 			$allowed_roles = $default_roles;
 		}
 
-		$query = new WP_User_Query(
-			array(
-				'role__in' => $allowed_roles,
-				'orderby'  => 'display_name',
-				'order'    => 'ASC',
-			)
-		);
-
-		$users  = $query->get_results();
-		$groupe = array();
-
-		// Pré-chargement des cours assignés (restreints) pour identifier les cours affectés par élève.
-		$restricted_courses_query = get_posts(
-			array(
-				'post_type'      => 'roi_cours',
-				'post_status'    => 'publish',
-				'posts_per_page' => -1,
-				'meta_query'     => array(
-					array(
-						'key'   => '_roi_cours_audience_type',
-						'value' => 'restricted',
-					),
-				),
-			)
-		);
-		$restricted_courses = array();
-		foreach ( $restricted_courses_query as $c_post ) {
-			$raw_groups  = get_post_meta( $c_post->ID, '_roi_cours_target_groups', true );
-			$c_groups    = ( is_string( $raw_groups ) && '' !== $raw_groups ) ? ( json_decode( $raw_groups, true ) ?: array() ) : array();
-			$raw_members = get_post_meta( $c_post->ID, '_roi_cours_target_members', true );
-			$c_members   = ( is_string( $raw_members ) && '' !== $raw_members ) ? ( json_decode( $raw_members, true ) ?: array() ) : array();
-
-			$restricted_courses[] = array(
-				'id'      => $c_post->ID,
-				'groups'  => array_map( 'intval', (array) $c_groups ),
-				'members' => array_map( 'intval', (array) $c_members ),
-			);
-		}
-
-		foreach ( $users as $user ) {
-			$user_meta = get_user_meta( $user->ID );
-			if ( ! is_array( $user_meta ) ) {
-				continue;
-			}
-
-			// Trouver toutes les clés de progression pour cet utilisateur.
-			$progression_keys = array();
-			foreach ( $user_meta as $key => $val ) {
-				if ( str_starts_with( $key, '_roi_element_valide' ) ) {
-					$progression_keys[] = $key;
-				}
-			}
-
-			// Si le compte possède des identités d'adhérents (_roi_element_valide_member_*),
-			// on masque la clé brute générique _roi_element_valide pour ne pas afficher le compte parent conteneur en doublon.
-			$has_member_keys = false;
-			foreach ( $progression_keys as $k ) {
-				if ( str_starts_with( $k, '_roi_element_valide_member_' ) ) {
-					$has_member_keys = true;
-					break;
-				}
-			}
-
-			if ( $has_member_keys ) {
-				$progression_keys = array_values(
-					array_filter(
-						$progression_keys,
-						static fn( string $k ): bool => '_roi_element_valide' !== $k
-					)
-				);
-			}
-
-			if ( empty( $progression_keys ) ) {
-				continue;
-			}
-
-			foreach ( $progression_keys as $key ) {
-				$meta_entries     = get_user_meta( $user->ID, $key, false );
-				$elements_valides = array();
-				$details          = array();
-
-				if ( is_array( $meta_entries ) ) {
-					foreach ( $meta_entries as $entry ) {
-						if ( is_array( $entry ) && isset( $entry['element_id'] ) ) {
-							$elem_id = (int) $entry['element_id'];
-							if ( $elem_id > 0 ) {
-								$elements_valides[] = $elem_id;
-								$details[ $elem_id ] = array(
-									'date'       => isset( $entry['date'] ) ? (string) $entry['date'] : '',
-									'time_spent' => isset( $entry['time_spent'] ) ? (int) $entry['time_spent'] : null,
-									'attempts'   => isset( $entry['attempts'] ) ? (int) $entry['attempts'] : null,
-									'source'     => isset( $entry['source'] ) ? (string) $entry['source'] : '',
-								);
-							}
-						}
-					}
-				}
-
-				// Garder des IDs uniques et ordonnés.
-				$elements_valides = array_values( array_unique( $elements_valides ) );
-
-				// Déterminer le nom et prénom en fonction de la clé d'identité.
-				$nom           = $user->last_name;
-				$prenom        = $user->first_name;
-				$display_name  = $user->display_name;
-				$display_id    = $user->ID;
-				$identity_type = 'user';
-				$parent_user   = null;
-				$adherent_id   = 0;
-
-				if ( '_roi_element_valide' !== $key ) {
-					$identity = str_replace( '_roi_element_valide_', '', $key );
-					if ( str_starts_with( $identity, 'member_' ) ) {
-						$identity_type = 'member';
-						$adherent_id   = (int) str_replace( 'member_', '', $identity );
-						$display_id    = $adherent_id;
-						$adh_post      = get_post( $adherent_id );
-						$adh_prenom    = get_post_meta( $adherent_id, '_dame_first_name', true ) ?: get_post_meta( $adherent_id, '_dame_prenom', true );
-						$adh_nom       = get_post_meta( $adherent_id, '_dame_last_name', true ) ?: ( get_post_meta( $adherent_id, '_dame_birth_name', true ) ?: get_post_meta( $adherent_id, '_dame_nom', true ) );
-
-						if ( ! empty( $adh_nom ) || ! empty( $adh_prenom ) ) {
-							$nom          = ! empty( $adh_nom ) ? (string) $adh_nom : '';
-							$prenom       = ! empty( $adh_prenom ) ? (string) $adh_prenom : '';
-							$display_name = trim( $prenom . ' ' . $nom );
-						} elseif ( $adh_post ) {
-							$display_name = $adh_post->post_title;
-							$prenom       = $display_name;
-							$nom          = '';
-						}
-
-						$parent_user = array(
-							'id'           => $user->ID,
-							'display_name' => $user->display_name,
-						);
-					} elseif ( str_starts_with( $identity, 'rep_' ) ) {
-						$identity_type = 'parent';
-						$display_name  = $user->display_name . ' (Parent)';
-					} elseif ( 'wp_virtual' === $identity ) {
-						$identity_type = 'admin';
-						$display_name  = $user->display_name . ' (Admin)';
-					}
-				}
-
-				if ( empty( $nom ) && empty( $prenom ) ) {
-					$prenom = $display_name;
-					$nom    = '';
-				}
-
-				// Récupération des groupes dame_group et des cours assignés pour l'élève.
-				$student_groups      = array();
-				$assigned_course_ids = array();
-
-				if ( 'member' === $identity_type && $adherent_id > 0 ) {
-					if ( taxonomy_exists( 'dame_group' ) ) {
-						$terms = wp_get_object_terms( $adherent_id, 'dame_group' );
-						if ( is_array( $terms ) && ! empty( $terms ) ) {
-							foreach ( $terms as $t ) {
-								if ( $t instanceof \WP_Term ) {
-									$student_groups[] = array(
-										'id'   => (int) $t->term_id,
-										'name' => html_entity_decode( (string) $t->name, ENT_QUOTES | ENT_HTML5, 'UTF-8' ),
-										'slug' => (string) $t->slug,
-									);
-								}
-							}
-						}
-					}
-
-					$group_ids = array_column( $student_groups, 'id' );
-					foreach ( $restricted_courses as $rc ) {
-						if ( in_array( $adherent_id, $rc['members'], true ) || ! empty( array_intersect( $group_ids, $rc['groups'] ) ) ) {
-							$assigned_course_ids[] = $rc['id'];
-						}
-					}
-				}
-
-				$groupe[] = array(
-					'id'                  => $user->ID . '__' . $key, // ID unique pour le tableau React (double underscore).
-					'display_id'          => $display_id,
-					'identity_type'       => $identity_type,
-					'parent_user'         => $parent_user,
-					'nom'                 => $nom,
-					'prenom'              => $prenom,
-					'display_name'        => $display_name,
-					'groups'              => $student_groups,
-					'assigned_course_ids' => $assigned_course_ids,
-					'elements_valides'    => $elements_valides,
-					'details'             => (object) $details,
-				);
-			}
-		}
+		$groupe = $this->group_service->obtenir_progression_groupe( $allowed_roles );
 
 		return new WP_REST_Response( $groupe, 200 );
 	}
@@ -581,18 +382,7 @@ class Progression_Controller {
 	public function obtenir_progression( WP_REST_Request $request ): WP_REST_Response {
 		$user_id      = get_current_user_id();
 		$meta_key     = $this->get_progression_meta_key( $request );
-		$meta_entries = get_user_meta( $user_id, $meta_key, false );
-		$elements     = array();
-
-		if ( is_array( $meta_entries ) ) {
-			foreach ( $meta_entries as $entry ) {
-				if ( is_array( $entry ) && isset( $entry['element_id'] ) ) {
-					$elements[] = (int) $entry['element_id'];
-				}
-			}
-		}
-
-		$elements = array_values( array_unique( $elements ) );
+		$elements     = $this->progression_service->obtenir( $user_id, $meta_key );
 
 		return new WP_REST_Response( $elements, 200 );
 	}
@@ -601,9 +391,9 @@ class Progression_Controller {
 	 * Supprime la progression d'un élève pour un cours spécifique.
 	 *
 	 * @param WP_REST_Request $request The request object.
-	 * @return WP_REST_Response|\WP_Error
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function reset_progression_cours( WP_REST_Request $request ): WP_REST_Response|\WP_Error {
+	public function reset_progression_cours( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$student_id_raw = $request->get_param( 'student_id' );
 		$meta_key       = '_roi_element_valide';
 		$student_id     = 0;
@@ -622,64 +412,24 @@ class Progression_Controller {
 		$element_id = (int) $request->get_param( 'element_id' );
 
 		if ( $student_id <= 0 || ( $course_id <= 0 && $element_id <= 0 ) ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'invalid_params',
 				__( 'Paramètres invalides.', 'roi' ),
 				array( 'status' => 400 )
 			);
 		}
 
-		$playlist_ids = array();
-
-		if ( $element_id > 0 ) {
-			$playlist_ids[] = $element_id;
-		} elseif ( $course_id > 0 ) {
-			// Retrieve course playlist.
-			$playlist_meta = get_post_meta( $course_id, '_roi_cours_playlist', true );
-			if ( is_string( $playlist_meta ) && '' !== $playlist_meta ) {
-				$decoded = json_decode( $playlist_meta, true );
-				if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
-					foreach ( $decoded as $item ) {
-						if ( isset( $item['id'] ) ) {
-							$playlist_ids[] = (int) $item['id'];
-						}
-					}
-				}
-			}
-		}
-
-		if ( empty( $playlist_ids ) ) {
-			return new WP_REST_Response(
-				array(
-					'success' => true,
-					'message' => __( 'Aucun élément à réinitialiser.', 'roi' ),
-				),
-				200
-			);
-		}
-
-		// Get all entries.
-		$meta_entries = get_user_meta( $student_id, $meta_key, false );
-
-		// Delete all entries.
-		delete_user_meta( $student_id, $meta_key );
-
-		// Filter and re-add entries not in the playlist.
-		if ( is_array( $meta_entries ) ) {
-			foreach ( $meta_entries as $entry ) {
-				if ( is_array( $entry ) && isset( $entry['element_id'] ) ) {
-					$elem_id = (int) $entry['element_id'];
-					if ( ! in_array( $elem_id, $playlist_ids, true ) ) {
-						add_user_meta( $student_id, $meta_key, $entry, false );
-					}
-				}
-			}
-		}
+		$success = $this->group_service->reset_progression_cours(
+			$student_id,
+			$meta_key,
+			$course_id > 0 ? $course_id : null,
+			$element_id > 0 ? $element_id : null
+		);
 
 		return new WP_REST_Response(
 			array(
-				'success' => true,
-				'message' => __( 'Progression réinitialisée avec succès.', 'roi' ),
+				'success' => $success,
+				'message' => $success ? __( 'Progression réinitialisée avec succès.', 'roi' ) : __( 'Aucun élément à réinitialiser.', 'roi' ),
 			),
 			200
 		);
@@ -692,70 +442,7 @@ class Progression_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function obtenir_candidats_eleves( WP_REST_Request $request ): WP_REST_Response { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-		global $wpdb;
-
-		// Récupérer tous les identifiants d'adhérents déjà suivis dans les meta users.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$existing_keys = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT DISTINCT meta_key FROM {$wpdb->usermeta} WHERE meta_key LIKE %s",
-				'_roi_element_valide_member_%'
-			)
-		);
-
-		$tracked_adherent_ids = array();
-		if ( is_array( $existing_keys ) ) {
-			foreach ( $existing_keys as $k ) {
-				$aid = (int) str_replace( '_roi_element_valide_member_', '', (string) $k );
-				if ( $aid > 0 ) {
-					$tracked_adherent_ids[] = $aid;
-				}
-			}
-		}
-
-		$candidats = array();
-
-		// Si le CPT adherent existe (DAME actif).
-		if ( post_type_exists( 'adherent' ) ) {
-			$args = array(
-				'post_type'      => 'adherent',
-				'post_status'    => 'publish',
-				'posts_per_page' => 200,
-				'orderby'        => 'title',
-				'order'          => 'ASC',
-			);
-			if ( ! empty( $tracked_adherent_ids ) ) {
-				$args['post__not_in'] = $tracked_adherent_ids;
-			}
-
-			$posts = get_posts( $args );
-			foreach ( $posts as $post ) {
-				$prenom    = (string) ( get_post_meta( $post->ID, '_dame_first_name', true ) ?: get_post_meta( $post->ID, '_dame_prenom', true ) );
-				$nom       = (string) ( get_post_meta( $post->ID, '_dame_last_name', true ) ?: ( get_post_meta( $post->ID, '_dame_birth_name', true ) ?: get_post_meta( $post->ID, '_dame_nom', true ) ) );
-				$email     = (string) get_post_meta( $post->ID, '_dame_email', true );
-				$full_name = trim( $prenom . ' ' . $nom );
-				if ( empty( $full_name ) ) {
-					$full_name = $post->post_title;
-				}
-
-				$birth_date = (string) get_post_meta( $post->ID, '_dame_birth_date', true );
-				$rep_fname  = (string) get_post_meta( $post->ID, '_dame_legal_rep_1_first_name', true );
-				$rep_lname  = (string) get_post_meta( $post->ID, '_dame_legal_rep_1_last_name', true );
-				$legal_rep  = trim( $rep_fname . ' ' . $rep_lname );
-
-				$candidats[] = array(
-					'id'           => $post->ID,
-					'type'         => 'adherent',
-					'nom'          => $nom,
-					'prenom'       => $prenom,
-					'display_name' => $full_name,
-					'email'        => $email,
-					'birth_date'   => $birth_date,
-					'legal_rep'    => $legal_rep,
-				);
-			}
-		}
-
+		$candidats = $this->group_service->obtenir_candidats_eleves();
 		return new WP_REST_Response( $candidats, 200 );
 	}
 
@@ -763,168 +450,28 @@ class Progression_Controller {
 	 * Ajoute un élève (adhérent DAME) dans la liste de suivi.
 	 *
 	 * @param WP_REST_Request $request The request object.
-	 * @return WP_REST_Response|\WP_Error
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function ajouter_eleve_suivi( WP_REST_Request $request ): WP_REST_Response|\WP_Error {
+	public function ajouter_eleve_suivi( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$adherent_id = (int) $request->get_param( 'adherent_id' );
 
 		if ( $adherent_id <= 0 ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'invalid_adherent_id',
 				__( 'ID d\'adhérent invalide.', 'roi' ),
 				array( 'status' => 400 )
 			);
 		}
 
-		$post = get_post( $adherent_id );
-		if ( ! $post || 'adherent' !== $post->post_type ) {
-			return new \WP_Error(
-				'adherent_not_found',
-				__( 'Adhérent non trouvé dans DAME.', 'roi' ),
-				array( 'status' => 404 )
-			);
+		$result = $this->group_service->ajouter_eleve_suivi( $adherent_id );
+		if ( is_wp_error( $result ) ) {
+			return $result;
 		}
-
-		// Trouver un compte WordPress rattaché à cet adhérent.
-		$user = null;
-
-		// 1. Recherche par post meta direct (_dame_wp_user_id, _dame_linked_wp_user, _dame_user_id).
-		$linked_user_id = (int) ( get_post_meta( $adherent_id, '_dame_wp_user_id', true )
-			?: get_post_meta( $adherent_id, '_dame_linked_wp_user', true )
-			?: get_post_meta( $adherent_id, '_dame_user_id', true ) );
-
-		if ( $linked_user_id > 0 ) {
-			$found = get_user_by( 'ID', $linked_user_id );
-			if ( $found instanceof \WP_User ) {
-				$user = $found;
-			}
-		}
-
-		// 2. Recherche par user meta _dame_adherent_id.
-		if ( ! $user ) {
-			$users_with_meta = get_users(
-				array(
-					'meta_key'   => '_dame_adherent_id',
-					'meta_value' => (string) $adherent_id, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-					'number'     => 1,
-				)
-			);
-			if ( ! empty( $users_with_meta ) ) {
-				$user = $users_with_meta[0];
-			}
-		}
-
-		// 3. Recherche par email direct de l'adhérent.
-		$adh_email = (string) get_post_meta( $adherent_id, '_dame_email', true );
-		if ( ! $user && ! empty( $adh_email ) ) {
-			$found = get_user_by( 'email', $adh_email );
-			if ( $found instanceof \WP_User ) {
-				$user = $found;
-			}
-		}
-
-		// 4. Recherche par email du représentant légal 1.
-		$rep1_email = (string) get_post_meta( $adherent_id, '_dame_legal_rep_1_email', true );
-		if ( ! $user && ! empty( $rep1_email ) ) {
-			$found = get_user_by( 'email', $rep1_email );
-			if ( $found instanceof \WP_User ) {
-				$user = $found;
-			}
-		}
-
-		// 5. Recherche par email du représentant légal 2.
-		$rep2_email = (string) get_post_meta( $adherent_id, '_dame_legal_rep_2_email', true );
-		if ( ! $user && ! empty( $rep2_email ) ) {
-			$found = get_user_by( 'email', $rep2_email );
-			if ( $found instanceof \WP_User ) {
-				$user = $found;
-			}
-		}
-
-		// 6. Si aucun utilisateur WP n'existe, on crée un compte WP dédié.
-		// Note : Ne JAMAIS se replier sur post_author ni sur l'administrateur courant.
-		if ( ! $user ) {
-			$adh_fname = (string) ( get_post_meta( $adherent_id, '_dame_first_name', true ) ?: get_post_meta( $adherent_id, '_dame_prenom', true ) );
-			$adh_lname = (string) ( get_post_meta( $adherent_id, '_dame_last_name', true ) ?: get_post_meta( $adherent_id, '_dame_nom', true ) );
-			$login     = sanitize_user( 'eleve_' . $adherent_id, true );
-
-			// Préférer l'email du représentant légal ou de l'adhérent s'il existe et n'est pas déjà pris.
-			$email_candidate = ! empty( $rep1_email ) ? $rep1_email : ( ! empty( $adh_email ) ? $adh_email : '' );
-			if ( ! empty( $email_candidate ) && ! email_exists( $email_candidate ) ) {
-				$email = $email_candidate;
-			} else {
-				$email = 'eleve_' . $adherent_id . '@club.local';
-			}
-
-			$created_id = wp_insert_user(
-				array(
-					'user_login'   => $login,
-					'user_email'   => $email,
-					'first_name'   => $adh_fname,
-					'last_name'    => $adh_lname,
-					'display_name' => trim( $adh_fname . ' ' . $adh_lname ),
-					'user_pass'    => wp_generate_password( 20 ),
-					'role'         => 'membre',
-				)
-			);
-
-			if ( ! is_wp_error( $created_id ) ) {
-				update_user_meta( $created_id, '_dame_adherent_id', $adherent_id );
-				$user = get_user_by( 'ID', $created_id );
-			}
-		}
-
-		if ( ! $user instanceof \WP_User ) {
-			return new \WP_Error(
-				'user_association_failed',
-				__( 'Impossible d\'associer un compte utilisateur.', 'roi' ),
-				array( 'status' => 500 )
-			);
-		}
-
-		$meta_key = '_roi_element_valide_member_' . $adherent_id;
-
-		// Initialiser l'entrée de suivi avec un marqueur (element_id = 0) si aucune entrée n'existe.
-		$existing = get_user_meta( $user->ID, $meta_key, false );
-		if ( empty( $existing ) ) {
-			add_user_meta(
-				$user->ID,
-				$meta_key,
-				array(
-					'element_id' => 0,
-					'date'       => current_time( 'mysql' ),
-					'source'     => 'init',
-				),
-				false
-			);
-		}
-
-		$prenom       = (string) ( get_post_meta( $adherent_id, '_dame_first_name', true ) ?: get_post_meta( $adherent_id, '_dame_prenom', true ) );
-		$nom          = (string) ( get_post_meta( $adherent_id, '_dame_last_name', true ) ?: ( get_post_meta( $adherent_id, '_dame_birth_name', true ) ?: get_post_meta( $adherent_id, '_dame_nom', true ) ) );
-		$display_name = trim( $prenom . ' ' . $nom );
-		if ( empty( $display_name ) ) {
-			$display_name = $post->post_title;
-		}
-
-		$parent_user = array(
-			'id'           => $user->ID,
-			'display_name' => $user->display_name,
-		);
 
 		return new WP_REST_Response(
 			array(
 				'success' => true,
-				'student' => array(
-					'id'               => $user->ID . '__' . $meta_key,
-					'display_id'       => $adherent_id,
-					'identity_type'    => 'member',
-					'parent_user'      => $parent_user,
-					'nom'              => $nom,
-					'prenom'           => $prenom,
-					'display_name'     => $display_name,
-					'elements_valides' => array(),
-					'details'          => (object) array(),
-				),
+				'student' => $result,
 			),
 			200
 		);
@@ -934,13 +481,13 @@ class Progression_Controller {
 	 * Retire un élève de la liste de suivi.
 	 *
 	 * @param WP_REST_Request $request The request object.
-	 * @return WP_REST_Response|\WP_Error
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function retirer_eleve_suivi( WP_REST_Request $request ): WP_REST_Response|\WP_Error {
+	public function retirer_eleve_suivi( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$student_id = (string) $request->get_param( 'student_id' );
 
 		if ( empty( $student_id ) ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'missing_student_id',
 				__( 'Identifiant d\'élève manquant.', 'roi' ),
 				array( 'status' => 400 )
@@ -960,14 +507,14 @@ class Progression_Controller {
 		}
 
 		if ( $user_id <= 0 || empty( $meta_key ) || ! str_starts_with( $meta_key, '_roi_element_valide' ) ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'invalid_student_id',
 				__( 'Identifiant d\'élève invalide.', 'roi' ),
 				array( 'status' => 400 )
 			);
 		}
 
-		delete_user_meta( $user_id, $meta_key );
+		$this->group_service->retirer_eleve_suivi( $user_id, $meta_key );
 
 		return new WP_REST_Response(
 			array(
@@ -982,58 +529,33 @@ class Progression_Controller {
 	 * Assigne ou retire un cours ciblé pour un élève (Entraîneur).
 	 *
 	 * @param WP_REST_Request $request The request object.
-	 * @return WP_REST_Response|\WP_Error
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function assigner_cours_eleve( WP_REST_Request $request ): WP_REST_Response|\WP_Error {
+	public function assigner_cours_eleve( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$adherent_id = (int) $request->get_param( 'adherent_id' );
 		$cours_id    = (int) $request->get_param( 'cours_id' );
 		$action      = sanitize_key( (string) ( $request->get_param( 'action' ) ?: 'assign' ) );
 
 		if ( $adherent_id <= 0 || $cours_id <= 0 ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'invalid_params',
 				__( 'Identifiant d\'élève ou de cours invalide.', 'roi' ),
 				array( 'status' => 400 )
 			);
 		}
 
-		$cours_post = get_post( $cours_id );
-		if ( ! $cours_post || 'roi_cours' !== $cours_post->post_type ) {
-			return new \WP_Error(
-				'course_not_found',
-				__( 'Cours introuvable.', 'roi' ),
-				array( 'status' => 404 )
-			);
+		$result = $this->group_service->assigner_cours_eleve( $adherent_id, $cours_id, $action );
+		if ( is_wp_error( $result ) ) {
+			return $result;
 		}
-
-		// Récupérer les membres cibles actuels.
-		$raw_members    = get_post_meta( $cours_id, '_roi_cours_target_members', true );
-		$target_members = array();
-		if ( is_string( $raw_members ) && '' !== $raw_members ) {
-			$decoded = json_decode( $raw_members, true );
-			if ( is_array( $decoded ) ) {
-				$target_members = array_map( 'intval', $decoded );
-			}
-		}
-
-		if ( 'assign' === $action ) {
-			if ( ! in_array( $adherent_id, $target_members, true ) ) {
-				$target_members[] = $adherent_id;
-			}
-			update_post_meta( $cours_id, '_roi_cours_audience_type', 'restricted' );
-		} else {
-			$target_members = array_values( array_diff( $target_members, array( $adherent_id ) ) );
-		}
-
-		update_post_meta( $cours_id, '_roi_cours_target_members', wp_json_encode( array_values( array_unique( $target_members ) ) ) );
 
 		return new WP_REST_Response(
 			array(
 				'success'        => true,
 				'message'        => ( 'assign' === $action ) ? __( 'Cours assigné avec succès.', 'roi' ) : __( 'Cours retiré des assignations.', 'roi' ),
-				'cours_id'       => $cours_id,
-				'adherent_id'    => $adherent_id,
-				'target_members' => $target_members,
+				'cours_id'       => $result['cours_id'],
+				'adherent_id'    => $result['adherent_id'],
+				'target_members' => $result['target_members'],
 			),
 			200
 		);
@@ -1046,27 +568,7 @@ class Progression_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function obtenir_groupes_eleves( WP_REST_Request $request ): WP_REST_Response { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-		$groups = array();
-		if ( taxonomy_exists( 'dame_group' ) ) {
-			$terms = get_terms(
-				array(
-					'taxonomy'   => 'dame_group',
-					'hide_empty' => false,
-				)
-			);
-			if ( is_array( $terms ) ) {
-				foreach ( $terms as $t ) {
-					if ( $t instanceof \WP_Term ) {
-						$groups[] = array(
-							'id'    => (int) $t->term_id,
-							'name'  => html_entity_decode( (string) $t->name, ENT_QUOTES | ENT_HTML5, 'UTF-8' ),
-							'slug'  => (string) $t->slug,
-							'count' => (int) $t->count,
-						);
-					}
-				}
-			}
-		}
+		$groups = $this->group_service->obtenir_groupes_eleves();
 		return new WP_REST_Response( $groups, 200 );
 	}
 }

@@ -2,6 +2,23 @@
 
 ## [Unreleased]
 
+*   **Optimisation des Performances REST & Mise en Cache Transients (`Parcours_Controller.php`, `Chapitre_Taxonomy.php`) :**
+    *   **Élimination du problème N+1 :** Préchauffage global des métadonnées et états de publication de l'ensemble des éléments de playlist en une seule requête SQL via `_prime_post_caches()`.
+    *   **Mise en cache Transients (`roi_parcours_raw_courses`) :** Stockage du catalogue de cours pré-calculé et invalidation automatique lors des hooks `save_post_*`, `deleted_post`, `trash_post` et modifications de la taxonomie `roi_chapitre`.
+    *   **Centralisation de l'ordre strict des chapitres :** Définition de `Chapitre_Taxonomy::ORDER_MAP` et de la méthode `get_chapter_order()` pour garantir le tri obligatoire (Matérialité, Activité des Pièces, Sécurité du Roi, Structure de Pions, Combination) de manière cohérente dans l'API REST et les listes d'administration.
+
+*   **Chargement Conditionnel des Assets Front-end (`ChessEngine.php`) :**
+    *   **Enregistrement dynamique :** Remplacement de l'inclusion globale inconditionnelle des scripts et styles de l'échiquier (`chessboard-view.js`, `style.css`) au profit d'un enregistrement au hook `init` (`register_assets`).
+    *   **Enqueue contextuel :** Injection exclusive lors du rendu effectif du bloc Gutenberg ou du shortcode `[chess_board]`.
+
+*   **Refactoring & Modularisation PSR-4 (`Progression_Controller.php`, `Builder.php`) :**
+    *   **Services de progression (`ROI\Services\Progression\`) :** Extraction de `Progression_Service.php` (logique d'enregistrement et de calcul individuel) et de `Group_Service.php` (matrice de progression de groupe, gestion des élèves suivis, assignation de cours, réinitialisation) réduisant la classe `Progression_Controller` de 1073 lignes à ~500 lignes.
+    *   **Composants du constructeur de cours (`ROI\Metaboxes\Cours\Builder\`) :** Extraction de `Ajax_Handler.php` (recherche asynchrone d'éléments) et de `Playlist_Cleaner.php` (purge automatique des éléments supprimés dans les playlists), réduisant `Builder.php` de 643 lignes à 393 lignes.
+
+*   **Nettoyage CSS & Constante Globale (`roi.php`, `admin-style.css`, `Manager.php`) :**
+    *   **Constante `ROI_PLUGIN_URL` :** Définition dans `roi.php` et harmonisation dans l'ensemble des modules d'administration et métaboxes.
+    *   **Déport CSS des modales :** Élimination des balises `<style>` et styles inline dans le gestionnaire d'exercices au profit de classes dédiées dans `assets/css/admin-style.css`.
+
 ## [1.6.5] - 2026-09-17
 
 *   **Refonte du Constructeur d'Exercice Type 13 (Ouvre'boîte) en Série de 6 Mini-PGN (`TypeOuvreBoite.php`, `type-13.js`) :**

@@ -71,11 +71,11 @@ class Suivi_Page {
 			return;
 		}
 
-		$plugin_dir  = dirname( __DIR__, 2 );
-		$plugin_url  = plugin_dir_url( $plugin_dir . '/roi.php' );
+		$plugin_dir  = ROI_PLUGIN_DIR;
+		$plugin_url  = ROI_PLUGIN_URL;
 		$script_url  = $plugin_url . 'build/suivi/index.js';
-		$script_path = $plugin_dir . '/build/suivi/index.js';
-		$asset_file  = $plugin_dir . '/build/suivi/index.asset.php';
+		$script_path = $plugin_dir . 'build/suivi/index.js';
+		$asset_file  = $plugin_dir . 'build/suivi/index.asset.php';
 		$asset       = file_exists( $asset_file ) ? include $asset_file : array(
 			'dependencies' => array( 'wp-element' ),
 			'version'      => ROI_VERSION,

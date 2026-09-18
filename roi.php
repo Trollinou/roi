@@ -65,6 +65,7 @@ function roi_dame_not_active_notice() {
 
 define( 'ROI_VERSION', '1.6.5' );
 define( 'ROI_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'ROI_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 // Autoloader SPL natif.
 spl_autoload_register(

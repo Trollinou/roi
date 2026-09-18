@@ -16,6 +16,29 @@ namespace ROI\CPT;
 class Chapitre_Taxonomy {
 
 	/**
+	 * Predefined strict order for the 'roi_chapitre' taxonomy.
+	 *
+	 * @var array<string, int>
+	 */
+	public const ORDER_MAP = array(
+		'Matérialité'         => 1,
+		'Activité des Pièces' => 2,
+		'Sécurité du Roi'     => 3,
+		'Structure de Pions'  => 4,
+		'Combination'         => 5,
+	);
+
+	/**
+	 * Returns the strict order index for a given chapter name.
+	 *
+	 * @param string $chapter_name Name of the chapter.
+	 * @return int Order index (1-based), or 99 if not predefined.
+	 */
+	public static function get_chapter_order( string $chapter_name ): int {
+		return self::ORDER_MAP[ $chapter_name ] ?? 99;
+	}
+
+	/**
 	 * Register actions.
 	 *
 	 * @return void
@@ -114,21 +137,13 @@ class Chapitre_Taxonomy {
 		}
 
 		if ( is_array( $taxonomies ) && in_array( 'roi_chapitre', $taxonomies, true ) ) {
-			$order_map = array(
-				'Matérialité'         => 1,
-				'Activité des Pièces' => 2,
-				'Sécurité du Roi'     => 3,
-				'Structure de Pions'  => 4,
-				'Combination'         => 5,
-			);
-
 			usort(
 				$terms,
-				function ( $a, $b ) use ( $order_map ) {
+				function ( $a, $b ) {
 					$name_a = is_object( $a ) ? $a->name : ( is_array( $a ) ? ( $a['name'] ?? '' ) : '' );
 					$name_b = is_object( $b ) ? $b->name : ( is_array( $b ) ? ( $b['name'] ?? '' ) : '' );
-					$pos_a  = $order_map[ $name_a ] ?? 99;
-					$pos_b  = $order_map[ $name_b ] ?? 99;
+					$pos_a  = self::get_chapter_order( (string) $name_a );
+					$pos_b  = self::get_chapter_order( (string) $name_b );
 					return $pos_a <=> $pos_b;
 				}
 			);

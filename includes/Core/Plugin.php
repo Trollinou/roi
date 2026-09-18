@@ -33,14 +33,14 @@ class Plugin {
 		$roles = new Roles();
 		$roles->init();
 
-		// REST API endpoints.
+		// REST API controllers & cache handlers.
+		( new \ROI\API\REST\Parcours_Controller() )->init();
 		add_action(
 			'rest_api_init',
 			function (): void {
 				( new \ROI\API\REST\Games_Controller() )->register_routes();
 				( new \ROI\API\REST\Contenu_Controller() )->register_routes();
 				( new \ROI\API\REST\Progression_Controller() )->register_routes();
-				( new \ROI\API\REST\Parcours_Controller() )->register_routes();
 				( new \ROI\API\REST\Config_Controller() )->register_routes();
 			}
 		);
@@ -50,7 +50,7 @@ class Plugin {
 			'init',
 			function (): void {
 				\ROI\Chess\ChessEngine::get_instance(
-					plugin_dir_url( ROI_PLUGIN_DIR . 'roi.php' ),
+					ROI_PLUGIN_URL,
 					ROI_PLUGIN_DIR
 				);
 			},

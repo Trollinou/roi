@@ -61,7 +61,7 @@ class ChessEngine {
 		$this->plugin_path = $plugin_path;
 
 		// Hooks.
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+		add_action( 'init', array( $this, 'register_assets' ) );
 		add_action( 'init', array( $this, 'register_block' ) );
 		add_shortcode( 'chess_board', array( $this, 'render_chessboard' ) );
 	}
@@ -91,21 +91,21 @@ class ChessEngine {
 	}
 
 	/**
-	 * Enqueue scripts/styles.
+	 * Register scripts and styles.
 	 *
 	 * @return void
 	 */
-	public function enqueue_assets(): void {
+	public function register_assets(): void {
 		$chess_url = $this->plugin_url . 'build/chessboard/';
 
-		wp_enqueue_style(
+		wp_register_style(
 			'roi-public-chessboard-style',
 			$chess_url . 'style.css',
 			array(),
 			ROI_VERSION
 		);
 
-		wp_enqueue_script(
+		wp_register_script(
 			'roi-public-chessboard-view',
 			$chess_url . 'chessboard-view.js',
 			array( 'wp-element' ),
@@ -142,6 +142,8 @@ class ChessEngine {
 	 * @return string HTML output.
 	 */
 	public function render_chessboard( $atts ): string {
+		wp_enqueue_style( 'roi-public-chessboard-style' );
+		wp_enqueue_script( 'roi-public-chessboard-view' );
 		$atts = shortcode_atts(
 			array(
 				'fen'                   => 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',

@@ -38,8 +38,8 @@ class Assets {
 			return;
 		}
 
-		$plugin_dir = plugin_dir_path( dirname( __DIR__, 2 ) . '/roi.php' );
-		$plugin_url = plugin_dir_url( dirname( __DIR__, 2 ) . '/roi.php' );
+		$plugin_dir = ROI_PLUGIN_DIR;
+		$plugin_url = ROI_PLUGIN_URL;
 		$chess_url  = $plugin_url . 'build/chessboard/';
 		$chess_dir  = $plugin_dir . 'build/chessboard/';
 

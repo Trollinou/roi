@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace ROI\Admin;
 
+use ROI\CPT\Chapitre_Taxonomy;
 use ROI\Enums\Chapitre_Couleur;
 use ROI\Enums\Exercice_Type;
 
@@ -298,7 +299,8 @@ class Columns {
 
 			$clauses['groupby'] = "{$wpdb->posts}.ID";
 
-			$chapitre_order = "'Matérialité', 'Activité des Pièces', 'Sécurité du Roi', 'Structure de Pions', 'Combination'";
+			$escaped_names  = array_map( static fn( string $name ): string => "'" . esc_sql( $name ) . "'", array_keys( Chapitre_Taxonomy::ORDER_MAP ) );
+			$chapitre_order = implode( ', ', $escaped_names );
 
 			$clauses['orderby'] = " CAST(COALESCE(pm_lvl.meta_value, '1') AS SIGNED) ASC, FIELD(t.name, {$chapitre_order}) ASC, {$wpdb->posts}.menu_order ASC, {$wpdb->posts}.post_title ASC ";
 		}

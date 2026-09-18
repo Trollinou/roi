@@ -251,7 +251,7 @@ class Partie {
 		}
 
 		if ( 'post.php' === $hook || 'post-new.php' === $hook ) {
-			$plugin_url = plugin_dir_url( dirname( __DIR__, 2 ) . '/roi.php' );
+			$plugin_url = ROI_PLUGIN_URL;
 			$chess_url  = $plugin_url . 'build/chessboard/';
 
 			wp_enqueue_style(
