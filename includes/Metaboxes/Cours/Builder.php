@@ -65,7 +65,7 @@ class Builder {
 	public function ordonner_metaboxes_side(): void {
 		global $wp_meta_boxes;
 
-		if ( ! isset( $wp_meta_boxes['roi_cours']['side'] ) ) {
+		if ( ! isset( $wp_meta_boxes['roi_cours']['side'] ) || ! is_array( $wp_meta_boxes['roi_cours']['side'] ) ) {
 			return;
 		}
 
@@ -81,7 +81,12 @@ class Builder {
 
 		foreach ( $desired_order as $box_id ) {
 			foreach ( array( 'high', 'core', 'default', 'low' ) as $priority ) {
-				if ( isset( $wp_meta_boxes['roi_cours']['side'][ $priority ][ $box_id ] ) ) {
+				if (
+					isset( $wp_meta_boxes['roi_cours']['side'][ $priority ] )
+					&& is_array( $wp_meta_boxes['roi_cours']['side'][ $priority ] )
+					&& isset( $wp_meta_boxes['roi_cours']['side'][ $priority ][ $box_id ] )
+					&& is_array( $wp_meta_boxes['roi_cours']['side'][ $priority ][ $box_id ] )
+				) {
 					$reordered[ $box_id ] = $wp_meta_boxes['roi_cours']['side'][ $priority ][ $box_id ];
 					unset( $wp_meta_boxes['roi_cours']['side'][ $priority ][ $box_id ] );
 					break;
@@ -90,16 +95,21 @@ class Builder {
 		}
 
 		foreach ( array( 'high', 'core', 'default', 'low' ) as $priority ) {
-			if ( ! empty( $wp_meta_boxes['roi_cours']['side'][ $priority ] ) ) {
+			if ( ! empty( $wp_meta_boxes['roi_cours']['side'][ $priority ] ) && is_array( $wp_meta_boxes['roi_cours']['side'][ $priority ] ) ) {
 				foreach ( $wp_meta_boxes['roi_cours']['side'][ $priority ] as $box_id => $box ) {
-					$reordered[ $box_id ] = $box;
+					if ( is_array( $box ) ) {
+						$reordered[ $box_id ] = $box;
+					}
 				}
 			}
 		}
 
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$wp_meta_boxes['roi_cours']['side'] = array(
-			'high' => $reordered,
+			'high'    => $reordered,
+			'core'    => array(),
+			'default' => array(),
+			'low'     => array(),
 		);
 	}
 

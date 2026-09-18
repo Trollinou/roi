@@ -14,6 +14,7 @@
 *   **Refactoring & Modularisation PSR-4 (`Progression_Controller.php`, `Builder.php`) :**
     *   **Services de progression (`ROI\Services\Progression\`) :** Extraction de `Progression_Service.php` (logique d'enregistrement et de calcul individuel) et de `Group_Service.php` (matrice de progression de groupe, gestion des élèves suivis, assignation de cours, réinitialisation) réduisant la classe `Progression_Controller` de 1073 lignes à ~500 lignes.
     *   **Composants du constructeur de cours (`ROI\Metaboxes\Cours\Builder\`) :** Extraction de `Ajax_Handler.php` (recherche asynchrone d'éléments) et de `Playlist_Cleaner.php` (purge automatique des éléments supprimés dans les playlists), réduisant `Builder.php` de 643 lignes à 393 lignes.
+    *   **Correction Warning PHP `template.php:1327` :** Sécurisation du réordonnancement des métaboxes latérales (`ordonner_metaboxes_side`) avec vérification stricte des tableaux et préservation des priorités WordPress standard (`high`, `core`, `default`, `low`).
 
 *   **Nettoyage CSS & Constante Globale (`roi.php`, `admin-style.css`, `Manager.php`) :**
     *   **Constante `ROI_PLUGIN_URL` :** Définition dans `roi.php` et harmonisation dans l'ensemble des modules d'administration et métaboxes.
