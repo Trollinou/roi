@@ -3,6 +3,7 @@
  */
 
 const textarea = document.getElementById('roi_config_json');
+const t1ConsigneGlobale = document.getElementById('roi_t1_consigne');
 let qcmsData = [];
 
 /**
@@ -18,6 +19,7 @@ export function updateConfig() {
 		return;
 	}
 
+	const consigneText = t1ConsigneGlobale ? t1ConsigneGlobale.value.trim() : '';
 	const qcmItems = container.querySelectorAll('.roi-t1-qcm-item');
 	const qcmsArr = [];
 
@@ -51,7 +53,11 @@ export function updateConfig() {
 	});
 
 	qcmsData = qcmsArr;
-	textarea.value = JSON.stringify({ qcms: qcmsData }, null, 4);
+	const configData = {
+		consigne: consigneText,
+		qcms: qcmsData,
+	};
+	textarea.value = JSON.stringify(configData, null, 4);
 }
 
 /**
@@ -214,6 +220,9 @@ export function init() {
 		try {
 			const parsed = JSON.parse(textarea.value);
 			if (parsed && typeof parsed === 'object') {
+				if (t1ConsigneGlobale && typeof parsed.consigne === 'string') {
+					t1ConsigneGlobale.value = parsed.consigne;
+				}
 				if (Array.isArray(parsed.qcms) && parsed.qcms.length > 0) {
 					qcmsData = parsed.qcms;
 				} else if (typeof parsed.question === 'string') {
@@ -235,6 +244,10 @@ export function init() {
 		} catch (e) {
 			console.warn('Erreur parsing JSON Type 1 initial :', e);
 		}
+	}
+
+	if (t1ConsigneGlobale) {
+		t1ConsigneGlobale.addEventListener('input', updateConfig);
 	}
 
 	// If qcmsData has items, rebuild DOM container from qcmsData

@@ -63,3 +63,103 @@ export function toFrenchNotation(san) {
 	};
 	return san.replace(/[KQRBN]/g, (match) => pieceMap[match] || match);
 }
+
+/**
+ * Noms des rôles de pièces en français.
+ */
+export const ROLE_NAMES_FR = {
+	pawn: 'Pion',
+	knight: 'Cavalier',
+	bishop: 'Fou',
+	rook: 'Tour',
+	queen: 'Dame',
+	king: 'Roi',
+	p: 'Pion',
+	n: 'Cavalier',
+	b: 'Fou',
+	r: 'Tour',
+	q: 'Dame',
+	k: 'Roi',
+};
+
+/**
+ * Retourne le nom en français d'une pièce à partir de son rôle ou caractère FEN.
+ *
+ * @param {string} roleOrChar - Clé de rôle (ex: 'n', 'knight', 'q')
+ * @return {string} Nom français de la pièce (ex: 'Cavalier', 'Dame')
+ */
+export function getPieceLabel(roleOrChar) {
+	if (!roleOrChar) return 'Pièce';
+	const key = String(roleOrChar).toLowerCase();
+	return ROLE_NAMES_FR[key] || 'Pièce';
+}
+
+/**
+ * Palette de correspondance des codes de couleur Lichess vers les noms de brosses.
+ */
+export const PGN_BRUSH_MAP = {
+	g: 'green',
+	r: 'red',
+	b: 'blue',
+	y: 'yellow',
+	c: 'green',
+	o: 'yellow',
+};
+
+/**
+ * Extrait les formes graphiques ([%csl ...], [%cal ...], [%cpl ...]) et le texte nettoyé d'un commentaire PGN.
+ *
+ * @param {string} commentsText - Chaîne de commentaires PGN
+ * @return {{ shapes: Array<{ orig: string, dest?: string, brush: string }>, cleanedText: string }}
+ */
+export function extractShapesFromComments(commentsText) {
+	if (!commentsText || typeof commentsText !== 'string') {
+		return { shapes: [], cleanedText: '' };
+	}
+	const shapes = [];
+
+	// 1. Cercles [%csl ...] ou [%cpl ...]
+	const cslRegex = /\[%(?:csl|cpl)\s+([^\]]+)\]/gi;
+	let cslMatch;
+	while ((cslMatch = cslRegex.exec(commentsText)) !== null) {
+		const items = cslMatch[1].split(',');
+		for (const item of items) {
+			const clean = item.trim();
+			if (clean.length >= 3) {
+				const brushChar = clean[0].toLowerCase();
+				const brush = PGN_BRUSH_MAP[brushChar] || 'green';
+				const orig = clean.substring(1, 3).toLowerCase();
+				if (!shapes.some((s) => s.orig === orig && !s.dest)) {
+					shapes.push({ orig, brush });
+				}
+			}
+		}
+	}
+
+	// 2. Flèches [%cal ...]
+	const calRegex = /\[%cal\s+([^\]]+)\]/gi;
+	let calMatch;
+	while ((calMatch = calRegex.exec(commentsText)) !== null) {
+		const items = calMatch[1].split(',');
+		for (const item of items) {
+			const clean = item.trim();
+			if (clean.length >= 5) {
+				const brushChar = clean[0].toLowerCase();
+				const brush = PGN_BRUSH_MAP[brushChar] || 'green';
+				const orig = clean.substring(1, 3).toLowerCase();
+				const dest = clean.substring(3, 5).toLowerCase();
+				if (!shapes.some((s) => s.orig === orig && s.dest === dest)) {
+					shapes.push({ orig, dest, brush });
+				}
+			}
+		}
+	}
+
+	// 3. Texte épuré
+	const cleanedText = commentsText
+		.replace(/\[%[^\]]+\]/g, '')
+		.trim()
+		.replace(/\s{2,}/g, ' ');
+
+	return { shapes, cleanedText };
+}

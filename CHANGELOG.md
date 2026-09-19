@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+*   **Centralisation & Déduplication des Utilitaires de Notation (`chessUtils.js`, `controls.js`, `FenEditor.jsx`, `type-9.js`, `README.md`) :**
+    *   **Extraction mutualisée des formes PGN (`extractShapesFromComments`) :** Centralisation du parsing des balises `[%csl ...]`, `[%cal ...]`, `[%cpl ...]` et du nettoyage de texte, éliminant les duplications de regex dans `controls.js` (`extractFenOrientationAndShapes`) et `FenEditor.jsx`.
+    *   **Noms des pièces et libellés français (`ROLE_NAMES_FR`, `getPieceLabel`) :** Centralisation du dictionnaire de traduction des pièces en français dans `chessUtils.js` et déduplication dans `type-9.js`.
+
 ## [1.6.6] - 2026-09-19
 
 *   **Options de Réponses Dynamiques & QCM Unifié pour le Type 14 (Cap ou pas cap ?) (`TypeCapOuPasCap.php`, `type-14.js`, `README.md`) :**

@@ -71,6 +71,11 @@ Ce plugin nécessite que le plugin **DAME** soit installé et activé. Le plugin
     *   **Type 9 (Parcours) :** Configuration de séries de 3 parcours progressifs avec choix de variante (`standard`, `pacman`, `stealth`, `traces`), FEN de départ, case de départ/arrivée, formes/traces géométriques et déduction automatique de la pièce pour le mode traces.
     *   **Type 12 (Qui-suis-je ?) :** Configuration de séries de 6 cartes avec sélection de variante (`pieces` pour deviner une pièce blanche parmi 6 avec palette visuelle, ou `cases` pour deviner une case de l'échiquier via un cercle vert dans l'éditeur FEN) et saisie multiligne des indices.
     *   **Type 14 (Cap ou pas Cap ?) :** Configuration de séries de 5 Mini-PGN avec sélection de variante (`qcm_multiple`, `qcm_oui_non`, `move`, `notation`, `clic`, `setup`), gestionnaire d'options de réponses personnalisées (ex: OUI/NON, BLANC/NOIR/ÉGALE, 0/1/2/3), propositions globales ou question commune, sélection de sous-modes (`cibles` / `prises_meilleur_coup` / `materiel` pour Clic, `memoire` / `texte` pour Setup), support des multi-coups automatiques depuis les variantes PGN pour Move, déduction automatique des coordonnées cibles pour la notation française, et prévisualisation PGN interactive.
+*   **Utilitaires Partagés de Notation & Parsing (`src/utils/chessUtils.js`) :**
+    *   `toFrenchNotation(san)` : Traduction des coups SAN vers la notation française (`R, D, T, F, C`) pour l'affichage dans le visualiseur PGN d'administration (`pgn-viewer.js`) et l'éditeur modal (`PgnEditor.jsx`).
+    *   `ensurePgnFenHeader(pgn, fen)` : Injection et normalisation des en-têtes `[SetUp "1"]` et `[FEN "..."]`.
+    *   `extractShapesFromComments(commentsText)` : Extraction universelle des cercles et flèches `[%csl ...]`, `[%cal ...]`, `[%cpl ...]` utilisée par `controls.js` et `FenEditor.jsx`.
+    *   `ROLE_NAMES_FR` & `getPieceLabel(roleOrChar)` : Dictionnaire et libellés normalisés des pièces en français.
 
 ## API REST
 

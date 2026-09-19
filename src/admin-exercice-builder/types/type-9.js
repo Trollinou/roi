@@ -3,6 +3,7 @@
  */
 
 import { setupFenControl, getActiveColorFromFen } from '../utils/controls';
+import { getPieceLabel } from '../../utils/chessUtils';
 
 const textarea = document.getElementById('roi_config_json');
 const t9ConsigneGlobale = document.getElementById('roi_t9_consigne');
@@ -72,18 +73,6 @@ function extractPieceRoleFromFen(fen) {
 		}
 	}
 	return '';
-}
-
-function getPieceLabel(role) {
-	const labels = {
-		k: 'Roi',
-		q: 'Dame',
-		r: 'Tour',
-		b: 'Fou',
-		n: 'Cavalier',
-		p: 'Pion',
-	};
-	return labels[role.toLowerCase()] || role;
 }
 
 export function updateConfig() {

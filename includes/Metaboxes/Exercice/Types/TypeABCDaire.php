@@ -27,7 +27,7 @@ class TypeABCDaire implements TypeInterface {
 	public function render( \WP_Post $post, array $config_data ): void {
 		$consigne_globale = isset( $config_data['consigne'] ) && is_string( $config_data['consigne'] ) && '' !== trim( $config_data['consigne'] )
 			? $config_data['consigne']
-			: __( 'Trouver le meilleur coup.', 'roi' );
+			: __( 'Trouve le meilleur coup.', 'roi' );
 		$exercices        = isset( $config_data['exercices'] ) && is_array( $config_data['exercices'] ) ? $config_data['exercices'] : array();
 
 		// Rétrocompatibilité avec l'ancien format FEN unique si présent.
@@ -50,15 +50,16 @@ class TypeABCDaire implements TypeInterface {
 			</p>
 
 			<div style="margin-bottom: 20px;">
-				<label for="roi_t3_consigne"><strong><?php esc_html_e( 'Consigne :', 'roi' ); ?></strong></label><br>
-				<input type="text" id="roi_t3_consigne" class="large-text" style="width: 100%; height: 30px;" value="<?php echo esc_attr( $consigne_globale ); ?>" placeholder="<?php esc_attr_e( 'Trouver le meilleur coup.', 'roi' ); ?>">
+				<label for="roi_t3_consigne"><strong><?php esc_html_e( 'Consigne générale :', 'roi' ); ?></strong></label><br>
+				<input type="text" id="roi_t3_consigne" class="large-text" style="width: 100%; height: 30px;" value="<?php echo esc_attr( $consigne_globale ); ?>" placeholder="<?php esc_attr_e( 'Trouve le meilleur coup.', 'roi' ); ?>">
 			</div>
 
 			<div style="display: flex; flex-direction: column; gap: 15px;">
 				<?php
 				for ( $i = 0; $i < 4; $i++ ) :
-					$exo_item = isset( $exercices[ $i ] ) && is_array( $exercices[ $i ] ) ? $exercices[ $i ] : array();
-					$exo_pgn  = isset( $exo_item['pgn'] ) && is_string( $exo_item['pgn'] ) ? $exo_item['pgn'] : '';
+					$exo_item     = isset( $exercices[ $i ] ) && is_array( $exercices[ $i ] ) ? $exercices[ $i ] : array();
+					$exo_consigne = isset( $exo_item['consigne'] ) && is_string( $exo_item['consigne'] ) ? $exo_item['consigne'] : '';
+					$exo_pgn      = isset( $exo_item['pgn'] ) && is_string( $exo_item['pgn'] ) ? $exo_item['pgn'] : '';
 					?>
 					<div class="roi-t3-diagramme-item" style="border: 1px solid #e5e5e5; padding: 14px; border-radius: 4px; background: #f9f9f9;">
 						<h4 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 600; color: #1d2327;">
@@ -67,6 +68,11 @@ class TypeABCDaire implements TypeInterface {
 							echo esc_html( sprintf( __( 'Mini PGN %d / 4', 'roi' ), $i + 1 ) );
 							?>
 						</h4>
+
+						<div style="margin-bottom: 12px;">
+							<label for="roi_t3_consigne_<?php echo (int) $i; ?>"><strong><?php esc_html_e( 'Consigne de ce diagramme (optionnelle) :', 'roi' ); ?></strong></label><br>
+							<input type="text" id="roi_t3_consigne_<?php echo (int) $i; ?>" class="roi_t3_consigne_item large-text" data-index="<?php echo (int) $i; ?>" style="width: 100%; height: 30px;" value="<?php echo esc_attr( $exo_consigne ); ?>" placeholder="<?php esc_attr_e( 'Ex : Trouve le mat en 2 coups.', 'roi' ); ?>">
+						</div>
 
 						<?php
 						PgnInput::render(

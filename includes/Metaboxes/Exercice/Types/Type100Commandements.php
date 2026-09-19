@@ -23,7 +23,8 @@ class Type100Commandements implements TypeInterface {
 	 * @return void
 	 */
 	public function render( \WP_Post $post, array $config_data ): void {
-		$qcms = array();
+		$consigne_globale = isset( $config_data['consigne'] ) && is_string( $config_data['consigne'] ) ? $config_data['consigne'] : '';
+		$qcms             = array();
 
 		if ( isset( $config_data['qcms'] ) && is_array( $config_data['qcms'] ) ) {
 			foreach ( $config_data['qcms'] as $qcm_item ) {
@@ -56,6 +57,11 @@ class Type100Commandements implements TypeInterface {
 		<div id="roi_builder_type_1" class="roi-builder-section" style="display:none; margin-top: 15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
 			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice (100 Commandements)", 'roi' ); ?></h4>
 			
+			<div style="margin-bottom: 20px;">
+				<label for="roi_t1_consigne"><strong><?php esc_html_e( 'Consigne générale (optionnelle) :', 'roi' ); ?></strong></label><br>
+				<input type="text" id="roi_t1_consigne" class="large-text" style="width: 100%; height: 30px;" value="<?php echo esc_attr( $consigne_globale ); ?>" placeholder="<?php esc_attr_e( 'Sélectionne la bonne réponse.', 'roi' ); ?>">
+			</div>
+
 			<div id="roi_t1_qcms_container" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px;">
 				<?php foreach ( $qcms as $idx => $qcm ) : ?>
 					<?php

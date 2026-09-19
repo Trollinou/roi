@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import { BoardCore } from "eg-chessboard";
 import { parsePgn } from "chessops/pgn";
+import { extractShapesFromComments } from "../../utils/chessUtils";
 import PiecePalette from "./PiecePalette";
 import DrawingLegend from "../DrawingLegend";
 import useChessBoard from "../../hooks/useChessBoard";
@@ -278,40 +279,8 @@ function parsePgnOrFen(text) {
   }
 
   if (rootComments.length > 0) {
-    const commentsText = rootComments.join(" ");
-
-    // Extraire les cercles [%csl ...] ou [%cpl ...]
-    const cslRegex = /\[%(?:csl|cpl)\s+([^\]]+)\]/gi;
-    let cslMatch;
-    while ((cslMatch = cslRegex.exec(commentsText)) !== null) {
-      const items = cslMatch[1].split(",");
-      for (const item of items) {
-        const cleanItem = item.trim();
-        if (cleanItem.length >= 3) {
-          const brushChar = cleanItem[0].toLowerCase();
-          const brush = brushMap[brushChar] || "green";
-          const orig = cleanItem.substring(1, 3).toLowerCase();
-          shapes.push({ orig, brush });
-        }
-      }
-    }
-
-    // Extraire les flèches [%cal ...]
-    const calRegex = /\[%cal\s+([^\]]+)\]/gi;
-    let calMatch;
-    while ((calMatch = calRegex.exec(commentsText)) !== null) {
-      const items = calMatch[1].split(",");
-      for (const item of items) {
-        const cleanItem = item.trim();
-        if (cleanItem.length >= 5) {
-          const brushChar = cleanItem[0].toLowerCase();
-          const brush = brushMap[brushChar] || "green";
-          const orig = cleanItem.substring(1, 3).toLowerCase();
-          const dest = cleanItem.substring(3, 5).toLowerCase();
-          shapes.push({ orig, dest, brush });
-        }
-      }
-    }
+    const parsed = extractShapesFromComments(rootComments.join(" "));
+    shapes.push(...parsed.shapes);
   }
 
   // 3. Si aucune FEN n'a été trouvée dans les balises PGN

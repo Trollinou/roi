@@ -38,7 +38,7 @@ class TypePopEchecs implements TypeInterface {
 
 			<div style="margin-bottom: 20px;">
 				<label for="roi_t2_consigne"><strong><?php esc_html_e( 'Consigne générale (optionnelle) :', 'roi' ); ?></strong></label><br>
-				<input type="text" id="roi_t2_consigne" class="large-text" style="width: 100%; height: 30px;" value="<?php echo esc_attr( $consigne_globale ); ?>" placeholder="<?php esc_attr_e( 'Ex : Replacez les pièces sur les bonnes cases.', 'roi' ); ?>">
+				<input type="text" id="roi_t2_consigne" class="large-text" style="width: 100%; height: 30px;" value="<?php echo esc_attr( $consigne_globale ); ?>" placeholder="<?php esc_attr_e( 'Place la pièce sur la meilleure case.', 'roi' ); ?>">
 			</div>
 
 			<div style="display: flex; flex-direction: column; gap: 15px;">

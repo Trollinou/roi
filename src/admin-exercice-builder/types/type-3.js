@@ -11,7 +11,12 @@ import { createPgnPreviewViewer } from '../utils/pgn-viewer';
 const textarea = document.getElementById('roi_config_json');
 const t3ConsigneInput = document.getElementById('roi_t3_consigne');
 
-const t3Exercices = [{ pgn: '' }, { pgn: '' }, { pgn: '' }, { pgn: '' }];
+const t3Exercices = [
+	{ consigne: '', pgn: '' },
+	{ consigne: '', pgn: '' },
+	{ consigne: '', pgn: '' },
+	{ consigne: '', pgn: '' },
+];
 const previewViewers = [null, null, null, null];
 
 export function updateConfig() {
@@ -21,11 +26,12 @@ export function updateConfig() {
 
 	const consigneText = t3ConsigneInput
 		? t3ConsigneInput.value.trim()
-		: 'Trouver le meilleur coup.';
+		: 'Trouve le meilleur coup.';
 
 	const configData = {
-		consigne: consigneText || 'Trouver le meilleur coup.',
+		consigne: consigneText || 'Trouve le meilleur coup.',
 		exercices: t3Exercices.map((exo) => ({
+			consigne: exo.consigne ? exo.consigne.trim() : '',
 			pgn: exo.pgn || '',
 		})),
 	};
@@ -76,6 +82,7 @@ export function init() {
 					for (let i = 0; i < 4; i++) {
 						if (parsed.exercices[i]) {
 							t3Exercices[i] = {
+								consigne: parsed.exercices[i].consigne || '',
 								pgn: parsed.exercices[i].pgn || '',
 							};
 						}
@@ -89,7 +96,7 @@ export function init() {
 						(Array.isArray(parsed.solution)
 							? parsed.solution.join(' ')
 							: '');
-					t3Exercices[0] = { pgn: legacyPgn };
+					t3Exercices[0] = { consigne: '', pgn: legacyPgn };
 				}
 			}
 		} catch (e) {
@@ -104,6 +111,22 @@ export function init() {
 
 	// Synchroniser les champs DOM et configurer les 4 PGN controls
 	for (let i = 0; i < 4; i++) {
+		const consigneItemInput =
+			document.getElementById(`roi_t3_consigne_${i}`) ||
+			document.querySelector(`.roi_t3_consigne_item[data-index="${i}"]`);
+
+		if (consigneItemInput) {
+			consigneItemInput.value = t3Exercices[i]
+				? t3Exercices[i].consigne || ''
+				: '';
+			consigneItemInput.addEventListener('input', (e) => {
+				if (t3Exercices[i]) {
+					t3Exercices[i].consigne = e.target.value;
+					updateConfig();
+				}
+			});
+		}
+
 		const pgnTextarea =
 			document.getElementById(`roi_t3_pgn_${i}`) ||
 			document.querySelector(`.roi_t3_pgn[data-index="${i}"]`);
