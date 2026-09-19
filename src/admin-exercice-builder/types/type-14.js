@@ -14,6 +14,7 @@ let t14Consigne = '';
 let t14Variante = 'qcm_oui_non';
 let t14ModeClic = 'cibles';
 let t14ModeSetup = 'memoire';
+let t14OptionsReponse = ['OUI', 'NON'];
 let t14Propositions = [];
 let t14Question = '';
 const t14Exercices = [
@@ -68,6 +69,9 @@ function updateVisibility() {
 	const varianteSelect = document.getElementById('roi_t14_variante');
 	const variante = varianteSelect ? varianteSelect.value : 'qcm_oui_non';
 
+	const blocOptionsReponse = document.getElementById(
+		'roi_t14_bloc_global_options_reponse'
+	);
 	const blocPropositions = document.getElementById(
 		'roi_t14_bloc_global_propositions'
 	);
@@ -77,6 +81,12 @@ function updateVisibility() {
 	const blocClic = document.getElementById('roi_t14_bloc_global_clic');
 	const blocSetup = document.getElementById('roi_t14_bloc_global_setup');
 
+	if (blocOptionsReponse) {
+		blocOptionsReponse.style.display =
+			variante === 'qcm_multiple' || variante === 'qcm_oui_non'
+				? 'block'
+				: 'none';
+	}
 	if (blocPropositions) {
 		blocPropositions.style.display =
 			variante === 'qcm_multiple' ? 'block' : 'none';
@@ -163,6 +173,7 @@ export function updateConfig() {
 		variante: t14Variante,
 		mode_clic: t14ModeClic,
 		mode_setup: t14ModeSetup,
+		options_reponse: t14OptionsReponse,
 		propositions: t14Propositions,
 		question: t14Question,
 		exercices: t14Exercices.map((exo) => ({
@@ -171,7 +182,7 @@ export function updateConfig() {
 				? exo.reponses_multiple
 				: [],
 			reponse_oui_non:
-				typeof exo.reponse_oui_non === 'boolean'
+				typeof exo.reponse_oui_non !== 'undefined'
 					? exo.reponse_oui_non
 					: true,
 			move_san: exo.move_san || '',
@@ -181,6 +192,153 @@ export function updateConfig() {
 	};
 
 	textarea.value = JSON.stringify(configData, null, 4);
+}
+
+/**
+ * Renders the global response options list (e.g. OUI, NON, or 0, 1, 2, 3).
+ */
+function renderOptionsReponseList() {
+	const listContainer = document.getElementById(
+		'roi_t14_options_reponse_list'
+	);
+	if (!listContainer) {
+		return;
+	}
+
+	listContainer.innerHTML = '';
+
+	t14OptionsReponse.forEach((optText, optIdx) => {
+		const itemDiv = document.createElement('div');
+		itemDiv.style.display = 'inline-flex';
+		itemDiv.style.gap = '4px';
+		itemDiv.style.alignItems = 'center';
+		itemDiv.style.background = '#fff';
+		itemDiv.style.border = '1px solid #ccd0d4';
+		itemDiv.style.borderRadius = '4px';
+		itemDiv.style.padding = '3px 6px';
+
+		const input = document.createElement('input');
+		input.type = 'text';
+		input.value = optText;
+		input.placeholder = `Option ${optIdx + 1}`;
+		input.style.width = '100px';
+		input.style.height = '28px';
+		input.style.fontSize = '12px';
+
+		input.addEventListener('input', () => {
+			t14OptionsReponse[optIdx] = input.value;
+			updateConfig();
+			renderSingleReponseContainers();
+			renderMultipleReponsesContainers();
+		});
+
+		const btnDelete = document.createElement('button');
+		btnDelete.type = 'button';
+		btnDelete.className = 'button button-link-delete';
+		btnDelete.style.padding = '0 4px';
+		btnDelete.innerHTML =
+			'<span class="dashicons dashicons-trash" style="font-size:16px; width:16px; height:16px;"></span>';
+		btnDelete.title = 'Supprimer cette option';
+
+		btnDelete.addEventListener('click', () => {
+			if (t14OptionsReponse.length <= 1) {
+				return;
+			}
+			t14OptionsReponse.splice(optIdx, 1);
+			renderOptionsReponseList();
+			renderSingleReponseContainers();
+			renderMultipleReponsesContainers();
+			updateConfig();
+		});
+
+		itemDiv.appendChild(input);
+		itemDiv.appendChild(btnDelete);
+		listContainer.appendChild(itemDiv);
+	});
+}
+
+/**
+ * Renders single question response choice across all 5 diagrams.
+ */
+function renderSingleReponseContainers() {
+	for (let i = 0; i < 5; i++) {
+		const container = document.querySelector(
+			`.roi_t14_single_reponse_container[data-index="${i}"]`
+		);
+		if (!container) {
+			continue;
+		}
+
+		container.innerHTML = '';
+
+		const currentVal = t14Exercices[i].reponse_oui_non;
+
+		t14OptionsReponse.forEach((optText, optIdx) => {
+			const label = document.createElement('label');
+			label.style.display = 'flex';
+			label.style.alignItems = 'center';
+			label.style.gap = '6px';
+			label.style.cursor = 'pointer';
+			label.style.fontWeight = '600';
+			label.style.fontSize = '13px';
+
+			const isFirst = optIdx === 0;
+			const isSecond = optIdx === 1;
+			if (
+				optText === 'OUI' ||
+				(isFirst && (optText === '' || optText === 'OUI'))
+			) {
+				label.style.color = '#198754';
+			} else if (
+				optText === 'NON' ||
+				(isSecond && (optText === '' || optText === 'NON'))
+			) {
+				label.style.color = '#dc3545';
+			} else {
+				label.style.color = '#1d2327';
+			}
+
+			let isChecked = false;
+			if (typeof currentVal === 'boolean') {
+				isChecked =
+					(currentVal && optIdx === 0) ||
+					(!currentVal && optIdx === 1);
+			} else if (typeof currentVal === 'string') {
+				isChecked =
+					currentVal === optText ||
+					(optIdx === 0 && currentVal === '1') ||
+					(optIdx === 1 && currentVal === '0');
+			} else if (typeof currentVal === 'number') {
+				isChecked = currentVal === optIdx;
+			}
+
+			const radio = document.createElement('input');
+			radio.type = 'radio';
+			radio.name = `roi_t14_reponse_oui_non_${i}`;
+			radio.value = optText || `option_${optIdx}`;
+			radio.checked = isChecked;
+
+			radio.addEventListener('change', () => {
+				if (
+					t14OptionsReponse.length === 2 &&
+					t14OptionsReponse[0] === 'OUI' &&
+					t14OptionsReponse[1] === 'NON'
+				) {
+					t14Exercices[i].reponse_oui_non = optIdx === 0;
+				} else {
+					t14Exercices[i].reponse_oui_non = optText;
+				}
+				updateConfig();
+			});
+
+			const span = document.createElement('span');
+			span.textContent = optText || `Option ${optIdx + 1}`;
+
+			label.appendChild(radio);
+			label.appendChild(span);
+			container.appendChild(label);
+		});
+	}
 }
 
 /**
@@ -225,38 +383,80 @@ function renderMultipleReponsesContainers() {
 
 			const radiosDiv = document.createElement('div');
 			radiosDiv.style.display = 'flex';
-			radiosDiv.style.gap = '15px';
+			radiosDiv.style.gap = '12px';
 			radiosDiv.style.alignItems = 'center';
 
-			const isOui = t14Exercices[i].reponses_multiple[propIdx] === true;
+			const currentAns = Array.isArray(t14Exercices[i].reponses_multiple)
+				? t14Exercices[i].reponses_multiple[propIdx]
+				: undefined;
 
-			const labelOui = document.createElement('label');
-			labelOui.style.cursor = 'pointer';
-			labelOui.style.fontWeight = '600';
-			labelOui.style.color = '#198754';
-			labelOui.innerHTML = `<input type="radio" name="roi_t14_prop_ans_${i}_${propIdx}" value="1" ${isOui ? 'checked' : ''}> ✓ OUI`;
+			t14OptionsReponse.forEach((optText, optIdx) => {
+				const optLabel = document.createElement('label');
+				optLabel.style.cursor = 'pointer';
+				optLabel.style.fontWeight = '600';
+				optLabel.style.fontSize = '12px';
 
-			const labelNon = document.createElement('label');
-			labelNon.style.cursor = 'pointer';
-			labelNon.style.fontWeight = '600';
-			labelNon.style.color = '#dc3545';
-			labelNon.innerHTML = `<input type="radio" name="roi_t14_prop_ans_${i}_${propIdx}" value="0" ${!isOui ? 'checked' : ''}> ✗ NON`;
+				if (
+					optText === 'OUI' ||
+					(optIdx === 0 && (optText === '' || optText === 'OUI'))
+				) {
+					optLabel.style.color = '#198754';
+				} else if (
+					optText === 'NON' ||
+					(optIdx === 1 && (optText === '' || optText === 'NON'))
+				) {
+					optLabel.style.color = '#dc3545';
+				} else {
+					optLabel.style.color = '#1d2327';
+				}
 
-			const onRadioChange = (e) => {
-				t14Exercices[i].reponses_multiple[propIdx] =
-					e.target.value === '1';
-				updateConfig();
-			};
+				let isChecked = false;
+				if (typeof currentAns === 'boolean') {
+					isChecked =
+						(currentAns && optIdx === 0) ||
+						(!currentAns && optIdx === 1);
+				} else if (typeof currentAns === 'string') {
+					isChecked =
+						currentAns === optText ||
+						(optIdx === 0 && currentAns === '1') ||
+						(optIdx === 1 && currentAns === '0');
+				} else if (typeof currentAns === 'number') {
+					isChecked = currentAns === optIdx;
+				} else if (typeof currentAns === 'undefined' && optIdx === 0) {
+					isChecked = true;
+				}
 
-			labelOui
-				.querySelector('input')
-				.addEventListener('change', onRadioChange);
-			labelNon
-				.querySelector('input')
-				.addEventListener('change', onRadioChange);
+				const radio = document.createElement('input');
+				radio.type = 'radio';
+				radio.name = `roi_t14_prop_ans_${i}_${propIdx}`;
+				radio.value = optText || `option_${optIdx}`;
+				radio.checked = isChecked;
 
-			radiosDiv.appendChild(labelOui);
-			radiosDiv.appendChild(labelNon);
+				radio.addEventListener('change', () => {
+					if (!Array.isArray(t14Exercices[i].reponses_multiple)) {
+						t14Exercices[i].reponses_multiple = [];
+					}
+					if (
+						t14OptionsReponse.length === 2 &&
+						t14OptionsReponse[0] === 'OUI' &&
+						t14OptionsReponse[1] === 'NON'
+					) {
+						t14Exercices[i].reponses_multiple[propIdx] =
+							optIdx === 0;
+					} else {
+						t14Exercices[i].reponses_multiple[propIdx] = optText;
+					}
+					updateConfig();
+				});
+
+				const span = document.createElement('span');
+				span.textContent = optText || `Option ${optIdx + 1}`;
+
+				optLabel.appendChild(radio);
+				optLabel.appendChild(document.createTextNode(' '));
+				optLabel.appendChild(span);
+				radiosDiv.appendChild(optLabel);
+			});
 
 			row.appendChild(label);
 			row.appendChild(radiosDiv);
@@ -362,6 +562,7 @@ export function init() {
 	const btnAddProposition = document.getElementById(
 		'roi_t14_add_proposition_btn'
 	);
+	const btnAddOption = document.getElementById('roi_t14_add_option_btn');
 
 	// Restoration from saved JSON
 	if (textarea.value.trim() !== '') {
@@ -403,6 +604,15 @@ export function init() {
 					modeSetupRadio.checked = true;
 				}
 
+				if (
+					Array.isArray(parsed.options_reponse) &&
+					parsed.options_reponse.length > 0
+				) {
+					t14OptionsReponse = [...parsed.options_reponse];
+				} else {
+					t14OptionsReponse = ['OUI', 'NON'];
+				}
+
 				if (Array.isArray(parsed.propositions)) {
 					t14Propositions = [...parsed.propositions];
 				}
@@ -428,8 +638,12 @@ export function init() {
 						}
 
 						let reponseOuiNon = true;
-						if (typeof raw.reponse_oui_non === 'boolean') {
+						if (typeof raw.reponse_oui_non !== 'undefined') {
 							reponseOuiNon = raw.reponse_oui_non;
+						} else if (
+							typeof raw.reponse_attendue !== 'undefined'
+						) {
+							reponseOuiNon = raw.reponse_attendue;
 						} else if (typeof raw.qcm_bonne_reponse === 'number') {
 							reponseOuiNon = raw.qcm_bonne_reponse === 0;
 						}
@@ -454,8 +668,20 @@ export function init() {
 		}
 	}
 
-	// Dynamic propositions list setup
+	// Dynamic lists setup
+	renderOptionsReponseList();
 	renderPropositionsList();
+	renderSingleReponseContainers();
+
+	if (btnAddOption) {
+		btnAddOption.addEventListener('click', () => {
+			t14OptionsReponse.push(`Option ${t14OptionsReponse.length + 1}`);
+			renderOptionsReponseList();
+			renderSingleReponseContainers();
+			renderMultipleReponsesContainers();
+			updateConfig();
+		});
+	}
 
 	if (btnAddProposition) {
 		btnAddProposition.addEventListener('click', () => {
@@ -549,25 +775,6 @@ export function init() {
 					renderPreviewBoard(i);
 				}
 			},
-		});
-
-		// QCM Oui/Non listener
-		const ouiNonRadios = document.querySelectorAll(
-			`input[name="roi_t14_reponse_oui_non_${i}"]`
-		);
-		ouiNonRadios.forEach((radio) => {
-			if (t14Exercices[i].reponse_oui_non && radio.value === '1') {
-				radio.checked = true;
-			} else if (
-				!t14Exercices[i].reponse_oui_non &&
-				radio.value === '0'
-			) {
-				radio.checked = true;
-			}
-			radio.addEventListener('change', (e) => {
-				t14Exercices[i].reponse_oui_non = e.target.value === '1';
-				updateConfig();
-			});
 		});
 
 		// Move inputs

@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [1.6.6] - 2026-09-19
+
+*   **Options de Réponses Dynamiques & QCM Unifié pour le Type 14 (Cap ou pas cap ?) (`TypeCapOuPasCap.php`, `type-14.js`, `README.md`) :**
+    *   **Gestionnaire d'options de réponses partagé :** Possibilité de configurer librement la liste des options de réponses possibles pour le QCM Simple (1 question) et le QCM Multiple (N questions) (ex: `['BLANC', 'NOIR', 'ÉGALE']`, `['0', '1', '2', '3']` ou `['OUI', 'NON']` par défaut).
+    *   **Sélecteurs radio dynamiques par diagramme :** Mise à jour en temps réel des boutons radio de sélection de réponse attendue sur chacun des 5 mini-PGN en fonction des options déclarées.
+    *   **Rétrocompatibilité totale :** Préservation intégrale et automatique du comportement pour l'ensemble des exercices existants (formats booléens `true`/`false`, `qcm_bonne_reponse` et chaînes).
+
 *   **Optimisation des Performances REST & Mise en Cache Transients (`Parcours_Controller.php`, `Chapitre_Taxonomy.php`) :**
     *   **Élimination du problème N+1 :** Préchauffage global des métadonnées et états de publication de l'ensemble des éléments de playlist en une seule requête SQL via `_prime_post_caches()`.
     *   **Mise en cache Transients (`roi_parcours_raw_courses`) :** Stockage du catalogue de cours pré-calculé et invalidation automatique lors des hooks `save_post_*`, `deleted_post`, `trash_post` et modifications de la taxonomie `roi_chapitre`.

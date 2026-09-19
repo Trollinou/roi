@@ -74,10 +74,27 @@ class TypeCapOuPasCap implements TypeInterface {
 					</select>
 				</div>
 
+				<!-- Bloc Options de réponses partagées (pour QCM Simple et QCM Multiple) -->
+				<div id="roi_t14_bloc_global_options_reponse" style="border: 1px solid #e2e4e7; background: #fafafa; padding: 12px; border-radius: 4px; display: <?php echo ( 'qcm_multiple' === $variante || 'qcm_oui_non' === $variante ) ? 'block' : 'none'; ?>;">
+					<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+						<label><strong><?php esc_html_e( 'Options de réponse possibles :', 'roi' ); ?></strong></label>
+						<button type="button" id="roi_t14_add_option_btn" class="button button-secondary">
+							<span class="dashicons dashicons-plus-alt2" style="vertical-align: middle;"></span>
+							<?php esc_html_e( 'Ajouter une option', 'roi' ); ?>
+						</button>
+					</div>
+					<p class="description" style="margin-top: 0; margin-bottom: 8px; font-size: 12px; color: #646970;">
+						<?php esc_html_e( "Par défaut : OUI et NON. Vous pouvez modifier les libellés ou ajouter des choix supplémentaires (ex: BLANC, NOIR, ÉGALE ou 0, 1, 2, 3).", 'roi' ); ?>
+					</p>
+					<div id="roi_t14_options_reponse_list" style="display: flex; flex-wrap: wrap; gap: 8px;">
+						<!-- Généré dynamiquement en JS -->
+					</div>
+				</div>
+
 				<!-- Bloc Propositions pour QCM Multiple -->
 				<div id="roi_t14_bloc_global_propositions" style="border: 1px solid #e2e4e7; background: #fafafa; padding: 12px; border-radius: 4px; display: <?php echo 'qcm_multiple' === $variante ? 'block' : 'none'; ?>;">
 					<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-						<label><strong><?php esc_html_e( 'Propositions communes à la série :', 'roi' ); ?></strong></label>
+						<label><strong><?php esc_html_e( 'Propositions / Questions de la série :', 'roi' ); ?></strong></label>
 						<button type="button" id="roi_t14_add_proposition_btn" class="button button-secondary">
 							<span class="dashicons dashicons-plus-alt2" style="vertical-align: middle;"></span>
 							<?php esc_html_e( 'Ajouter une proposition', 'roi' ); ?>
@@ -88,10 +105,10 @@ class TypeCapOuPasCap implements TypeInterface {
 					</div>
 				</div>
 
-				<!-- Bloc Question unique pour QCM Oui/Non -->
+				<!-- Bloc Question unique pour QCM Oui/Non (QCM Simple) -->
 				<div id="roi_t14_bloc_global_question" style="border: 1px solid #e2e4e7; background: #fafafa; padding: 12px; border-radius: 4px; display: <?php echo 'qcm_oui_non' === $variante ? 'block' : 'none'; ?>;">
 					<label for="roi_t14_question"><strong><?php esc_html_e( 'Question commune aux 5 diagrammes :', 'roi' ); ?></strong></label><br>
-					<input type="text" id="roi_t14_question" value="<?php echo esc_attr( $question ); ?>" style="width:100%; height: 30px; margin-top: 5px;" placeholder="<?php esc_attr_e( 'ex: Le roque est-il autorisé dans cette position ?', 'roi' ); ?>">
+					<input type="text" id="roi_t14_question" value="<?php echo esc_attr( $question ); ?>" style="width:100%; height: 30px; margin-top: 5px;" placeholder="<?php esc_attr_e( 'ex: Le roque est-il autorisé dans cette position ? ou Qui a l\'avantage ?', 'roi' ); ?>">
 				</div>
 
 				<!-- Bloc Sous-mode pour Clic -->
@@ -178,27 +195,20 @@ class TypeCapOuPasCap implements TypeInterface {
 						<!-- Bloc QCM Multiple (réponses pour les propositions) -->
 						<div class="roi_t14_bloc_qcm_multiple" data-index="<?php echo (int) $i; ?>" style="display: <?php echo 'qcm_multiple' === $variante ? 'block' : 'none'; ?>; border-top: 1px dashed #ccc; padding-top: 12px; margin-top: 10px;">
 							<label style="font-weight: 600; margin-bottom: 8px; display: block;">
-								<?php esc_html_e( 'Réponses attendues pour ce diagramme (OUI / NON) :', 'roi' ); ?>
+								<?php esc_html_e( 'Réponses attendues pour ce diagramme :', 'roi' ); ?>
 							</label>
 							<div class="roi_t14_multiple_reponses_container" data-index="<?php echo (int) $i; ?>" style="display: flex; flex-direction: column; gap: 8px;">
-								<!-- Rempli dynamiquement en JS selon les propositions -->
+								<!-- Rempli dynamiquement en JS selon les propositions et options -->
 							</div>
 						</div>
 
-						<!-- Bloc QCM Oui/Non -->
+						<!-- Bloc QCM Oui/Non (QCM Simple) -->
 						<div class="roi_t14_bloc_qcm_oui_non" data-index="<?php echo (int) $i; ?>" style="display: <?php echo 'qcm_oui_non' === $variante ? 'block' : 'none'; ?>; border-top: 1px dashed #ccc; padding-top: 12px; margin-top: 10px;">
 							<label style="font-weight: 600; margin-bottom: 8px; display: block;">
 								<?php esc_html_e( 'Réponse attendue pour ce diagramme :', 'roi' ); ?>
 							</label>
-							<div style="display: flex; gap: 20px; align-items: center; background: #fff; padding: 10px 14px; border: 1px solid #ccd0d4; border-radius: 4px; width: fit-content;">
-								<label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; color: #198754;">
-									<input type="radio" name="roi_t14_reponse_oui_non_<?php echo (int) $i; ?>" class="roi_t14_reponse_oui_non" data-index="<?php echo (int) $i; ?>" value="1" <?php checked( $reponse_oui_non, true ); ?>>
-									<span>✓ <?php esc_html_e( 'OUI', 'roi' ); ?></span>
-								</label>
-								<label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; color: #dc3545;">
-									<input type="radio" name="roi_t14_reponse_oui_non_<?php echo (int) $i; ?>" class="roi_t14_reponse_oui_non" data-index="<?php echo (int) $i; ?>" value="0" <?php checked( $reponse_oui_non, false ); ?>>
-									<span>✗ <?php esc_html_e( 'NON', 'roi' ); ?></span>
-								</label>
+							<div class="roi_t14_single_reponse_container" data-index="<?php echo (int) $i; ?>" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: #fff; padding: 10px 14px; border: 1px solid #ccd0d4; border-radius: 4px; width: fit-content;">
+								<!-- Rempli dynamiquement en JS selon options_reponse -->
 							</div>
 						</div>
 
