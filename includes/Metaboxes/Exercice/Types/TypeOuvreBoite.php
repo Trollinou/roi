@@ -32,7 +32,8 @@ class TypeOuvreBoite implements TypeInterface {
 			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice (Ouvre'boîte - Série de 6)", 'roi' ); ?></h4>
 			
 			<p class="description" style="margin-bottom: 15px; color: #1d2327; background: #f0f6fc; border-left: 4px solid #72aee6; padding: 10px 12px; border-radius: 2px;">
-				<strong><?php esc_html_e( 'Format :', 'roi' ); ?></strong> <?php esc_html_e( "Série de 6 Mini-PGN. Chaque PGN contient la position de départ (avec flèches éventuelles [%cal]), la branche principale (bonne réponse avec son explication) et les variantes (mauvais choix avec leurs explications). Le moteur PWA déduit automatiquement les choix, les libellés des coups en français et mélange les options.", 'roi' ); ?>
+				<?php // translators: %cal tag description. ?>
+				<strong><?php esc_html_e( 'Format :', 'roi' ); ?></strong> <?php esc_html_e( 'Série de 6 Mini-PGN. Chaque PGN contient la position de départ (avec flèches éventuelles [%cal]), la branche principale (bonne réponse avec son explication) et les variantes (mauvais choix avec leurs explications). Le moteur PWA déduit automatiquement les choix, les libellés des coups en français et mélange les options.', 'roi' ); ?>
 			</p>
 
 			<div style="margin-bottom: 15px;">

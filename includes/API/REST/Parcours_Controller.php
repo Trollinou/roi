@@ -307,10 +307,10 @@ class Parcours_Controller {
 		$cours       = array();
 
 		foreach ( $raw_courses as $item ) {
-			$audience_type  = $item['audience_type'];
-			$target_groups  = $item['target_groups'];
-			$target_members = $item['target_members'];
-			$is_assigned    = ( 'restricted' === $audience_type );
+			$audience_type          = $item['audience_type'];
+			$target_groups          = $item['target_groups'];
+			$target_members         = $item['target_members'];
+			$is_assigned            = ( 'restricted' === $audience_type );
 			$unlocked_by_assignment = false;
 
 			// Audience verification.

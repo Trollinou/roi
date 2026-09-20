@@ -178,8 +178,15 @@ class Columns {
 			if ( is_array( $members ) && ! empty( $members ) ) {
 				$names = array();
 				foreach ( $members as $mid ) {
-					$prenom = (string) ( get_post_meta( (int) $mid, '_dame_first_name', true ) ?: get_post_meta( (int) $mid, '_dame_prenom', true ) );
-					$nom    = (string) ( get_post_meta( (int) $mid, '_dame_last_name', true ) ?: ( get_post_meta( (int) $mid, '_dame_birth_name', true ) ?: get_post_meta( (int) $mid, '_dame_nom', true ) ) );
+					$adh_fn = (string) get_post_meta( (int) $mid, '_dame_first_name', true );
+					$adh_pr = (string) get_post_meta( (int) $mid, '_dame_prenom', true );
+					$prenom = ! empty( $adh_fn ) ? $adh_fn : $adh_pr;
+
+					$adh_ln = (string) get_post_meta( (int) $mid, '_dame_last_name', true );
+					$adh_bn = (string) get_post_meta( (int) $mid, '_dame_birth_name', true );
+					$adh_no = (string) get_post_meta( (int) $mid, '_dame_nom', true );
+					$nom    = ! empty( $adh_ln ) ? $adh_ln : ( ! empty( $adh_bn ) ? $adh_bn : $adh_no );
+
 					$label  = trim( $prenom . ' ' . $nom );
 					if ( empty( $label ) ) {
 						$p     = get_post( (int) $mid );
@@ -195,6 +202,7 @@ class Columns {
 						echo '<span style="display:inline-block; background:#edf7ed; color:#1e4620; border-radius:3px; padding:1px 5px; margin-right:3px; margin-bottom:2px;">👤 ' . esc_html( $n ) . '</span>';
 					}
 				} else {
+					/* translators: %d: Number of students */
 					$summary = sprintf( esc_html__( '%d élèves', 'roi' ), $count );
 					$tooltip = implode( ', ', $names );
 					echo '<span title="' . esc_attr( $tooltip ) . '" style="display:inline-block; background:#edf7ed; color:#1e4620; border-radius:3px; padding:1px 5px; cursor:help; font-weight:600;">👤 ' . esc_html( $summary ) . ' ℹ️</span>';

@@ -218,19 +218,11 @@ class Games_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_games( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$member_id = (int) $request->get_param( 'member_id' );
-		$per_page  = (int) ( $request->get_param( 'per_page' ) ?: 10 );
-		$page      = (int) ( $request->get_param( 'page' ) ?: 1 );
-
-		if ( $per_page < 1 ) {
-			$per_page = 10;
-		}
-		if ( $per_page > 100 ) {
-			$per_page = 100;
-		}
-		if ( $page < 1 ) {
-			$page = 1;
-		}
+		$member_id    = (int) $request->get_param( 'member_id' );
+		$raw_per_page = (int) $request->get_param( 'per_page' );
+		$per_page     = $raw_per_page > 0 ? min( $raw_per_page, 100 ) : 10;
+		$raw_page     = (int) $request->get_param( 'page' );
+		$page         = $raw_page > 0 ? $raw_page : 1;
 
 		$query_args = array(
 			'post_type'      => 'roi_partie',
@@ -260,11 +252,12 @@ class Games_Controller {
 					continue;
 				}
 
-				$game_id = $post->ID;
-				$games[] = array(
+				$game_id   = $post->ID;
+				$game_date = (string) get_post_meta( $game_id, '_roi_game_date', true );
+				$games[]   = array(
 					'id'               => $game_id,
 					'title'            => $post->post_title,
-					'date'             => (string) get_post_meta( $game_id, '_roi_game_date', true ) ?: $post->post_date,
+					'date'             => ! empty( $game_date ) ? $game_date : $post->post_date,
 					'member_id'        => (int) get_post_meta( $game_id, '_roi_member_id', true ),
 					'difficulty_level' => (int) get_post_meta( $game_id, '_roi_difficulty_level', true ),
 					'hints_count'      => (int) get_post_meta( $game_id, '_roi_hints_count', true ),

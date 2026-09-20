@@ -153,7 +153,7 @@ enum Exercice_Type: int {
 		$labels = $this->variantes_labels();
 		$base_label = $labels[ $normalized ] ?? $normalized;
 
-		// Si Cap ou pas cap avec sous-mode, enrichir le label affiché
+		// Si Cap ou pas cap avec sous-mode, enrichir le label affiché.
 		if ( self::CAP_OU_PAS_CAP === $this ) {
 			if ( 'clic' === $normalized ) {
 				$mode = isset( $config['mode_clic'] ) && is_string( $config['mode_clic'] ) ? $config['mode_clic'] : 'cibles';

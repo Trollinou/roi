@@ -36,19 +36,37 @@ class TypeQuiSuisJe implements TypeInterface {
 		$series = isset( $config_data['series'] ) && is_array( $config_data['series'] ) ? $config_data['series'] : array();
 
 		$pieces = array(
-			'R' => array( 'label' => __( 'Roi (R)', 'roi' ), 'symbol' => '♔' ),
-			'D' => array( 'label' => __( 'Dame (D)', 'roi' ), 'symbol' => '♕' ),
-			'T' => array( 'label' => __( 'Tour (T)', 'roi' ), 'symbol' => '♖' ),
-			'F' => array( 'label' => __( 'Fou (F)', 'roi' ), 'symbol' => '♗' ),
-			'C' => array( 'label' => __( 'Cavalier (C)', 'roi' ), 'symbol' => '♘' ),
-			'P' => array( 'label' => __( 'Pion (P)', 'roi' ), 'symbol' => '♙' ),
+			'R' => array(
+				'label'  => __( 'Roi (R)', 'roi' ),
+				'symbol' => '♔',
+			),
+			'D' => array(
+				'label'  => __( 'Dame (D)', 'roi' ),
+				'symbol' => '♕',
+			),
+			'T' => array(
+				'label'  => __( 'Tour (T)', 'roi' ),
+				'symbol' => '♖',
+			),
+			'F' => array(
+				'label'  => __( 'Fou (F)', 'roi' ),
+				'symbol' => '♗',
+			),
+			'C' => array(
+				'label'  => __( 'Cavalier (C)', 'roi' ),
+				'symbol' => '♘',
+			),
+			'P' => array(
+				'label'  => __( 'Pion (P)', 'roi' ),
+				'symbol' => '♙',
+			),
 		);
 		?>
 		<div id="roi_builder_type_12" class="roi-builder-section" style="display:none; margin-top:15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
 			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice (Qui-suis-je ? - Série de 6)", 'roi' ); ?></h4>
 
 			<p class="description" style="margin-bottom: 15px; color: #1d2327; background: #f0f6fc; border-left: 4px solid #72aee6; padding: 10px 12px; border-radius: 2px;">
-				<strong><?php esc_html_e( 'Format :', 'roi' ); ?></strong> <?php esc_html_e( "Série de 6 cartes. Pour chaque carte, saisissez les indices/affirmations (multilignes).", 'roi' ); ?><br>
+				<strong><?php esc_html_e( 'Format :', 'roi' ); ?></strong> <?php esc_html_e( 'Série de 6 cartes. Pour chaque carte, saisissez les indices/affirmations (multilignes).', 'roi' ); ?><br>
 				• <strong><?php esc_html_e( 'Variante Pièces :', 'roi' ); ?></strong> <?php esc_html_e( "L'élève doit déduire la pièce blanche parmi les 6 choix en notation française : R (Roi), D (Dame), T (Tour), F (Fou), C (Cavalier), P (Pion).", 'roi' ); ?><br>
 				• <strong><?php esc_html_e( 'Variante Cases :', 'roi' ); ?></strong> <?php esc_html_e( "L'élève doit cliquer sur la case de l'échiquier. Placez un cercle vert sur la case attendue via l'éditeur de position.", 'roi' ); ?>
 			</p>
@@ -75,11 +93,11 @@ class TypeQuiSuisJe implements TypeInterface {
 			<div id="roi_t12_series_container" style="display: flex; flex-direction: column; gap: 18px;">
 				<?php
 				for ( $i = 0; $i < 6; $i++ ) :
-					$item          = isset( $series[ $i ] ) && is_array( $series[ $i ] ) ? $series[ $i ] : array();
-					$item_indices  = isset( $item['indices'] ) && is_string( $item['indices'] ) ? $item['indices'] : '';
-					$raw_piece     = isset( $item['piece'] ) && is_string( $item['piece'] ) ? $item['piece'] : ( isset( $item['piece_attendue'] ) && is_string( $item['piece_attendue'] ) ? $item['piece_attendue'] : 'R' );
-					
-					// Normalisation en notation française
+					$item         = isset( $series[ $i ] ) && is_array( $series[ $i ] ) ? $series[ $i ] : array();
+					$item_indices = isset( $item['indices'] ) && is_string( $item['indices'] ) ? $item['indices'] : '';
+					$raw_piece    = isset( $item['piece'] ) && is_string( $item['piece'] ) ? $item['piece'] : ( isset( $item['piece_attendue'] ) && is_string( $item['piece_attendue'] ) ? $item['piece_attendue'] : 'R' );
+
+					// Normalisation en notation française.
 					$item_piece = strtoupper( trim( $raw_piece ) );
 					if ( str_starts_with( $item_piece, 'W' ) && strlen( $item_piece ) === 2 ) {
 						$item_piece = substr( $item_piece, 1 );
@@ -134,9 +152,9 @@ class TypeQuiSuisJe implements TypeInterface {
 								array(
 									'id'              => 'roi_t12_fen_' . $i,
 									'value'           => $item_fen,
-									'shapes'          => $item_shapes,
-									'show_orientation'=> false,
-									'button_id'       => 'btn_open_fen_editor_t12_' . $i,
+									'shapes'           => $item_shapes,
+									'show_orientation' => false,
+									'button_id'        => 'btn_open_fen_editor_t12_' . $i,
 									'input_class'     => 'roi_t12_fen',
 									'button_class'    => 'button btn_open_fen_editor_t12',
 									'label'           => __( 'Position & Case attendue (FEN + Cercle Vert) :', 'roi' ),

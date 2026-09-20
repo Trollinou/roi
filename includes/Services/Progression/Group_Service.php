@@ -53,10 +53,13 @@ class Group_Service {
 		);
 		$restricted_courses = array();
 		foreach ( $restricted_courses_query as $c_post ) {
-			$raw_groups  = get_post_meta( $c_post->ID, '_roi_cours_target_groups', true );
-			$c_groups    = ( is_string( $raw_groups ) && '' !== $raw_groups ) ? ( json_decode( $raw_groups, true ) ?: array() ) : array();
-			$raw_members = get_post_meta( $c_post->ID, '_roi_cours_target_members', true );
-			$c_members   = ( is_string( $raw_members ) && '' !== $raw_members ) ? ( json_decode( $raw_members, true ) ?: array() ) : array();
+			$raw_groups     = get_post_meta( $c_post->ID, '_roi_cours_target_groups', true );
+			$decoded_groups = ( is_string( $raw_groups ) && '' !== $raw_groups ) ? json_decode( $raw_groups, true ) : null;
+			$c_groups       = is_array( $decoded_groups ) ? $decoded_groups : array();
+
+			$raw_members     = get_post_meta( $c_post->ID, '_roi_cours_target_members', true );
+			$decoded_members = ( is_string( $raw_members ) && '' !== $raw_members ) ? json_decode( $raw_members, true ) : null;
+			$c_members       = is_array( $decoded_members ) ? $decoded_members : array();
 
 			$restricted_courses[] = array(
 				'id'      => (int) $c_post->ID,
@@ -145,9 +148,15 @@ class Group_Service {
 						$identity_type = 'member';
 						$adherent_id   = (int) str_replace( 'member_', '', $identity );
 						$display_id    = $adherent_id;
-						$adh_post      = get_post( $adherent_id );
-						$adh_prenom    = get_post_meta( $adherent_id, '_dame_first_name', true ) ?: get_post_meta( $adherent_id, '_dame_prenom', true );
-						$adh_nom       = get_post_meta( $adherent_id, '_dame_last_name', true ) ?: ( get_post_meta( $adherent_id, '_dame_birth_name', true ) ?: get_post_meta( $adherent_id, '_dame_nom', true ) );
+						$adh_post   = get_post( $adherent_id );
+						$adh_fn     = (string) get_post_meta( $adherent_id, '_dame_first_name', true );
+						$adh_pr     = (string) get_post_meta( $adherent_id, '_dame_prenom', true );
+						$adh_prenom = ! empty( $adh_fn ) ? $adh_fn : $adh_pr;
+
+						$adh_ln  = (string) get_post_meta( $adherent_id, '_dame_last_name', true );
+						$adh_bn  = (string) get_post_meta( $adherent_id, '_dame_birth_name', true );
+						$adh_no  = (string) get_post_meta( $adherent_id, '_dame_nom', true );
+						$adh_nom = ! empty( $adh_ln ) ? $adh_ln : ( ! empty( $adh_bn ) ? $adh_bn : $adh_no );
 
 						if ( ! empty( $adh_nom ) || ! empty( $adh_prenom ) ) {
 							$nom          = ! empty( $adh_nom ) ? (string) $adh_nom : '';
@@ -320,8 +329,15 @@ class Group_Service {
 
 			$posts = get_posts( $args );
 			foreach ( $posts as $post ) {
-				$prenom    = (string) ( get_post_meta( $post->ID, '_dame_first_name', true ) ?: get_post_meta( $post->ID, '_dame_prenom', true ) );
-				$nom       = (string) ( get_post_meta( $post->ID, '_dame_last_name', true ) ?: ( get_post_meta( $post->ID, '_dame_birth_name', true ) ?: get_post_meta( $post->ID, '_dame_nom', true ) ) );
+				$adh_fn = (string) get_post_meta( $post->ID, '_dame_first_name', true );
+				$adh_pr = (string) get_post_meta( $post->ID, '_dame_prenom', true );
+				$prenom = ! empty( $adh_fn ) ? $adh_fn : $adh_pr;
+
+				$adh_ln = (string) get_post_meta( $post->ID, '_dame_last_name', true );
+				$adh_bn = (string) get_post_meta( $post->ID, '_dame_birth_name', true );
+				$adh_no = (string) get_post_meta( $post->ID, '_dame_nom', true );
+				$nom    = ! empty( $adh_ln ) ? $adh_ln : ( ! empty( $adh_bn ) ? $adh_bn : $adh_no );
+
 				$email     = (string) get_post_meta( $post->ID, '_dame_email', true );
 				$full_name = trim( $prenom . ' ' . $nom );
 				if ( empty( $full_name ) ) {
@@ -367,9 +383,10 @@ class Group_Service {
 
 		$user = null;
 
-		$linked_user_id = (int) ( get_post_meta( $adherent_id, '_dame_wp_user_id', true )
-			?: get_post_meta( $adherent_id, '_dame_linked_wp_user', true )
-			?: get_post_meta( $adherent_id, '_dame_user_id', true ) );
+		$meta_wp_user     = (int) get_post_meta( $adherent_id, '_dame_wp_user_id', true );
+		$meta_linked_user = (int) get_post_meta( $adherent_id, '_dame_linked_wp_user', true );
+		$meta_user        = (int) get_post_meta( $adherent_id, '_dame_user_id', true );
+		$linked_user_id   = $meta_wp_user > 0 ? $meta_wp_user : ( $meta_linked_user > 0 ? $meta_linked_user : $meta_user );
 
 		if ( $linked_user_id > 0 ) {
 			$found = get_user_by( 'ID', $linked_user_id );
@@ -416,8 +433,14 @@ class Group_Service {
 		}
 
 		if ( ! $user ) {
-			$adh_fname       = (string) ( get_post_meta( $adherent_id, '_dame_first_name', true ) ?: get_post_meta( $adherent_id, '_dame_prenom', true ) );
-			$adh_lname       = (string) ( get_post_meta( $adherent_id, '_dame_last_name', true ) ?: get_post_meta( $adherent_id, '_dame_nom', true ) );
+			$meta_fn   = (string) get_post_meta( $adherent_id, '_dame_first_name', true );
+			$meta_pr   = (string) get_post_meta( $adherent_id, '_dame_prenom', true );
+			$adh_fname = ! empty( $meta_fn ) ? $meta_fn : $meta_pr;
+
+			$meta_ln   = (string) get_post_meta( $adherent_id, '_dame_last_name', true );
+			$meta_no   = (string) get_post_meta( $adherent_id, '_dame_nom', true );
+			$adh_lname = ! empty( $meta_ln ) ? $meta_ln : $meta_no;
+
 			$login           = sanitize_user( 'eleve_' . $adherent_id, true );
 			$email_candidate = ! empty( $rep1_email ) ? $rep1_email : ( ! empty( $adh_email ) ? $adh_email : '' );
 			$email           = ( ! empty( $email_candidate ) && ! email_exists( $email_candidate ) ) ? $email_candidate : 'eleve_' . $adherent_id . '@club.local';
@@ -463,8 +486,15 @@ class Group_Service {
 			);
 		}
 
-		$prenom       = (string) ( get_post_meta( $adherent_id, '_dame_first_name', true ) ?: get_post_meta( $adherent_id, '_dame_prenom', true ) );
-		$nom          = (string) ( get_post_meta( $adherent_id, '_dame_last_name', true ) ?: ( get_post_meta( $adherent_id, '_dame_birth_name', true ) ?: get_post_meta( $adherent_id, '_dame_nom', true ) ) );
+		$meta_fn = (string) get_post_meta( $adherent_id, '_dame_first_name', true );
+		$meta_pr = (string) get_post_meta( $adherent_id, '_dame_prenom', true );
+		$prenom  = ! empty( $meta_fn ) ? $meta_fn : $meta_pr;
+
+		$meta_ln = (string) get_post_meta( $adherent_id, '_dame_last_name', true );
+		$meta_bn = (string) get_post_meta( $adherent_id, '_dame_birth_name', true );
+		$meta_no = (string) get_post_meta( $adherent_id, '_dame_nom', true );
+		$nom     = ! empty( $meta_ln ) ? $meta_ln : ( ! empty( $meta_bn ) ? $meta_bn : $meta_no );
+
 		$display_name = trim( $prenom . ' ' . $nom );
 		if ( empty( $display_name ) ) {
 			$display_name = (string) $post->post_title;

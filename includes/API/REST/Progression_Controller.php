@@ -534,7 +534,8 @@ class Progression_Controller {
 	public function assigner_cours_eleve( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$adherent_id = (int) $request->get_param( 'adherent_id' );
 		$cours_id    = (int) $request->get_param( 'cours_id' );
-		$action      = sanitize_key( (string) ( $request->get_param( 'action' ) ?: 'assign' ) );
+		$raw_action  = (string) $request->get_param( 'action' );
+		$action      = sanitize_key( ! empty( $raw_action ) ? $raw_action : 'assign' );
 
 		if ( $adherent_id <= 0 || $cours_id <= 0 ) {
 			return new WP_Error(

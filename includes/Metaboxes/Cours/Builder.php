@@ -159,7 +159,14 @@ class Builder {
 			)
 		);
 
-		if ( empty( $playlist ) ) {
+		if ( is_array( $playlist ) ) {
+			$playlist = (string) wp_json_encode( $playlist );
+		} elseif ( is_string( $playlist ) && '' !== trim( $playlist ) ) {
+			$unserialized = maybe_unserialize( $playlist );
+			if ( is_array( $unserialized ) ) {
+				$playlist = (string) wp_json_encode( $unserialized );
+			}
+		} else {
 			$playlist = '[]';
 		}
 		?>

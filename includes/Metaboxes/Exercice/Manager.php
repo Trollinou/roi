@@ -70,17 +70,38 @@ class Manager {
 	public function afficher_metabox( $post ): void {
 		wp_nonce_field( 'roi_sauvegarder_exercice', 'roi_exercice_nonce' );
 
-		$type   = get_post_meta( $post->ID, '_roi_exercice_type', true );
-		$niveau = get_post_meta( $post->ID, '_roi_exercice_niveau', true );
-		$config = get_post_meta( $post->ID, '_roi_exercice_config', true );
-
-		if ( empty( $config ) ) {
-			$config = '{"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "color": "white", "solution": []}';
+		$type        = get_post_meta( $post->ID, '_roi_exercice_type', true );
+		$niveau      = get_post_meta( $post->ID, '_roi_exercice_niveau', true );
+		$config      = get_post_meta( $post->ID, '_roi_exercice_config', true );
+		$config_data = array();
+		if ( is_array( $config ) ) {
+			$config_data = $config;
+			$config      = (string) wp_json_encode( $config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
+		} elseif ( is_string( $config ) && '' !== trim( $config ) ) {
+			$unserialized = maybe_unserialize( $config );
+			if ( is_array( $unserialized ) ) {
+				$config_data = $unserialized;
+				$config      = (string) wp_json_encode( $unserialized, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
+			} else {
+				$decoded = json_decode( $config, true );
+				if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
+					$config_data = $decoded;
+				} else {
+					$decoded_unslashed = json_decode( wp_unslash( $config ), true );
+					if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded_unslashed ) ) {
+						$config_data = $decoded_unslashed;
+						$config      = wp_unslash( $config );
+					}
+				}
+			}
 		}
 
-		$config_data = json_decode( $config, true );
-		if ( ! is_array( $config_data ) ) {
-			$config_data = array();
+		if ( empty( $config_data ) ) {
+			$config      = '{"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "color": "white", "solution": []}';
+			$config_data = json_decode( $config, true );
+			if ( ! is_array( $config_data ) ) {
+				$config_data = array();
+			}
 		}
 		?>
 		<p>

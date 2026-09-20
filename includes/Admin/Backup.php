@@ -124,7 +124,7 @@ class Backup {
 					'meta_data'        => $meta_data,
 				);
 
-				$export_data['terms'][]                           = $term_entry;
+				$export_data['terms'][]                       = $term_entry;
 				$export_data['taxonomy_terms'][ $taxonomy ][] = $term_entry;
 			}
 		}
@@ -142,7 +142,7 @@ class Backup {
 			update_meta_cache( 'post', wp_list_pluck( $posts, 'ID' ) );
 
 			foreach ( $posts as $p ) {
-				$meta = array();
+				$meta          = array();
 				$post_meta_raw = get_post_meta( (int) $p->ID );
 				if ( is_array( $post_meta_raw ) ) {
 					foreach ( $post_meta_raw as $k => $vals ) {
@@ -281,7 +281,7 @@ class Backup {
 		$import_data = json_decode( (string) $json_data, true );
 
 		if ( json_last_error() !== JSON_ERROR_NONE || ! is_array( $import_data ) || ( empty( $import_data['posts'] ) && empty( $import_data['terms'] ) && empty( $import_data['taxonomy_terms'] ) ) ) {
-			$this->add_admin_notice( __( "Le fichier téléversé ne contient pas de données de sauvegarde valides.", 'roi' ), 'error' );
+			$this->add_admin_notice( __( 'Le fichier téléversé ne contient pas de données de sauvegarde valides.', 'roi' ), 'error' );
 			wp_safe_redirect( add_query_arg( 'page', 'roi-backup-restore', admin_url( 'admin.php' ) ) );
 			exit;
 		}
@@ -469,25 +469,65 @@ class Backup {
 					}
 				}
 
-				// Clean and restore postmeta.
+				// Clean and restore postmeta directly to preserve exact JSON strings and avoid unslashing artifacts.
 				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 				$wpdb->delete( $wpdb->postmeta, array( 'post_id' => $pid ) );
 
+				$raw_meta_pairs = array();
 				if ( ! empty( $p['meta_data'] ) && is_array( $p['meta_data'] ) ) {
 					foreach ( $p['meta_data'] as $k => $vals ) {
 						if ( is_array( $vals ) ) {
 							foreach ( $vals as $v ) {
-								add_post_meta( $pid, (string) $k, $v, false );
+								$raw_meta_pairs[] = array(
+									'key'   => (string) $k,
+									'value' => $v,
+								);
 							}
 						} else {
-							add_post_meta( $pid, (string) $k, $vals, false );
+							$raw_meta_pairs[] = array(
+								'key'   => (string) $k,
+								'value' => $vals,
+							);
 						}
 					}
 				} elseif ( ! empty( $p['meta_input'] ) && is_array( $p['meta_input'] ) ) {
 					// Legacy fallback.
 					foreach ( $p['meta_input'] as $k => $v ) {
-						update_post_meta( $pid, (string) $k, $v );
+						$raw_meta_pairs[] = array(
+							'key'   => (string) $k,
+							'value' => $v,
+						);
 					}
+				}
+
+				foreach ( $raw_meta_pairs as $meta_pair ) {
+					$meta_k = $meta_pair['key'];
+					$meta_v = $meta_pair['value'];
+
+					// Specific handling for JSON fields: ensure valid JSON string and prevent PHP serialization.
+					if ( in_array( $meta_k, array( '_roi_exercice_config', '_roi_cours_playlist' ), true ) ) {
+						if ( is_array( $meta_v ) || is_object( $meta_v ) ) {
+							$meta_v = wp_json_encode( $meta_v, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+						} elseif ( is_string( $meta_v ) ) {
+							$unserialized = maybe_unserialize( $meta_v );
+							if ( is_array( $unserialized ) || is_object( $unserialized ) ) {
+								$meta_v = wp_json_encode( $unserialized, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+							}
+						}
+						$db_value = is_string( $meta_v ) ? $meta_v : (string) wp_json_encode( $meta_v );
+					} else {
+						$db_value = ( is_array( $meta_v ) || is_object( $meta_v ) ) ? maybe_serialize( $meta_v ) : (string) $meta_v;
+					}
+
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+					$wpdb->insert(
+						$wpdb->postmeta,
+						array(
+							'post_id'    => $pid,
+							'meta_key'   => $meta_k,
+							'meta_value' => $db_value,
+						)
+					);
 				}
 
 				// Restore taxonomy relationships.
@@ -555,7 +595,7 @@ class Backup {
 					$already_exists = false;
 					if ( is_array( $existing ) ) {
 						foreach ( $existing as $ex ) {
-							if ( $ex == $prog['meta_value'] ) {
+							if ( $ex === $prog['meta_value'] ) {
 								$already_exists = true;
 								break;
 							}

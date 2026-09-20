@@ -37,7 +37,7 @@ class Ajax_Handler {
 		$search          = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : '';
 		$chapitre        = isset( $_GET['chapter'] ) ? (int) $_GET['chapter'] : 0;
 		$niveau          = isset( $_GET['level'] ) ? (int) $_GET['level'] : 0;
-		$unassigned_only = isset( $_GET['unassigned'] ) && '1' === (string) $_GET['unassigned'];
+		$unassigned_only = isset( $_GET['unassigned'] ) && '1' === sanitize_text_field( wp_unslash( $_GET['unassigned'] ) );
 		$course_id       = isset( $_GET['course_id'] ) ? (int) $_GET['course_id'] : 0;
 
 		$args = array(
