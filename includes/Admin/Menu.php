@@ -21,7 +21,7 @@ class Menu {
 	 * @return void
 	 */
 	public function init(): void {
-		add_action( 'admin_menu', array( $this, 'add_apprentissage_menu' ) );
+		add_action( 'admin_menu', array( $this, 'add_apprentissage_menu' ), 5 );
 		add_action( 'admin_menu', array( $this, 'reorder_apprentissage_submenus' ), 999 );
 		add_filter( 'parent_file', array( $this, 'apprentissage_menu_highlight' ) );
 		add_action( 'admin_notices', array( $this, 'display_admin_notices' ) );

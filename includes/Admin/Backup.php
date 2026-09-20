@@ -23,7 +23,7 @@ class Backup {
 	 * @return void
 	 */
 	public function init(): void {
-		add_action( 'admin_menu', array( $this, 'add_backup_restore_page' ) );
+		add_action( 'admin_menu', array( $this, 'add_backup_restore_page' ), 20 );
 		add_action( 'admin_init', array( $this, 'handle_backup_action' ) );
 		add_action( 'admin_init', array( $this, 'handle_restore_action' ) );
 		add_filter( 'dame_scheduled_backup_attachments', array( $this, 'add_to_dame_scheduled_backup' ), 10, 2 );
@@ -254,7 +254,8 @@ class Backup {
 
 		if ( ! isset( $_FILES['roi_restore_file'] ) || ! is_array( $_FILES['roi_restore_file'] ) || ! isset( $_FILES['roi_restore_file']['error'] ) || UPLOAD_ERR_OK !== $_FILES['roi_restore_file']['error'] ) {
 			$this->add_admin_notice( __( 'Erreur lors du téléversement du fichier.', 'roi' ), 'error' );
-			return;
+			wp_safe_redirect( add_query_arg( 'page', 'roi-backup-restore', admin_url( 'admin.php' ) ) );
+			exit;
 		}
 
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -265,27 +266,31 @@ class Backup {
 
 		if ( 'gz' !== $file_ext || 'json' !== $file_ext_double ) {
 			$this->add_admin_notice( __( "Le fichier téléversé n'est pas une sauvegarde valide (format .json.gz attendu).", 'roi' ), 'error' );
-			return;
+			wp_safe_redirect( add_query_arg( 'page', 'roi-backup-restore', admin_url( 'admin.php' ) ) );
+			exit;
 		}
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$compressed_data = file_get_contents( $file['tmp_name'] );
 		if ( false === $compressed_data ) {
 			$this->add_admin_notice( __( 'Erreur lors de la lecture du fichier temporaire.', 'roi' ), 'error' );
-			return;
+			wp_safe_redirect( add_query_arg( 'page', 'roi-backup-restore', admin_url( 'admin.php' ) ) );
+			exit;
 		}
 
 		$json_data = gzuncompress( $compressed_data );
 		if ( false === $json_data ) {
 			$this->add_admin_notice( __( 'Erreur lors de la décompression du fichier.', 'roi' ), 'error' );
-			return;
+			wp_safe_redirect( add_query_arg( 'page', 'roi-backup-restore', admin_url( 'admin.php' ) ) );
+			exit;
 		}
 
 		$import_data = json_decode( $json_data, true );
 
 		if ( json_last_error() !== JSON_ERROR_NONE || ! is_array( $import_data ) ) {
 			$this->add_admin_notice( __( 'Erreur lors de la lecture des données JSON.', 'roi' ), 'error' );
-			return;
+			wp_safe_redirect( add_query_arg( 'page', 'roi-backup-restore', admin_url( 'admin.php' ) ) );
+			exit;
 		}
 
 		global $wpdb;
@@ -571,6 +576,8 @@ class Backup {
 		}
 
 		$this->add_admin_notice( __( "La restauration des données d'apprentissage a été effectuée avec succès (conservation stricte des identifiants ISO).", 'roi' ) );
+		wp_safe_redirect( add_query_arg( 'page', 'roi-backup-restore', admin_url( 'admin.php' ) ) );
+		exit;
 	}
 
 	/**
@@ -581,15 +588,15 @@ class Backup {
 	 * @return void
 	 */
 	private function add_admin_notice( string $message, string $type = 'success' ): void {
-		$transient_name = 'roi_admin_notice_' . md5( $message );
-		set_transient(
-			$transient_name,
-			array(
-				'message' => $message,
-				'type'    => $type,
-			),
-			5
+		$notices = get_transient( 'roi_admin_notices' );
+		if ( ! is_array( $notices ) ) {
+			$notices = array();
+		}
+		$notices[] = array(
+			'message' => $message,
+			'type'    => $type,
 		);
+		set_transient( 'roi_admin_notices', $notices, 30 );
 	}
 
 	/**

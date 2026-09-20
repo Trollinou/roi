@@ -64,7 +64,9 @@ class Plugin {
 		new \ROI\Metaboxes\Lecon\Settings();
 		new \ROI\Metaboxes\Video\Settings();
 		( new \ROI\Metaboxes\Partie() )->init();
-		( new \ROI\Admin\Backup() )->init();
+
+		// Always register DAME backup hook (for WP-Cron & background tasks).
+		add_filter( 'dame_scheduled_backup_attachments', array( new \ROI\Admin\Backup(), 'add_to_dame_scheduled_backup' ), 10, 2 );
 
 		// Admin pages & assets UI.
 		if ( is_admin() ) {
@@ -73,6 +75,7 @@ class Plugin {
 			$admin_assets = new \ROI\Admin\Assets();
 			$admin_assets->init();
 			( new \ROI\Admin\Suivi_Page() )->init();
+			( new \ROI\Admin\Backup() )->init();
 			( new \ROI\Admin\Columns() )->init();
 			( new \ROI\Admin\Settings\Main() )->init();
 		}
