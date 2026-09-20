@@ -221,7 +221,7 @@ class Backup {
 
 		$export_data = $this->get_apprentissage_export_data();
 
-		$filename         = 'roi-apprentissage-backup-' . gmdate( 'Y-m-d' ) . '.json.gz';
+		$filename         = 'roi-apprentissage-backup-' . wp_date( 'Y-m-d' ) . '.json.gz';
 		$data_to_compress = wp_json_encode( $export_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
 		$compressed_data  = gzcompress( (string) $data_to_compress );
 
