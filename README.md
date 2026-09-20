@@ -60,7 +60,7 @@ Ce plugin nécessite que le plugin **DAME** soit installé et activé. Le plugin
 
 ### Administration
 
-*   **Sauvegarde et Restauration du Contenu :** Une page d'administration dédiée pour exporter tout le contenu pédagogique (leçons, exercices, cours, catégories) dans un fichier `.json.gz` et le restaurer, prévenant ainsi la perte de données.
+*   **Sauvegarde et Restauration ISO du Contenu :** Une page d'administration dédiée pour exporter l'ensemble des données d'apprentissage (leçons, exercices, cours, vidéos, parties, chapitres, configurations et progressions) dans un fichier `.json.gz` et le restaurer en conservant strictement les identifiants d'origine (duplication ISO parfaite entre production et qualification). Intégration automatique au batch quotidien de sauvegarde par email de DAME.
 *   **Composants de Saisie Unifiés (`FenInput` & `PgnInput`) :**
     *   **Smart Paste PGN sur `FenInput` :** Possibilité de coller directement un export PGN complet Lichess dans n'importe quel champ FEN sans ouvrir l'éditeur modal. Extraction automatique de la FEN, de l'orientation et des formes graphiques (`[%cal]` / `[%csl]`) avec feedback visuel immédiat.
     *   **Gestionnaire de Séquences `PgnInput` & Prévisualisation Instantanée :** Zone de saisie rapide PGN avec validation de syntaxe en direct (`checkPgnStatus`), support des annotations et ouverture de la modale d'édition `RoiPgnEditor`. Affichage et synchronisation SVG instantanés des flèches et cercles dès le collage direct dans les prévisualisations interactives (Type 14, Type 3, Type 4, Type 7).

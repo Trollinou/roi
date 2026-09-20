@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+*   **Sauvegarde et Restauration ISO Complète (`Backup.php`, `CHANGELOG.md`) :**
+    *   **Préservation Stricte des Identifiants (IDs) :** Réinjection directe dans `$wpdb->posts`, `$wpdb->terms` et `$wpdb->term_taxonomy` avec réalignement automatique des `AUTO_INCREMENT`, garantissant une synchronisation ISO parfaite entre la production et la qualification sans corruption des références d'IDs dans les playlists de cours (`_roi_cours_playlist`) ni des progressions d'élèves.
+    *   **Couverture Intégrale des Données :** Prise en compte de tous les CPTs (`roi_lecon`, `roi_exercice`, `roi_cours`, `roi_video`, `roi_partie`), de la taxonomie `roi_chapitre` avec ses métadonnées de couleurs (`_roi_chapitre_couleur`), des réglages du plugin (`roi_apprentissage_allowed_roles`), et des progressions utilisateurs (`_roi_element_valide*`).
+    *   **Rétrocompatibilité :** Prise en charge transparente des sauvegardes historiques au format JSON standard.
+
 *   **Refonte du Constructeur Type 5 (Posi'Plan) vers Étude PGN Complète (`TypePosiPlan.php`, `type-5.js`, `README.md`, `USING.md`) :**
     *   **Saisie PGN unifiée (`PgnInput`) :** Remplacement des étapes manuelles par la saisie d'une étude PGN complète intégrant le choix initial à 3 branches (1 branche principale + 2 variantes explorables) et les embranchements de la ligne principale.
     *   **Aperçu interactif temps réel :** Intégration de l'échiquier d'aperçu dynamique (`createPgnPreviewViewer`) avec navigation et affichage des commentaires.

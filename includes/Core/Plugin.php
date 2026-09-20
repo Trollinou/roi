@@ -64,6 +64,7 @@ class Plugin {
 		new \ROI\Metaboxes\Lecon\Settings();
 		new \ROI\Metaboxes\Video\Settings();
 		( new \ROI\Metaboxes\Partie() )->init();
+		( new \ROI\Admin\Backup() )->init();
 
 		// Admin pages & assets UI.
 		if ( is_admin() ) {
@@ -72,8 +73,6 @@ class Plugin {
 			$admin_assets = new \ROI\Admin\Assets();
 			$admin_assets->init();
 			( new \ROI\Admin\Suivi_Page() )->init();
-			$backup = new \ROI\Admin\Backup();
-			$backup->init();
 			( new \ROI\Admin\Columns() )->init();
 			( new \ROI\Admin\Settings\Main() )->init();
 		}

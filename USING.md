@@ -81,7 +81,13 @@ Ce plugin ajoute les capacités suivantes au rôle "Entraineur":
 
 ## Sauvegarde et Restauration
 
-La sauvegarde et la restauration de la base de données d'apprentissage sont gérées par le plugin DAME.
+Le module ROI propose un système complet de sauvegarde et de restauration garantissant l'intégrité et la duplication ISO (préservation stricte des identifiants d'origine) :
+
+1. **Sauvegarde et Restauration Manuelle (`Apprentissage > Sauvegarde / Restauration`) :**
+   * **Exportation (`.json.gz`) :** Génération d'une archive compressée contenant l'ensemble des contenus (leçons, exercices, cours, vidéos, parties d'échecs), de la taxonomie des chapitres avec leurs couleurs, des réglages du plugin (`roi_apprentissage_allowed_roles`) et des données de progression des élèves (`_roi_element_valide*`).
+   * **Restauration ISO :** Réinjection directe dans la base de données avec conservation stricte des identifiants (`ID`, `term_id`, `term_taxonomy_id`) et réalignement de l'`AUTO_INCREMENT`, évitant toute rupture de références dans les cours (`_roi_cours_playlist`) ou les progressions.
+2. **Sauvegarde Automatique Quotidienne (Batch DAME) :**
+   * Lors du déclenchement du cron de sauvegarde quotidien par le module DAME (`dame_daily_backup_event`), l'archive `roi-apprentissage-backup-YYYY-MM-DD.json.gz` est automatiquement générée et jointe à l'email récapitulatif avec les sauvegardes DAME.
 
 ## Suivi des parties d'échecs (PWA)
 
