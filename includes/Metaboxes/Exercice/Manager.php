@@ -84,13 +84,30 @@ class Manager {
 				$config      = (string) wp_json_encode( $unserialized, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
 			} else {
 				$decoded = json_decode( $config, true );
-				if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
+				while ( is_string( $decoded ) ) {
+					$sub = json_decode( $decoded, true );
+					if ( json_last_error() === JSON_ERROR_NONE ) {
+						$decoded = $sub;
+					} else {
+						break;
+					}
+				}
+				if ( is_array( $decoded ) ) {
 					$config_data = $decoded;
+					$config      = (string) wp_json_encode( $decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
 				} else {
 					$decoded_unslashed = json_decode( wp_unslash( $config ), true );
-					if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded_unslashed ) ) {
+					while ( is_string( $decoded_unslashed ) ) {
+						$sub = json_decode( $decoded_unslashed, true );
+						if ( json_last_error() === JSON_ERROR_NONE ) {
+							$decoded_unslashed = $sub;
+						} else {
+							break;
+						}
+					}
+					if ( is_array( $decoded_unslashed ) ) {
 						$config_data = $decoded_unslashed;
-						$config      = wp_unslash( $config );
+						$config      = (string) wp_json_encode( $decoded_unslashed, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
 					}
 				}
 			}

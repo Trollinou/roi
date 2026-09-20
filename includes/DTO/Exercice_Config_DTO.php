@@ -61,10 +61,38 @@ readonly class Exercice_Config_DTO {
 		$niveau = Exercice_Niveau::from( $niveau_meta > 0 ? $niveau_meta : 1 );
 
 		$config = null;
-		if ( is_string( $config_meta ) && '' !== $config_meta ) {
-			$decoded = json_decode( $config_meta, true );
-			if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
-				$config = $decoded;
+		if ( is_array( $config_meta ) ) {
+			$config = $config_meta;
+		} elseif ( is_string( $config_meta ) && '' !== trim( $config_meta ) ) {
+			$unserialized = maybe_unserialize( $config_meta );
+			if ( is_array( $unserialized ) ) {
+				$config = $unserialized;
+			} else {
+				$decoded = json_decode( $config_meta, true );
+				while ( is_string( $decoded ) ) {
+					$sub = json_decode( $decoded, true );
+					if ( json_last_error() === JSON_ERROR_NONE ) {
+						$decoded = $sub;
+					} else {
+						break;
+					}
+				}
+				if ( is_array( $decoded ) ) {
+					$config = $decoded;
+				} else {
+					$decoded_unslashed = json_decode( wp_unslash( $config_meta ), true );
+					while ( is_string( $decoded_unslashed ) ) {
+						$sub = json_decode( $decoded_unslashed, true );
+						if ( json_last_error() === JSON_ERROR_NONE ) {
+							$decoded_unslashed = $sub;
+						} else {
+							break;
+						}
+					}
+					if ( is_array( $decoded_unslashed ) ) {
+						$config = $decoded_unslashed;
+					}
+				}
 			}
 		}
 
