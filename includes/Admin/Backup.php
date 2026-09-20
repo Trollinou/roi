@@ -259,36 +259,29 @@ class Backup {
 		}
 
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$file            = $_FILES['roi_restore_file'];
-		$filename        = sanitize_file_name( wp_unslash( $file['name'] ?? '' ) );
-		$file_ext        = pathinfo( $filename, PATHINFO_EXTENSION );
-		$file_ext_double = pathinfo( str_replace( '.gz', '', $filename ), PATHINFO_EXTENSION );
-
-		if ( 'gz' !== $file_ext || 'json' !== $file_ext_double ) {
-			$this->add_admin_notice( __( "Le fichier téléversé n'est pas une sauvegarde valide (format .json.gz attendu).", 'roi' ), 'error' );
-			wp_safe_redirect( add_query_arg( 'page', 'roi-backup-restore', admin_url( 'admin.php' ) ) );
-			exit;
-		}
+		$file = $_FILES['roi_restore_file'];
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$compressed_data = file_get_contents( $file['tmp_name'] );
-		if ( false === $compressed_data ) {
+		$raw_content = file_get_contents( (string) $file['tmp_name'] );
+		if ( false === $raw_content || '' === $raw_content ) {
 			$this->add_admin_notice( __( 'Erreur lors de la lecture du fichier temporaire.', 'roi' ), 'error' );
 			wp_safe_redirect( add_query_arg( 'page', 'roi-backup-restore', admin_url( 'admin.php' ) ) );
 			exit;
 		}
 
-		$json_data = gzuncompress( $compressed_data );
+		// Try decompressing with gzuncompress (zlib) or gzdecode (gzip), or fallback to raw content if uncompressed.
+		$json_data = @gzuncompress( $raw_content );
 		if ( false === $json_data ) {
-			$this->add_admin_notice( __( 'Erreur lors de la décompression du fichier.', 'roi' ), 'error' );
-			wp_safe_redirect( add_query_arg( 'page', 'roi-backup-restore', admin_url( 'admin.php' ) ) );
-			exit;
+			$json_data = @gzdecode( $raw_content );
+		}
+		if ( false === $json_data ) {
+			$json_data = $raw_content;
 		}
 
-		$import_data = json_decode( $json_data, true );
+		$import_data = json_decode( (string) $json_data, true );
 
-		if ( json_last_error() !== JSON_ERROR_NONE || ! is_array( $import_data ) ) {
-			$this->add_admin_notice( __( 'Erreur lors de la lecture des données JSON.', 'roi' ), 'error' );
+		if ( json_last_error() !== JSON_ERROR_NONE || ! is_array( $import_data ) || ( empty( $import_data['posts'] ) && empty( $import_data['terms'] ) && empty( $import_data['taxonomy_terms'] ) ) ) {
+			$this->add_admin_notice( __( "Le fichier téléversé ne contient pas de données de sauvegarde valides.", 'roi' ), 'error' );
 			wp_safe_redirect( add_query_arg( 'page', 'roi-backup-restore', admin_url( 'admin.php' ) ) );
 			exit;
 		}
@@ -630,8 +623,8 @@ class Backup {
 					<form method="post" enctype="multipart/form-data" id="roi-restore-form" action="">
 						<?php wp_nonce_field( 'roi_restore_nonce_action', 'roi_restore_nonce' ); ?>
 						<p>
-							<label for="roi_restore_file"><?php esc_html_e( 'Choisissez un fichier de sauvegarde (.json.gz) à importer :', 'roi' ); ?></label>
-							<input type="file" id="roi_restore_file" name="roi_restore_file" accept=".gz" required>
+							<label for="roi_restore_file"><?php esc_html_e( 'Choisissez un fichier de sauvegarde (.json.gz ou .json) à importer :', 'roi' ); ?></label>
+							<input type="file" id="roi_restore_file" name="roi_restore_file" accept=".gz,.json" required>
 						</p>
 						<?php submit_button( __( 'Restaurer la base de données', 'roi' ), 'delete', 'roi_restore_action' ); ?>
 					</form>
