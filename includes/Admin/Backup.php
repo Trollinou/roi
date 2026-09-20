@@ -473,25 +473,97 @@ class Backup {
 					}
 				}
 
-				// Clean and restore postmeta.
+				// Clean and restore postmeta directly to preserve exact JSON strings and avoid unslashing artifacts.
 				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 				$wpdb->delete( $wpdb->postmeta, array( 'post_id' => $pid ) );
 
+				$raw_meta_pairs = array();
 				if ( ! empty( $p['meta_data'] ) && is_array( $p['meta_data'] ) ) {
 					foreach ( $p['meta_data'] as $k => $vals ) {
 						if ( is_array( $vals ) ) {
 							foreach ( $vals as $v ) {
-								add_post_meta( $pid, (string) $k, $v, false );
+								$raw_meta_pairs[] = array(
+									'key'   => (string) $k,
+									'value' => $v,
+								);
 							}
 						} else {
-							add_post_meta( $pid, (string) $k, $vals, false );
+							$raw_meta_pairs[] = array(
+								'key'   => (string) $k,
+								'value' => $vals,
+							);
 						}
 					}
 				} elseif ( ! empty( $p['meta_input'] ) && is_array( $p['meta_input'] ) ) {
 					// Legacy fallback.
 					foreach ( $p['meta_input'] as $k => $v ) {
-						update_post_meta( $pid, (string) $k, $v );
+						$raw_meta_pairs[] = array(
+							'key'   => (string) $k,
+							'value' => $v,
+						);
 					}
+				}
+
+				foreach ( $raw_meta_pairs as $meta_pair ) {
+					$meta_k = $meta_pair['key'];
+					$meta_v = $meta_pair['value'];
+
+					// Specific handling for JSON fields: ensure valid JSON string and prevent PHP serialization.
+					if ( in_array( $meta_k, array( '_roi_exercice_config', '_roi_cours_playlist' ), true ) ) {
+						$parsed_json = null;
+						if ( is_array( $meta_v ) || is_object( $meta_v ) ) {
+							$parsed_json = (array) $meta_v;
+						} elseif ( is_string( $meta_v ) && '' !== trim( $meta_v ) ) {
+							$unserialized = maybe_unserialize( $meta_v );
+							if ( is_array( $unserialized ) || is_object( $unserialized ) ) {
+								$parsed_json = (array) $unserialized;
+							} else {
+								$decoded = json_decode( $meta_v, true );
+								while ( is_string( $decoded ) ) {
+									$sub = json_decode( $decoded, true );
+									if ( json_last_error() === JSON_ERROR_NONE ) {
+										$decoded = $sub;
+									} else {
+										break;
+									}
+								}
+								if ( is_array( $decoded ) ) {
+									$parsed_json = $decoded;
+								} else {
+									$decoded_unslashed = json_decode( wp_unslash( $meta_v ), true );
+									while ( is_string( $decoded_unslashed ) ) {
+										$sub = json_decode( $decoded_unslashed, true );
+										if ( json_last_error() === JSON_ERROR_NONE ) {
+											$decoded_unslashed = $sub;
+										} else {
+											break;
+										}
+									}
+									if ( is_array( $decoded_unslashed ) ) {
+										$parsed_json = $decoded_unslashed;
+									}
+								}
+							}
+						}
+
+						if ( is_array( $parsed_json ) ) {
+							$db_value = (string) wp_json_encode( $parsed_json, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+						} else {
+							$db_value = is_string( $meta_v ) ? $meta_v : (string) wp_json_encode( $meta_v );
+						}
+					} else {
+						$db_value = ( is_array( $meta_v ) || is_object( $meta_v ) ) ? maybe_serialize( $meta_v ) : (string) $meta_v;
+					}
+
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+					$wpdb->insert(
+						$wpdb->postmeta,
+						array(
+							'post_id'    => $pid,
+							'meta_key'   => $meta_k,
+							'meta_value' => $db_value,
+						)
+					);
 				}
 
 				// Restore taxonomy relationships.
@@ -506,21 +578,23 @@ class Backup {
 					}
 				}
 
+				wp_cache_delete( $pid, 'posts' );
+				wp_cache_delete( $pid, 'post_meta' );
 				clean_post_cache( $pid );
 			}
 		}
 
 		// 4. REALIGN AUTO_INCREMENT.
 		if ( $max_post_id > 0 ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Required to align AUTO_INCREMENT after ISO restore.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->query( $wpdb->prepare( "ALTER TABLE {$wpdb->posts} AUTO_INCREMENT = %d", $max_post_id + 1 ) );
 		}
 		if ( $max_term_id > 0 ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Required to align AUTO_INCREMENT after ISO restore.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->query( $wpdb->prepare( "ALTER TABLE {$wpdb->terms} AUTO_INCREMENT = %d", $max_term_id + 1 ) );
 		}
 		if ( $max_tt_id > 0 ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Required to align AUTO_INCREMENT after ISO restore.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->query( $wpdb->prepare( "ALTER TABLE {$wpdb->term_taxonomy} AUTO_INCREMENT = %d", $max_tt_id + 1 ) );
 		}
 
@@ -571,6 +645,8 @@ class Backup {
 				}
 			}
 		}
+
+		wp_cache_flush();
 
 		$this->add_admin_notice( __( "La restauration des données d'apprentissage a été effectuée avec succès (conservation stricte des identifiants ISO).", 'roi' ) );
 		wp_safe_redirect( add_query_arg( 'page', 'roi-backup-restore', admin_url( 'admin.php' ) ) );

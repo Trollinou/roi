@@ -123,15 +123,36 @@ class Contenu_Controller {
 			if ( is_array( $config_meta ) ) {
 				$data['config'] = $config_meta;
 			} elseif ( is_string( $config_meta ) && '' !== trim( $config_meta ) ) {
-				$decoded = json_decode( $config_meta, true );
-				if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
-					$data['config'] = $decoded;
+				$unserialized = maybe_unserialize( $config_meta );
+				if ( is_array( $unserialized ) ) {
+					$data['config'] = $unserialized;
 				} else {
-					$decoded_unslashed = json_decode( wp_unslash( $config_meta ), true );
-					if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded_unslashed ) ) {
-						$data['config'] = $decoded_unslashed;
+					$decoded = json_decode( $config_meta, true );
+					while ( is_string( $decoded ) ) {
+						$sub = json_decode( $decoded, true );
+						if ( json_last_error() === JSON_ERROR_NONE ) {
+							$decoded = $sub;
+						} else {
+							break;
+						}
+					}
+					if ( is_array( $decoded ) ) {
+						$data['config'] = $decoded;
 					} else {
-						$data['config'] = array( 'raw_json' => $config_meta );
+						$decoded_unslashed = json_decode( wp_unslash( $config_meta ), true );
+						while ( is_string( $decoded_unslashed ) ) {
+							$sub = json_decode( $decoded_unslashed, true );
+							if ( json_last_error() === JSON_ERROR_NONE ) {
+								$decoded_unslashed = $sub;
+							} else {
+								break;
+							}
+						}
+						if ( is_array( $decoded_unslashed ) ) {
+							$data['config'] = $decoded_unslashed;
+						} else {
+							$data['config'] = array( 'raw_json' => $config_meta );
+						}
 					}
 				}
 			}

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+*   **Correction et Robustesse de la Restauration des Sauvegardes & Hydratation des Exercices (`Backup.php`, `Manager.php`, `Exercice_Config_DTO.php`, `Builder.php`, `Contenu_Controller.php`) :**
+    *   **Préservation Directe des Métadonnées JSON :** Réinjection brute dans `$wpdb->postmeta` pour les configurations JSON (`_roi_exercice_config`, `_roi_cours_playlist`) afin d'éviter les altérations d'échappement (`wp_unslash`) ou la sérialisation PHP involontaire lors de la restauration.
+    *   **Hydratation Robuste des Métaboxes & REST API :** Gestion universelle des formats (JSON imbriqué, chaîne sérialisée PHP, `wp_unslash`) dans `Manager.php`, `Exercice_Config_DTO.php` et `Contenu_Controller.php`, garantissant le chargement instantané et fiable des composants React `FenInput` et `PgnInput`.
+    *   **Purge et Invalidation du Cache :** Nettoyage automatique des caches de posts (`clean_post_cache`, `wp_cache_delete`, `wp_cache_flush`) lors de la restauration pour un rafraîchissement immédiat de l'interface d'administration.
 *   **Passage aux Prérequis WordPress 7.1 & PHP 8.4 Strict (`roi.php`, `phpcs.xml`, `phpstan.neon`) :**
     *   Rehaussement du prérequis WordPress à la version 7.1 (`Requires at least: 7.1` et `minimum_wp_version: 7.1`).
     *   Déclaration stricte `declare(strict_types=1);` appliquée systématiquement sur 100% des fichiers PHP.
