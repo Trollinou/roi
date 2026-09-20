@@ -51,6 +51,11 @@ Permet d'afficher et de rejouer une partie d'échecs complète :
 
 ## Types d'Exercices (Administration)
 
+### Type 5 — Posi'Plan (Étude PGN avec Embranchements)
+* **Configuration :** Saisie d'une consigne générale et d'une étude PGN complète (ex: export Lichess).
+* **Principe :** Dès la position initiale, l'exercice propose un choix clé parmi 3 options (le bon plan sur la branche principale et 2 variantes explorables). Sur la branche principale, des moments de choix QCM successifs accompagnent l'apprenant jusqu'au plan final.
+* **Édition :** Champ PGN dédié avec bouton d'ouverture de l'éditeur PGN et composant d'aperçu dynamique (`createPgnPreviewViewer`) avec navigation pas-à-pas et affichage des commentaires.
+
 ### Type 9 — Parcours (Série de 3)
 * **Configuration :** Chaque exercice de type 9 permet de renseigner une série de 3 parcours indépendants.
 * **Variantes supportées :**

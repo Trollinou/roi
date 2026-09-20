@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+*   **Refonte du Constructeur Type 5 (Posi'Plan) vers Étude PGN Complète (`TypePosiPlan.php`, `type-5.js`, `README.md`, `USING.md`) :**
+    *   **Saisie PGN unifiée (`PgnInput`) :** Remplacement des étapes manuelles par la saisie d'une étude PGN complète intégrant le choix initial à 3 branches (1 branche principale + 2 variantes explorables) et les embranchements de la ligne principale.
+    *   **Aperçu interactif temps réel :** Intégration de l'échiquier d'aperçu dynamique (`createPgnPreviewViewer`) avec navigation et affichage des commentaires.
+    *   **Rétrocompatibilité :** Conversion automatique des anciens formats JSON basés sur `etapes` lors de l'édition.
+
 *   **Centralisation & Déduplication des Utilitaires de Notation (`chessUtils.js`, `controls.js`, `FenEditor.jsx`, `type-9.js`, `README.md`) :**
     *   **Extraction mutualisée des formes PGN (`extractShapesFromComments`) :** Centralisation du parsing des balises `[%csl ...]`, `[%cal ...]`, `[%cpl ...]` et du nettoyage de texte, éliminant les duplications de regex dans `controls.js` (`extractFenOrientationAndShapes`) et `FenEditor.jsx`.
     *   **Noms des pièces et libellés français (`ROLE_NAMES_FR`, `getPieceLabel`) :** Centralisation du dictionnaire de traduction des pièces en français dans `chessUtils.js` et déduplication dans `type-9.js`.
