@@ -30,7 +30,7 @@ class TypePosiPlan implements TypeInterface {
 			: __( 'Évaluez la position et choisissez le meilleur plan.', 'roi' );
 		$pgn      = isset( $config_data['pgn'] ) && is_string( $config_data['pgn'] ) ? $config_data['pgn'] : '';
 
-		// Rétrocompatibilité : si l'ancien format 'etapes' est présent
+		// Rétrocompatibilité : si l'ancien format 'etapes' est présent.
 		if ( empty( $pgn ) && ! empty( $config_data['etapes'] ) && is_array( $config_data['etapes'] ) ) {
 			$pgn_parts = array();
 			foreach ( $config_data['etapes'] as $etape ) {

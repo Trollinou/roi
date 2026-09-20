@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+*   **Passage aux Prérequis WordPress 7.1 & PHP 8.4 Strict (`roi.php`, `phpcs.xml`, `phpstan.neon`) :**
+    *   Rehaussement du prérequis WordPress à la version 7.1 (`Requires at least: 7.1` et `minimum_wp_version: 7.1`).
+    *   Déclaration stricte `declare(strict_types=1);` appliquée systématiquement sur 100% des fichiers PHP.
+    *   Niveau d'analyse statique PHPStan rehaussé au niveau 7 (`level: 7`) avec zéro erreur.
+    *   Conformité PHPCS totale validée sur l'ensemble du projet sans règles de contournement.
+
+## [1.7.0] - 2026-09-20
+
 *   **Sauvegarde et Restauration ISO Complète (`Backup.php`, `CHANGELOG.md`) :**
     *   **Préservation Stricte des Identifiants (IDs) :** Réinjection directe dans `$wpdb->posts`, `$wpdb->terms` et `$wpdb->term_taxonomy` avec réalignement automatique des `AUTO_INCREMENT`, garantissant une synchronisation ISO parfaite entre la production et la qualification sans corruption des références d'IDs dans les playlists de cours (`_roi_cours_playlist`) ni des progressions d'élèves.
     *   **Couverture Intégrale des Données :** Prise en compte de tous les CPTs (`roi_lecon`, `roi_exercice`, `roi_cours`, `roi_video`, `roi_partie`), de la taxonomie `roi_chapitre` avec ses métadonnées de couleurs (`_roi_chapitre_couleur`), des réglages du plugin (`roi_apprentissage_allowed_roles`), et des progressions utilisateurs (`_roi_element_valide*`).

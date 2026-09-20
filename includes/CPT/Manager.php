@@ -18,7 +18,7 @@ class Manager {
 	/**
 	 * List of CPT classes to initialize.
 	 *
-	 * @var array<class-string>
+	 * @var array<class-string<Lecon|Exercice|Cours|Partie|Video|Chapitre_Taxonomy>>
 	 */
 	private array $cpts = array(
 		Lecon::class,

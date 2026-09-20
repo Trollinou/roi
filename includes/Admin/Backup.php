@@ -124,7 +124,7 @@ class Backup {
 					'meta_data'        => $meta_data,
 				);
 
-				$export_data['terms'][]                           = $term_entry;
+				$export_data['terms'][]                       = $term_entry;
 				$export_data['taxonomy_terms'][ $taxonomy ][] = $term_entry;
 			}
 		}
@@ -142,7 +142,7 @@ class Backup {
 			update_meta_cache( 'post', wp_list_pluck( $posts, 'ID' ) );
 
 			foreach ( $posts as $p ) {
-				$meta = array();
+				$meta          = array();
 				$post_meta_raw = get_post_meta( (int) $p->ID );
 				if ( is_array( $post_meta_raw ) ) {
 					foreach ( $post_meta_raw as $k => $vals ) {
@@ -192,6 +192,7 @@ class Backup {
 
 		if ( is_array( $progress_rows ) ) {
 			foreach ( $progress_rows as $row ) {
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Backup extraction.
 				$export_data['user_progress'][] = array(
 					'user_id'    => (int) $row->user_id,
 					'user_login' => (string) $row->user_login,
@@ -270,8 +271,10 @@ class Backup {
 		}
 
 		// Try decompressing with gzuncompress (zlib) or gzdecode (gzip), or fallback to raw content if uncompressed.
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- gzuncompress/gzdecode fallback detection.
 		$json_data = @gzuncompress( $raw_content );
 		if ( false === $json_data ) {
+			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- gzuncompress/gzdecode fallback detection.
 			$json_data = @gzdecode( $raw_content );
 		}
 		if ( false === $json_data ) {
@@ -281,7 +284,7 @@ class Backup {
 		$import_data = json_decode( (string) $json_data, true );
 
 		if ( json_last_error() !== JSON_ERROR_NONE || ! is_array( $import_data ) || ( empty( $import_data['posts'] ) && empty( $import_data['terms'] ) && empty( $import_data['taxonomy_terms'] ) ) ) {
-			$this->add_admin_notice( __( "Le fichier téléversé ne contient pas de données de sauvegarde valides.", 'roi' ), 'error' );
+			$this->add_admin_notice( __( 'Le fichier téléversé ne contient pas de données de sauvegarde valides.', 'roi' ), 'error' );
 			wp_safe_redirect( add_query_arg( 'page', 'roi-backup-restore', admin_url( 'admin.php' ) ) );
 			exit;
 		}
@@ -295,8 +298,9 @@ class Backup {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$posts_to_delete = $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT ID FROM {$wpdb->posts} WHERE post_type IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$post_types
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+				"SELECT ID FROM {$wpdb->posts} WHERE post_type IN ($placeholders)",
+				...$post_types
 			)
 		);
 		if ( is_array( $posts_to_delete ) ) {
@@ -508,15 +512,15 @@ class Backup {
 
 		// 4. REALIGN AUTO_INCREMENT.
 		if ( $max_post_id > 0 ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Required to align AUTO_INCREMENT after ISO restore.
 			$wpdb->query( $wpdb->prepare( "ALTER TABLE {$wpdb->posts} AUTO_INCREMENT = %d", $max_post_id + 1 ) );
 		}
 		if ( $max_term_id > 0 ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Required to align AUTO_INCREMENT after ISO restore.
 			$wpdb->query( $wpdb->prepare( "ALTER TABLE {$wpdb->terms} AUTO_INCREMENT = %d", $max_term_id + 1 ) );
 		}
 		if ( $max_tt_id > 0 ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Required to align AUTO_INCREMENT after ISO restore.
 			$wpdb->query( $wpdb->prepare( "ALTER TABLE {$wpdb->term_taxonomy} AUTO_INCREMENT = %d", $max_tt_id + 1 ) );
 		}
 
@@ -555,7 +559,7 @@ class Backup {
 					$already_exists = false;
 					if ( is_array( $existing ) ) {
 						foreach ( $existing as $ex ) {
-							if ( $ex == $prog['meta_value'] ) {
+							if ( $ex === $prog['meta_value'] ) {
 								$already_exists = true;
 								break;
 							}

@@ -25,12 +25,12 @@ class TypeCapOuPasCap implements TypeInterface {
 	 * @return void
 	 */
 	public function render( \WP_Post $post, array $config_data ): void {
-		$consigne     = isset( $config_data['consigne'] ) && is_string( $config_data['consigne'] ) ? $config_data['consigne'] : '';
-		$variante     = isset( $config_data['variante'] ) && is_string( $config_data['variante'] )
+		$consigne = isset( $config_data['consigne'] ) && is_string( $config_data['consigne'] ) ? $config_data['consigne'] : '';
+		$variante = isset( $config_data['variante'] ) && is_string( $config_data['variante'] )
 			? $config_data['variante']
 			: ( isset( $config_data['type_reponse'] ) && is_string( $config_data['type_reponse'] ) ? $config_data['type_reponse'] : 'qcm_oui_non' );
 
-		// Rétrocompatibilité variante
+		// Rétrocompatibilité variante.
 		if ( 'qcm' === $variante ) {
 			$variante = 'qcm_oui_non';
 		}
@@ -48,10 +48,11 @@ class TypeCapOuPasCap implements TypeInterface {
 
 			<p class="description" style="margin-bottom: 15px; color: #1d2327; background: #f0f6fc; border-left: 4px solid #72aee6; padding: 10px 12px; border-radius: 2px;">
 				<strong><?php esc_html_e( 'Format :', 'roi' ); ?></strong> <?php esc_html_e( "Série de 5 Mini-PGN (position FEN ou 1 coup avec flèches/cercles). La variante et la consigne s'appliquent pour l'ensemble de la série de 5.", 'roi' ); ?><br>
-				• <strong><?php esc_html_e( 'QCM Multiple :', 'roi' ); ?></strong> <?php esc_html_e( "Définissez les affirmations globales, puis pour chaque diagramme indiquez si chaque affirmation est OUI ou NON.", 'roi' ); ?><br>
-				• <strong><?php esc_html_e( 'QCM Oui/Non :', 'roi' ); ?></strong> <?php esc_html_e( "Définissez une question commune à la série, puis pour chaque diagramme indiquez la réponse attendue (OUI ou NON).", 'roi' ); ?><br>
-				• <strong><?php esc_html_e( 'Move :', 'roi' ); ?></strong> <?php esc_html_e( "Indiquez le ou les coups attendus (supporte les variantes PGN multi-solutions ex: 1. Nd5+ (1. Bh4+)).", 'roi' ); ?><br>
+				• <strong><?php esc_html_e( 'QCM Multiple :', 'roi' ); ?></strong> <?php esc_html_e( 'Définissez les affirmations globales, puis pour chaque diagramme indiquez si chaque affirmation est OUI ou NON.', 'roi' ); ?><br>
+				• <strong><?php esc_html_e( 'QCM Oui/Non :', 'roi' ); ?></strong> <?php esc_html_e( 'Définissez une question commune à la série, puis pour chaque diagramme indiquez la réponse attendue (OUI ou NON).', 'roi' ); ?><br>
+				• <strong><?php esc_html_e( 'Move :', 'roi' ); ?></strong> <?php esc_html_e( 'Indiquez le ou les coups attendus (supporte les variantes PGN multi-solutions ex: 1. Nd5+ (1. Bh4+)).', 'roi' ); ?><br>
 				• <strong><?php esc_html_e( 'Notation :', 'roi' ); ?></strong> <?php esc_html_e( "L'élève doit saisir la position de chaque pièce en notation française (ex: Tc2, Dd4, c3). Déduit de la FEN.", 'roi' ); ?><br>
+				<?php /* translators: %csl is a PGN annotation tag for colored squares */ ?>
 				• <strong><?php esc_html_e( 'Clic / Sélection :', 'roi' ); ?></strong> <?php esc_html_e( "L'élève clique pour entourer les pièces (Prises [%csl], pièces non protégées, attaques ou différentiel de matériel).", 'roi' ); ?><br>
 				• <strong><?php esc_html_e( 'Reconstitution (Setup) :', 'roi' ); ?></strong> <?php esc_html_e( "L'élève place les pièces sur un échiquier vierge depuis une palette (d'après texte ou de mémoire).", 'roi' ); ?>
 			</p>
@@ -84,7 +85,7 @@ class TypeCapOuPasCap implements TypeInterface {
 						</button>
 					</div>
 					<p class="description" style="margin-top: 0; margin-bottom: 8px; font-size: 12px; color: #646970;">
-						<?php esc_html_e( "Par défaut : OUI et NON. Vous pouvez modifier les libellés ou ajouter des choix supplémentaires (ex: BLANC, NOIR, ÉGALE ou 0, 1, 2, 3).", 'roi' ); ?>
+						<?php esc_html_e( 'Par défaut : OUI et NON. Vous pouvez modifier les libellés ou ajouter des choix supplémentaires (ex: BLANC, NOIR, ÉGALE ou 0, 1, 2, 3).', 'roi' ); ?>
 					</p>
 					<div id="roi_t14_options_reponse_list" style="display: flex; flex-wrap: wrap; gap: 8px;">
 						<!-- Généré dynamiquement en JS -->
@@ -117,6 +118,7 @@ class TypeCapOuPasCap implements TypeInterface {
 					<div style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 8px;">
 						<label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
 							<input type="radio" name="roi_t14_mode_clic" class="roi_t14_mode_clic" value="cibles" <?php checked( $mode_clic, 'cibles' ); ?>>
+							<?php /* translators: %csl is a PGN annotation tag for colored squares */ ?>
 							<span><?php esc_html_e( 'Cases / Pièces cibles du PGN ([%csl ...]) (Prises, Attaques, Non-protégées)', 'roi' ); ?></span>
 						</label>
 						<label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
@@ -220,7 +222,7 @@ class TypeCapOuPasCap implements TypeInterface {
 								<input type="text" class="roi_t14_move_explication" data-index="<?php echo (int) $i; ?>" value="<?php echo esc_attr( $move_explication ); ?>" placeholder="<?php esc_attr_e( 'Explication si erreur', 'roi' ); ?>" style="flex: 2; height: 30px;">
 							</div>
 							<div style="font-size: 11px; color: #666;">
-								<?php esc_html_e( "Astuce : Si le PGN contient des variantes (ex: 1. Nd5+ (1. Bh4+)), le moteur PWA demandera automatiquement de trouver tous les coups légaux !", 'roi' ); ?>
+								<?php esc_html_e( 'Astuce : Si le PGN contient des variantes (ex: 1. Nd5+ (1. Bh4+)), le moteur PWA demandera automatiquement de trouver tous les coups légaux !', 'roi' ); ?>
 							</div>
 						</div>
 
@@ -228,7 +230,7 @@ class TypeCapOuPasCap implements TypeInterface {
 						<div class="roi_t14_bloc_notation" data-index="<?php echo (int) $i; ?>" style="display: <?php echo 'notation' === $variante ? 'block' : 'none'; ?>; border-top: 1px dashed #ccc; padding-top: 12px; margin-top: 10px;">
 							<div style="font-size: 12px; color: #50575e; background: #e7f3fe; border-left: 3px solid #2271b1; padding: 8px 10px; border-radius: 2px;">
 								<span class="dashicons dashicons-info" style="font-size: 16px; width: 16px; height: 16px; vertical-align: text-bottom; margin-right: 4px; color: #2271b1;"></span>
-								<?php esc_html_e( "Variante Notation : Les pièces et leurs coordonnées cibles sont automatiquement extraites de la position FEN.", 'roi' ); ?>
+								<?php esc_html_e( 'Variante Notation : Les pièces et leurs coordonnées cibles sont automatiquement extraites de la position FEN.', 'roi' ); ?>
 							</div>
 						</div>
 
@@ -236,7 +238,10 @@ class TypeCapOuPasCap implements TypeInterface {
 						<div class="roi_t14_bloc_clic" data-index="<?php echo (int) $i; ?>" style="display: <?php echo 'clic' === $variante ? 'block' : 'none'; ?>; border-top: 1px dashed #ccc; padding-top: 12px; margin-top: 10px;">
 							<div style="font-size: 12px; color: #50575e; background: #e7f3fe; border-left: 3px solid #2271b1; padding: 8px 10px; border-radius: 2px;">
 								<span class="dashicons dashicons-info" style="font-size: 16px; width: 16px; height: 16px; vertical-align: text-bottom; margin-right: 4px; color: #2271b1;"></span>
-								<?php esc_html_e( "Variante Clic : Les cases/pièces cibles sont automatiquement extraites des annotations [%csl ...] du PGN ou calculées à partir de la FEN.", 'roi' ); ?>
+								<?php
+								/* translators: %csl is a PGN annotation tag for colored squares */
+								esc_html_e( 'Variante Clic : Les cases/pièces cibles sont automatiquement extraites des annotations [%csl ...] du PGN ou calculées à partir de la FEN.', 'roi' );
+								?>
 							</div>
 						</div>
 

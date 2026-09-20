@@ -140,8 +140,8 @@ class Chapitre_Taxonomy {
 			usort(
 				$terms,
 				function ( $a, $b ) {
-					$name_a = is_object( $a ) ? $a->name : ( is_array( $a ) ? ( $a['name'] ?? '' ) : '' );
-					$name_b = is_object( $b ) ? $b->name : ( is_array( $b ) ? ( $b['name'] ?? '' ) : '' );
+					$name_a = ( is_object( $a ) && isset( $a->name ) ) ? $a->name : ( is_array( $a ) ? ( $a['name'] ?? '' ) : '' );
+					$name_b = ( is_object( $b ) && isset( $b->name ) ) ? $b->name : ( is_array( $b ) ? ( $b['name'] ?? '' ) : '' );
 					$pos_a  = self::get_chapter_order( (string) $name_a );
 					$pos_b  = self::get_chapter_order( (string) $name_b );
 					return $pos_a <=> $pos_b;

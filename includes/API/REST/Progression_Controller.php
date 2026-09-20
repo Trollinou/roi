@@ -25,7 +25,7 @@ class Progression_Controller {
 	/**
 	 * Namespace for the API.
 	 *
-	 * @var string
+	 * @var non-falsy-string
 	 */
 	protected string $namespace = 'roi/v1';
 
@@ -380,9 +380,9 @@ class Progression_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function obtenir_progression( WP_REST_Request $request ): WP_REST_Response {
-		$user_id      = get_current_user_id();
-		$meta_key     = $this->get_progression_meta_key( $request );
-		$elements     = $this->progression_service->obtenir( $user_id, $meta_key );
+		$user_id  = get_current_user_id();
+		$meta_key = $this->get_progression_meta_key( $request );
+		$elements = $this->progression_service->obtenir( $user_id, $meta_key );
 
 		return new WP_REST_Response( $elements, 200 );
 	}
@@ -534,7 +534,8 @@ class Progression_Controller {
 	public function assigner_cours_eleve( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$adherent_id = (int) $request->get_param( 'adherent_id' );
 		$cours_id    = (int) $request->get_param( 'cours_id' );
-		$action      = sanitize_key( (string) ( $request->get_param( 'action' ) ?: 'assign' ) );
+		$raw_action  = (string) $request->get_param( 'action' );
+		$action      = '' !== $raw_action ? sanitize_key( $raw_action ) : 'assign';
 
 		if ( $adherent_id <= 0 || $cours_id <= 0 ) {
 			return new WP_Error(

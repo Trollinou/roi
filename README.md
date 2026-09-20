@@ -3,7 +3,7 @@
 **Version :** 1.3.1
 **Auteur :** Etienne Gagnon
 **Licence :** GPL v2 ou ultérieure
-**WordPress Requis :** 6.9.1+
+**WordPress Requis :** 7.1+
 **PHP Requis :** 8.4+
 
 ## Description

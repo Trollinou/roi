@@ -35,10 +35,10 @@ class Ajax_Handler {
 		check_ajax_referer( 'roi_search_cours_items_nonce', 'security', false );
 
 		$search          = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : '';
-		$chapitre        = isset( $_GET['chapter'] ) ? (int) $_GET['chapter'] : 0;
-		$niveau          = isset( $_GET['level'] ) ? (int) $_GET['level'] : 0;
-		$unassigned_only = isset( $_GET['unassigned'] ) && '1' === (string) $_GET['unassigned'];
-		$course_id       = isset( $_GET['course_id'] ) ? (int) $_GET['course_id'] : 0;
+		$chapitre        = isset( $_GET['chapter'] ) ? absint( $_GET['chapter'] ) : 0;
+		$niveau          = isset( $_GET['level'] ) ? absint( $_GET['level'] ) : 0;
+		$unassigned_only = isset( $_GET['unassigned'] ) && '1' === sanitize_text_field( wp_unslash( $_GET['unassigned'] ) );
+		$course_id       = isset( $_GET['course_id'] ) ? absint( $_GET['course_id'] ) : 0;
 
 		$args = array(
 			'post_type'      => array( 'roi_lecon', 'roi_exercice', 'roi_video' ),
@@ -51,6 +51,7 @@ class Ajax_Handler {
 			global $wpdb;
 
 			if ( $course_id > 0 ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Specific aggregation query across courses.
 				$playlists = $wpdb->get_col(
 					$wpdb->prepare(
 						"SELECT pm.meta_value 
@@ -58,19 +59,18 @@ class Ajax_Handler {
 						 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
 						 WHERE pm.meta_key = '_roi_cours_playlist'
 						   AND p.post_type = 'roi_cours'
-						   AND p.post_status NOT IN ('trash', 'auto-draft')
 						   AND p.ID != %d",
 						$course_id
 					)
 				);
 			} else {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Specific aggregation query across courses.
 				$playlists = $wpdb->get_col(
 					"SELECT pm.meta_value 
 					 FROM {$wpdb->postmeta} pm
 					 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
 					 WHERE pm.meta_key = '_roi_cours_playlist'
-					   AND p.post_type = 'roi_cours'
-					   AND p.post_status NOT IN ('trash', 'auto-draft')"
+					   AND p.post_type = 'roi_cours'"
 				);
 			}
 
@@ -136,6 +136,9 @@ class Ajax_Handler {
 			while ( $query->have_posts() ) {
 				$query->the_post();
 				$post_id   = get_the_ID();
+				if ( ! $post_id ) {
+					continue;
+				}
 				$post_type = get_post_type();
 
 				// Get associated chapter color and ID.

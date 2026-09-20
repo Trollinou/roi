@@ -31,7 +31,7 @@ class Parcours_Controller {
 	/**
 	 * Namespace for the API.
 	 *
-	 * @var string
+	 * @var non-falsy-string
 	 */
 	protected string $namespace = 'roi/v1';
 
@@ -134,7 +134,10 @@ class Parcours_Controller {
 		while ( $query->have_posts() ) {
 			$query->the_post();
 			$post_id = get_the_ID();
-			$post    = get_post( $post_id );
+			if ( ! $post_id ) {
+				continue;
+			}
+			$post = get_post( $post_id );
 			if ( ! $post ) {
 				continue;
 			}
@@ -307,10 +310,10 @@ class Parcours_Controller {
 		$cours       = array();
 
 		foreach ( $raw_courses as $item ) {
-			$audience_type  = $item['audience_type'];
-			$target_groups  = $item['target_groups'];
-			$target_members = $item['target_members'];
-			$is_assigned    = ( 'restricted' === $audience_type );
+			$audience_type          = $item['audience_type'];
+			$target_groups          = $item['target_groups'];
+			$target_members         = $item['target_members'];
+			$is_assigned            = ( 'restricted' === $audience_type );
 			$unlocked_by_assignment = false;
 
 			// Audience verification.

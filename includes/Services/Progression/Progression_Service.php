@@ -65,7 +65,7 @@ class Progression_Service {
 				}
 				add_user_meta( $user_id, $meta_key, $data, false );
 				$already_val_map[ $elem_id ] = $data;
-				$validated_count++;
+				++$validated_count;
 			} elseif ( ! $is_trainer && $time_spent > 0 ) {
 				$old_entry = $already_val_map[ $elem_id ];
 				if ( empty( $old_entry['time_spent'] ) ) {

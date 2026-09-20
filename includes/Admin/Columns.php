@@ -178,9 +178,12 @@ class Columns {
 			if ( is_array( $members ) && ! empty( $members ) ) {
 				$names = array();
 				foreach ( $members as $mid ) {
-					$prenom = (string) ( get_post_meta( (int) $mid, '_dame_first_name', true ) ?: get_post_meta( (int) $mid, '_dame_prenom', true ) );
-					$nom    = (string) ( get_post_meta( (int) $mid, '_dame_last_name', true ) ?: ( get_post_meta( (int) $mid, '_dame_birth_name', true ) ?: get_post_meta( (int) $mid, '_dame_nom', true ) ) );
-					$label  = trim( $prenom . ' ' . $nom );
+					$first_name = (string) get_post_meta( (int) $mid, '_dame_first_name', true );
+					$prenom     = '' !== $first_name ? $first_name : (string) get_post_meta( (int) $mid, '_dame_prenom', true );
+					$last_name  = (string) get_post_meta( (int) $mid, '_dame_last_name', true );
+					$birth_name = (string) get_post_meta( (int) $mid, '_dame_birth_name', true );
+					$nom        = '' !== $last_name ? $last_name : ( '' !== $birth_name ? $birth_name : (string) get_post_meta( (int) $mid, '_dame_nom', true ) );
+					$label      = trim( $prenom . ' ' . $nom );
 					if ( empty( $label ) ) {
 						$p     = get_post( (int) $mid );
 						$label = $p ? $p->post_title : '#' . $mid;
@@ -195,6 +198,7 @@ class Columns {
 						echo '<span style="display:inline-block; background:#edf7ed; color:#1e4620; border-radius:3px; padding:1px 5px; margin-right:3px; margin-bottom:2px;">👤 ' . esc_html( $n ) . '</span>';
 					}
 				} else {
+					/* translators: %d: Number of students */
 					$summary = sprintf( esc_html__( '%d élèves', 'roi' ), $count );
 					$tooltip = implode( ', ', $names );
 					echo '<span title="' . esc_attr( $tooltip ) . '" style="display:inline-block; background:#edf7ed; color:#1e4620; border-radius:3px; padding:1px 5px; cursor:help; font-weight:600;">👤 ' . esc_html( $summary ) . ' ℹ️</span>';
@@ -320,10 +324,12 @@ class Columns {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$current = isset( $_GET['roi_audience'] ) ? sanitize_key( (string) $_GET['roi_audience'] ) : '';
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Audience counter query.
 		$total_cours = (int) $wpdb->get_var(
 			"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'roi_cours' AND post_status NOT IN ('trash', 'auto-draft')"
 		);
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Audience counter query.
 		$assigned_cours = (int) $wpdb->get_var(
 			"SELECT COUNT(DISTINCT p.ID) 
 			 FROM {$wpdb->posts} p

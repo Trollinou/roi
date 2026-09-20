@@ -43,6 +43,7 @@ class Group_Service {
 				'post_type'      => 'roi_cours',
 				'post_status'    => 'publish',
 				'posts_per_page' => -1,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 				'meta_query'     => array(
 					array(
 						'key'   => '_roi_cours_audience_type',
@@ -51,12 +52,13 @@ class Group_Service {
 				),
 			)
 		);
+
 		$restricted_courses = array();
 		foreach ( $restricted_courses_query as $c_post ) {
 			$raw_groups  = get_post_meta( $c_post->ID, '_roi_cours_target_groups', true );
-			$c_groups    = ( is_string( $raw_groups ) && '' !== $raw_groups ) ? ( json_decode( $raw_groups, true ) ?: array() ) : array();
+			$c_groups    = ( is_string( $raw_groups ) && '' !== $raw_groups ) ? ( json_decode( $raw_groups, true ) ? json_decode( $raw_groups, true ) : array() ) : array();
 			$raw_members = get_post_meta( $c_post->ID, '_roi_cours_target_members', true );
-			$c_members   = ( is_string( $raw_members ) && '' !== $raw_members ) ? ( json_decode( $raw_members, true ) ?: array() ) : array();
+			$c_members   = ( is_string( $raw_members ) && '' !== $raw_members ) ? ( json_decode( $raw_members, true ) ? json_decode( $raw_members, true ) : array() ) : array();
 
 			$restricted_courses[] = array(
 				'id'      => (int) $c_post->ID,
@@ -115,7 +117,7 @@ class Group_Service {
 						if ( is_array( $entry ) && isset( $entry['element_id'] ) ) {
 							$elem_id = (int) $entry['element_id'];
 							if ( $elem_id > 0 ) {
-								$elements_valides[] = $elem_id;
+								$elements_valides[]  = $elem_id;
 								$details[ $elem_id ] = array(
 									'date'       => isset( $entry['date'] ) ? (string) $entry['date'] : '',
 									'time_spent' => isset( $entry['time_spent'] ) ? (int) $entry['time_spent'] : null,
@@ -146,8 +148,11 @@ class Group_Service {
 						$adherent_id   = (int) str_replace( 'member_', '', $identity );
 						$display_id    = $adherent_id;
 						$adh_post      = get_post( $adherent_id );
-						$adh_prenom    = get_post_meta( $adherent_id, '_dame_first_name', true ) ?: get_post_meta( $adherent_id, '_dame_prenom', true );
-						$adh_nom       = get_post_meta( $adherent_id, '_dame_last_name', true ) ?: ( get_post_meta( $adherent_id, '_dame_birth_name', true ) ?: get_post_meta( $adherent_id, '_dame_nom', true ) );
+						$first_name    = (string) get_post_meta( $adherent_id, '_dame_first_name', true );
+						$adh_prenom    = '' !== $first_name ? $first_name : (string) get_post_meta( $adherent_id, '_dame_prenom', true );
+						$last_name     = (string) get_post_meta( $adherent_id, '_dame_last_name', true );
+						$birth_name    = (string) get_post_meta( $adherent_id, '_dame_birth_name', true );
+						$adh_nom       = '' !== $last_name ? $last_name : ( '' !== $birth_name ? $birth_name : (string) get_post_meta( $adherent_id, '_dame_nom', true ) );
 
 						if ( ! empty( $adh_nom ) || ! empty( $adh_prenom ) ) {
 							$nom          = ! empty( $adh_nom ) ? (string) $adh_nom : '';
@@ -310,6 +315,7 @@ class Group_Service {
 			$args = array(
 				'post_type'      => 'adherent',
 				'post_status'    => 'publish',
+				// phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_posts_per_page -- Candidate members list for coach tracking.
 				'posts_per_page' => 200,
 				'orderby'        => 'title',
 				'order'          => 'ASC',
@@ -320,10 +326,13 @@ class Group_Service {
 
 			$posts = get_posts( $args );
 			foreach ( $posts as $post ) {
-				$prenom    = (string) ( get_post_meta( $post->ID, '_dame_first_name', true ) ?: get_post_meta( $post->ID, '_dame_prenom', true ) );
-				$nom       = (string) ( get_post_meta( $post->ID, '_dame_last_name', true ) ?: ( get_post_meta( $post->ID, '_dame_birth_name', true ) ?: get_post_meta( $post->ID, '_dame_nom', true ) ) );
-				$email     = (string) get_post_meta( $post->ID, '_dame_email', true );
-				$full_name = trim( $prenom . ' ' . $nom );
+				$first_name = (string) get_post_meta( $post->ID, '_dame_first_name', true );
+				$prenom     = '' !== $first_name ? $first_name : (string) get_post_meta( $post->ID, '_dame_prenom', true );
+				$last_name  = (string) get_post_meta( $post->ID, '_dame_last_name', true );
+				$birth_name = (string) get_post_meta( $post->ID, '_dame_birth_name', true );
+				$nom        = '' !== $last_name ? $last_name : ( '' !== $birth_name ? $birth_name : (string) get_post_meta( $post->ID, '_dame_nom', true ) );
+				$email      = (string) get_post_meta( $post->ID, '_dame_email', true );
+				$full_name  = trim( $prenom . ' ' . $nom );
 				if ( empty( $full_name ) ) {
 					$full_name = (string) $post->post_title;
 				}
@@ -367,9 +376,14 @@ class Group_Service {
 
 		$user = null;
 
-		$linked_user_id = (int) ( get_post_meta( $adherent_id, '_dame_wp_user_id', true )
-			?: get_post_meta( $adherent_id, '_dame_linked_wp_user', true )
-			?: get_post_meta( $adherent_id, '_dame_user_id', true ) );
+		$meta_user_id = (int) get_post_meta( $adherent_id, '_dame_wp_user_id', true );
+		if ( $meta_user_id <= 0 ) {
+			$meta_user_id = (int) get_post_meta( $adherent_id, '_dame_linked_wp_user', true );
+		}
+		if ( $meta_user_id <= 0 ) {
+			$meta_user_id = (int) get_post_meta( $adherent_id, '_dame_user_id', true );
+		}
+		$linked_user_id = $meta_user_id;
 
 		if ( $linked_user_id > 0 ) {
 			$found = get_user_by( 'ID', $linked_user_id );
@@ -381,8 +395,9 @@ class Group_Service {
 		if ( ! $user ) {
 			$users_with_meta = get_users(
 				array(
+					// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 					'meta_key'   => '_dame_adherent_id',
-					'meta_value' => (string) $adherent_id, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					'meta_value' => (string) $adherent_id,
 					'number'     => 1,
 				)
 			);
@@ -416,8 +431,10 @@ class Group_Service {
 		}
 
 		if ( ! $user ) {
-			$adh_fname       = (string) ( get_post_meta( $adherent_id, '_dame_first_name', true ) ?: get_post_meta( $adherent_id, '_dame_prenom', true ) );
-			$adh_lname       = (string) ( get_post_meta( $adherent_id, '_dame_last_name', true ) ?: get_post_meta( $adherent_id, '_dame_nom', true ) );
+			$fname_meta      = (string) get_post_meta( $adherent_id, '_dame_first_name', true );
+			$adh_fname       = '' !== $fname_meta ? $fname_meta : (string) get_post_meta( $adherent_id, '_dame_prenom', true );
+			$lname_meta      = (string) get_post_meta( $adherent_id, '_dame_last_name', true );
+			$adh_lname       = '' !== $lname_meta ? $lname_meta : (string) get_post_meta( $adherent_id, '_dame_nom', true );
 			$login           = sanitize_user( 'eleve_' . $adherent_id, true );
 			$email_candidate = ! empty( $rep1_email ) ? $rep1_email : ( ! empty( $adh_email ) ? $adh_email : '' );
 			$email           = ( ! empty( $email_candidate ) && ! email_exists( $email_candidate ) ) ? $email_candidate : 'eleve_' . $adherent_id . '@club.local';
@@ -463,8 +480,11 @@ class Group_Service {
 			);
 		}
 
-		$prenom       = (string) ( get_post_meta( $adherent_id, '_dame_first_name', true ) ?: get_post_meta( $adherent_id, '_dame_prenom', true ) );
-		$nom          = (string) ( get_post_meta( $adherent_id, '_dame_last_name', true ) ?: ( get_post_meta( $adherent_id, '_dame_birth_name', true ) ?: get_post_meta( $adherent_id, '_dame_nom', true ) ) );
+		$f_name       = (string) get_post_meta( $adherent_id, '_dame_first_name', true );
+		$prenom       = '' !== $f_name ? $f_name : (string) get_post_meta( $adherent_id, '_dame_prenom', true );
+		$l_name       = (string) get_post_meta( $adherent_id, '_dame_last_name', true );
+		$b_name       = (string) get_post_meta( $adherent_id, '_dame_birth_name', true );
+		$nom          = '' !== $l_name ? $l_name : ( '' !== $b_name ? $b_name : (string) get_post_meta( $adherent_id, '_dame_nom', true ) );
 		$display_name = trim( $prenom . ' ' . $nom );
 		if ( empty( $display_name ) ) {
 			$display_name = (string) $post->post_title;

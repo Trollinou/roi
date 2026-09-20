@@ -157,7 +157,7 @@ class Settings {
 					<?php esc_html_e( 'Identifiant YouTube extrait :', 'roi' ); ?>
 				</label>
 				<code id="roi_video_id_preview" style="display: inline-block; padding: 4px 8px; background: #f0f0f1; border-radius: 4px;">
-					<?php echo esc_html( $video_id ?: 'Aucun' ); ?>
+					<?php echo esc_html( '' !== $video_id ? $video_id : 'Aucun' ); ?>
 				</code>
 			</div>
 		</div>
@@ -201,7 +201,10 @@ class Settings {
 			<select name="roi_video_niveau" id="roi_video_niveau" class="widefat" style="margin-top: 5px;">
 				<?php for ( $i = 1; $i <= 4; $i++ ) : ?>
 					<option value="<?php echo (int) $i; ?>" <?php selected( $niveau, $i ); ?>>
-						<?php printf( esc_html__( 'Niveau %d', 'roi' ), (int) $i ); ?>
+						<?php
+						/* translators: %d: Difficulty level number */
+						printf( esc_html__( 'Niveau %d', 'roi' ), (int) $i );
+						?>
 					</option>
 				<?php endfor; ?>
 			</select>

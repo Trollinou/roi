@@ -39,6 +39,7 @@ class Playlist_Cleaner {
 
 		global $wpdb;
 		// Find all roi_cours meta containing this ID.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct cleanup lookup for postmeta referencing deleted element.
 		$courses = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_roi_cours_playlist' AND (meta_value LIKE %s OR meta_value LIKE %s)",
