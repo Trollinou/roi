@@ -8,6 +8,7 @@
   "icon": "book-alt",
   "description": "Affichage d'une partie d'échecs au format PGN.",
   "supports": {
+    "blockBindings": true,
     "align": [
       "wide",
       "full"

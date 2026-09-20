@@ -166,9 +166,9 @@ class Parcours_Controller {
 		}
 		wp_reset_postdata();
 
-		// Bulk prime post caches in 1 single SQL query to prevent N+1 queries.
+		// Bulk prime post caches (posts, meta, terms) in batch queries to prevent N+1 queries.
 		if ( ! empty( $all_item_ids ) ) {
-			_prime_post_caches( array_unique( $all_item_ids ), false, false );
+			_prime_post_caches( array_unique( $all_item_ids ), true, true );
 		}
 
 		// Second pass: resolve playlist item details and course attributes.

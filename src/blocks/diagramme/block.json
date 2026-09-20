@@ -8,6 +8,7 @@
   "icon": "grid-view",
   "description": "Affichage d'un diagramme d'échecs (FEN).",
   "supports": {
+    "blockBindings": true,
     "align": [
       "wide",
       "full"

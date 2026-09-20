@@ -7,6 +7,9 @@
     *   Déclaration stricte `declare(strict_types=1);` appliquée systématiquement sur 100% des fichiers PHP.
     *   Niveau d'analyse statique PHPStan rehaussé au niveau 7 (`level: 7`) avec zéro erreur.
     *   Conformité PHPCS totale validée sur l'ensemble du projet sans règles de contournement.
+*   **Optimisations Modernes WordPress 7.1 :**
+    *   **Amorçage Groupé du Cache REST & Termes (`Parcours_Controller.php`) :** Extension de `_prime_post_caches( $ids, true, true )` pour précharger en requêtes groupées les objets, métadonnées et termes associés des éléments de cours/parcours.
+    *   **Blocs Gutenberg & Block Bindings API (`src/blocks/chessboard`, `diagramme`, `pgn`) :** Déclaration du support `"blockBindings": true` dans les fichiers `block.json` pour la liaison de blocs native tout en conservant `apiVersion: 2` garantissant la stabilité des composants React/Chessground.
 
 ## [1.7.0] - 2026-09-20
 

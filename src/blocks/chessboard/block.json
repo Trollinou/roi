@@ -9,6 +9,7 @@
   "description": "A native Gutenberg chessboard block for WordPress, powered by Chessground and chessops.",
   "supports": {
     "html": false,
+    "blockBindings": true,
     "align": [
       "wide",
       "full"
