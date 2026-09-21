@@ -192,6 +192,7 @@ class Backup {
 
 		if ( is_array( $progress_rows ) ) {
 			foreach ( $progress_rows as $row ) {
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Backup extraction.
 				$export_data['user_progress'][] = array(
 					'user_id'    => (int) $row->user_id,
 					'user_login' => (string) $row->user_login,
@@ -270,8 +271,10 @@ class Backup {
 		}
 
 		// Try decompressing with gzuncompress (zlib) or gzdecode (gzip), or fallback to raw content if uncompressed.
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- gzuncompress/gzdecode fallback detection.
 		$json_data = @gzuncompress( $raw_content );
 		if ( false === $json_data ) {
+			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- gzuncompress/gzdecode fallback detection.
 			$json_data = @gzdecode( $raw_content );
 		}
 		if ( false === $json_data ) {
@@ -295,8 +298,9 @@ class Backup {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$posts_to_delete = $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT ID FROM {$wpdb->posts} WHERE post_type IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$post_types
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+				"SELECT ID FROM {$wpdb->posts} WHERE post_type IN ($placeholders)",
+				...$post_types
 			)
 		);
 		if ( is_array( $posts_to_delete ) ) {

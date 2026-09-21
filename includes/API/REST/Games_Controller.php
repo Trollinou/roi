@@ -24,7 +24,7 @@ class Games_Controller {
 	/**
 	 * Namespace for the API.
 	 *
-	 * @var string
+	 * @var non-falsy-string
 	 */
 	protected string $namespace = 'roi/v1';
 
@@ -155,18 +155,29 @@ class Games_Controller {
 		}
 
 		// Formater la date fournie ou repli sur la date actuelle.
-		$post_date = current_time( 'mysql' );
-		if ( ! empty( $game_date_raw ) ) {
+		$post_date = (string) current_time( 'mysql' );
+		if ( ! empty( $game_date_raw ) && is_string( $game_date_raw ) ) {
 			$timestamp = strtotime( $game_date_raw );
-			if ( $timestamp ) {
-				$post_date = wp_date( 'Y-m-d H:i:s', $timestamp );
+			if ( false !== $timestamp ) {
+				$formatted = wp_date( 'Y-m-d H:i:s', $timestamp );
+				if ( false !== $formatted ) {
+					$post_date = $formatted;
+				}
 			}
 		}
 
 		$current_user = wp_get_current_user();
 
 		// Insérer le post roi_partie.
-		$post_title = sprintf( 'Partie de %s - %s', $member->post_title, wp_date( 'd/m/Y H:i', strtotime( $post_date ) ) );
+		$date_ts    = strtotime( $post_date );
+		$date_str   = '';
+		if ( false !== $date_ts ) {
+			$formatted_title_date = wp_date( 'd/m/Y H:i', $date_ts );
+			if ( false !== $formatted_title_date ) {
+				$date_str = $formatted_title_date;
+			}
+		}
+		$post_title = sprintf( 'Partie de %s - %s', (string) $member->post_title, $date_str );
 
 		$post_id = wp_insert_post(
 			array(
@@ -218,11 +229,19 @@ class Games_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_games( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$member_id    = (int) $request->get_param( 'member_id' );
-		$raw_per_page = (int) $request->get_param( 'per_page' );
-		$per_page     = $raw_per_page > 0 ? min( $raw_per_page, 100 ) : 10;
-		$raw_page     = (int) $request->get_param( 'page' );
-		$page         = $raw_page > 0 ? $raw_page : 1;
+		$member_id = (int) $request->get_param( 'member_id' );
+		$per_page  = $request->get_param( 'per_page' ) ? (int) $request->get_param( 'per_page' ) : 10;
+		$page      = $request->get_param( 'page' ) ? (int) $request->get_param( 'page' ) : 1;
+
+		if ( $per_page < 1 ) {
+			$per_page = 10;
+		}
+		if ( $per_page > 100 ) {
+			$per_page = 100;
+		}
+		if ( $page < 1 ) {
+			$page = 1;
+		}
 
 		$query_args = array(
 			'post_type'      => 'roi_partie',
@@ -257,7 +276,7 @@ class Games_Controller {
 				$games[]   = array(
 					'id'               => $game_id,
 					'title'            => $post->post_title,
-					'date'             => ! empty( $game_date ) ? $game_date : $post->post_date,
+					'date'             => '' !== $game_date ? $game_date : $post->post_date,
 					'member_id'        => (int) get_post_meta( $game_id, '_roi_member_id', true ),
 					'difficulty_level' => (int) get_post_meta( $game_id, '_roi_difficulty_level', true ),
 					'hints_count'      => (int) get_post_meta( $game_id, '_roi_hints_count', true ),

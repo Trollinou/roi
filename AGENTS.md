@@ -6,7 +6,7 @@
 
 ## 2. Stack Technique
 - **Plugin** : `ROI` | Slug: `roi` | Prefix: `roi_` | Namespace: `ROI\` | Table: `{$wpdb->prefix}roi_`
-- **WordPress** : 6.9.1 (Interactivity API, Transients, `apiVersion: 2` obligatoire pour les blocs Gutenberg avec Chessground/eg-chessboard).
+- **WordPress** : 7.1 (Interactivity API, Transients, `apiVersion: 2` obligatoire pour les blocs Gutenberg avec Chessground/eg-chessboard).
 - **PHP** : 8.4 avec `declare(strict_types=1);`. ZÉRO Composer en prod. Autoloader SPL natif dans `roi.php`.
 - **JS / CSS** : ES2021 Vanilla (pas de jQuery), SCSS avec BEM. Compilés dans `build/` et `assets/css/`.
 

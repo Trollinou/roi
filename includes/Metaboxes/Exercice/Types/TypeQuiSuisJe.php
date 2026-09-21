@@ -112,9 +112,9 @@ class TypeQuiSuisJe implements TypeInterface {
 						default  => ! empty( $item_piece ) ? substr( $item_piece, 0, 1 ) : 'R',
 					};
 
-					$item_fen      = isset( $item['fen'] ) && is_string( $item['fen'] ) ? $item['fen'] : '8/8/8/8/8/8/8/8 w - - 0 1';
-					$item_shapes   = isset( $item['shapes'] ) && is_array( $item['shapes'] ) ? $item['shapes'] : array();
-					$item_case     = isset( $item['case_attendue'] ) && is_string( $item['case_attendue'] ) ? $item['case_attendue'] : ( isset( $item['reponse_case'] ) && is_string( $item['reponse_case'] ) ? $item['reponse_case'] : '' );
+					$item_fen    = isset( $item['fen'] ) && is_string( $item['fen'] ) ? $item['fen'] : '8/8/8/8/8/8/8/8 w - - 0 1';
+					$item_shapes = isset( $item['shapes'] ) && is_array( $item['shapes'] ) ? $item['shapes'] : array();
+					$item_case   = isset( $item['case_attendue'] ) && is_string( $item['case_attendue'] ) ? $item['case_attendue'] : ( isset( $item['reponse_case'] ) && is_string( $item['reponse_case'] ) ? $item['reponse_case'] : '' );
 					?>
 					<div class="roi-t12-card-item" data-index="<?php echo (int) $i; ?>" style="border: 1px solid #e5e5e5; padding: 14px; border-radius: 4px; background: #f9f9f9;">
 						<h4 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 600; color: #1d2327;">
@@ -150,16 +150,16 @@ class TypeQuiSuisJe implements TypeInterface {
 							<?php
 							FenInput::render(
 								array(
-									'id'              => 'roi_t12_fen_' . $i,
-									'value'           => $item_fen,
+									'id'               => 'roi_t12_fen_' . $i,
+									'value'            => $item_fen,
 									'shapes'           => $item_shapes,
 									'show_orientation' => false,
 									'button_id'        => 'btn_open_fen_editor_t12_' . $i,
-									'input_class'     => 'roi_t12_fen',
-									'button_class'    => 'button btn_open_fen_editor_t12',
-									'label'           => __( 'Position & Case attendue (FEN + Cercle Vert) :', 'roi' ),
-									'button_label'    => __( 'Placer la case attendue (Cercle Vert)', 'roi' ),
-									'data_attributes' => array( 'index' => $i ),
+									'input_class'      => 'roi_t12_fen',
+									'button_class'     => 'button btn_open_fen_editor_t12',
+									'label'            => __( 'Position & Case attendue (FEN + Cercle Vert) :', 'roi' ),
+									'button_label'     => __( 'Placer la case attendue (Cercle Vert)', 'roi' ),
+									'data_attributes'  => array( 'index' => $i ),
 								)
 							);
 							?>

@@ -178,16 +178,12 @@ class Columns {
 			if ( is_array( $members ) && ! empty( $members ) ) {
 				$names = array();
 				foreach ( $members as $mid ) {
-					$adh_fn = (string) get_post_meta( (int) $mid, '_dame_first_name', true );
-					$adh_pr = (string) get_post_meta( (int) $mid, '_dame_prenom', true );
-					$prenom = ! empty( $adh_fn ) ? $adh_fn : $adh_pr;
-
-					$adh_ln = (string) get_post_meta( (int) $mid, '_dame_last_name', true );
-					$adh_bn = (string) get_post_meta( (int) $mid, '_dame_birth_name', true );
-					$adh_no = (string) get_post_meta( (int) $mid, '_dame_nom', true );
-					$nom    = ! empty( $adh_ln ) ? $adh_ln : ( ! empty( $adh_bn ) ? $adh_bn : $adh_no );
-
-					$label  = trim( $prenom . ' ' . $nom );
+					$first_name = (string) get_post_meta( (int) $mid, '_dame_first_name', true );
+					$prenom     = '' !== $first_name ? $first_name : (string) get_post_meta( (int) $mid, '_dame_prenom', true );
+					$last_name  = (string) get_post_meta( (int) $mid, '_dame_last_name', true );
+					$birth_name = (string) get_post_meta( (int) $mid, '_dame_birth_name', true );
+					$nom        = '' !== $last_name ? $last_name : ( '' !== $birth_name ? $birth_name : (string) get_post_meta( (int) $mid, '_dame_nom', true ) );
+					$label      = trim( $prenom . ' ' . $nom );
 					if ( empty( $label ) ) {
 						$p     = get_post( (int) $mid );
 						$label = $p ? $p->post_title : '#' . $mid;
@@ -328,10 +324,12 @@ class Columns {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$current = isset( $_GET['roi_audience'] ) ? sanitize_key( (string) $_GET['roi_audience'] ) : '';
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Audience counter query.
 		$total_cours = (int) $wpdb->get_var(
 			"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'roi_cours' AND post_status NOT IN ('trash', 'auto-draft')"
 		);
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Audience counter query.
 		$assigned_cours = (int) $wpdb->get_var(
 			"SELECT COUNT(DISTINCT p.ID) 
 			 FROM {$wpdb->posts} p

@@ -22,7 +22,7 @@ class Config_Controller {
 	/**
 	 * Namespace for the API.
 	 *
-	 * @var string
+	 * @var non-falsy-string
 	 */
 	protected string $namespace = 'roi/v1';
 

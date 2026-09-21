@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <ruleset name="ROI_WordPress_Standards">
-    <description>Standard de code WordPress pour le plugin ROI.</description>
+    <description>Standard de code WordPress strict pour le plugin ROI.</description>
 
-    <!-- 1. Utiliser le standard officiel WordPress -->
+    <!-- 1. Utiliser le standard officiel WordPress complet -->
     <rule ref="WordPress" />
 
     <!-- Configurer le text domain pour l'i18n -->
@@ -14,16 +14,22 @@
         </properties>
     </rule>
 
-    <!-- Définir la version minimale de WP supportée -->
-    <config name="minimum_wp_version" value="6.7" />
+    <!-- Définir la version minimale de WP supportée : 7.1 -->
+    <config name="minimum_wp_version" value="7.1" />
 
-    <!-- Exclusion du nommage de fichier strict WP pour garder la convention PSR-4/PascalCase du projet -->
+    <!-- Exclusion du nommage de fichier WordPress classique pour respecter la convention PSR-4 / PascalCase du projet -->
     <rule ref="WordPress.Files.FileName">
         <severity>0</severity>
     </rule>
 
+    <!-- Ne pas imposer les conditions Yoda en PHP 8.4 -->
+    <rule ref="WordPress.PHP.YodaConditions">
+        <severity>0</severity>
+    </rule>
+
     <!-- 2. Fichiers & dossiers à analyser -->
-    <file>.</file>
+    <file>roi.php</file>
+    <file>includes</file>
 
     <!-- 3. Exclusions obligatoires -->
     <exclude-pattern>/vendor/*</exclude-pattern>
@@ -32,7 +38,7 @@
     <exclude-pattern>/tests/*</exclude-pattern>
     <exclude-pattern>/includes/lib/*</exclude-pattern>
 
-    <!-- 4. Paramètres de confort -->
+    <!-- 4. Paramètres d'exécution -->
     <arg name="colors"/>
     <arg value="sp"/>
     <arg name="extensions" value="php"/>

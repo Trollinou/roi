@@ -53,11 +53,11 @@ class Audience {
 			'roi_cours',
 			'_roi_cours_target_groups',
 			array(
-				'show_in_rest'      => true,
-				'single'            => true,
-				'type'              => 'string',
-				'default'           => '[]',
-				'auth_callback'     => function ( bool $allowed, string $meta_key, int $post_id ): bool {
+				'show_in_rest'  => true,
+				'single'        => true,
+				'type'          => 'string',
+				'default'       => '[]',
+				'auth_callback' => function ( bool $allowed, string $meta_key, int $post_id ): bool {
 					return current_user_can( 'edit_post', $post_id );
 				},
 			)
@@ -67,11 +67,11 @@ class Audience {
 			'roi_cours',
 			'_roi_cours_target_members',
 			array(
-				'show_in_rest'      => true,
-				'single'            => true,
-				'type'              => 'string',
-				'default'           => '[]',
-				'auth_callback'     => function ( bool $allowed, string $meta_key, int $post_id ): bool {
+				'show_in_rest'  => true,
+				'single'        => true,
+				'type'          => 'string',
+				'default'       => '[]',
+				'auth_callback' => function ( bool $allowed, string $meta_key, int $post_id ): bool {
 					return current_user_can( 'edit_post', $post_id );
 				},
 			)
@@ -168,16 +168,12 @@ class Audience {
 				)
 			);
 			foreach ( $adherents as $adh ) {
-				$meta_first_name = (string) get_post_meta( $adh->ID, '_dame_first_name', true );
-				$meta_prenom     = (string) get_post_meta( $adh->ID, '_dame_prenom', true );
-				$prenom          = ! empty( $meta_first_name ) ? $meta_first_name : $meta_prenom;
-
-				$meta_last_name  = (string) get_post_meta( $adh->ID, '_dame_last_name', true );
-				$meta_birth_name = (string) get_post_meta( $adh->ID, '_dame_birth_name', true );
-				$meta_nom        = (string) get_post_meta( $adh->ID, '_dame_nom', true );
-				$nom             = ! empty( $meta_last_name ) ? $meta_last_name : ( ! empty( $meta_birth_name ) ? $meta_birth_name : $meta_nom );
-
-				$label = trim( $prenom . ' ' . $nom );
+				$first_name = (string) get_post_meta( $adh->ID, '_dame_first_name', true );
+				$prenom     = '' !== $first_name ? $first_name : (string) get_post_meta( $adh->ID, '_dame_prenom', true );
+				$last_name  = (string) get_post_meta( $adh->ID, '_dame_last_name', true );
+				$birth_name = (string) get_post_meta( $adh->ID, '_dame_birth_name', true );
+				$nom        = '' !== $last_name ? $last_name : ( '' !== $birth_name ? $birth_name : (string) get_post_meta( $adh->ID, '_dame_nom', true ) );
+				$label      = trim( $prenom . ' ' . $nom );
 				if ( empty( $label ) ) {
 					$label = $adh->post_title;
 				}
@@ -313,7 +309,7 @@ class Audience {
 			return;
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized in sanitize_audience_type method.
 		$audience_type = isset( $_POST['roi_cours_audience_type'] ) ? $this->sanitize_audience_type( wp_unslash( $_POST['roi_cours_audience_type'] ) ) : 'all';
 		update_post_meta( $post_id, '_roi_cours_audience_type', $audience_type );
 
@@ -321,13 +317,11 @@ class Audience {
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( 'restricted' === $audience_type && isset( $_POST['roi_cours_target_groups'] ) && is_array( $_POST['roi_cours_target_groups'] ) ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$raw_groups = wp_unslash( $_POST['roi_cours_target_groups'] );
-			if ( is_array( $raw_groups ) ) {
-				foreach ( $raw_groups as $gid ) {
-					$gid_int = absint( $gid );
-					if ( $gid_int > 0 ) {
-						$target_groups[] = $gid_int;
-					}
+			$raw_target_groups = (array) wp_unslash( $_POST['roi_cours_target_groups'] );
+			foreach ( $raw_target_groups as $gid ) {
+				$gid_int = absint( $gid );
+				if ( $gid_int > 0 ) {
+					$target_groups[] = $gid_int;
 				}
 			}
 		}
@@ -337,13 +331,11 @@ class Audience {
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( 'restricted' === $audience_type && isset( $_POST['roi_cours_target_members'] ) && is_array( $_POST['roi_cours_target_members'] ) ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$raw_members = wp_unslash( $_POST['roi_cours_target_members'] );
-			if ( is_array( $raw_members ) ) {
-				foreach ( $raw_members as $mid ) {
-					$mid_int = absint( $mid );
-					if ( $mid_int > 0 ) {
-						$target_members[] = $mid_int;
-					}
+			$raw_target_members = (array) wp_unslash( $_POST['roi_cours_target_members'] );
+			foreach ( $raw_target_members as $mid ) {
+				$mid_int = absint( $mid );
+				if ( $mid_int > 0 ) {
+					$target_members[] = $mid_int;
 				}
 			}
 		}

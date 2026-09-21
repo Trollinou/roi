@@ -25,8 +25,8 @@ class TypeCapOuPasCap implements TypeInterface {
 	 * @return void
 	 */
 	public function render( \WP_Post $post, array $config_data ): void {
-		$consigne     = isset( $config_data['consigne'] ) && is_string( $config_data['consigne'] ) ? $config_data['consigne'] : '';
-		$variante     = isset( $config_data['variante'] ) && is_string( $config_data['variante'] )
+		$consigne = isset( $config_data['consigne'] ) && is_string( $config_data['consigne'] ) ? $config_data['consigne'] : '';
+		$variante = isset( $config_data['variante'] ) && is_string( $config_data['variante'] )
 			? $config_data['variante']
 			: ( isset( $config_data['type_reponse'] ) && is_string( $config_data['type_reponse'] ) ? $config_data['type_reponse'] : 'qcm_oui_non' );
 
@@ -52,8 +52,8 @@ class TypeCapOuPasCap implements TypeInterface {
 				• <strong><?php esc_html_e( 'QCM Oui/Non :', 'roi' ); ?></strong> <?php esc_html_e( 'Définissez une question commune à la série, puis pour chaque diagramme indiquez la réponse attendue (OUI ou NON).', 'roi' ); ?><br>
 				• <strong><?php esc_html_e( 'Move :', 'roi' ); ?></strong> <?php esc_html_e( 'Indiquez le ou les coups attendus (supporte les variantes PGN multi-solutions ex: 1. Nd5+ (1. Bh4+)).', 'roi' ); ?><br>
 				• <strong><?php esc_html_e( 'Notation :', 'roi' ); ?></strong> <?php esc_html_e( "L'élève doit saisir la position de chaque pièce en notation française (ex: Tc2, Dd4, c3). Déduit de la FEN.", 'roi' ); ?><br>
-				<?php // translators: %csl tag explanation. ?>
-				• <strong><?php esc_html_e( 'Clic / Sélection :', 'roi' ); ?></strong> <?php esc_html_e( 'L\'élève clique pour entourer les pièces (Prises [%csl], pièces non protégées, attaques ou différentiel de matériel).', 'roi' ); ?><br>
+				<?php /* translators: %csl is a PGN annotation tag for colored squares */ ?>
+				• <strong><?php esc_html_e( 'Clic / Sélection :', 'roi' ); ?></strong> <?php esc_html_e( "L'élève clique pour entourer les pièces (Prises [%csl], pièces non protégées, attaques ou différentiel de matériel).", 'roi' ); ?><br>
 				• <strong><?php esc_html_e( 'Reconstitution (Setup) :', 'roi' ); ?></strong> <?php esc_html_e( "L'élève place les pièces sur un échiquier vierge depuis une palette (d'après texte ou de mémoire).", 'roi' ); ?>
 			</p>
 
@@ -118,7 +118,7 @@ class TypeCapOuPasCap implements TypeInterface {
 					<div style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 8px;">
 						<label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
 							<input type="radio" name="roi_t14_mode_clic" class="roi_t14_mode_clic" value="cibles" <?php checked( $mode_clic, 'cibles' ); ?>>
-							<?php // translators: %csl annotations description. ?>
+							<?php /* translators: %csl is a PGN annotation tag for colored squares */ ?>
 							<span><?php esc_html_e( 'Cases / Pièces cibles du PGN ([%csl ...]) (Prises, Attaques, Non-protégées)', 'roi' ); ?></span>
 						</label>
 						<label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
@@ -238,8 +238,10 @@ class TypeCapOuPasCap implements TypeInterface {
 						<div class="roi_t14_bloc_clic" data-index="<?php echo (int) $i; ?>" style="display: <?php echo 'clic' === $variante ? 'block' : 'none'; ?>; border-top: 1px dashed #ccc; padding-top: 12px; margin-top: 10px;">
 							<div style="font-size: 12px; color: #50575e; background: #e7f3fe; border-left: 3px solid #2271b1; padding: 8px 10px; border-radius: 2px;">
 								<span class="dashicons dashicons-info" style="font-size: 16px; width: 16px; height: 16px; vertical-align: text-bottom; margin-right: 4px; color: #2271b1;"></span>
-								<?php // translators: %csl annotations explanation. ?>
-								<?php esc_html_e( 'Variante Clic : Les cases/pièces cibles sont automatiquement extraites des annotations [%csl ...] du PGN ou calculées à partir de la FEN.', 'roi' ); ?>
+								<?php
+								/* translators: %csl is a PGN annotation tag for colored squares */
+								esc_html_e( 'Variante Clic : Les cases/pièces cibles sont automatiquement extraites des annotations [%csl ...] du PGN ou calculées à partir de la FEN.', 'roi' );
+								?>
 							</div>
 						</div>
 

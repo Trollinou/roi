@@ -44,7 +44,7 @@ class TypePartieHeros implements TypeInterface {
 		<div id="roi_builder_type_4" class="roi-builder-section" style="display:none; margin-top: 15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
 			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice (La Partie dont tu es le Héros)", 'roi' ); ?></h4>
 			<p class="description" style="margin-bottom: 15px; color: #1d2327; background: #f0f6fc; border-left: 4px solid #72aee6; padding: 10px 12px; border-radius: 2px;">
-				<?php // translators: %cal annotations description. ?>
+				<?php /* translators: %cal is a PGN annotation tag for colored arrows */ ?>
 				<strong><?php esc_html_e( 'Principe :', 'roi' ); ?></strong> <?php esc_html_e( 'Collez une étude PGN complète (ex: exportée depuis Lichess). Les moments de choix QCM sont automatiquement détectés via les flèches [%cal ...] et les 2 variantes associées au coup principal.', 'roi' ); ?>
 			</p>
 

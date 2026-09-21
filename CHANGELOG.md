@@ -2,7 +2,22 @@
 
 ## [Unreleased]
 
-*   **Sauvegarde et Restauration ISO Complète (`Backup.php`, `Manager.php`, `Exercice_Config_DTO.php`, `Contenu_Controller.php`, `CHANGELOG.md`) :**
+*   **Correction et Robustesse de la Restauration des Sauvegardes & Hydratation des Exercices (`Backup.php`, `Manager.php`, `Exercice_Config_DTO.php`, `Builder.php`, `Contenu_Controller.php`) :**
+    *   **Préservation Directe des Métadonnées JSON :** Réinjection brute dans `$wpdb->postmeta` pour les configurations JSON (`_roi_exercice_config`, `_roi_cours_playlist`) afin d'éviter les altérations d'échappement (`wp_unslash`) ou la sérialisation PHP involontaire lors de la restauration.
+    *   **Hydratation Robuste des Métaboxes & REST API :** Gestion universelle des formats (JSON imbriqué, chaîne sérialisée PHP, `wp_unslash`) dans `Manager.php`, `Exercice_Config_DTO.php` et `Contenu_Controller.php`, garantissant le chargement instantané et fiable des composants React `FenInput` et `PgnInput`.
+    *   **Purge et Invalidation du Cache :** Nettoyage automatique des caches de posts (`clean_post_cache`, `wp_cache_delete`, `wp_cache_flush`) lors de la restauration pour un rafraîchissement immédiat de l'interface d'administration.
+*   **Passage aux Prérequis WordPress 7.1 & PHP 8.4 Strict (`roi.php`, `phpcs.xml`, `phpstan.neon`) :**
+    *   Rehaussement du prérequis WordPress à la version 7.1 (`Requires at least: 7.1` et `minimum_wp_version: 7.1`).
+    *   Déclaration stricte `declare(strict_types=1);` appliquée systématiquement sur 100% des fichiers PHP.
+    *   Niveau d'analyse statique PHPStan rehaussé au niveau 7 (`level: 7`) avec zéro erreur.
+    *   Conformité PHPCS totale validée sur l'ensemble du projet sans règles de contournement.
+*   **Optimisations Modernes WordPress 7.1 :**
+    *   **Amorçage Groupé du Cache REST & Termes (`Parcours_Controller.php`) :** Extension de `_prime_post_caches( $ids, true, true )` pour précharger en requêtes groupées les objets, métadonnées et termes associés des éléments de cours/parcours.
+    *   **Blocs Gutenberg & Block Bindings API (`src/blocks/chessboard`, `diagramme`, `pgn`) :** Déclaration du support `"blockBindings": true` dans les fichiers `block.json` pour la liaison de blocs native tout en conservant `apiVersion: 2` garantissant la stabilité des composants React/Chessground.
+
+## [1.7.0] - 2026-09-20
+
+*   **Sauvegarde et Restauration ISO Complète (`Backup.php`, `CHANGELOG.md`) :**
     *   **Préservation Stricte des Identifiants (IDs) :** Réinjection directe dans `$wpdb->posts`, `$wpdb->terms` et `$wpdb->term_taxonomy` avec réalignement automatique des `AUTO_INCREMENT`, garantissant une synchronisation ISO parfaite entre la production et la qualification sans corruption des références d'IDs dans les playlists de cours (`_roi_cours_playlist`) ni des progressions d'élèves.
     *   **Préservation Intégrale des Métadonnées JSON & Restauration Fiable :**
         *   Correction de la restauration des métadonnées de posts : réinjection directe sans altération par `wp_unslash()` (qui supprimait les antislashs d'échappement des configurations JSON, des balises PGN et des formes `[%cal ...]`).

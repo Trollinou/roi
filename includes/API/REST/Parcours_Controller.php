@@ -31,7 +31,7 @@ class Parcours_Controller {
 	/**
 	 * Namespace for the API.
 	 *
-	 * @var string
+	 * @var non-falsy-string
 	 */
 	protected string $namespace = 'roi/v1';
 
@@ -134,7 +134,10 @@ class Parcours_Controller {
 		while ( $query->have_posts() ) {
 			$query->the_post();
 			$post_id = get_the_ID();
-			$post    = get_post( $post_id );
+			if ( ! $post_id ) {
+				continue;
+			}
+			$post = get_post( $post_id );
 			if ( ! $post ) {
 				continue;
 			}
@@ -163,9 +166,9 @@ class Parcours_Controller {
 		}
 		wp_reset_postdata();
 
-		// Bulk prime post caches in 1 single SQL query to prevent N+1 queries.
+		// Bulk prime post caches (posts, meta, terms) in batch queries to prevent N+1 queries.
 		if ( ! empty( $all_item_ids ) ) {
-			_prime_post_caches( array_unique( $all_item_ids ), false, false );
+			_prime_post_caches( array_unique( $all_item_ids ), true, true );
 		}
 
 		// Second pass: resolve playlist item details and course attributes.

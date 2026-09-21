@@ -144,7 +144,8 @@ class ChessEngine {
 	public function render_chessboard( $atts ): string {
 		wp_enqueue_style( 'roi-public-chessboard-style' );
 		wp_enqueue_script( 'roi-public-chessboard-view' );
-		$atts = shortcode_atts(
+		$raw_atts = is_array( $atts ) ? $atts : array();
+		$atts     = shortcode_atts(
 			array(
 				'fen'                   => 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
 				'orientation'           => 'white',
@@ -159,7 +160,7 @@ class ChessEngine {
 				'clockPreset'           => 'none',
 				'showMaterialIndicator' => 'true',
 			),
-			$atts,
+			$raw_atts,
 			'chess_board'
 		);
 
