@@ -19,8 +19,13 @@
 
 *   **Sauvegarde et Restauration ISO Complète (`Backup.php`, `CHANGELOG.md`) :**
     *   **Préservation Stricte des Identifiants (IDs) :** Réinjection directe dans `$wpdb->posts`, `$wpdb->terms` et `$wpdb->term_taxonomy` avec réalignement automatique des `AUTO_INCREMENT`, garantissant une synchronisation ISO parfaite entre la production et la qualification sans corruption des références d'IDs dans les playlists de cours (`_roi_cours_playlist`) ni des progressions d'élèves.
+    *   **Préservation Intégrale des Métadonnées JSON & Restauration Fiable :**
+        *   Correction de la restauration des métadonnées de posts : réinjection directe sans altération par `wp_unslash()` (qui supprimait les antislashs d'échappement des configurations JSON, des balises PGN et des formes `[%cal ...]`).
+        *   Normalisation systématique des configurations d'exercices (`_roi_exercice_config`) et playlists (`_roi_cours_playlist`) en chaînes JSON valides, avec décodage multi-niveaux récursif (empêchant toute corruption issue d'un double échappement ou d'une sérialisation PHP).
+        *   Désérialisation et hydratation robuste dans la metabox d'exercice (`Manager.php`), le DTO (`Exercice_Config_DTO.php`) et l'API REST (`Contenu_Controller.php`) prenant en compte de manière transparente les tableaux PHP, chaînes sérialisées ou JSON multi-échappés, garantissant le peuplement immédiat de l'ensemble des champs `FenInput` et `PgnInput`.
+        *   Purge explicite des caches WordPress (`wp_cache_delete` sur `posts` et `post_meta`, `clean_post_cache`, `wp_cache_flush`) lors de la restauration pour garantir que les données rafraîchies soient immédiatement servies.
     *   **Couverture Intégrale des Données :** Prise en compte de tous les CPTs (`roi_lecon`, `roi_exercice`, `roi_cours`, `roi_video`, `roi_partie`), de la taxonomie `roi_chapitre` avec ses métadonnées de couleurs (`_roi_chapitre_couleur`), des réglages du plugin (`roi_apprentissage_allowed_roles`), et des progressions utilisateurs (`_roi_element_valide*`).
-    *   **Rétrocompatibilité :** Prise en charge transparente des sauvegardes historiques au format JSON standard.
+    *   **Rétrocompatibilité :** Prise en charge transparente des sauvegardes historiques au format JSON standard et décompression universelle (`gzcompress`/`gzuncompress`, `gzencode`/`gzdecode`, JSON brut).
 
 *   **Refonte du Constructeur Type 5 (Posi'Plan) vers Étude PGN Complète (`TypePosiPlan.php`, `type-5.js`, `README.md`, `USING.md`) :**
     *   **Saisie PGN unifiée (`PgnInput`) :** Remplacement des étapes manuelles par la saisie d'une étude PGN complète intégrant le choix initial à 3 branches (1 branche principale + 2 variantes explorables) et les embranchements de la ligne principale.
