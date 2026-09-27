@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-09-27
+
 *   **Correction et Robustesse de la Restauration des Sauvegardes & Hydratation des Exercices (`Backup.php`, `Manager.php`, `Exercice_Config_DTO.php`, `Builder.php`, `Contenu_Controller.php`) :**
     *   **Préservation Directe des Métadonnées JSON :** Réinjection brute dans `$wpdb->postmeta` pour les configurations JSON (`_roi_exercice_config`, `_roi_cours_playlist`) afin d'éviter les altérations d'échappement (`wp_unslash`) ou la sérialisation PHP involontaire lors de la restauration.
     *   **Hydratation Robuste des Métaboxes & REST API :** Gestion universelle des formats (JSON imbriqué, chaîne sérialisée PHP, `wp_unslash`) dans `Manager.php`, `Exercice_Config_DTO.php` et `Contenu_Controller.php`, garantissant le chargement instantané et fiable des composants React `FenInput` et `PgnInput`.
