@@ -13,6 +13,8 @@ import { useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import PromotionDialog from './components/PromotionDialog';
 import { BoardCore } from 'eg-chessboard';
+import 'eg-chessboard/base.css';
+import 'eg-chessboard/pieces/cburnett.css';
 
 export default function Edit({ attributes, setAttributes, clientId }) {
   const blockProps = useBlockProps({

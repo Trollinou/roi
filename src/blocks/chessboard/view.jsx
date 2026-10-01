@@ -1,4 +1,6 @@
 import { BoardCore } from 'eg-chessboard';
+import 'eg-chessboard/base.css';
+import 'eg-chessboard/pieces/cburnett.css';
 import { ChessClock } from './classes/ChessClock';
 import { StockfishManager } from './classes/stockfishManager';
 

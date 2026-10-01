@@ -9,6 +9,8 @@ import {
 import { useEffect, useRef, useState } from '@wordpress/element';
 import RoiFenEditor from '../../components/FenEditor';
 import { BoardCore as EgBoardCore } from 'eg-chessboard';
+import 'eg-chessboard/base.css';
+import 'eg-chessboard/pieces/cburnett.css';
 
 export default function Edit({ attributes, setAttributes }) {
 	const [isModalOpen, setIsModalOpen] = useState(false);

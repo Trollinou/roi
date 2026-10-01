@@ -10,6 +10,8 @@ import { useEffect, useRef, useState } from '@wordpress/element';
 import RoiPgnEditor from '../../components/PgnEditor';
 import '../../components/PgnEditor/PgnEditor.css';
 import { BoardCore as EgBoardCore } from 'eg-chessboard';
+import 'eg-chessboard/base.css';
+import 'eg-chessboard/pieces/cburnett.css';
 
 export default function Edit({ attributes, setAttributes }) {
 	const [isModalOpen, setIsModalOpen] = useState(false);

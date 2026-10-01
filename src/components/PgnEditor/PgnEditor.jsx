@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import { BoardCore } from "eg-chessboard";
+import 'eg-chessboard/base.css';
+import 'eg-chessboard/pieces/cburnett.css';
 import DrawingLegend from "../DrawingLegend";
 import { ensurePgnFenHeader, toFrenchNotation } from "../../utils/chessUtils";
 import useChessBoard from "../../hooks/useChessBoard";

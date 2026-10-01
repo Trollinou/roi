@@ -5,6 +5,8 @@ import { SelectControl } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { BoardCore, getFinalFenFromPgn } from 'eg-chessboard';
+import 'eg-chessboard/base.css';
+import 'eg-chessboard/pieces/cburnett.css';
 import RoiFenEditor from './components/FenEditor';
 import RoiPgnEditor from './components/PgnEditor';
 import './components/FenEditor/FenEditor.css';
