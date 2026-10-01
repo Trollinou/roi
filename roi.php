@@ -3,7 +3,7 @@
  * Plugin Name:       ROI - Ressources et Organisation pour l’Initiation (aux échecs)
  * Plugin URI:        https://example.com/plugins/the-basics/
  * Description:       Ressources et Organisation pour l’Initiation aux échecs.
- * Version:           1.8.0
+ * Version:           1.8.1
  * Requires at least: 7.1
  * Requires PHP:      8.4
  * Author:            Etienne Gagnon
@@ -63,7 +63,7 @@ function roi_dame_not_active_notice() {
 	<?php
 }
 
-define( 'ROI_VERSION', '1.8.0' );
+define( 'ROI_VERSION', '1.8.1' );
 define( 'ROI_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'ROI_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 

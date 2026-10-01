@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.8.1] - 2026-10-01
+
 *   **Optimisation des Styles & Import Granulaire `eg-chessboard` (`webpack.config.js`, `src/admin-fen-editor.js`, `FenEditor.jsx`, `PgnEditor.jsx`, blocs `chessboard`, `diagramme`, `pgn`) :**
     *   **Passage à l'import CSS granulaire :** Remplacement de l'import global tout-en-un par `eg-chessboard/base.css` et le jeu de pièces standard du projet (`eg-chessboard/pieces/cburnett.css`).
     *   **Allègement du Bundle CSS (`eg-chessboard.css`) :** Optimisation de la compilation Webpack réduisant la taille du fichier `build/chessboard/eg-chessboard.css` de 466.8 kB à 117.6 kB (-75%).
