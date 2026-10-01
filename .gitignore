@@ -4,3 +4,5 @@ vendor/
 *.zip
 scratch/
 build/
+dist-temp/
+*.tsbuildinfo
