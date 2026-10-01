@@ -8,6 +8,7 @@ import {
   setupSidebarMetaboxOrdering,
 } from './sidebar-sync';
 import { getDragAfterElement } from './drag-drop';
+import { initAudienceMetabox } from './audience';
 
 declare const ajaxurl: string;
 declare const roi_cours_builder: { nonce: string };
@@ -22,6 +23,8 @@ interface DraggedCatalogData {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  initAudienceMetabox();
+
   const playlistJsonInput = document.getElementById('roi_cours_playlist_json') as HTMLInputElement | null;
   if (!playlistJsonInput) {
     return;

@@ -64,6 +64,7 @@ class Backup {
 	 */
 	public function init(): void {
 		add_action( 'admin_menu', array( $this->admin_page, 'register_page' ), 20 );
+		add_action( 'admin_enqueue_scripts', array( $this->admin_page, 'enqueue_assets' ) );
 		add_action( 'admin_init', array( $this, 'handle_backup_action' ) );
 		add_action( 'admin_init', array( $this, 'handle_restore_action' ) );
 		add_filter( 'dame_scheduled_backup_attachments', array( $this, 'add_to_dame_scheduled_backup' ), 10, 2 );

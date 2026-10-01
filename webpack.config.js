@@ -34,12 +34,17 @@ module.exports = {
 			__dirname,
 			'src/admin-video-settings.ts'
 		),
+		'chessboard/admin-partie-viewer': path.resolve(
+			__dirname,
+			'src/admin-partie-viewer.ts'
+		),
 		'diagramme/index': path.resolve(
 			__dirname,
 			'src/blocks/diagramme/index.ts'
 		),
 		'pgn/index': path.resolve(__dirname, 'src/blocks/pgn/index.ts'),
 		'suivi/index': path.resolve(__dirname, 'src/suivi/index.tsx'),
+		'admin-backup': path.resolve(__dirname, 'src/admin-backup.ts'),
 	},
 	output: {
 		...defaultConfig.output,

@@ -51,6 +51,32 @@ class Admin_Page {
 	}
 
 	/**
+	 * Enqueues assets for the backup/restore page.
+	 *
+	 * @param string $hook The current admin page hook.
+	 * @return void
+	 */
+	public function enqueue_assets( string $hook ): void {
+		if ( ! str_contains( $hook, 'roi-backup-restore' ) ) {
+			return;
+		}
+
+		$asset_file = ROI_PLUGIN_DIR . 'build/admin-backup.asset.php';
+		$asset      = file_exists( $asset_file ) ? include $asset_file : array(
+			'dependencies' => array(),
+			'version'      => ROI_VERSION,
+		);
+
+		wp_enqueue_script(
+			'roi-admin-backup',
+			ROI_PLUGIN_URL . 'build/admin-backup.js',
+			$asset['dependencies'],
+			$asset['version'],
+			true
+		);
+	}
+
+	/**
 	 * Renders the backup/restore admin view.
 	 *
 	 * @return void
@@ -78,7 +104,7 @@ class Admin_Page {
 				<div class="roi-restore-section">
 					<h2><?php esc_html_e( 'Restaurer les données d\'apprentissage', 'roi' ); ?></h2>
 					<p><strong><span style="color: red;"><?php esc_html_e( 'Attention :', 'roi' ); ?></span></strong> <?php esc_html_e( "L'importation depuis un fichier de sauvegarde effacera et remplacera l'ensemble des données d'apprentissage existantes (leçons, exercices, cours, vidéos, parties et chapitres). Les identifiants (IDs) d'origine sont strictement préservés pour garantir la conformité ISO.", 'roi' ); ?></p>
-					<form method="post" enctype="multipart/form-data" id="roi-restore-form" action="">
+					<form method="post" enctype="multipart/form-data" id="roi-restore-form" action="" data-confirm-message="<?php esc_attr_e( 'Êtes-vous sûr de vouloir restaurer cette sauvegarde ? Toutes les données existantes du module seront remplacées en conservant les identifiants d\'origine. Cette action est irréversible.', 'roi' ); ?>">
 						<?php wp_nonce_field( 'roi_restore_nonce_action', 'roi_restore_nonce' ); ?>
 						<p>
 							<label for="roi_restore_file"><?php esc_html_e( 'Choisissez un fichier de sauvegarde (.json.gz ou .json) à importer :', 'roi' ); ?></label>
@@ -89,18 +115,6 @@ class Admin_Page {
 				</div>
 
 			</div>
-			<script>
-				document.addEventListener('DOMContentLoaded', function() {
-					const restoreForm = document.getElementById('roi-restore-form');
-					if (restoreForm) {
-						restoreForm.addEventListener('submit', function(e) {
-							if (!confirm("<?php echo esc_js( __( 'Êtes-vous sûr de vouloir restaurer cette sauvegarde ? Toutes les données existantes du module seront remplacées en conservant les identifiants d\'origine. Cette action est irréversible.', 'roi' ) ); ?>")) {
-								e.preventDefault();
-							}
-						});
-					}
-				});
-			</script>
 		</div>
 		<?php
 	}

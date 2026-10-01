@@ -208,14 +208,14 @@ class Audience {
 
 			<div style="margin-bottom: 12px;">
 				<label style="display: block; margin-bottom: 6px; cursor: pointer;">
-					<input type="radio" name="roi_cours_audience_type" value="all" <?php checked( $audience_type, 'all' ); ?> onchange="roiToggleAudienceSection(this.value)">
+					<input type="radio" name="roi_cours_audience_type" value="all" <?php checked( $audience_type, 'all' ); ?>>
 					<strong><?php esc_html_e( 'Tous les membres', 'roi' ); ?></strong>
 					<span style="display: block; font-size: 11px; color: #646970; margin-left: 20px;">
 						<?php esc_html_e( 'Parcours commun du club', 'roi' ); ?>
 					</span>
 				</label>
 				<label style="display: block; cursor: pointer;">
-					<input type="radio" name="roi_cours_audience_type" value="restricted" <?php checked( $audience_type, 'restricted' ); ?> onchange="roiToggleAudienceSection(this.value)">
+					<input type="radio" name="roi_cours_audience_type" value="restricted" <?php checked( $audience_type, 'restricted' ); ?>>
 					<strong><?php esc_html_e( 'Cours assigné', 'roi' ); ?></strong>
 					<span style="display: block; font-size: 11px; color: #646970; margin-left: 20px;">
 						<?php esc_html_e( 'Affecté à des groupes ou élèves ciblés', 'roi' ); ?>
@@ -241,7 +241,7 @@ class Audience {
 				<?php if ( ! empty( $available_members ) ) : ?>
 					<div>
 						<strong style="display: block; font-size: 12px; margin-bottom: 4px;"><?php esc_html_e( 'Élèves assignés individuellement :', 'roi' ); ?></strong>
-						<input type="text" id="roi_audience_member_filter" placeholder="<?php esc_attr_e( 'Filtrer par nom...', 'roi' ); ?>" style="width: 100%; margin-bottom: 6px; font-size: 12px; padding: 3px 8px; border: 1px solid #8c8f94; border-radius: 4px;" oninput="roiFilterAudienceMembers(this.value)" onkeydown="if(event.key === 'Enter'){event.preventDefault(); return false;}">
+						<input type="text" id="roi_audience_member_filter" placeholder="<?php esc_attr_e( 'Filtrer par nom...', 'roi' ); ?>" style="width: 100%; margin-bottom: 6px; font-size: 12px; padding: 3px 8px; border: 1px solid #8c8f94; border-radius: 4px;">
 						<div class="roi-audience-members-checklist" style="max-height: 180px; overflow-y: auto; border: 1px solid #dcdcde; padding: 6px; background: #fff; border-radius: 3px;">
 							<ul id="roi_audience_members_list" style="margin: 0; padding: 0; list-style: none;">
 								<?php foreach ( $available_members as $m ) : ?>
@@ -258,32 +258,6 @@ class Audience {
 				<?php endif; ?>
 			</div>
 		</div>
-
-		<script>
-		function roiToggleAudienceSection(val) {
-			var c = document.getElementById('roi-audience-restricted-container');
-			if (c) {
-				c.style.display = (val === 'restricted') ? 'block' : 'none';
-			}
-		}
-
-		function roiNormalizeText(str) {
-			return (str || '')
-				.normalize('NFD')
-				.replace(/[\u0300-\u036f]/g, '')
-				.toLowerCase()
-				.trim();
-		}
-
-		function roiFilterAudienceMembers(val) {
-			var filter = roiNormalizeText(val);
-			var items = document.querySelectorAll('#roi_audience_members_list li');
-			for (var i = 0; i < items.length; i++) {
-				var text = roiNormalizeText(items[i].textContent || items[i].innerText);
-				items[i].style.display = (text.indexOf(filter) > -1) ? '' : 'none';
-			}
-		}
-		</script>
 		<?php
 	}
 

@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+*   **Éradication Complète du JavaScript Embarqué & Migration TypeScript 100% :**
+    *   **Migration du Visualiseur de Parties Admin (`src/admin-partie-viewer.ts`, `Partie.php`, `webpack.config.js`) :** Portage intégral en TypeScript strict avec typage des interfaces `boardAPI` et du DOM, suppression du fichier legacy dans `assets/js/admin-partie-viewer.js` et chargement du script compilé depuis `build/chessboard/admin-partie-viewer.js` avec son fichier de dépendances `.asset.php`.
+    *   **Externalisation de la Metabox Audience (`src/admin-cours-builder/audience.ts`, `Audience.php`, `main.ts`) :** Création d'un module TypeScript dédié pour le basculement d'affichage et le filtrage en direct des élèves avec écouteurs d'événements standards, et suppression complète des attributs inline (`onchange`, `oninput`, `onkeydown`) ainsi que du bloc `<script>` inline dans `Audience.php`.
+    *   **Externalisation de la Confirmation de Restauration (`src/admin-backup.ts`, `Admin_Page.php`, `Backup.php`, `webpack.config.js`) :** Création d'un module TypeScript pour intercepter la soumission du formulaire de restauration via `data-confirm-message`, enregistrement et mise en file d'attente propres via `admin_enqueue_scripts` et suppression de la balise `<script>` inline.
+
 ## [1.8.1] - 2026-10-01
 
 *   **Optimisation des Styles & Import Granulaire `eg-chessboard` (`webpack.config.js`, `src/admin-fen-editor.js`, `FenEditor.jsx`, `PgnEditor.jsx`, blocs `chessboard`, `diagramme`, `pgn`) :**

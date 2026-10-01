@@ -253,6 +253,7 @@ class Partie {
 		if ( 'post.php' === $hook || 'post-new.php' === $hook ) {
 			$plugin_url = ROI_PLUGIN_URL;
 			$chess_url  = $plugin_url . 'build/chessboard/';
+			$chess_dir  = ROI_PLUGIN_DIR . 'build/chessboard/';
 
 			wp_enqueue_style(
 				'roi-public-chessboard-style',
@@ -261,11 +262,17 @@ class Partie {
 				ROI_VERSION
 			);
 
+			$view_asset_file = $chess_dir . 'chessboard-view.asset.php';
+			$view_asset      = file_exists( $view_asset_file ) ? include $view_asset_file : array(
+				'dependencies' => array( 'wp-element' ),
+				'version'      => ROI_VERSION,
+			);
+
 			wp_enqueue_script(
 				'roi-public-chessboard-view',
 				$chess_url . 'chessboard-view.js',
-				array( 'wp-element' ),
-				ROI_VERSION,
+				$view_asset['dependencies'],
+				$view_asset['version'],
 				true
 			);
 
@@ -277,11 +284,17 @@ class Partie {
 				)
 			);
 
+			$viewer_asset_file = $chess_dir . 'admin-partie-viewer.asset.php';
+			$viewer_asset      = file_exists( $viewer_asset_file ) ? include $viewer_asset_file : array(
+				'dependencies' => array( 'roi-public-chessboard-view' ),
+				'version'      => ROI_VERSION,
+			);
+
 			wp_enqueue_script(
 				'roi-admin-partie-viewer',
-				$plugin_url . 'assets/js/admin-partie-viewer.js',
-				array( 'roi-public-chessboard-view' ),
-				ROI_VERSION,
+				$chess_url . 'admin-partie-viewer.js',
+				array_merge( array( 'roi-public-chessboard-view' ), $viewer_asset['dependencies'] ),
+				$viewer_asset['version'],
 				true
 			);
 		}
