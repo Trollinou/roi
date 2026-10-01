@@ -5,6 +5,7 @@
 phpstan.neon
 package.json
 package-lock.json
+tsconfig.json
 composer.json
 composer.lock
 node_modules
