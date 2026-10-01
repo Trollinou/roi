@@ -1,9 +1,22 @@
 {
   "name": "roi",
   "version": "1.8.0",
+  "types": "./src/types/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/types/index.ts"
+    },
+    "./types": {
+      "types": "./src/types/index.ts"
+    },
+    "./*": {
+      "types": "./src/types/*.ts"
+    }
+  },
   "scripts": {
     "build": "wp-scripts build",
     "start": "wp-scripts start",
+    "typecheck": "tsc --noEmit",
     "package": "node scripts/package.cjs",
     "version-sync": "node scripts/version-sync.cjs",
     "lint": "eslint ."

@@ -1,0 +1,614 @@
+import React from 'react';
+import { decodeEntities } from '@wordpress/html-entities';
+import { CHAPTER_COLOR_MAP, CHAPTER_ORDER_MAP } from '../utils/suiviHelpers';
+import type { StudentProgress } from '../../types/api/progression';
+import type { CoursItem } from '../../types/api/parcours';
+
+export interface ActionPayload {
+  type: 'course' | 'element';
+  studentId: string;
+  id: number;
+}
+
+export interface StudentCardProps {
+  student: StudentProgress;
+  courses: CoursItem[];
+  selectedLevel: string;
+  selectedChapter: string;
+  expandedLevels: Record<string, boolean>;
+  expandedChapters: Record<string, boolean>;
+  toggleLevelExpanded: (studentId: string, level: number) => void;
+  toggleChapterExpanded: (studentId: string, level: number, chapter: string) => void;
+  onSelectStudent: (studentId: string) => void;
+  handleValidateCourse: (studentId: string, courseId: number, courseTitle: string) => void;
+  handleResetCourse: (studentId: string, courseId: number, courseTitle: string) => void;
+  resettingAction: ActionPayload | null;
+  validatingAction: ActionPayload | null;
+}
+
+export default function StudentCard({
+  student,
+  courses,
+  selectedLevel,
+  selectedChapter,
+  expandedLevels,
+  expandedChapters,
+  toggleLevelExpanded,
+  toggleChapterExpanded,
+  onSelectStudent,
+  handleValidateCourse,
+  handleResetCourse,
+  resettingAction,
+  validatingAction,
+}: StudentCardProps): React.JSX.Element {
+  const validesSet = new Set<number>(student.elements_valides || []);
+  const rawStudentName =
+    student.prenom || student.nom
+      ? `${student.prenom || ''} ${student.nom || ''}`.trim()
+      : student.display_name || `Élève #${student.id}`;
+  const studentName = decodeEntities(rawStudentName);
+
+  // Filter courses for this student
+  const filteredCourses = courses.filter((course) => {
+    if (
+      selectedLevel !== 'all' &&
+      Number(course.niveau) !== Number(selectedLevel)
+    ) {
+      return false;
+    }
+    if (
+      selectedChapter !== 'all' &&
+      course.chapitre_nom !== selectedChapter
+    ) {
+      return false;
+    }
+    return (course.playlist || []).length > 0;
+  });
+
+  // Group courses by Level, then by Chapter
+  const groupedData: Record<number, Record<string, CoursItem[]>> = {};
+  filteredCourses.forEach((course) => {
+    const lvl = course.niveau || 1;
+    const chap = course.chapitre_nom || 'Sans Chapitre';
+
+    if (!groupedData[lvl]) {
+      groupedData[lvl] = {};
+    }
+    if (!groupedData[lvl][chap]) {
+      groupedData[lvl][chap] = [];
+    }
+    groupedData[lvl][chap].push(course);
+  });
+
+  const studentLevels = Object.keys(groupedData)
+    .map(Number)
+    .sort((a, b) => a - b);
+
+  return (
+    <div
+      style={{
+        background: '#fff',
+        border: '1px solid #c3c4c7',
+        borderRadius: '6px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+        padding: '20px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '15px',
+      }}
+    >
+      {/* CARD HEADER */}
+      <div
+        style={{
+          borderBottom: '1px solid #f0f0f1',
+          paddingBottom: '10px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          cursor: 'pointer',
+        }}
+        onClick={() => onSelectStudent(student.id)}
+        title="Cliquer pour afficher la vue détaillée de l'élève"
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '2px',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              flexWrap: 'wrap',
+            }}
+          >
+            <h3
+              style={{
+                margin: 0,
+                fontSize: '17px',
+                fontWeight: 600,
+                color: '#0073aa',
+              }}
+            >
+              {studentName}
+            </h3>
+            {(student.groups || []).map((g) => (
+              <span
+                key={g.id}
+                style={{
+                  fontSize: '11px',
+                  background: '#e0f2fe',
+                  color: '#0369a1',
+                  border: '1px solid #bae6fd',
+                  padding: '1px 6px',
+                  borderRadius: '12px',
+                  fontWeight: 500,
+                }}
+              >
+                {decodeEntities(g.name)}
+              </span>
+            ))}
+            {(student.assigned_course_ids || []).length > 0 && (
+              <span
+                style={{
+                  fontSize: '11px',
+                  background: '#fef3c7',
+                  color: '#92400e',
+                  border: '1px solid #fde68a',
+                  padding: '1px 6px',
+                  borderRadius: '12px',
+                  fontWeight: 500,
+                }}
+                title="Cet élève a des cours assignés"
+              >
+                📌 {(student.assigned_course_ids || []).length}{' '}
+                assigné
+                {(student.assigned_course_ids || []).length > 1 ? 's' : ''}
+              </span>
+            )}
+            <span
+              style={{
+                fontSize: '11px',
+                color: '#0073aa',
+                opacity: 0.8,
+              }}
+            >
+              🔍 Détails
+            </span>
+          </div>
+          {student.parent_user && (
+            <span style={{ fontSize: '11px', color: '#646970' }}>
+              Rattaché à :{' '}
+              <a
+                href={`user-edit.php?user_id=${student.parent_user.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  color: '#0073aa',
+                  textDecoration: 'none',
+                }}
+                title="Ouvrir le profil WordPress parent (nouvel onglet)"
+              >
+                {decodeEntities(student.parent_user.display_name)}{' '}
+                (#{student.parent_user.id}) ↗
+              </a>
+            </span>
+          )}
+        </div>
+        <a
+          href={
+            student.identity_type === 'member'
+              ? `post.php?post=${student.display_id}&action=edit`
+              : `user-edit.php?user_id=${student.display_id || student.id}`
+          }
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            fontSize: '10px',
+            color:
+              student.identity_type === 'member'
+                ? '#0369a1'
+                : '#444',
+            background:
+              student.identity_type === 'member'
+                ? '#e0f2fe'
+                : '#f0f0f1',
+            padding: '3px 8px',
+            borderRadius: '3px',
+            fontWeight: '600',
+            textDecoration: 'none',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '3px',
+          }}
+          title={
+            student.identity_type === 'member'
+              ? 'Voir la fiche adhérent DAME (nouvel onglet)'
+              : 'Voir le compte utilisateur WP (nouvel onglet)'
+          }
+        >
+          {student.identity_type === 'member'
+            ? `Adhérent #${student.display_id} ↗`
+            : `Compte WP #${student.display_id || student.id} ↗`}
+        </a>
+      </div>
+
+      {/* CARD CONTENT - LEVEL ACCORDIONS */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px',
+        }}
+      >
+        {studentLevels.length === 0 ? (
+          <div
+            style={{
+              fontSize: '13px',
+              color: '#8c8f94',
+              fontStyle: 'italic',
+              textAlign: 'center',
+              padding: '10px 0',
+            }}
+          >
+            Aucun cours ne correspond aux filtres.
+          </div>
+        ) : (
+          studentLevels.map((level) => {
+            const chapters = groupedData[level];
+            const isLevelExpanded =
+              expandedLevels[`${student.id}_${level}`] !== false;
+
+            const sortedChapters = Object.keys(chapters).sort((a, b) => {
+              const orderA = CHAPTER_ORDER_MAP[a] ?? 99;
+              const orderB = CHAPTER_ORDER_MAP[b] ?? 99;
+              return orderA - orderB;
+            });
+
+            return (
+              <div
+                key={level}
+                style={{
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '4px',
+                  overflow: 'hidden',
+                }}
+              >
+                {/* Level Header */}
+                <button
+                  type="button"
+                  onClick={() => toggleLevelExpanded(student.id, level)}
+                  style={{
+                    width: '100%',
+                    background: '#f8f9fa',
+                    border: 'none',
+                    borderBottom: isLevelExpanded
+                      ? '1px solid #e0e0e0'
+                      : 'none',
+                    padding: '8px 12px',
+                    textAlign: 'left',
+                    fontWeight: '600',
+                    fontSize: '13px',
+                    color: '#444',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <span>Niveau {level}</span>
+                  <span
+                    style={{
+                      fontSize: '10px',
+                      color: '#888',
+                    }}
+                  >
+                    {isLevelExpanded ? '▲ Cacher' : '▼ Afficher'}
+                  </span>
+                </button>
+
+                {/* Chapters (Nested Accordions) */}
+                {isLevelExpanded && (
+                  <div
+                    style={{
+                      padding: '8px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px',
+                      background: '#fff',
+                    }}
+                  >
+                    {sortedChapters.map((chapter) => {
+                      const chapterCourses = chapters[chapter];
+                      const isChapterExpanded =
+                        expandedChapters[`${student.id}_${level}_${chapter}`] !== false;
+                      const firstCourse = chapterCourses[0] || ({} as Partial<CoursItem>);
+                      const colorSlug = firstCourse.chapitre_couleur || 'tertiary';
+                      const chapterColor =
+                        CHAPTER_COLOR_MAP[colorSlug] || colorSlug || '#8224e3';
+
+                      const sortedCourses = [...chapterCourses].sort(
+                        (a, b) => (a.ordre || 0) - (b.ordre || 0)
+                      );
+
+                      return (
+                        <div
+                          key={chapter}
+                          style={{
+                            border: `1px solid ${chapterColor}25`,
+                            borderRadius: '4px',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          {/* Chapter Header */}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              toggleChapterExpanded(
+                                student.id,
+                                level,
+                                chapter
+                              )
+                            }
+                            style={{
+                              width: '100%',
+                              background: chapterColor,
+                              border: 'none',
+                              borderBottom: 'none',
+                              padding: '8px 12px',
+                              textAlign: 'left',
+                              fontWeight: '600',
+                              fontSize: '11px',
+                              textTransform: 'uppercase',
+                              color: '#fff',
+                              letterSpacing: '0.5px',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                            }}
+                          >
+                            <span>{decodeEntities(chapter)}</span>
+                            <span
+                              style={{
+                                fontSize: '9px',
+                                opacity: 0.8,
+                              }}
+                            >
+                              {isChapterExpanded ? '▲' : '▼'}
+                            </span>
+                          </button>
+
+                          {/* Courses list within chapter */}
+                          {isChapterExpanded && (
+                            <div
+                              style={{
+                                padding: '10px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '12px',
+                                background: '#fff',
+                              }}
+                            >
+                              {sortedCourses.map((course) => {
+                                const playlist = course.playlist || [];
+                                const totalElements = playlist.length;
+
+                                let validatedCount = 0;
+                                playlist.forEach((item) => {
+                                  if (
+                                    item &&
+                                    item.id &&
+                                    validesSet.has(Number(item.id))
+                                  ) {
+                                    validatedCount++;
+                                  }
+                                });
+
+                                const percentage =
+                                  totalElements > 0
+                                    ? Math.round((validatedCount / totalElements) * 100)
+                                    : 0;
+                                const isResettingThisCourse =
+                                  resettingAction &&
+                                  resettingAction.type === 'course' &&
+                                  resettingAction.studentId === student.id &&
+                                  resettingAction.id === course.id;
+                                const isValidatingThisCourse =
+                                  validatingAction &&
+                                  validatingAction.type === 'course' &&
+                                  validatingAction.studentId === student.id &&
+                                  validatingAction.id === course.id;
+
+                                return (
+                                  <div
+                                    key={course.id}
+                                    style={{
+                                      display: 'flex',
+                                      flexDirection: 'column',
+                                      gap: '4px',
+                                    }}
+                                  >
+                                    {/* Course Row */}
+                                    <div
+                                      style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        gap: '10px',
+                                      }}
+                                    >
+                                      <span
+                                        style={{
+                                          fontWeight: '600',
+                                          fontSize: '13px',
+                                          color: '#1d2327',
+                                          maxWidth: '75%',
+                                          whiteSpace: 'nowrap',
+                                          overflow: 'hidden',
+                                          textOverflow: 'ellipsis',
+                                        }}
+                                        title={decodeEntities(course.titre)}
+                                      >
+                                        {decodeEntities(course.titre)}
+                                      </span>
+
+                                      <div
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: '6px',
+                                        }}
+                                      >
+                                        <span
+                                          style={{
+                                            color: '#646970',
+                                            fontSize: '11px',
+                                            fontWeight: '500',
+                                          }}
+                                        >
+                                          {validatedCount} / {totalElements}
+                                        </span>
+
+                                        {validatedCount < totalElements && (
+                                          <button
+                                            type="button"
+                                            onClick={() =>
+                                              handleValidateCourse(
+                                                student.id,
+                                                course.id,
+                                                course.titre
+                                              )
+                                            }
+                                            disabled={
+                                              Boolean(isValidatingThisCourse || isResettingThisCourse)
+                                            }
+                                            title="Valider tous les exercices restants de ce cours (Club)"
+                                            style={{
+                                              background: 'none',
+                                              border: 'none',
+                                              color: '#00a32a',
+                                              cursor: 'pointer',
+                                              fontSize: '14px',
+                                              padding: '2px 4px',
+                                              lineHeight: 1,
+                                              borderRadius: '3px',
+                                            }}
+                                            onMouseOver={(e) => {
+                                              e.currentTarget.style.backgroundColor = '#dcfce7';
+                                            }}
+                                            onMouseOut={(e) => {
+                                              e.currentTarget.style.backgroundColor = 'transparent';
+                                            }}
+                                          >
+                                            {isValidatingThisCourse ? '...' : '✓'}
+                                          </button>
+                                        )}
+
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            handleResetCourse(
+                                              student.id,
+                                              course.id,
+                                              course.titre
+                                            )
+                                          }
+                                          disabled={
+                                            Boolean(
+                                              isResettingThisCourse ||
+                                              isValidatingThisCourse ||
+                                              validatedCount === 0
+                                            )
+                                          }
+                                          title="Réinitialiser la progression de ce cours"
+                                          style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            color:
+                                              validatedCount === 0
+                                                ? '#ccd0d4'
+                                                : '#d63638',
+                                            cursor:
+                                              validatedCount === 0
+                                                ? 'default'
+                                                : 'pointer',
+                                            fontSize: '14px',
+                                            padding: '2px 4px',
+                                            lineHeight: 1,
+                                            borderRadius: '3px',
+                                          }}
+                                          onMouseOver={(e) => {
+                                            if (validatedCount > 0) {
+                                              e.currentTarget.style.backgroundColor = '#fbeaea';
+                                            }
+                                          }}
+                                          onMouseOut={(e) => {
+                                            e.currentTarget.style.backgroundColor = 'transparent';
+                                          }}
+                                        >
+                                          {isResettingThisCourse ? '...' : '↺'}
+                                        </button>
+                                      </div>
+                                    </div>
+
+                                    {/* Progress Bar Row */}
+                                    <div
+                                      style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '10px',
+                                      }}
+                                    >
+                                      <div
+                                        style={{
+                                          flexGrow: 1,
+                                          height: '6px',
+                                          background: '#f0f0f1',
+                                          borderRadius: '3px',
+                                          overflow: 'hidden',
+                                        }}
+                                      >
+                                        <div
+                                          style={{
+                                            width: `${percentage}%`,
+                                            height: '100%',
+                                            background: '#00a32a',
+                                          }}
+                                        />
+                                      </div>
+                                      <span
+                                        style={{
+                                          fontSize: '10px',
+                                          fontWeight: '600',
+                                          color: '#444',
+                                          minWidth: '28px',
+                                          textAlign: 'right',
+                                        }}
+                                      >
+                                        {percentage}%
+                                      </span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}

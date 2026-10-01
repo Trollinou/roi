@@ -8,9 +8,9 @@ export class ChessClock {
 	public binc = 0; // ms
 	public activeColor: 'white' | 'black' | null = null;
 	public timerTenths = 0;
-	private timerInterval: any = null;
+	private timerInterval: ReturnType<typeof setInterval> | null = null;
 
-	public onTick: ((wtime: number, btime: number) => void) | null = null; // eslint-disable-line no-unused-vars
+	public onTick: ((wtime: number, btime: number) => void) | null = null;
 	public onTimeOut: ((flaggedColor: 'white' | 'black') => void) | null = // eslint-disable-line no-unused-vars
 		null;
 
@@ -148,12 +148,12 @@ export class ChessClock {
 		if (justFinishedColor === 'white') {
 			this.wtime += this.winc;
 			// Bonus time at move 40 (+30s) is only applied if explicitly supported by a custom/classic cadence preset.
-			if (this.preset === ('classic' as any) && plyCount === 80) {
+			if ((this.preset as string) === 'classic' && plyCount === 80) {
 				this.wtime += 30000;
 			}
 		} else {
 			this.btime += this.binc;
-			if (this.preset === ('classic' as any) && plyCount === 81) {
+			if ((this.preset as string) === 'classic' && plyCount === 81) {
 				this.btime += 30000;
 			}
 		}

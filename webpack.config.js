@@ -5,37 +5,41 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
 	...defaultConfig,
+	resolve: {
+		...(defaultConfig.resolve || {}),
+		extensions: ['.ts', '.tsx', '.js', '.jsx', '.json', ...(defaultConfig.resolve?.extensions || [])],
+	},
 	entry: {
 		'chessboard/chessboard': path.resolve(
 			__dirname,
-			'src/blocks/chessboard/index.jsx'
+			'src/blocks/chessboard/index.tsx'
 		),
 		'chessboard/chessboard-view': path.resolve(
 			__dirname,
-			'src/blocks/chessboard/view.jsx'
+			'src/blocks/chessboard/view.ts'
 		),
 		'chessboard/admin-fen-editor': path.resolve(
 			__dirname,
-			'src/admin-fen-editor.js'
+			'src/admin-fen-editor.tsx'
 		),
 		'chessboard/admin-exercice-builder': path.resolve(
 			__dirname,
-			'src/admin-exercice-builder/main.js'
+			'src/admin-exercice-builder/main.ts'
 		),
 		'chessboard/admin-cours-builder': path.resolve(
 			__dirname,
-			'src/admin-cours-builder/main.js'
+			'src/admin-cours-builder/main.ts'
 		),
 		'chessboard/admin-video-settings': path.resolve(
 			__dirname,
-			'src/admin-video-settings.js'
+			'src/admin-video-settings.ts'
 		),
 		'diagramme/index': path.resolve(
 			__dirname,
-			'src/blocks/diagramme/index.js'
+			'src/blocks/diagramme/index.ts'
 		),
-		'pgn/index': path.resolve(__dirname, 'src/blocks/pgn/index.js'),
-		'suivi/index': path.resolve(__dirname, 'src/suivi/index.js'),
+		'pgn/index': path.resolve(__dirname, 'src/blocks/pgn/index.ts'),
+		'suivi/index': path.resolve(__dirname, 'src/suivi/index.tsx'),
 	},
 	output: {
 		...defaultConfig.output,
