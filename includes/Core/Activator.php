@@ -31,6 +31,7 @@ class Activator {
 		( new \ROI\CPT\Exercice() )->register();
 		( new \ROI\CPT\Cours() )->register();
 		( new \ROI\CPT\Partie() )->register();
+		( new \ROI\CPT\Video() )->register();
 
 		// Flush rewrite rules.
 		flush_rewrite_rules();

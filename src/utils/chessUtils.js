@@ -89,7 +89,9 @@ export const ROLE_NAMES_FR = {
  * @return {string} Nom français de la pièce (ex: 'Cavalier', 'Dame')
  */
 export function getPieceLabel(roleOrChar) {
-	if (!roleOrChar) return 'Pièce';
+	if (!roleOrChar) {
+		return 'Pièce';
+	}
 	const key = String(roleOrChar).toLowerCase();
 	return ROLE_NAMES_FR[key] || 'Pièce';
 }
@@ -110,7 +112,7 @@ export const PGN_BRUSH_MAP = {
  * Extrait les formes graphiques ([%csl ...], [%cal ...], [%cpl ...]) et le texte nettoyé d'un commentaire PGN.
  *
  * @param {string} commentsText - Chaîne de commentaires PGN
- * @return {{ shapes: Array<{ orig: string, dest?: string, brush: string }>, cleanedText: string }}
+ * @return {{ shapes: Array<{ orig: string, dest?: string, brush: string }>, cleanedText: string }} Objets de formes géométriques et texte épuré.
  */
 export function extractShapesFromComments(commentsText) {
 	if (!commentsText || typeof commentsText !== 'string') {

@@ -53,6 +53,10 @@ class Group_Service {
 			)
 		);
 
+		if ( ! empty( $restricted_courses_query ) ) {
+			update_meta_cache( 'post', wp_list_pluck( $restricted_courses_query, 'ID' ) );
+		}
+
 		$restricted_courses = array();
 		foreach ( $restricted_courses_query as $c_post ) {
 			$raw_groups  = get_post_meta( $c_post->ID, '_roi_cours_target_groups', true );
@@ -65,6 +69,10 @@ class Group_Service {
 				'groups'  => array_map( 'intval', (array) $c_groups ),
 				'members' => array_map( 'intval', (array) $c_members ),
 			);
+		}
+
+		if ( ! empty( $users ) ) {
+			update_meta_cache( 'user', wp_list_pluck( $users, 'ID' ) );
 		}
 
 		foreach ( $users as $user ) {

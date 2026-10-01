@@ -48,3 +48,12 @@ if ( ! empty( $term_ids ) ) {
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 	$wpdb->query( "DELETE FROM {$wpdb->term_taxonomy} WHERE term_id IN ($term_ids_escaped)" );
 }
+
+// Delete ROI user progression and config metadata.
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+$wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE '\_roi\_%'" );
+
+// Delete transients.
+delete_transient( 'roi_parcours_raw_courses' );
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\_transient\_roi\_%' OR option_name LIKE '\_transient\_timeout\_roi\_%'" );

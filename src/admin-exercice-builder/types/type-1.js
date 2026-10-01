@@ -19,7 +19,9 @@ export function updateConfig() {
 		return;
 	}
 
-	const consigneText = t1ConsigneGlobale ? t1ConsigneGlobale.value.trim() : '';
+	const consigneText = t1ConsigneGlobale
+		? t1ConsigneGlobale.value.trim()
+		: '';
 	const qcmItems = container.querySelectorAll('.roi-t1-qcm-item');
 	const qcmsArr = [];
 

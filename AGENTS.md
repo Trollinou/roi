@@ -12,8 +12,7 @@
 
 ## 3. Architecture & Structure
 - **PSR-4 / Namespaces** : Sub-folders dans `includes/` en PascalCase (`includes/Admin/`, `includes/CPT/`). Fichiers/classes en PascalCase.
-- **Assets centralisés** : `assets/css/` et `assets/js/`. Naming: `{contexte}-{composant}.{ext}` (ex: `admin-settings.js`). Enqueue handles préfixés par `roi-`.
-- **Complexité = Sous-dossier** : Si > 300-400 lignes, découper la classe/module dans un sous-dossier thématique avec le pattern Manager/Components. Une classe = Un fichier.
+- **Complexité & Modularité** : Seuil d'alerte à ~500 lignes (ou multi-responsabilités avérées). Découper selon le principe SRP (Single Responsibility Principle) avec le pattern Manager/Components ou Custom Hooks en React. Éviter le sur-découpage artificiel (over-engineering). Une classe PHP = Un fichier.
 
 ## 4. Règles Code & Sécurité
 - **PHP 8.4** : Promoted properties, Enums typés, DTO `readonly`, strict return types. $wpdb->prepare obligatoire.

@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+*   **QA, Sécurité & Cycle de Vie (`Activator.php`, `uninstall.php`, `type-1.js`, `chessUtils.js`) :**
+    *   **Conformité ESLint / Prettier :** Résolution des erreurs de formatage ternaire (`type-1.js`), ajout des accolades obligatoires (`curly`) et documentation JSDoc `@return` dans `chessUtils.js`.
+    *   **Enregistrement CPT Vidéo à l'activation :** Ajout de `Video::register()` dans `Activator.php` pour la génération des règles de réécriture lors de l'activation.
+    *   **Désinstallation Complète :** Purge des métadonnées utilisateur de progression (`_roi_%`) et des transients de cache (`_transient_roi_%`) dans `uninstall.php`.
+*   **Refactorisation Modulaire Frontend (React / Vanilla JS) :**
+    *   **Application Suivi des élèves (`src/suivi/`) :** Découpage modulaire en sous-composants spécialisés (`StudentModalHeader.jsx`, `StudentModalStats.jsx`, `StudentModalCurriculum.jsx`, `StudentDetailCourseCard.jsx`, `StudentDetailItemRow.jsx`, `StudentCard.jsx`, `SuiviFilters.jsx`, `suiviHelpers.js`), allégeant `StudentDetailModal.jsx` de 890 à 292 lignes et `SuiviApp.jsx` de 838 à 445 lignes.
+    *   **Constructeur de Cours (`src/admin-cours-builder/`) :** Séparation des responsabilités en modules dédiés (`templates.js`, `sidebar-sync.js`, `drag-drop.js`), réduisant `main.js` de 551 à 270 lignes.
+    *   **Constructeur d'Exercices Type 14 (`src/admin-exercice-builder/types/`) :** Extraction de `type-14-options.js`, réduisant `type-14.js` de 823 à 380 lignes.
+*   **Refactorisation Backend PHP & Performance (`ROI\Admin\Backup\`, `Group_Service.php`) :**
+    *   **Découpage SRP du module de Sauvegarde / Restauration :** Scission de `Backup.php` (730 lignes) en trois classes spécialisées `Exporter.php`, `Importer.php`, `Admin_Page.php` coordonnées par une façade `Backup.php` (~120 lignes).
+    *   **Optimisation des Requêtes SQL de Groupe (`Group_Service.php`) :** Pré-chargement par lot des métas utilisateurs et cours (`update_meta_cache( 'user', ... )` et `update_meta_cache( 'post', ... )`) éliminant le problème des requêtes N+1 sur les grands effectifs d'élèves.
+*   **Mise à jour des Directives Projet (`AGENTS.md`, `ARCHITECTURE.md`) :**
+    *   Ajustement pragmatique du seuil d'alerte de complexité à ~500 lignes fondé sur le principe de responsabilité unique (SRP) et l'utilisation de Custom Hooks en React pour éviter le sur-découpage artificiel.
+
 ## [1.8.0] - 2026-09-27
 
 *   **Correction et Robustesse de la Restauration des Sauvegardes & Hydratation des Exercices (`Backup.php`, `Manager.php`, `Exercice_Config_DTO.php`, `Builder.php`, `Contenu_Controller.php`) :**

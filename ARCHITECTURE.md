@@ -189,7 +189,7 @@ Le code legacy existant fonctionne. L'objectif est de le moderniser **sans régr
 Cette règle s'applique à **tous** les composants du plugin (CPT, Settings, Shortcodes, Services, API, etc.).
 
 **1. Le Principe de "Complexité = Sous-Dossier"**
-Dès qu'une fonctionnalité nécessite plus d'une classe ou dépasse ~300 lignes, elle ne doit plus être un fichier unique à la racine de son dossier parent.
+Dès qu'une fonctionnalité nécessite plus d'une classe, mélange plusieurs responsabilités ou dépasse le seuil d'alerte de ~500 lignes, elle doit être structurée dans un sous-dossier thématique dédié.
 
 * **Interdit** : Avoir 15 fichiers préfixés dans un même dossier (ex: `Services/ExportCSV.php`, `Services/ExportPDF.php`, `Services/ExportXLS.php`).
 * **Obligatoire** : Créer un dossier thématique (ex: `Services/Export/`) contenant des classes focalisées (`Manager.php`, `Formats/CSV.php`, `Formats/PDF.php`).
