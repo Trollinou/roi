@@ -23,18 +23,18 @@ class Bindings_Manager {
 	 * @var array<string, string>
 	 */
 	private const ALLOWED_META_MAP = array(
-		'fen'              => '_roi_fen',
-		'pgn'              => '_roi_pgn',
-		'orientation'      => '_roi_orientation',
-		'difficulty_level' => '_roi_difficulty_level',
-		'game_duration'    => '_roi_game_duration',
-		'game_date'        => '_roi_game_date',
-		'video_url'        => '_roi_video_url',
-		'video_duree'      => '_roi_video_duree',
-		'cours_niveau'     => '_roi_cours_niveau',
-		'exercice_niveau'  => '_roi_exercice_niveau',
-		'exercice_type'    => '_roi_exercice_type',
-		'exercice_variante'=> '_roi_exercice_variante',
+		'fen'               => '_roi_fen',
+		'pgn'               => '_roi_pgn',
+		'orientation'       => '_roi_orientation',
+		'difficulty_level'  => '_roi_difficulty_level',
+		'game_duration'     => '_roi_game_duration',
+		'game_date'         => '_roi_game_date',
+		'video_url'         => '_roi_video_url',
+		'video_duree'       => '_roi_video_duree',
+		'cours_niveau'      => '_roi_cours_niveau',
+		'exercice_niveau'   => '_roi_exercice_niveau',
+		'exercice_type'     => '_roi_exercice_type',
+		'exercice_variante' => '_roi_exercice_variante',
 	);
 
 	/**
@@ -91,7 +91,7 @@ class Bindings_Manager {
 			return null;
 		}
 
-		$raw_key = isset( $source_args['key'] ) ? (string) $source_args['key'] : $attribute_name;
+		$raw_key  = isset( $source_args['key'] ) ? (string) $source_args['key'] : $attribute_name;
 		$meta_key = self::ALLOWED_META_MAP[ $raw_key ] ?? ( str_starts_with( $raw_key, '_roi_' ) ? $raw_key : null );
 
 		if ( null === $meta_key || ! in_array( $meta_key, self::ALLOWED_META_MAP, true ) ) {
@@ -122,11 +122,11 @@ class Bindings_Manager {
 
 		$target_key = isset( $source_args['key'] ) ? (string) $source_args['key'] : $attribute_name;
 
-		// Résolution de label de type
+		// Résolution de label de type.
 		if ( 'type_name' === $target_key || 'type_label' === $target_key ) {
-			$type_val = (int) get_post_meta( $post_id, '_roi_exercice_type', true );
+			$type_val  = (int) get_post_meta( $post_id, '_roi_exercice_type', true );
 			$type_enum = Exercice_Type::tryFrom( $type_val );
-			return $type_enum ? $type_enum->get_label() : '';
+			return $type_enum ? $type_enum->label() : '';
 		}
 
 		$config_raw = get_post_meta( $post_id, '_roi_exercice_config', true );
@@ -140,7 +140,7 @@ class Bindings_Manager {
 		}
 
 		if ( ! array_key_exists( $target_key, $config ) ) {
-			// Fallback standard pour FEN si absent
+			// Fallback standard pour FEN si absent.
 			if ( 'fen' === $target_key ) {
 				return 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 			}

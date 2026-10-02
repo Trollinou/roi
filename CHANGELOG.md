@@ -20,6 +20,11 @@
     *   **Externalisation de la Metabox Audience (`src/admin-cours-builder/audience.ts`, `Audience.php`, `main.ts`) :** Création d'un module TypeScript dédié pour le basculement d'affichage et le filtrage en direct des élèves avec écouteurs d'événements standards, et suppression complète des attributs inline (`onchange`, `oninput`, `onkeydown`) ainsi que du bloc `<script>` inline dans `Audience.php`.
     *   **Externalisation de la Confirmation de Restauration (`src/admin-backup.ts`, `Admin_Page.php`, `Backup.php`, `webpack.config.js`) :** Création d'un module TypeScript pour intercepter la soumission du formulaire de restauration via `data-confirm-message`, enregistrement et mise en file d'attente propres via `admin_enqueue_scripts` et suppression de la balise `<script>` inline.
 
+*   **Assurance Qualité & Conformité Stricte (PHPStan Level 7, WPCS & Directives Globales) :**
+    *   **Correction de Typage Enum PHPStan (`includes/Blocks/Bindings_Manager.php`) :** Résolution de l'appel de méthode invalide sur `Exercice_Type` (`label()` au lieu de `get_label()`), portant l'analyse PHPStan 2.x à 0 erreur sur 67 fichiers.
+    *   **Formatage & Alignements WPCS (`ChessEngine.php`, `Partie.php`, `Exercice.php`, `Html_Processor.php`, `Backup.php`) :** Harmonisation automatique des tableaux associatifs et opérateurs via PHPCBF, renommage du paramètre réservé PHP `$namespace` en `$store_namespace`, ajout des points finaux sur les commentaires inline et justification de la directive de sécurité sur `$_FILES`.
+    *   **Mise à jour des Directives Globales & QA (`AGENTS.md`) :** Intégration des paramètres de commande fiabilisés pour l'environnement sandbox/CLI (`vendor/bin/phpstan analyze --debug --memory-limit=2G` et auto-correction préalable par `vendor/bin/phpcbf`).
+
 ## [1.8.1] - 2026-10-01
 
 *   **Optimisation des Styles & Import Granulaire `eg-chessboard` (`webpack.config.js`, `src/admin-fen-editor.js`, `FenEditor.jsx`, `PgnEditor.jsx`, blocs `chessboard`, `diagramme`, `pgn`) :**

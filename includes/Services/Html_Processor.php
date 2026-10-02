@@ -20,15 +20,15 @@ class Html_Processor {
 	/**
 	 * Injects Interactivity API attributes and directives onto the first HTML element.
 	 *
-	 * @param string               $html       Original HTML markup.
-	 * @param string               $namespace  Interactivity namespace (e.g. 'roi/chessboard').
-	 * @param array<string, mixed> $context    Initial context array (encoded as JSON).
-	 * @param array<string, string> $directives Additional directives (e.g. ['data-wp-init' => 'callbacks.mount']).
+	 * @param string                $html            Original HTML markup.
+	 * @param string                $store_namespace Interactivity namespace (e.g. 'roi/chessboard').
+	 * @param array<string, mixed>  $context         Initial context array (encoded as JSON).
+	 * @param array<string, string> $directives      Additional directives (e.g. ['data-wp-init' => 'callbacks.mount']).
 	 * @return string Updated HTML.
 	 */
 	public function inject_interactivity(
 		string $html,
-		string $namespace,
+		string $store_namespace,
 		array $context = array(),
 		array $directives = array()
 	): string {
@@ -39,7 +39,7 @@ class Html_Processor {
 		$processor = new WP_HTML_Tag_Processor( $html );
 
 		if ( $processor->next_tag() ) {
-			$processor->set_attribute( 'data-wp-interactive', $namespace );
+			$processor->set_attribute( 'data-wp-interactive', $store_namespace );
 
 			if ( ! empty( $context ) ) {
 				$json_context = wp_json_encode( $context );
@@ -61,10 +61,10 @@ class Html_Processor {
 	/**
 	 * Sets attributes on a specific tag in HTML markup.
 	 *
-	 * @param string               $html       Original HTML markup.
-	 * @param string               $tag_name   Target HTML tag (e.g. 'div', 'section').
+	 * @param string                $html       Original HTML markup.
+	 * @param string                $tag_name   Target HTML tag (e.g. 'div', 'section').
 	 * @param array<string, string> $attributes Key-value map of attributes to set.
-	 * @param string|null          $class_name Optional CSS class name to match.
+	 * @param string|null           $class_name Optional CSS class name to match.
 	 * @return string Updated HTML.
 	 */
 	public function set_tag_attributes(

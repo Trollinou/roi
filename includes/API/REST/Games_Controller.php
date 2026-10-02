@@ -169,8 +169,8 @@ class Games_Controller {
 		$current_user = wp_get_current_user();
 
 		// Insérer le post roi_partie.
-		$date_ts    = strtotime( $post_date );
-		$date_str   = '';
+		$date_ts  = strtotime( $post_date );
+		$date_str = '';
 		if ( false !== $date_ts ) {
 			$formatted_title_date = wp_date( 'd/m/Y H:i', $date_ts );
 			if ( false !== $formatted_title_date ) {

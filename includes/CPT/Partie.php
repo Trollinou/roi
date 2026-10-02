@@ -80,13 +80,34 @@ class Partie {
 	 */
 	public function register_meta(): void {
 		$scalar_fields = array(
-			'_roi_member_id'        => array( 'type' => 'integer', 'default' => 0 ),
-			'_roi_difficulty_level' => array( 'type' => 'integer', 'default' => 1 ),
-			'_roi_hints_count'      => array( 'type' => 'integer', 'default' => 0 ),
-			'_roi_takebacks_count'  => array( 'type' => 'integer', 'default' => 0 ),
-			'_roi_game_duration'    => array( 'type' => 'integer', 'default' => 0 ),
-			'_roi_game_date'        => array( 'type' => 'string', 'default' => '' ),
-			'_roi_pgn'              => array( 'type' => 'string', 'default' => '' ),
+			'_roi_member_id'        => array(
+				'type'    => 'integer',
+				'default' => 0,
+			),
+			'_roi_difficulty_level' => array(
+				'type'    => 'integer',
+				'default' => 1,
+			),
+			'_roi_hints_count'      => array(
+				'type'    => 'integer',
+				'default' => 0,
+			),
+			'_roi_takebacks_count'  => array(
+				'type'    => 'integer',
+				'default' => 0,
+			),
+			'_roi_game_duration'    => array(
+				'type'    => 'integer',
+				'default' => 0,
+			),
+			'_roi_game_date'        => array(
+				'type'    => 'string',
+				'default' => '',
+			),
+			'_roi_pgn'              => array(
+				'type'    => 'string',
+				'default' => '',
+			),
 		);
 
 		foreach ( $scalar_fields as $meta_key => $config ) {

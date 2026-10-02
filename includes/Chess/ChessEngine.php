@@ -191,18 +191,18 @@ class ChessEngine {
 		return $processor->set_root_data_attributes(
 			$raw_html,
 			array(
-				'fen'                   => (string) $atts['fen'],
-				'orientation'           => (string) $atts['orientation'],
-				'coordinates'           => $coordinates,
-				'view-only'             => $view_only,
-				'player-color'          => (string) $atts['playerColor'],
-				'show-threats'          => $show_threats,
-				'use-stockfish'         => $use_stockfish,
-				'stockfish-elo'         => (int) $atts['stockfishElo'],
-				'show-evaluation-bar'   => $show_evaluation_bar,
-				'free-mode'             => $free_mode,
-				'clock-preset'          => (string) $atts['clockPreset'],
-				'show-material-indicator'=> $show_material,
+				'fen'                     => (string) $atts['fen'],
+				'orientation'             => (string) $atts['orientation'],
+				'coordinates'             => $coordinates,
+				'view-only'               => $view_only,
+				'player-color'            => (string) $atts['playerColor'],
+				'show-threats'            => $show_threats,
+				'use-stockfish'           => $use_stockfish,
+				'stockfish-elo'           => (int) $atts['stockfishElo'],
+				'show-evaluation-bar'     => $show_evaluation_bar,
+				'free-mode'               => $free_mode,
+				'clock-preset'            => (string) $atts['clockPreset'],
+				'show-material-indicator' => $show_material,
 			)
 		);
 	}

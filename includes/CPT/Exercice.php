@@ -128,11 +128,11 @@ class Exercice {
 			'roi_exercice',
 			'_roi_exercice_config',
 			array(
-				'show_in_rest'      => true,
-				'single'            => true,
-				'type'              => 'string',
-				'default'           => '{}',
-				'auth_callback'     => function ( bool $allowed, string $meta_key, int $post_id ): bool {
+				'show_in_rest'  => true,
+				'single'        => true,
+				'type'          => 'string',
+				'default'       => '{}',
+				'auth_callback' => function ( bool $allowed, string $meta_key, int $post_id ): bool {
 					return current_user_can( 'edit_post', $post_id );
 				},
 			)

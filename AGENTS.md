@@ -32,6 +32,8 @@
 - **Manipulation HTML** : Utiliser `WP_HTML_Tag_Processor` (via `ROI\Services\Html_Processor`) pour toute altération/injection d'attributs HTML côté serveur. Jamais de regex pour parser ou modifier du HTML.
 
 ## 5. QA & Conformité
-- Config PHPStan Level 6 (`phpstan.neon`) + ESLint WP (`.eslintrc.json`) + TypeScript Check (`npm run typecheck`).
-- Validation PWA conjointe : `npm run type-check` (`vue-tsc`) et `npm run build` dans `dame-pwa`.
-- Versionning sémantique synchronisé : `roi.php`, constante `ROI_VERSION`, `package.json`, `CHANGELOG.md`.
+- **PHPStan** : `vendor/bin/phpstan analyze --debug --memory-limit=2G` (mode single-process `--debug` obligatoire en environnement contraint/sandbox et allocation mémoire 2G pour l'AST WP).
+- **PHPCS & Style** : `vendor/bin/phpcbf` pour auto-fix WPCS, suivi de `vendor/bin/phpcs` pour la validation stricte.
+- **TypeScript & Build** : `npm run typecheck` (`tsc --noEmit`), `npm run build` (`wp-scripts build`).
+- **Validation PWA conjointe** : `npm run type-check` (`vue-tsc`) et `npm run build` dans `dame-pwa`.
+- **Versionning sémantique synchronisé** : `roi.php`, constante `ROI_VERSION`, `package.json`, `CHANGELOG.md`.

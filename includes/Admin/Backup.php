@@ -127,6 +127,7 @@ class Backup {
 			exit;
 		}
 
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Validated in restore_from_upload.
 		$result = $this->importer->restore_from_upload( $_FILES['roi_restore_file'] );
 
 		if ( is_wp_error( $result ) ) {
