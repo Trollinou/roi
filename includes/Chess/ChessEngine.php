@@ -120,6 +120,16 @@ class ChessEngine {
 				'stockfishWorkerUrl' => self::get_stockfish_worker_url(),
 			)
 		);
+
+		// WordPress 6.5+ / 7.x Interactivity API state initialization.
+		if ( function_exists( 'wp_interactivity_state' ) ) {
+			wp_interactivity_state(
+				'roi/chessboard',
+				array(
+					'stockfishWorkerUrl' => self::get_stockfish_worker_url(),
+				)
+			);
+		}
 	}
 
 	/**
@@ -175,6 +185,25 @@ class ChessEngine {
 
 		ob_start();
 		include $this->plugin_path . 'includes/Chess/templates/chessboard.php';
-		return (string) ob_get_clean();
+		$raw_html = (string) ob_get_clean();
+
+		$processor = new \ROI\Services\Html_Processor();
+		return $processor->set_root_data_attributes(
+			$raw_html,
+			array(
+				'fen'                   => (string) $atts['fen'],
+				'orientation'           => (string) $atts['orientation'],
+				'coordinates'           => $coordinates,
+				'view-only'             => $view_only,
+				'player-color'          => (string) $atts['playerColor'],
+				'show-threats'          => $show_threats,
+				'use-stockfish'         => $use_stockfish,
+				'stockfish-elo'         => (int) $atts['stockfishElo'],
+				'show-evaluation-bar'   => $show_evaluation_bar,
+				'free-mode'             => $free_mode,
+				'clock-preset'          => (string) $atts['clockPreset'],
+				'show-material-indicator'=> $show_material,
+			)
+		);
 	}
 }

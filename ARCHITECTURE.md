@@ -31,7 +31,7 @@
 ### Versions Cibles (Stack Technique)
 | Outil | Version Requise | Impact sur le code |
 | :--- | :--- | :--- |
-| **WordPress** | **6.9.1** | Utiliser les API récentes (**Interactivity API**, Block Bindings) plutôt que jQuery. Transients API pour le cache. |
+| **WordPress** | **7.1** | Utiliser les API récentes (**Interactivity API**, Block Bindings, WP_HTML_Tag_Processor, Script Modules) plutôt que jQuery. Transients API pour le cache. |
 | **PHP** | **8.4** | **ZERO COMPOSER EN PROD**. **STRICT_TYPES=1 OBLIGATOIRE**. Utiliser un autoloader natif SPL. Typage strict, Enums, Readonly classes, Constructor Promotion, New Fetch in array, etc. |
 | **Node.js** | **20 LTS** | **DEV ONLY**. Sert uniquement à compiler les assets (Build step). |
 | **Styles** | **SCSS** | Préprocesseur obligatoire + Convention BEM. |

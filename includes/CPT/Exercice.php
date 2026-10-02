@@ -22,6 +22,7 @@ class Exercice {
 	 */
 	public function init(): void {
 		add_action( 'init', array( $this, 'register' ), 0 );
+		add_action( 'init', array( $this, 'register_meta' ) );
 	}
 
 	/**
@@ -85,5 +86,71 @@ class Exercice {
 		);
 
 		register_post_type( 'roi_exercice', $args );
+	}
+
+	/**
+	 * Register typed post meta for roi_exercice.
+	 *
+	 * @return void
+	 */
+	public function register_meta(): void {
+		register_post_meta(
+			'roi_exercice',
+			'_roi_exercice_type',
+			array(
+				'show_in_rest'      => true,
+				'single'            => true,
+				'type'              => 'integer',
+				'default'           => 1,
+				'sanitize_callback' => 'absint',
+				'auth_callback'     => function ( bool $allowed, string $meta_key, int $post_id ): bool {
+					return current_user_can( 'edit_post', $post_id );
+				},
+			)
+		);
+
+		register_post_meta(
+			'roi_exercice',
+			'_roi_exercice_niveau',
+			array(
+				'show_in_rest'      => true,
+				'single'            => true,
+				'type'              => 'integer',
+				'default'           => 1,
+				'sanitize_callback' => 'absint',
+				'auth_callback'     => function ( bool $allowed, string $meta_key, int $post_id ): bool {
+					return current_user_can( 'edit_post', $post_id );
+				},
+			)
+		);
+
+		register_post_meta(
+			'roi_exercice',
+			'_roi_exercice_config',
+			array(
+				'show_in_rest'      => true,
+				'single'            => true,
+				'type'              => 'string',
+				'default'           => '{}',
+				'auth_callback'     => function ( bool $allowed, string $meta_key, int $post_id ): bool {
+					return current_user_can( 'edit_post', $post_id );
+				},
+			)
+		);
+
+		register_post_meta(
+			'roi_exercice',
+			'_roi_exercice_variante',
+			array(
+				'show_in_rest'      => true,
+				'single'            => true,
+				'type'              => 'string',
+				'default'           => '',
+				'sanitize_callback' => 'sanitize_text_field',
+				'auth_callback'     => function ( bool $allowed, string $meta_key, int $post_id ): bool {
+					return current_user_can( 'edit_post', $post_id );
+				},
+			)
+		);
 	}
 }

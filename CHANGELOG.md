@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+*   **Modernisation WordPress 7.0 / 7.1 & Interactivity API :**
+    *   **Migration Interactivity API & Script Modules (`src/blocks/chessboard/view.ts`, `save.tsx`, `block.json`) :**
+        *   Activation de `"interactivity": true` et basculement vers `"viewScriptModule": "file:./chessboard-view.js"`.
+        *   Création du store réactif `@wordpress/interactivity` pour l'échiquier front (actions de sélection de couleur, réglage cadence, ELO, commandes de partie, retournement) et encapsulation du cycle de vie de `BoardCore` (`eg-chessboard`) via la directive `data-wp-init="callbacks.mountBoard"`.
+        *   Transmission de l'état initial (URL du worker Stockfish) via `wp_interactivity_state('roi/chessboard', [...])` côté PHP.
+    *   **Block Bindings API & Métadonnées Typées (`includes/Blocks/Bindings_Manager.php`, `Exercice.php`, `Partie.php`, `Cours.php`) :**
+        *   Enregistrement des sources de liaison personnalisées `roi/post-meta` et `roi/exercice-config` pour lier dynamiquement les blocs aux métadonnées des CPT et extraire les positions FEN/PGN à la volée.
+        *   Déclaration formelle `register_post_meta()` avec `show_in_rest` sur les CPT `roi_exercice`, `roi_partie` et `roi_cours` pour la compatibilité native avec la source `core/post-meta`.
+    *   **Service de Traitement HTML Haute Performance (`ROI\Services\Html_Processor`) :**
+        *   Encapsulation de `WP_HTML_Tag_Processor` pour injecter en toute sécurité les directives `data-wp-*` et contextes d'interactivité sans manipulation par expressions régulières.
+    *   **Conformité SSOT & Validation Cross-Projet :**
+        *   Isolation stricte des types TypeScript partagés (`src/types/index.ts` / `roi-types`) validée conjointement avec `dame-pwa` (`vue-tsc` à 0 erreur).
+
 *   **Éradication Complète du JavaScript Embarqué & Migration TypeScript 100% :**
     *   **Migration du Visualiseur de Parties Admin (`src/admin-partie-viewer.ts`, `Partie.php`, `webpack.config.js`) :** Portage intégral en TypeScript strict avec typage des interfaces `boardAPI` et du DOM, suppression du fichier legacy dans `assets/js/admin-partie-viewer.js` et chargement du script compilé depuis `build/chessboard/admin-partie-viewer.js` avec son fichier de dépendances `.asset.php`.
     *   **Externalisation de la Metabox Audience (`src/admin-cours-builder/audience.ts`, `Audience.php`, `main.ts`) :** Création d'un module TypeScript dédié pour le basculement d'affichage et le filtrage en direct des élèves avec écouteurs d'événements standards, et suppression complète des attributs inline (`onchange`, `oninput`, `onkeydown`) ainsi que du bloc `<script>` inline dans `Audience.php`.

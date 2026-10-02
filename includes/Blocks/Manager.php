@@ -16,12 +16,13 @@ namespace ROI\Blocks;
 class Manager {
 
 	/**
-	 * Initialize the blocks registration hooks.
+	 * Initialize the blocks registration hooks and bindings.
 	 *
 	 * @return void
 	 */
 	public function init(): void {
 		add_action( 'init', array( $this, 'register_blocks' ) );
+		( new Bindings_Manager() )->init();
 	}
 
 	/**

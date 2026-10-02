@@ -12,6 +12,21 @@ export default function Save({ attributes }: SaveProps): React.ReactElement {
     className: `chessboard-block ${
       showBar ? 'has-evaluation-bar' : ''
     }`,
+    'data-wp-interactive': 'roi/chessboard',
+    'data-wp-context': JSON.stringify({
+      fen: attributes.fen,
+      orientation: attributes.orientation || 'white',
+      coordinates: attributes.coordinates !== false,
+      viewOnly: attributes.viewOnly === true,
+      playerColor: attributes.playerColor || 'both',
+      showThreats: attributes.showThreats === true,
+      useStockfish: attributes.useStockfish === true,
+      stockfishElo: attributes.stockfishElo || 1500,
+      showEvaluationBar: attributes.showEvaluationBar === true,
+      freeMode: attributes.freeMode === true,
+      clockPreset: attributes.clockPreset || 'none',
+      showMaterialIndicator: attributes.showMaterialIndicator !== false,
+    }),
     'data-fen': attributes.fen,
     'data-orientation': attributes.orientation,
     'data-coordinates': attributes.coordinates,
@@ -58,7 +73,7 @@ export default function Save({ attributes }: SaveProps): React.ReactElement {
           </div>
         </div>
         <div className="main-board">
-          <div className="chessboard-mount-element"></div>
+          <div className="chessboard-mount-element" data-wp-init="callbacks.mountBoard"></div>
           {showBar && (
             <div className="evaluation-bar">
               <div
@@ -79,6 +94,7 @@ export default function Save({ attributes }: SaveProps): React.ReactElement {
                     type="button"
                     className={`color-btn white${(attributes.playerColor === 'white' || !attributes.playerColor) ? ' active' : ''}`}
                     data-color="white"
+                    data-wp-on--click="actions.selectColor"
                   >
                     Blancs
                   </button>
@@ -86,6 +102,7 @@ export default function Save({ attributes }: SaveProps): React.ReactElement {
                     type="button"
                     className={`color-btn random${attributes.playerColor === 'both' ? ' active' : ''}`}
                     data-color="random"
+                    data-wp-on--click="actions.selectColor"
                   >
                     Aléatoire
                   </button>
@@ -93,6 +110,7 @@ export default function Save({ attributes }: SaveProps): React.ReactElement {
                     type="button"
                     className={`color-btn black${attributes.playerColor === 'black' ? ' active' : ''}`}
                     data-color="black"
+                    data-wp-on--click="actions.selectColor"
                   >
                     Noirs
                   </button>
@@ -101,7 +119,11 @@ export default function Save({ attributes }: SaveProps): React.ReactElement {
                 {/* Sélecteur de cadence (Pendule) */}
                 <div className="cadence-selector">
                   <label>Cadence :</label>
-                  <select className="cadence-select" defaultValue={attributes.clockPreset || 'none'}>
+                  <select
+                    className="cadence-select"
+                    defaultValue={attributes.clockPreset || 'none'}
+                    data-wp-on--change="actions.changeCadence"
+                  >
                     <option value="none">Sans pendule</option>
                     <option value="1+0">1 min (Bullet)</option>
                     <option value="3+2">3 min + 2 s (Blitz)</option>
@@ -125,9 +147,14 @@ export default function Save({ attributes }: SaveProps): React.ReactElement {
                     min="1320"
                     max="2800"
                     defaultValue={attributes.stockfishElo || 1500}
+                    data-wp-on--input="actions.changeElo"
                   />
                 </div>
-                <button type="button" className="start-btn">
+                <button
+                  type="button"
+                  className="start-btn"
+                  data-wp-on--click="actions.startGame"
+                >
                   Commencer
                 </button>
               </div>
@@ -167,13 +194,25 @@ export default function Save({ attributes }: SaveProps): React.ReactElement {
             <div className="chess-status">À vous de jouer</div>
             {!attributes.freeMode && (
               <div className="chess-controls">
-                <button type="button" className="control-btn new-game">
+                <button
+                  type="button"
+                  className="control-btn new-game"
+                  data-wp-on--click="actions.newGame"
+                >
                   Nouvelle partie
                 </button>
-                <button type="button" className="control-btn flip-board">
+                <button
+                  type="button"
+                  className="control-btn flip-board"
+                  data-wp-on--click="actions.flipBoard"
+                >
                   Retourner
                 </button>
-                <button type="button" className="control-btn undo-move">
+                <button
+                  type="button"
+                  className="control-btn undo-move"
+                  data-wp-on--click="actions.undoMove"
+                >
                   Annuler
                 </button>
               </div>
