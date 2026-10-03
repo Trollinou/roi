@@ -8,7 +8,9 @@
   "icon": "grid-view",
   "description": "Affichage d'un diagramme d'échecs (FEN).",
   "supports": {
+    "html": false,
     "blockBindings": true,
+    "interactivity": true,
     "align": [
       "wide",
       "full"
@@ -37,5 +39,6 @@
   "style": [
     "file:./chessboard-style.css",
     "file:./index.css"
-  ]
+  ],
+  "viewScriptModule": "file:./diagramme-view.js"
 }

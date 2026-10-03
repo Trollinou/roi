@@ -42,7 +42,12 @@ module.exports = {
 			__dirname,
 			'src/blocks/diagramme/index.ts'
 		),
+		'diagramme/diagramme-view': path.resolve(
+			__dirname,
+			'src/blocks/diagramme/view.ts'
+		),
 		'pgn/index': path.resolve(__dirname, 'src/blocks/pgn/index.ts'),
+		'pgn/pgn-view': path.resolve(__dirname, 'src/blocks/pgn/view.ts'),
 		'suivi/index': path.resolve(__dirname, 'src/suivi/index.tsx'),
 		'admin-backup': path.resolve(__dirname, 'src/admin-backup.ts'),
 	},

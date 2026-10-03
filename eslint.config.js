@@ -78,4 +78,10 @@ module.exports = [
 			camelcase: 'off',
 		},
 	},
+	{
+		files: ['**/*.{ts,tsx}'],
+		rules: {
+			'no-unused-vars': 'off',
+		},
+	},
 ];

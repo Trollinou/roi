@@ -948,4 +948,60 @@ cg-board.editor-palette-board {
   position: relative !important;
 }
 
+/* Interactivity API Blocks: Diagramme & PGN */
+.roi-bloc-diagramme,
+.roi-bloc-pgn {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  margin: 1.5rem auto;
+}
+
+.roi-bloc-diagramme .main-wrap,
+.roi-bloc-pgn .main-wrap {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.pgn-navigation-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  position: relative;
+  z-index: 20;
+}
+
+.pgn-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  background: #ffffff;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #495057;
+  position: relative;
+  z-index: 21;
+  pointer-events: auto !important;
+  user-select: none;
+}
+
+.pgn-nav-btn:hover {
+  background: #e9ecef;
+  border-color: #adb5bd;
+  color: #212529;
+}
+
+.pgn-nav-btn:active {
+  transform: translateY(1px);
+}
+
+
 

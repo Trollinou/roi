@@ -11,8 +11,7 @@ export class ChessClock {
 	private timerInterval: ReturnType<typeof setInterval> | null = null;
 
 	public onTick: ((wtime: number, btime: number) => void) | null = null;
-	public onTimeOut: ((flaggedColor: 'white' | 'black') => void) | null = // eslint-disable-line no-unused-vars
-		null;
+	public onTimeOut: ((flaggedColor: 'white' | 'black') => void) | null = null;
 
 	constructor() {
 		this.setPreset('none');

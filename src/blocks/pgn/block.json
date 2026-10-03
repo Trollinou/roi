@@ -8,7 +8,9 @@
   "icon": "book-alt",
   "description": "Affichage d'une partie d'échecs au format PGN.",
   "supports": {
+    "html": false,
     "blockBindings": true,
+    "interactivity": true,
     "align": [
       "wide",
       "full"
@@ -18,8 +20,13 @@
     "pgn": {
       "type": "string",
       "default": ""
+    },
+    "orientation": {
+      "type": "string",
+      "default": "white"
     }
   },
+  "textdomain": "roi",
   "editorScript": "file:./index.js",
   "editorStyle": [
     "file:./chessboard-style.css",
@@ -28,5 +35,6 @@
   "style": [
     "file:./chessboard-style.css",
     "file:./index.css"
-  ]
+  ],
+  "viewScriptModule": "file:./pgn-view.js"
 }

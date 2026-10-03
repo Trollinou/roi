@@ -11,9 +11,11 @@
 *   **Pipeline Qualité, Linting & Packaging (`scripts/package.cjs`, `eslint.config.js`, `src/`) :**
     *   **Contrôle Qualité Pré-Packaging** : Automatisation de la validation QA complète (`typecheck`, `lint`, `phpstan`) avant la génération de l'archive de production dans `scripts/package.cjs`.
     *   **Conformité TypeScript & ESLint** : Nettoyage des imports inutilisés, résolution des conflits de règles Prettier/ESLint et typage strict sans avertissement sur l'ensemble de `src/`.
-    *   **Migration Interactivity API & Script Modules (`src/blocks/chessboard/view.ts`, `save.tsx`, `block.json`) :**
-        *   Activation de `"interactivity": true` et basculement vers `"viewScriptModule": "file:./chessboard-view.js"`.
-        *   Création du store réactif `@wordpress/interactivity` pour l'échiquier front (actions de sélection de couleur, réglage cadence, ELO, commandes de partie, retournement) et encapsulation du cycle de vie de `BoardCore` (`eg-chessboard`) via la directive `data-wp-init="callbacks.mountBoard"`.
+    *   **Migration Interactivity API & Script Modules (`src/blocks/chessboard/`, `src/blocks/diagramme/`, `src/blocks/pgn/`, `webpack.config.js`) :**
+        *   Activation globale de `"interactivity": true` et basculement vers `viewScriptModule` sur les 3 blocs Gutenberg d'échecs (`roi/chessboard`, `roi/diagramme` et `roi/pgn`).
+        *   **Bloc Diagramme (`roi/diagramme`)** : Création du module réactif `src/blocks/diagramme/view.ts` (`roi/diagramme`), montage automatique de l'échiquier statique avec formes/flèches graphiques (`data-wp-init="callbacks.mountDiagramme"`) et encapsulation propre du contexte FEN/orientation.
+        *   **Bloc PGN (`roi/pgn`)** : Création du module réactif `src/blocks/pgn/view.ts` (`roi/pgn`), montage de l'étude PGN (`data-wp-init="callbacks.mountPgn"`) et barre de navigation interactive (début, précédent, suivant, fin, retournement) pilotée par les actions réactives (`data-wp-on--click="actions.*"`).
+        *   **Bloc Échiquier Jouable (`roi/chessboard`)** : Store réactif `@wordpress/interactivity` (actions de sélection de couleur, cadence, ELO, partie, retournement) et encapsulation du cycle de vie de `BoardCore` (`eg-chessboard`) via `data-wp-init="callbacks.mountBoard"`.
         *   Transmission de l'état initial (URL du worker Stockfish) via `wp_interactivity_state('roi/chessboard', [...])` côté PHP.
     *   **Block Bindings API & Métadonnées Typées (`includes/Blocks/Bindings_Manager.php`, `Exercice.php`, `Partie.php`, `Cours.php`) :**
         *   Enregistrement des sources de liaison personnalisées `roi/post-meta` et `roi/exercice-config` pour lier dynamiquement les blocs aux métadonnées des CPT et extraire les positions FEN/PGN à la volée.
