@@ -127,6 +127,11 @@ class ChessEngine {
 				'roi/chessboard',
 				array(
 					'stockfishWorkerUrl' => self::get_stockfish_worker_url(),
+					'defaultFen'         => 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+					'supportedCadences'  => array( 'none', '1+0', '3+2', '5+0', '10+5', '15+10' ),
+					'minElo'             => 1320,
+					'maxElo'             => 2800,
+					'defaultElo'         => 1500,
 				)
 			);
 		}

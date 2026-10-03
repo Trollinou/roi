@@ -293,6 +293,7 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
   };
 
   const workerUrl =
+    globalStoreState.stockfishWorkerUrl ||
     (typeof window !== 'undefined' && window.roiChessConfig?.stockfishWorkerUrl) ||
     block.getAttribute('data-stockfish-worker-url') ||
     '/wp-content/plugins/dame-pwa/pwa/dist/stockfish/stockfish.js';
@@ -633,7 +634,15 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
 }
 
 // Register WordPress Interactivity API store for roi/chessboard
-store('roi/chessboard', {
+const { state: globalStoreState } = store('roi/chessboard', {
+  state: {
+    stockfishWorkerUrl: '',
+    defaultFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+    supportedCadences: ['none', '1+0', '3+2', '5+0', '10+5', '15+10'],
+    minElo: 1320,
+    maxElo: 2800,
+    defaultElo: 1500,
+  },
   actions: {
     selectColor(event: Event) {
       const btn = event.currentTarget as HTMLElement;
