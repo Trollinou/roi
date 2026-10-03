@@ -70,6 +70,9 @@ function initPgnInstance(block: HTMLElement, mountElement: HTMLElement, contextD
 }
 
 store('roi/pgn', {
+	state: {
+		defaultOrientation: 'white',
+	},
 	actions: {
 		viewStart(event: Event) {
 			const btn = event.target as HTMLElement;

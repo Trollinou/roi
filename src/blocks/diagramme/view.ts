@@ -80,6 +80,10 @@ function initDiagrammeInstance(block: HTMLElement, mountElement: HTMLElement, co
 }
 
 store('roi/diagramme', {
+	state: {
+		defaultFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+		defaultOrientation: 'white',
+	},
 	callbacks: {
 		mountDiagramme() {
 			const { ref } = getElement();
