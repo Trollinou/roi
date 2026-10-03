@@ -256,8 +256,7 @@ export default function SuiviApp(): React.JSX.Element {
 
 	const handleValidateElement = async (
 		studentId: string,
-		elementId: number,
-		_elementTitle?: string
+		elementId: number
 	) => {
 		const config = window.roiSuiviConfig || {};
 		const apiUrl = config.apiUrl || '';

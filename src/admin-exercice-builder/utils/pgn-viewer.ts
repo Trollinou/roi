@@ -4,7 +4,7 @@
 
 import { extractFenOrientationAndShapes } from './controls';
 import { toFrenchNotation } from '../../utils/chessUtils';
-import type { BoardShape, Color, PgnString } from '../../types/chess';
+import type { BoardShape, PgnString } from '../../types/chess';
 
 export interface PgnPreviewViewerOptions {
   pgn?: PgnString;

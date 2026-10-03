@@ -57,6 +57,17 @@ class Contenu_Controller {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_contenu' ),
 					'permission_callback' => array( Permissions_Helper::class, 'check_apprentissage_access' ),
+					'args'                => array(
+						'id' => array(
+							'description'       => __( 'ID du contenu (leçon, exercice ou vidéo).', 'roi' ),
+							'type'              => 'integer',
+							'required'          => true,
+							'validate_callback' => static function ( $param ): bool {
+								return is_numeric( $param ) && (int) $param > 0;
+							},
+							'sanitize_callback' => 'absint',
+						),
+					),
 				),
 			)
 		);

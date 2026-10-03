@@ -86,7 +86,7 @@ class Main {
 					}
 				}
 			}
-			update_option( 'roi_apprentissage_allowed_roles', $allowed_roles );
+			update_option( 'roi_apprentissage_allowed_roles', $allowed_roles, false );
 		}
 
 		// Store notice in transient.

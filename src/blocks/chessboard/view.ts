@@ -200,8 +200,7 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
   let stockfishManager: StockfishManager | null = null;
   let lastScoreType = 'cp';
   let lastScoreValue = 0;
-  let lastSuggestedMove = '';
-  let isHintEnabled = false;
+  const isHintEnabled = false;
 
   const configDialog = block.querySelector<HTMLElement>('.chess-config-dialog');
   const colorBtns = block.querySelectorAll<HTMLElement>('.color-btn');
@@ -282,7 +281,7 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
 
   let updateEvaluationBar: (scoreType?: string, scoreValue?: number) => void = () => {};
 
-  const emit = (event: string, _val: any) => {
+  const emit = (event: string) => {
     if (event === 'move') {
       updateStatus();
       setTimeout(() => {
@@ -317,7 +316,6 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
     binc: 0,
   };
   let activeClockColor: Color | null = null;
-  let timerTenths = 0;
 
   const formatClockTime = (timeMs: number) => {
     return ChessClock.formatTime(timeMs);
@@ -360,7 +358,6 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
   clock.onTick = (wtime, btime) => {
     clockSettings.wtime = wtime;
     clockSettings.btime = btime;
-    timerTenths = clock.timerTenths;
     updateClockDisplays();
   };
 
@@ -401,7 +398,6 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
           updateEvaluationBar(scoreType, scoreValue);
         },
         onHint: (bestMove: string) => {
-          lastSuggestedMove = bestMove;
           if (isHintEnabled) {
             const from = bestMove.slice(0, 2);
             const to = bestMove.slice(2, 4);
@@ -525,7 +521,6 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
     updateEvaluationBar('cp', 0);
 
     stopTimer();
-    timerTenths = 0;
     activeClockColor = 'white';
     clock.setActiveColor('white');
     startTimer();

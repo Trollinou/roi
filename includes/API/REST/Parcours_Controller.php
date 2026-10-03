@@ -49,7 +49,15 @@ class Parcours_Controller {
 	 */
 	public function init(): void {
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
+		self::register_cache_hooks();
+	}
 
+	/**
+	 * Registers cache invalidation hooks.
+	 *
+	 * @return void
+	 */
+	public static function register_cache_hooks(): void {
 		// Cache invalidation hooks.
 		add_action( 'save_post_roi_cours', array( self::class, 'delete_parcours_cache' ) );
 		add_action( 'save_post_roi_exercice', array( self::class, 'delete_parcours_cache' ) );
@@ -70,6 +78,9 @@ class Parcours_Controller {
 	 */
 	public static function delete_parcours_cache(): void {
 		delete_transient( self::CACHE_KEY );
+		wp_cache_delete( 'roi_total_cours_count', 'roi_chess' );
+		wp_cache_delete( 'roi_assigned_cours_count', 'roi_chess' );
+		wp_cache_delete( 'roi_assigned_elements_0', 'roi_chess' );
 	}
 
 	/**

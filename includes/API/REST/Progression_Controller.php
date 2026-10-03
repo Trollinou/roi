@@ -88,6 +88,48 @@ class Progression_Controller {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'enregistrer_progression' ),
 					'permission_callback' => array( $this, 'check_adherent_permissions' ),
+					'args'                => array(
+						'student_id'  => array(
+							'description'       => __( 'ID étudiant cible (pour les entraîneurs).', 'roi' ),
+							'type'              => 'string',
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'course_id'   => array(
+							'description'       => __( 'ID du cours complété.', 'roi' ),
+							'type'              => 'integer',
+							'required'          => false,
+							'sanitize_callback' => 'absint',
+						),
+						'element_id'  => array(
+							'description'       => __( 'ID de l\'élément validé.', 'roi' ),
+							'type'              => 'integer',
+							'required'          => false,
+							'sanitize_callback' => 'absint',
+						),
+						'element_ids' => array(
+							'description' => __( 'IDs des éléments validés.', 'roi' ),
+							'type'        => 'array',
+							'required'    => false,
+							'items'       => array(
+								'type' => 'integer',
+							),
+						),
+						'time_spent'  => array(
+							'description'       => __( 'Temps passé en secondes.', 'roi' ),
+							'type'              => 'integer',
+							'required'          => false,
+							'default'           => 0,
+							'sanitize_callback' => 'absint',
+						),
+						'attempts'    => array(
+							'description'       => __( 'Nombre de tentatives.', 'roi' ),
+							'type'              => 'integer',
+							'required'          => false,
+							'default'           => 1,
+							'sanitize_callback' => 'absint',
+						),
+					),
 				),
 				array(
 					'methods'             => WP_REST_Server::READABLE,
@@ -119,6 +161,26 @@ class Progression_Controller {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'reset_progression_cours' ),
 					'permission_callback' => array( $this, 'check_entraineur_permissions' ),
+					'args'                => array(
+						'student_id' => array(
+							'description'       => __( 'ID de l\'élève dont réinitialiser la progression.', 'roi' ),
+							'type'              => 'string',
+							'required'          => true,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'course_id'  => array(
+							'description'       => __( 'ID du cours à réinitialiser.', 'roi' ),
+							'type'              => 'integer',
+							'required'          => false,
+							'sanitize_callback' => 'absint',
+						),
+						'element_id' => array(
+							'description'       => __( 'ID de l\'élément individuel à réinitialiser.', 'roi' ),
+							'type'              => 'integer',
+							'required'          => false,
+							'sanitize_callback' => 'absint',
+						),
+					),
 				),
 			)
 		);
@@ -145,6 +207,17 @@ class Progression_Controller {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'ajouter_eleve_suivi' ),
 					'permission_callback' => array( $this, 'check_entraineur_permissions' ),
+					'args'                => array(
+						'adherent_id' => array(
+							'description'       => __( 'ID de l\'adhérent (CPT adherent) à ajouter au suivi.', 'roi' ),
+							'type'              => 'integer',
+							'required'          => true,
+							'validate_callback' => static function ( $param ): bool {
+								return is_numeric( $param ) && (int) $param > 0;
+							},
+							'sanitize_callback' => 'absint',
+						),
+					),
 				),
 			)
 		);
@@ -158,6 +231,17 @@ class Progression_Controller {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'retirer_eleve_suivi' ),
 					'permission_callback' => array( $this, 'check_entraineur_permissions' ),
+					'args'                => array(
+						'student_id' => array(
+							'description'       => __( 'Identifiant unique de l\'élève à retirer.', 'roi' ),
+							'type'              => 'string',
+							'required'          => true,
+							'validate_callback' => static function ( $param ): bool {
+								return is_string( $param ) && '' !== trim( $param );
+							},
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
 				),
 			)
 		);
@@ -184,6 +268,36 @@ class Progression_Controller {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'assigner_cours_eleve' ),
 					'permission_callback' => array( $this, 'check_entraineur_permissions' ),
+					'args'                => array(
+						'adherent_id' => array(
+							'description'       => __( 'ID de l\'adhérent cible.', 'roi' ),
+							'type'              => 'integer',
+							'required'          => true,
+							'validate_callback' => static function ( $param ): bool {
+								return is_numeric( $param ) && (int) $param > 0;
+							},
+							'sanitize_callback' => 'absint',
+						),
+						'cours_id'    => array(
+							'description'       => __( 'ID du cours ciblé.', 'roi' ),
+							'type'              => 'integer',
+							'required'          => true,
+							'validate_callback' => static function ( $param ): bool {
+								return is_numeric( $param ) && (int) $param > 0;
+							},
+							'sanitize_callback' => 'absint',
+						),
+						'action'      => array(
+							'description'       => __( 'Action: "assign" ou "unassign".', 'roi' ),
+							'type'              => 'string',
+							'required'          => false,
+							'default'           => 'assign',
+							'validate_callback' => static function ( $param ): bool {
+								return in_array( $param, array( 'assign', 'unassign' ), true );
+							},
+							'sanitize_callback' => 'sanitize_key',
+						),
+					),
 				),
 			)
 		);

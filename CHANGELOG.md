@@ -2,7 +2,15 @@
 
 ## [Unreleased]
 
-*   **Modernisation WordPress 7.0 / 7.1 & Interactivity API :**
+*   **Modernisation WordPress 7.1 & Performance Backend (`roi.php`, `Plugin.php`, `Group_Service.php`, `Columns.php`, `Ajax_Handler.php`) :**
+    *   **Options API & Autoload WP 7.1** : Configuration explicite `'autoload' => false` lors de l'enregistrement des réglages et imports de sauvegarde pour préserver la mémoire du bootstrap.
+    *   **Cycle de vie & Lazy Loading REST** : Encapsulation stricte de l'instanciation des contrôleurs REST au sein du hook `rest_api_init` et extraction des écouteurs d'invalidation de cache dans des méthodes statiques.
+    *   **Schémas Déclaratifs REST API** : Déclaration systématique des arguments REST (`validate_callback`, `sanitize_callback`, typage, descriptions) sur les contrôleurs de contenu, parties et progression.
+    *   **Object Cache WordPress (`wp_cache_*`)** : Mise en cache déterministe sous le groupe `roi_chess` pour les métadonnées d'élèves suivis, le décompte des cours assignés et les éléments de cours, avec invalidation granulaire lors des mutations.
+
+*   **Pipeline Qualité, Linting & Packaging (`scripts/package.cjs`, `eslint.config.js`, `src/`) :**
+    *   **Contrôle Qualité Pré-Packaging** : Automatisation de la validation QA complète (`typecheck`, `lint`, `phpstan`) avant la génération de l'archive de production dans `scripts/package.cjs`.
+    *   **Conformité TypeScript & ESLint** : Nettoyage des imports inutilisés, résolution des conflits de règles Prettier/ESLint et typage strict sans avertissement sur l'ensemble de `src/`.
     *   **Migration Interactivity API & Script Modules (`src/blocks/chessboard/view.ts`, `save.tsx`, `block.json`) :**
         *   Activation de `"interactivity": true` et basculement vers `"viewScriptModule": "file:./chessboard-view.js"`.
         *   Création du store réactif `@wordpress/interactivity` pour l'échiquier front (actions de sélection de couleur, réglage cadence, ELO, commandes de partie, retournement) et encapsulation du cycle de vie de `BoardCore` (`eg-chessboard`) via la directive `data-wp-init="callbacks.mountBoard"`.

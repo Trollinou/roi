@@ -346,7 +346,7 @@ class Importer {
 		// 5. RESTORE OPTIONS.
 		if ( ! empty( $import_data['options'] ) && is_array( $import_data['options'] ) ) {
 			if ( isset( $import_data['options']['roi_apprentissage_allowed_roles'] ) ) {
-				update_option( 'roi_apprentissage_allowed_roles', $import_data['options']['roi_apprentissage_allowed_roles'] );
+				update_option( 'roi_apprentissage_allowed_roles', $import_data['options']['roi_apprentissage_allowed_roles'], false );
 			}
 		}
 

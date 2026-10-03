@@ -8,7 +8,7 @@ import {
 	updateOrientationDisplay,
 	getOrientationColor,
 } from '../utils/controls';
-import type { Shape, ExerciceType10Config } from '../../types';
+import type { Shape } from '../../types';
 
 interface QuestionItem {
 	texte: string;

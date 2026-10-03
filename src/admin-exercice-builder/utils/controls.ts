@@ -5,8 +5,8 @@
 import { openFenEditor, openPgnEditor } from './modals';
 import { parsePgn } from 'chessops/pgn';
 import { extractShapesFromComments } from '../../utils/chessUtils';
-import type { BoardShape, Color, FenString, PgnString } from '../../types/chess';
-import type { DiagramData, FenEditorSavePayload } from '../../components/FenEditor';
+import type { BoardShape, Color, PgnString } from '../../types/chess';
+import type { FenEditorSavePayload } from '../../components/FenEditor';
 
 export function getActiveColorFromFen(fen: string | undefined): Color {
   if (typeof fen !== 'string') {

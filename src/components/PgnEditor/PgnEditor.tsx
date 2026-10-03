@@ -36,7 +36,7 @@ export interface PgnEditorProps {
 /**
  * PgnEditor - Éditeur de PGN interactif avec outils de dessin et commentaires.
  */
-export const PgnEditor = forwardRef<PgnEditorRef, PgnEditorProps>(function PgnEditor(
+export const PgnEditor = forwardRef<PgnEditorRef, PgnEditorProps>(function PgnEditorComponent(
   { initialPgn = '', initialFen = '', onSave, boardConfig = {} },
   ref
 ) {

@@ -69,13 +69,13 @@ define( 'ROI_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 // Autoloader SPL natif.
 spl_autoload_register(
-	function ( $class_name ) {
+	function ( string $class_name ): void {
 		$prefix   = 'ROI\\';
 		$base_dir = plugin_dir_path( __FILE__ ) . 'includes/';
 
 		$len = strlen( $prefix );
-		if ( strncmp( $prefix, $class_name, $len ) !== 0 ) {
-				return;
+		if ( 0 !== strncmp( $prefix, $class_name, $len ) ) {
+			return;
 		}
 
 		$relative_class = substr( $class_name, $len );
@@ -87,9 +87,16 @@ spl_autoload_register(
 	}
 );
 
-// Initialisation du plugin.
-$roi_plugin = new \ROI\Core\Plugin();
-$roi_plugin->run();
+/**
+ * Initialise le plugin ROI.
+ *
+ * @return void
+ */
+function roi_run(): void {
+	$roi_plugin = new \ROI\Core\Plugin();
+	$roi_plugin->run();
+}
+add_action( 'plugins_loaded', 'roi_run' );
 
 // Hooks d'activation et désactivation.
 register_activation_hook( __FILE__, array( \ROI\Core\Activator::class, 'activate' ) );
@@ -104,7 +111,7 @@ register_deactivation_hook( __FILE__, array( \ROI\Core\Deactivator::class, 'deac
  * @since 1.0.0
  * @return void
  */
-function roi_load_textdomain() {
+function roi_load_textdomain(): void {
 	load_plugin_textdomain( 'roi', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
 add_action( 'plugins_loaded', 'roi_load_textdomain' );

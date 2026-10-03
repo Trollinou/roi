@@ -51,7 +51,7 @@ export interface FenEditorProps {
 /**
  * FenEditor - Éditeur de position FEN autonome pour une utilisation dans une modale.
  */
-export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEditor(
+export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEditorComponent(
   {
     initialFen,
     fen,

@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (ytPlayer && typeof ytPlayer.destroy === 'function') {
 			try {
 				ytPlayer.destroy();
-			} catch (_e) {
+			} catch {
 				// ignore
 			}
 		}
@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
 						if (dur > 0 && dureeInput && !dureeInput.value) {
 							dureeInput.value = formatDuration(dur);
 						}
-					} catch (_e) {
+					} catch {
 						// ignore
 					}
 				},
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
 							if (dur > 0 && dureeInput && !dureeInput.value) {
 								dureeInput.value = formatDuration(dur);
 							}
-						} catch (_e) {
+						} catch {
 							// ignore
 						}
 					}
@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					statusNotice.style.display = 'none';
 				}
 			}
-		} catch (_e) {
+		} catch {
 			if (statusNotice) {
 				statusNotice.style.display = 'none';
 			}
