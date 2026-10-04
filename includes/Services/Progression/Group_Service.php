@@ -299,13 +299,21 @@ class Group_Service {
 	public function obtenir_candidats_eleves(): array {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$existing_keys = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT DISTINCT meta_key FROM {$wpdb->usermeta} WHERE meta_key LIKE %s",
-				'_roi_element_valide_member_%'
-			)
-		);
+		$cached_keys = wp_cache_get( 'roi_tracked_adherent_meta_keys', 'roi_chess' );
+		if ( false !== $cached_keys && is_array( $cached_keys ) ) {
+			$existing_keys = $cached_keys;
+		} else {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$existing_keys = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT DISTINCT meta_key FROM {$wpdb->usermeta} WHERE meta_key LIKE %s",
+					'_roi_element_valide_member_%'
+				)
+			);
+			if ( is_array( $existing_keys ) ) {
+				wp_cache_set( 'roi_tracked_adherent_meta_keys', $existing_keys, 'roi_chess', 3600 );
+			}
+		}
 
 		$tracked_adherent_ids = array();
 		if ( is_array( $existing_keys ) ) {
@@ -486,6 +494,7 @@ class Group_Service {
 				),
 				false
 			);
+			wp_cache_delete( 'roi_tracked_adherent_meta_keys', 'roi_chess' );
 		}
 
 		$f_name       = (string) get_post_meta( $adherent_id, '_dame_first_name', true );
@@ -523,6 +532,7 @@ class Group_Service {
 	 */
 	public function retirer_eleve_suivi( int $user_id, string $meta_key ): void {
 		delete_user_meta( $user_id, $meta_key );
+		wp_cache_delete( 'roi_tracked_adherent_meta_keys', 'roi_chess' );
 	}
 
 	/**

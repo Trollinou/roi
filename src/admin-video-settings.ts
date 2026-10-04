@@ -91,14 +91,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		await ensureYouTubeApi();
 
-		// Empty container and create iframe mount point with full absolute dimensions
-		playerContainer.innerHTML =
-			'<div id="roi_yt_iframe_mount" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"></div>';
+		playerContainer.innerHTML = '<div id="roi_yt_iframe_mount"></div>';
 
 		if (ytPlayer && typeof ytPlayer.destroy === 'function') {
 			try {
 				ytPlayer.destroy();
-			} catch (_e) {
+			} catch {
 				// ignore
 			}
 		}
@@ -120,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
 						if (dur > 0 && dureeInput && !dureeInput.value) {
 							dureeInput.value = formatDuration(dur);
 						}
-					} catch (_e) {
+					} catch {
 						// ignore
 					}
 				},
@@ -135,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
 							if (dur > 0 && dureeInput && !dureeInput.value) {
 								dureeInput.value = formatDuration(dur);
 							}
-						} catch (_e) {
+						} catch {
 							// ignore
 						}
 					}
@@ -177,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					statusNotice.style.display = 'none';
 				}
 			}
-		} catch (_e) {
+		} catch {
 			if (statusNotice) {
 				statusNotice.style.display = 'none';
 			}
@@ -199,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			fetchOEmbedMetadata(val);
 		} else if (playerContainer) {
 			playerContainer.innerHTML =
-				'<div style="position: absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#888;">Collez une URL YouTube valide pour afficher l\'aperçu.</div>';
+				'<div class="roi-video-placeholder">Collez une URL YouTube valide pour afficher l\'aperçu.</div>';
 		}
 	};
 

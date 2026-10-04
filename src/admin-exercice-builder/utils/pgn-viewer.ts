@@ -4,7 +4,7 @@
 
 import { extractFenOrientationAndShapes } from './controls';
 import { toFrenchNotation } from '../../utils/chessUtils';
-import type { BoardShape, Color, PgnString } from '../../types/chess';
+import type { BoardShape, PgnString } from '../../types/chess';
 
 export interface PgnPreviewViewerOptions {
   pgn?: PgnString;
@@ -51,48 +51,49 @@ export function createPgnPreviewViewer(
 
   // Structure HTML du composant
   rootEl.innerHTML = `
-		<div class="roi-pgn-preview-viewer" style="display: flex; gap: 12px; align-items: stretch; width: 100%; max-width: 680px; box-sizing: border-box; background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; padding: 10px; overflow: hidden;">
+		<div class="roi-pgn-preview-viewer">
 			<!-- Échiquier (gauche) -->
-			<div class="roi-pgn-viewer-board-col" style="flex: 0 0 ${boardSize}px; width: ${boardSize}px; height: ${boardSize}px; position: relative;">
-				<div class="main-wrap fit-container piece-set-cburnett board-theme-brown" style="width: 100%; height: 100%; position: relative;">
-					<div class="main-board roi-pgn-board-mount" style="width: 100%; height: 100%;"></div>
+			<div class="roi-pgn-viewer-board-col" style="flex: 0 0 ${boardSize}px; width: ${boardSize}px; height: ${boardSize}px;">
+				<div class="main-wrap fit-container piece-set-cburnett board-theme-brown">
+					<div class="main-board roi-pgn-board-mount"></div>
 				</div>
 			</div>
 
 			<!-- Volet de droite : Coups, commentaires, variantes, contrôles -->
-			<div class="roi-pgn-viewer-side-col" style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; height: ${boardSize}px; box-sizing: border-box;">
+			<div class="roi-pgn-viewer-side-col" style="height: ${boardSize}px;">
 				
 				<!-- Zone supérieure : Liste des coups de la branche active -->
-				<div class="roi-pgn-moves-container" style="flex: 1; min-height: 80px; max-height: 110px; overflow-y: auto; background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 4px; padding: 8px 10px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; line-height: 1.6;">
-					<div class="roi-pgn-moves-list" style="word-break: break-word;"></div>
+				<div class="roi-pgn-moves-container">
+					<div class="roi-pgn-moves-list"></div>
 				</div>
 
 				<!-- Zone des variantes alternatives au coup actif -->
-				<div class="roi-pgn-variations-container" style="display: none; margin-top: 5px; padding: 5px 8px; background: #f0f6fc; border: 1px solid #c8d9ea; border-radius: 4px; font-size: 12px;">
-					<div style="font-weight: 600; color: #0969da; margin-bottom: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">🌿 Coups & Variantes disponibles :</div>
-					<div class="roi-pgn-variations-list" style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;"></div>
+				<div class="roi-pgn-variations-container">
+					<div class="roi-pgn-variations-title">🌿 Coups & Variantes disponibles :</div>
+					<div class="roi-pgn-variations-list"></div>
 				</div>
 
 				<!-- Zone médiane : Commentaire du coup actif -->
-				<div class="roi-pgn-comment-container" style="margin-top: 5px; min-height: 38px; max-height: 55px; overflow-y: auto; background: #fff; border: 1px dashed #ccd0d4; border-radius: 4px; padding: 6px 8px; font-size: 12px; color: #444; line-height: 1.4;">
-					<div class="roi-pgn-comment-text" style="font-style: italic; color: #646970;">(Position de départ)</div>
+				<div class="roi-pgn-comment-container">
+					<div class="roi-pgn-comment-text">(Position de départ)</div>
 				</div>
 
 				<!-- Zone inférieure : Barre de navigation Lichess-like -->
-				<div class="roi-pgn-nav-bar" style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; padding-top: 6px; border-top: 1px solid #eee;">
-					<div style="display: flex; gap: 4px;">
-						<button type="button" class="button button-small roi-nav-first" title="Début (Position initiale)" style="min-width: 30px; padding: 0 4px; font-weight: bold;">|◀</button>
-						<button type="button" class="button button-small roi-nav-prev" title="Coup précédent" style="min-width: 30px; padding: 0 4px; font-weight: bold;">◀</button>
-						<button type="button" class="button button-small roi-nav-next" title="Coup suivant" style="min-width: 30px; padding: 0 4px; font-weight: bold;">▶</button>
-						<button type="button" class="button button-small roi-nav-last" title="Fin (Dernier coup)" style="min-width: 30px; padding: 0 4px; font-weight: bold;">▶|</button>
+				<div class="roi-pgn-nav-bar">
+					<div class="roi-pgn-nav-buttons">
+						<button type="button" class="button button-small roi-nav-first" title="Début (Position initiale)">|◀</button>
+						<button type="button" class="button button-small roi-nav-prev" title="Coup précédent">◀</button>
+						<button type="button" class="button button-small roi-nav-next" title="Coup suivant">▶</button>
+						<button type="button" class="button button-small roi-nav-last" title="Fin (Dernier coup)">▶|</button>
 					</div>
-					<div class="roi-pgn-ply-label" style="font-size: 11px; color: #50575e; font-weight: 600; white-space: nowrap;">
+					<div class="roi-pgn-ply-label">
 						Coup 0 / 0
 					</div>
 				</div>
 			</div>
 		</div>
 	`;
+
 
   const boardMountEl = rootEl.querySelector('.roi-pgn-board-mount') as HTMLElement | null;
   const movesListEl = rootEl.querySelector('.roi-pgn-moves-list') as HTMLElement | null;
@@ -181,7 +182,7 @@ export function createPgnPreviewViewer(
 
     if (movesData.length === 0) {
       movesListEl.innerHTML =
-        '<span style="color: #646970; font-style: italic;">Aucun coup dans cette séquence.</span>';
+        '<span style="color: var(--roi-color-text-muted); font-style: italic;">Aucun coup dans cette séquence.</span>';
       return;
     }
 
@@ -189,21 +190,18 @@ export function createPgnPreviewViewer(
     for (let i = 0; i < movesData.length; i++) {
       const m = movesData[i];
       if (m.isWhite) {
-        html += `<span class="roi-pgn-move-num" style="color: #646970; font-weight: 600; margin-left: 4px;">${m.num}.</span> `;
+        html += `<span class="roi-pgn-move-num">${m.num}.</span> `;
       } else if (i === 0) {
-        html += `<span class="roi-pgn-move-num" style="color: #646970; font-weight: 600;">${m.num}...</span> `;
+        html += `<span class="roi-pgn-move-num">${m.num}...</span> `;
       }
 
-      const branchStyle = m.hasBranches
-        ? 'text-decoration: underline dotted #0969da; text-underline-offset: 3px;'
-        : '';
       const branchTitle = m.hasBranches
         ? ' title="Variantes disponibles sur ce coup"'
         : '';
       const branchPrefix = m.hasBranches ? '›' : '';
       const branchSuffix = m.hasBranches ? '‹' : '';
 
-      html += `<span class="roi-pgn-move-item" data-ply="${m.ply}"${branchTitle} style="cursor: pointer; padding: 1px 4px; border-radius: 3px; display: inline-block; transition: all 0.15s; margin-right: 2px; ${branchStyle}">${branchPrefix}${toFrenchNotation(m.san)}${branchSuffix}</span> `;
+      html += `<span class="roi-pgn-move-item" data-ply="${m.ply}"${branchTitle}>${branchPrefix}${toFrenchNotation(m.san)}${branchSuffix}</span> `;
     }
 
     movesListEl.innerHTML = html;

@@ -33,11 +33,11 @@ class TypeEchecEval implements TypeInterface {
 		$solution_moves  = isset( $config_data['solution_moves'] ) && is_array( $config_data['solution_moves'] ) ? implode( ', ', $config_data['solution_moves'] ) : '';
 		$pgn_explication = isset( $config_data['pgn_explication'] ) && is_string( $config_data['pgn_explication'] ) ? $config_data['pgn_explication'] : '';
 		?>
-		<div id="roi_builder_type_10" class="roi-builder-section" style="display:none; margin-top:15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
-			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice (Echec'éval)", 'roi' ); ?></h4>
+		<div id="roi_builder_type_10" class="roi-builder-section" style="display:none;">
+			<h4 class="roi-builder-section-title"><?php esc_html_e( "Constructeur d'exercice (Echec'éval)", 'roi' ); ?></h4>
 
 			<!-- Configuration Globale -->
-			<div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
+			<div class="roi-form-row">
 				<?php
 				FenInput::render(
 					array(
@@ -51,19 +51,19 @@ class TypeEchecEval implements TypeInterface {
 				);
 				?>
 
-				<div>
-					<label for="roi_t10_theme"><strong><?php esc_html_e( 'Thème :', 'roi' ); ?></strong></label><br>
-					<input type="text" id="roi_t10_theme" value="<?php echo esc_attr( $theme ); ?>" style="width:100%; height: 30px;" placeholder="<?php esc_attr_e( 'Ex: Sécurité du Roi', 'roi' ); ?>">
+				<div class="roi-form-row">
+					<label for="roi_t10_theme"><?php esc_html_e( 'Thème :', 'roi' ); ?></label>
+					<input type="text" id="roi_t10_theme" value="<?php echo esc_attr( $theme ); ?>" placeholder="<?php esc_attr_e( 'Ex: Sécurité du Roi', 'roi' ); ?>">
 				</div>
 			</div>
 
-			<hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+			<hr>
 
 			<!-- Questions (Dynamiques) -->
-			<div style="margin-bottom: 20px;">
-				<h4 style="margin-top: 0; margin-bottom: 10px; font-size: 14px; font-weight: 600;"><?php esc_html_e( 'Questions d\'évaluation', 'roi' ); ?></h4>
+			<div class="roi-form-row">
+				<h4 class="roi-builder-section-title"><?php esc_html_e( 'Questions d\'évaluation', 'roi' ); ?></h4>
 				
-				<div id="roi_t10_questions_container" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px;">
+				<div id="roi_t10_questions_container">
 					<?php
 					foreach ( $questions as $idx => $q ) :
 						$q_texte       = isset( $q['texte'] ) && is_string( $q['texte'] ) ? $q['texte'] : '';
@@ -71,41 +71,41 @@ class TypeEchecEval implements TypeInterface {
 						$q_reponse     = isset( $q['reponse_attendue'] ) && is_string( $q['reponse_attendue'] ) ? $q['reponse_attendue'] : '';
 						$q_explication = isset( $q['explication'] ) && is_string( $q['explication'] ) ? $q['explication'] : '';
 						?>
-						<div class="roi-t10-question-card" data-index="<?php echo (int) $idx; ?>" style="padding: 12px; border: 1px solid #ddd; background: #f9f9f9; border-radius: 4px;">
-							<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-								<strong style="font-size: 13px; color: #1d2327;">
+						<div class="roi-t10-question-card" data-index="<?php echo (int) $idx; ?>">
+							<div class="roi-t10-question-header">
+								<strong>
 									<?php
 									/* translators: %d: Question number */
 									echo esc_html( sprintf( __( 'Question %d', 'roi' ), (int) $idx + 1 ) );
 									?>
 								</strong>
-								<button type="button" class="button button-link-delete roi_t10_remove_question" style="color: #b32d2e; text-decoration: none;">
+								<button type="button" class="button button-link-delete roi_t10_remove_question">
 									<?php esc_html_e( 'Supprimer', 'roi' ); ?>
 								</button>
 							</div>
 
-							<div style="display: flex; flex-direction: column; gap: 10px;">
-								<div>
-									<label style="font-weight: 600; font-size: 12px;"><?php esc_html_e( 'Intitulé de la question :', 'roi' ); ?></label>
-									<input type="text" class="roi_t10_q_texte" value="<?php echo esc_attr( $q_texte ); ?>" style="width: 100%; height: 30px;" placeholder="<?php esc_attr_e( 'Ex: Le Roi blanc est-il en sécurité ?', 'roi' ); ?>">
+							<div class="roi-form-row">
+								<div class="roi-form-row">
+									<label><?php esc_html_e( 'Intitulé de la question :', 'roi' ); ?></label>
+									<input type="text" class="roi_t10_q_texte" value="<?php echo esc_attr( $q_texte ); ?>" placeholder="<?php esc_attr_e( 'Ex: Le Roi blanc est-il en sécurité ?', 'roi' ); ?>">
 								</div>
 
-								<div style="display: flex; gap: 15px; align-items: center;">
-									<div style="flex: 1;">
-										<label style="font-weight: 600; font-size: 12px;"><?php esc_html_e( 'Type de réponse :', 'roi' ); ?></label>
-										<select class="roi_t10_q_type" style="width: 100%; height: 30px;">
+								<div class="roi-form-flex-row">
+									<div class="roi-form-flex-col">
+										<label><?php esc_html_e( 'Type de réponse :', 'roi' ); ?></label>
+										<select class="roi_t10_q_type">
 											<option value="yesno" <?php selected( $q_type, 'yesno' ); ?>><?php esc_html_e( 'Oui / Non (yesno)', 'roi' ); ?></option>
 											<option value="evaluation" <?php selected( $q_type, 'evaluation' ); ?>><?php esc_html_e( 'Évaluation (evaluation)', 'roi' ); ?></option>
 										</select>
 									</div>
 
-									<div style="flex: 1;">
-										<label style="font-weight: 600; font-size: 12px;"><?php esc_html_e( 'Réponse attendue :', 'roi' ); ?></label>
-										<select class="roi_t10_q_reponse_yesno" style="width: 100%; height: 30px; display: <?php echo 'yesno' === $q_type ? 'inline-block' : 'none'; ?>;">
+									<div class="roi-form-flex-col">
+										<label><?php esc_html_e( 'Réponse attendue :', 'roi' ); ?></label>
+										<select class="roi_t10_q_reponse_yesno" style="display: <?php echo 'yesno' === $q_type ? 'inline-block' : 'none'; ?>;">
 											<option value="oui" <?php selected( $q_reponse, 'oui' ); ?>><?php esc_html_e( 'Oui', 'roi' ); ?></option>
 											<option value="non" <?php selected( $q_reponse, 'non' ); ?>><?php esc_html_e( 'Non', 'roi' ); ?></option>
 										</select>
-										<select class="roi_t10_q_reponse_evaluation" style="width: 100%; height: 30px; display: <?php echo 'evaluation' === $q_type ? 'inline-block' : 'none'; ?>;">
+										<select class="roi_t10_q_reponse_evaluation" style="display: <?php echo 'evaluation' === $q_type ? 'inline-block' : 'none'; ?>;">
 											<option value="bonne" <?php selected( $q_reponse, 'bonne' ); ?>><?php esc_html_e( 'Bonne', 'roi' ); ?></option>
 											<option value="neutre" <?php selected( $q_reponse, 'neutre' ); ?>><?php esc_html_e( 'Neutre', 'roi' ); ?></option>
 											<option value="mauvaise" <?php selected( $q_reponse, 'mauvaise' ); ?>><?php esc_html_e( 'Mauvaise', 'roi' ); ?></option>
@@ -113,9 +113,9 @@ class TypeEchecEval implements TypeInterface {
 									</div>
 								</div>
 
-								<div>
-									<label style="font-weight: 600; font-size: 12px;"><?php esc_html_e( 'Explication :', 'roi' ); ?></label>
-									<input type="text" class="roi_t10_q_explication" value="<?php echo esc_attr( $q_explication ); ?>" style="width: 100%; height: 30px;" placeholder="<?php esc_attr_e( 'Ex: Le centre va s\'ouvrir dangereusement.', 'roi' ); ?>">
+								<div class="roi-form-row">
+									<label><?php esc_html_e( 'Explication :', 'roi' ); ?></label>
+									<input type="text" class="roi_t10_q_explication" value="<?php echo esc_attr( $q_explication ); ?>" placeholder="<?php esc_attr_e( 'Ex: Le centre va s\'ouvrir dangereusement.', 'roi' ); ?>">
 								</div>
 							</div>
 						</div>
@@ -125,16 +125,16 @@ class TypeEchecEval implements TypeInterface {
 				<button type="button" id="roi_t10_add_question" class="button"><?php esc_html_e( 'Ajouter une question', 'roi' ); ?></button>
 			</div>
 
-			<hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0 15px;">
+			<hr>
 
 			<!-- L'Action & Explication (Fin de l'exercice) -->
-			<div style="display: flex; flex-direction: column; gap: 15px;">
-				<div>
-					<h4 style="margin-top: 0; font-size: 14px; font-weight: 600; margin-bottom: 8px;"><?php esc_html_e( 'Séquence à jouer', 'roi' ); ?></h4>
-					<input type="text" id="roi_t10_solution_moves" value="<?php echo esc_attr( $solution_moves ); ?>" style="width:100%; height: 30px;" placeholder="<?php esc_attr_e( 'Coups SAN séparés par des virgules (ex: Nxe5, Nxe5, d4)', 'roi' ); ?>">
+			<div class="roi-form-row">
+				<div class="roi-form-row">
+					<h4><?php esc_html_e( 'Séquence à jouer', 'roi' ); ?></h4>
+					<input type="text" id="roi_t10_solution_moves" value="<?php echo esc_attr( $solution_moves ); ?>" placeholder="<?php esc_attr_e( 'Coups SAN séparés par des virgules (ex: Nxe5, Nxe5, d4)', 'roi' ); ?>">
 				</div>
 
-				<div>
+				<div class="roi-form-row">
 					<?php
 					PgnInput::render(
 						array(
@@ -150,6 +150,7 @@ class TypeEchecEval implements TypeInterface {
 				</div>
 			</div>
 		</div>
+
 		<?php
 	}
 }

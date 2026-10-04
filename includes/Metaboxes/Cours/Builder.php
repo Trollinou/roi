@@ -170,66 +170,13 @@ class Builder {
 			$playlist = '[]';
 		}
 		?>
-		<style>
-			.roi-cours-builder-columns {
-				display: flex;
-				gap: 20px;
-				margin-top: 10px;
-			}
-			.roi-cours-builder-col {
-				flex: 1;
-				min-width: 0;
-				border-radius: 6px;
-				padding: 12px;
-			}
-			.roi-cours-catalog-filter-bar {
-				display: flex;
-				gap: 8px;
-				margin-bottom: 12px;
-				align-items: center;
-			}
-			.roi-cours-catalog-filter-bar input[type="text"] {
-				flex: 1;
-				height: 32px;
-			}
-			.roi-cours-catalog-filter-bar select {
-				height: 32px;
-			}
-			.roi-builder-badge {
-				background: #2271b1;
-				color: #fff;
-				border-radius: 10px;
-				padding: 2px 8px;
-				font-size: 11px;
-				font-weight: bold;
-			}
-			.roi-scrollable-container {
-				max-height: 480px;
-				overflow-y: auto;
-				padding-right: 2px;
-			}
-			.roi-scrollable-container::-webkit-scrollbar {
-				width: 6px;
-			}
-			.roi-scrollable-container::-webkit-scrollbar-track {
-				background: #f1f1f1;
-				border-radius: 3px;
-			}
-			.roi-scrollable-container::-webkit-scrollbar-thumb {
-				background: #c1c1c1;
-				border-radius: 3px;
-			}
-			.roi-scrollable-container::-webkit-scrollbar-thumb:hover {
-				background: #a8a8a8;
-			}
-		</style>
 		<div class="roi-cours-builder-container" data-course-id="<?php echo esc_attr( (string) $post->ID ); ?>" data-course-chapter-id="<?php echo esc_attr( (string) $course_chapter_id ); ?>" data-course-level="<?php echo esc_attr( (string) $course_level ); ?>">
 			<input type="hidden" name="roi_cours_playlist_json" id="roi_cours_playlist_json" value="<?php echo esc_attr( $playlist ); ?>">
 
 			<div class="roi-cours-builder-columns">
 				<!-- Colonne Gauche : Catalogue -->
-				<div class="roi-cours-builder-col" style="border: 1px solid #ccc; background: #fafafa;">
-					<h3 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+				<div class="roi-cours-builder-col roi-cours-builder-col--catalog">
+					<h3 class="roi-cours-col-title">
 						<span><?php esc_html_e( 'Catalogue des leçons & exercices', 'roi' ); ?></span>
 						<span id="roi_available_count" class="roi-builder-badge">0</span>
 					</h3>
@@ -254,26 +201,26 @@ class Builder {
 						</select>
 					</div>
 
-					<div class="roi-cours-catalog-options" style="margin-bottom: 12px; display: flex; align-items: center;">
-						<label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #50575e; cursor: pointer; user-select: none;">
-							<input type="checkbox" id="roi_catalog_unassigned_only" value="1" checked style="margin: 0;">
+					<div class="roi-cours-catalog-options">
+						<label class="roi-catalog-unassigned-label">
+							<input type="checkbox" id="roi_catalog_unassigned_only" value="1" checked>
 							<span><?php esc_html_e( 'Non assignés uniquement', 'roi' ); ?></span>
 						</label>
 					</div>
 
-					<div id="roi_available_items" class="roi-scrollable-container" style="display: flex; flex-direction: column; gap: 8px; padding-right: 4px;">
+					<div id="roi_available_items" class="roi-scrollable-container roi-scrollable-container--available">
 						<!-- Rempli par JS -->
 					</div>
 				</div>
 
 				<!-- Colonne Droite : Playlist -->
-				<div class="roi-cours-builder-col" style="border: 1px solid #ccc; background: #fff;">
-					<h3 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+				<div class="roi-cours-builder-col roi-cours-builder-col--playlist">
+					<h3 class="roi-cours-col-title">
 						<span><?php esc_html_e( 'Contenu du cours (Playlist)', 'roi' ); ?></span>
 						<span id="roi_playlist_count" class="roi-builder-badge">0</span>
 					</h3>
 
-					<div id="roi_playlist_items" class="roi-scrollable-container" style="min-height: 350px; border: 2px dashed #bbb; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+					<div id="roi_playlist_items" class="roi-scrollable-container roi-scrollable-container--playlist">
 						<?php
 						$playlist_items = json_decode( $playlist, true );
 						if ( is_array( $playlist_items ) ) {
@@ -316,36 +263,6 @@ class Builder {
 										$type_label = 'Vidéo';
 									}
 
-									// Color style details.
-									$color_palette = array(
-										'primary'  => array(
-											'bg'     => '#e5f3ff',
-											'border' => '#0073aa',
-											'text'   => '#005a87',
-										),
-										'warning'  => array(
-											'bg'     => '#fff5ec',
-											'border' => '#d94f00',
-											'text'   => '#a63c00',
-										),
-										'danger'   => array(
-											'bg'     => '#fbeaea',
-											'border' => '#d63638',
-											'text'   => '#9e2526',
-										),
-										'success'  => array(
-											'bg'     => '#edfaef',
-											'border' => '#00a32a',
-											'text'   => '#00701c',
-										),
-										'tertiary' => array(
-											'bg'     => '#f5ecfc',
-											'border' => '#8224e3',
-											'text'   => '#5c16a6',
-										),
-									);
-									$styles        = isset( $color_palette[ $color ] ) ? $color_palette[ $color ] : $color_palette['primary'];
-
 									?>
 									<div class="roi-playlist-item" 
 										data-playlist-item="true" 
@@ -355,17 +272,16 @@ class Builder {
 										data-title="<?php echo esc_attr( $title ); ?>" 
 										data-color="<?php echo esc_attr( $color ); ?>" 
 										data-level="<?php echo (int) $level; ?>" 
-										data-chapter-id="<?php echo (int) $chapter_id; ?>" 
-										style="padding: 10px; border: 1px solid <?php echo esc_attr( $styles['border'] ); ?>; background: <?php echo esc_attr( $styles['bg'] ); ?>; color: <?php echo esc_attr( $styles['text'] ); ?>; border-radius: 4px; cursor: move; font-size: 13px; font-weight: 500; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-										<span style="word-break: break-word; overflow-wrap: anywhere;"><?php echo esc_html( $title ); ?></span>
-										<div style="display: flex; gap: 5px; align-items: center; flex-shrink: 0;">
-											<span style="font-size: 10px; white-space: nowrap; flex-shrink: 0; background: rgba(255,255,255,0.6); border: 1px solid <?php echo esc_attr( $styles['border'] ); ?>; padding: 1px 5px; border-radius: 3px;">
+										data-chapter-id="<?php echo (int) $chapter_id; ?>">
+										<span class="roi-cours-item-title"><?php echo esc_html( $title ); ?></span>
+										<div class="roi-cours-item-meta">
+											<span class="roi-cours-badge-level">
 												Niv.&nbsp;<?php echo (int) $level; ?>
 											</span>
-											<span style="font-size: 10px; white-space: nowrap; flex-shrink: 0; text-transform: uppercase; background: <?php echo esc_attr( $styles['border'] ); ?>; color: #fff; padding: 2px 6px; border-radius: 3px;">
+											<span class="roi-cours-badge-type">
 												<?php echo esc_html( $type_label ); ?>
 											</span>
-											<button type="button" class="roi-playlist-item-remove" style="background: none; border: none; color: <?php echo esc_attr( $styles['text'] ); ?>; opacity: 0.6; cursor: pointer; font-size: 16px; font-weight: bold; line-height: 1; padding: 0 0 0 5px;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">&times;</button>
+											<button type="button" class="roi-playlist-item-remove">&times;</button>
 										</div>
 									</div>
 									<?php
@@ -376,6 +292,7 @@ class Builder {
 					</div>
 				</div>
 			</div>
+
 		</div>
 		<?php
 	}

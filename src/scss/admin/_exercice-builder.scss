@@ -1,0 +1,109 @@
+// ==========================================================================
+// ROI Admin Exercice Builder & Types Styles
+// ==========================================================================
+
+.roi-builder-section {
+  margin-top: 15px;
+  padding: 15px;
+  border: 1px solid var(--roi-color-border, #ccd0d4);
+  background: var(--roi-color-bg, #fff);
+  border-radius: var(--roi-radius-sm, 4px);
+  box-sizing: border-box;
+
+  .roi-builder-section-title {
+    margin-top: 0;
+    border-bottom: 1px solid var(--roi-color-border-subtle, #eee);
+    padding-bottom: 8px;
+    font-size: var(--roi-font-size-base, 14px);
+    font-weight: 600;
+  }
+
+  .roi-builder-description {
+    margin-bottom: 15px;
+    color: var(--roi-color-text, #1d2327);
+    background: var(--roi-color-info-bg, #f0f6fc);
+    border-left: 4px solid var(--roi-color-primary, #72aee6);
+    padding: 10px 12px;
+    border-radius: var(--roi-radius-xs, 2px);
+    font-size: var(--roi-font-size-md, 13px);
+  }
+}
+
+.roi-t7-serie-card,
+.roi-t5-diagramme-item,
+.roi-t10-question-card {
+  border: 1px solid var(--roi-color-border-subtle, #e5e5e5);
+  padding: 14px;
+  border-radius: var(--roi-radius-sm, 4px);
+  background: var(--roi-color-surface, #f9f9f9);
+  margin-bottom: 15px;
+  box-sizing: border-box;
+
+  .roi-t7-serie-header,
+  .roi-t10-question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--roi-color-border-subtle, #e2e8f0);
+    padding-bottom: 6px;
+
+    strong {
+      font-size: 14px;
+      color: var(--roi-color-text, #1e1e1e);
+    }
+  }
+
+  .roi-t7-orientation-badge {
+    font-size: var(--roi-font-size-sm, 12px);
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: var(--roi-radius-full, 12px);
+    background: var(--roi-color-info-bg, #e0f2fe);
+    color: var(--roi-color-info, #0369a1);
+    border: 1px solid var(--roi-color-info-border, #bae6fd);
+  }
+}
+
+.roi-form-row {
+  margin-bottom: 12px;
+
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: var(--roi-font-size-sm, 12px);
+    color: var(--roi-color-text-muted, #50575e);
+    font-weight: 600;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  select,
+  textarea {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+.roi-form-flex-row {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+
+  .roi-form-flex-col {
+    flex: 1;
+
+    label {
+      font-weight: 600;
+      font-size: var(--roi-font-size-sm, 12px);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    select,
+    input {
+      width: 100%;
+      height: 30px;
+    }
+  }
+}

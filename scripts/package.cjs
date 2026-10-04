@@ -12,6 +12,21 @@ if ( ! versionMatch ) {
 const version = versionMatch[ 1 ].trim();
 console.log( `Packaging version: ${ version }` );
 
+// Contrôle Qualité Pré-Packaging
+console.log( '🔍 Running Pre-Packaging Quality Assurance Checks...' );
+try {
+	console.log( '  → TypeCheck...' );
+	execSync( 'npm run typecheck', { stdio: 'inherit' } );
+	console.log( '  → ESLint...' );
+	execSync( 'npm run lint', { stdio: 'inherit' } );
+	console.log( '  → PHPStan...' );
+	execSync( 'vendor/bin/phpstan analyze --debug --memory-limit=2G', { stdio: 'inherit' } );
+	console.log( '✅ QA Checks passed successfully.\n' );
+} catch ( qaErr ) {
+	console.error( '❌ Error: Pre-packaging QA suite failed.' );
+	process.exit( 1 );
+}
+
 const pluginSlug = 'roi';
 const zipName = `${ pluginSlug }-v${ version }.zip`;
 const tempDir = path.resolve( 'dist-temp' );

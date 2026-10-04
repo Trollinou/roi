@@ -10,6 +10,7 @@
   "supports": {
     "html": false,
     "blockBindings": true,
+    "interactivity": true,
     "align": [
       "wide",
       "full"
@@ -89,5 +90,5 @@
   "editorScript": "file:./chessboard.js",
   "editorStyle": "file:./style.css",
   "style": "file:./style.css",
-  "viewScript": "file:./chessboard-view.js"
+  "viewScriptModule": "file:./chessboard-view.js"
 }

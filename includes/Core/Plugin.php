@@ -33,11 +33,14 @@ class Plugin {
 		$roles = new Roles();
 		$roles->init();
 
-		// REST API controllers & cache handlers.
-		( new \ROI\API\REST\Parcours_Controller() )->init();
+		// Cache invalidation & object cache handlers.
+		\ROI\API\REST\Parcours_Controller::register_cache_hooks();
+
+		// REST API controllers (lazy loaded on rest_api_init).
 		add_action(
 			'rest_api_init',
 			function (): void {
+				( new \ROI\API\REST\Parcours_Controller() )->register_routes();
 				( new \ROI\API\REST\Games_Controller() )->register_routes();
 				( new \ROI\API\REST\Contenu_Controller() )->register_routes();
 				( new \ROI\API\REST\Progression_Controller() )->register_routes();

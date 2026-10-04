@@ -58,6 +58,60 @@ class Games_Controller {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'save_game' ),
 					'permission_callback' => array( $this, 'save_game_permissions_check' ),
+					'args'                => array(
+						'member_id'        => array(
+							'description'       => __( 'ID du membre ayant joué la partie.', 'roi' ),
+							'type'              => 'integer',
+							'required'          => true,
+							'validate_callback' => static function ( $param ): bool {
+								return is_numeric( $param ) && (int) $param > 0;
+							},
+							'sanitize_callback' => 'absint',
+						),
+						'difficulty_level' => array(
+							'description'       => __( 'Niveau de difficulté (1 à 8).', 'roi' ),
+							'type'              => 'integer',
+							'required'          => false,
+							'default'           => 1,
+							'sanitize_callback' => 'absint',
+						),
+						'hints_count'      => array(
+							'description'       => __( 'Nombre d\'indices utilisés.', 'roi' ),
+							'type'              => 'integer',
+							'required'          => false,
+							'default'           => 0,
+							'sanitize_callback' => 'absint',
+						),
+						'takebacks_count'  => array(
+							'description'       => __( 'Nombre de retours arrière effectués.', 'roi' ),
+							'type'              => 'integer',
+							'required'          => false,
+							'default'           => 0,
+							'sanitize_callback' => 'absint',
+						),
+						'pgn'              => array(
+							'description'       => __( 'Notation PGN de la partie.', 'roi' ),
+							'type'              => 'string',
+							'required'          => true,
+							'validate_callback' => static function ( $param ): bool {
+								return is_string( $param ) && '' !== trim( $param );
+							},
+							'sanitize_callback' => 'sanitize_textarea_field',
+						),
+						'duration'         => array(
+							'description'       => __( 'Durée de la partie en secondes.', 'roi' ),
+							'type'              => 'integer',
+							'required'          => false,
+							'default'           => 0,
+							'sanitize_callback' => 'absint',
+						),
+						'game_date'        => array(
+							'description'       => __( 'Date ISO de la partie.', 'roi' ),
+							'type'              => 'string',
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
 				),
 				array(
 					'methods'             => WP_REST_Server::READABLE,
@@ -169,8 +223,8 @@ class Games_Controller {
 		$current_user = wp_get_current_user();
 
 		// Insérer le post roi_partie.
-		$date_ts    = strtotime( $post_date );
-		$date_str   = '';
+		$date_ts  = strtotime( $post_date );
+		$date_str = '';
 		if ( false !== $date_ts ) {
 			$formatted_title_date = wp_date( 'd/m/Y H:i', $date_ts );
 			if ( false !== $formatted_title_date ) {

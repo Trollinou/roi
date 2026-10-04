@@ -1,0 +1,560 @@
+@use 'eg-chessboard/scss/base';
+
+@media (orientation: landscape) {
+  .main-wrap {
+    width: 90vh;
+    margin-inline: auto;
+    max-width: min(700px, 100%);
+  }
+}
+
+.fen-editor-board-col .main-wrap,
+.pgn-editor-left-col .main-wrap {
+  width: 100% !important;
+  max-width: 380px !important;
+  margin: 0 !important;
+}
+
+/* Editor Piece Palette Styles */
+
+.editor-palette-container {
+  margin-top: 15px;
+  background-color: #f7f7f7;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.editor-palette-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.editor-palette-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.editor-palette-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.editor-palette-board {
+  position: relative;
+  display: contents;
+}
+
+cg-board.editor-palette-board {
+  background-image: none !important;
+}
+
+.editor-palette-piece {
+  aspect-ratio: 1;
+  background: #e9e9e9;
+  border: 1px solid #dcdcdc;
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  padding: 0;
+  transition: all 0.2s ease;
+  min-height: 30px;
+}
+
+.editor-palette-piece:hover {
+  background: #e0e0e0;
+  border-color: #bbb;
+}
+
+.editor-palette-container .editor-palette-piece.active {
+  background: #3858e9 !important;
+  border-color: #3858e9 !important;
+  box-shadow: inset 0 0 0 2px #fff, 0 0 0 2px #3858e9 !important;
+}
+
+.editor-palette-piece .piece-inner {
+  position: absolute;
+  top: 5%;
+  left: 5%;
+  width: 90%;
+  height: 90%;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.editor-palette-eraser {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffebee;
+  border: 1px solid #ffcdd2;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #c62828;
+  aspect-ratio: 1;
+  padding: 0;
+  font-size: 18px;
+  min-height: 40px;
+}
+
+.editor-palette-eraser:hover {
+  background: #ffcdd2;
+}
+
+.editor-palette-container .editor-palette-eraser.active {
+  background: #d32f2f !important;
+  color: #fff !important;
+  border-color: #d32f2f !important;
+  box-shadow: inset 0 0 0 2px #fff, 0 0 0 2px #d32f2f !important;
+}
+
+/* Sidebar specific palette styles */
+.editor-palette-grid-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.editor-palette-row-sidebar {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 3px;
+}
+
+.editor-palette-row-eraser {
+  display: flex;
+  margin-top: 4px;
+}
+
+.editor-palette-row-eraser .editor-palette-eraser {
+  width: 100%;
+  height: 38px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 500;
+  border-radius: 4px;
+  aspect-ratio: auto;
+}
+
+/* Evaluation Bar */
+.main-wrap.has-evaluation-bar .main-board {
+  width: calc(100% - 20px);
+  padding-bottom: calc(100% - 20px);
+}
+
+.evaluation-bar {
+  position: absolute;
+  top: 0;
+  right: -20px;
+  bottom: 0;
+  width: 12px;
+  background-color: #313131;
+  border: 1px solid #404040;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+
+.evaluation-bar-fill {
+  background-color: #ffffff;
+  height: 50%;
+  width: 100%;
+  transition: height 0.3s ease;
+  margin-top: auto;
+}
+
+/* Visitor Interface Styles */
+.chess-config-dialog {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(26, 26, 26, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.config-dialog-content {
+  background: #2b2b2b;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 1.5rem;
+  width: 85%;
+  max-width: 320px;
+  color: #fff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif;
+}
+
+.color-selector {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.color-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #555;
+  border-radius: 6px;
+  background: #3a3a3a;
+  color: #ccc;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.color-btn:hover {
+  background: #4a4a4a;
+  color: #fff;
+}
+
+.color-btn.active {
+  background: #007cba;
+  border-color: #007cba;
+  color: #fff;
+  box-shadow: 0 0 8px rgba(0, 124, 186, 0.5);
+}
+
+.difficulty-selector {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.difficulty-selector label {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  color: #aaa;
+}
+
+.cadence-selector {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.cadence-selector label {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  color: #aaa;
+}
+
+.cadence-select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #555;
+  background: #3a3a3a;
+  color: #fff;
+  font-size: 0.9rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.difficulty-selector .elo-value {
+  font-weight: 700;
+  color: #007cba;
+}
+
+.elo-slider {
+  width: 100%;
+  margin: 0;
+  background: #444;
+  height: 6px;
+  border-radius: 3px;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.elo-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #007cba;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.elo-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.config-dialog-content .start-btn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  background: #007cba;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.config-dialog-content .start-btn:hover {
+  background: #006ba1;
+}
+
+.chessboard-block .chess-status {
+  box-sizing: border-box !important;
+  margin-top: 12px !important;
+  padding: 8px 12px !important;
+  background: #f7f7f7 !important;
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #333 !important;
+  text-align: center !important;
+  display: block !important;
+  width: 100% !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif !important;
+}
+
+.chessboard-block .chess-controls {
+  display: flex !important;
+  gap: var(--roi-spacing-sm, 8px) !important;
+  margin-top: 10px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.chessboard-block .control-btn {
+  flex: 1 !important;
+  padding: 10px 8px !important;
+  border: 1px solid var(--roi-color-border, #ccc) !important;
+  border-radius: var(--roi-radius-sm, 4px) !important;
+  background: var(--roi-color-bg, #fff) !important;
+  color: var(--roi-color-text, #333) !important;
+  font-size: var(--roi-font-size-base, 14px) !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: var(--roi-transition, all 0.2s ease) !important;
+  font-family: var(--roi-font-family) !important;
+  text-transform: none !important;
+  box-shadow: none !important;
+  height: auto !important;
+  line-height: normal !important;
+  display: inline-block !important;
+  text-align: center !important;
+}
+
+.chessboard-block .control-btn:hover {
+  background: var(--roi-color-surface-hover, #f0f0f0) !important;
+  border-color: var(--roi-color-text-subtle, #bbb) !important;
+  color: var(--roi-color-text, #333) !important;
+}
+
+.chessboard-block .captured-bar {
+  display: flex !important;
+  align-items: center !important;
+  padding: 6px 12px !important;
+  background: var(--roi-color-surface, #eee) !important;
+  border: 1px solid var(--roi-color-border, #ccc) !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
+.chessboard-block .captured-bar.hidden-bar {
+  display: none !important;
+}
+
+.chessboard-block .captured-clock-top {
+  border-radius: var(--roi-radius-lg, 8px) var(--roi-radius-lg, 8px) 0 0 !important;
+  border-bottom: none !important;
+}
+
+.chessboard-block .captured-clock-bottom {
+  border-radius: 0 0 var(--roi-radius-lg, 8px) var(--roi-radius-lg, 8px) !important;
+  border-top: none !important;
+  margin-bottom: 12px !important;
+}
+
+.chessboard-block .player-info {
+  font-size: 0.75rem !important;
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  color: var(--roi-color-text-muted, #666) !important;
+  min-width: 70px !important;
+  font-family: var(--roi-font-family) !important;
+}
+
+.chessboard-block .captured-pieces {
+  display: flex !important;
+  flex: 1 !important;
+  flex-wrap: nowrap !important;
+  overflow: hidden !important;
+  gap: 1px !important;
+}
+
+.chessboard-block .captured-piece {
+  font-size: 1.2rem !important;
+  line-height: 1 !important;
+  color: var(--roi-color-text, #333) !important;
+  font-family: var(--roi-font-family-chess, "Lucida Sans Unicode", "Arial Unicode MS", "Noto Sans Chess", sans-serif) !important;
+}
+
+.chessboard-block .material-wrapper {
+  min-width: 30px !important;
+  margin-right: 8px !important;
+}
+
+.chessboard-block .material-count {
+  font-size: 0.75rem !important;
+  font-weight: bold !important;
+  color: var(--roi-color-success, #15781B) !important;
+  font-family: var(--roi-font-family) !important;
+}
+
+.chessboard-block .game-clock {
+  font-family: var(--roi-font-family-mono, monospace) !important;
+  font-weight: bold !important;
+  font-size: 1.1rem !important;
+  padding: 2px 6px !important;
+  border-radius: var(--roi-radius-sm, 4px) !important;
+  background: var(--roi-color-border, #ddd) !important;
+  color: var(--roi-color-text, #333) !important;
+  min-width: 60px !important;
+  text-align: center !important;
+}
+
+.chessboard-block .game-clock.active {
+  background: var(--roi-color-success, #15781B) !important;
+  color: #fff !important;
+}
+
+/* Modales Gutenberg pour FenEditor et PgnEditor */
+@keyframes roiModalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.components-modal__frame.roi-fen-editor-modal,
+.components-modal__frame.roi-pgn-editor-modal {
+  animation: roiModalFadeIn 0.15s ease-out !important;
+  transform: none !important;
+  max-width: 860px !important;
+  width: 95% !important;
+  max-height: 92vh !important;
+  border-radius: var(--roi-radius-xl, 12px) !important;
+  box-shadow: var(--roi-shadow-lg, 0 10px 30px rgba(0, 0, 0, 0.25)) !important;
+  overflow: hidden !important;
+}
+
+.components-modal__frame.roi-fen-editor-modal .components-modal__header,
+.components-modal__frame.roi-pgn-editor-modal .components-modal__header {
+  padding: 16px 24px !important;
+  border-bottom: 1px solid var(--roi-color-border-subtle, #eee) !important;
+}
+
+.components-modal__frame.roi-fen-editor-modal .components-modal__header-heading,
+.components-modal__frame.roi-pgn-editor-modal .components-modal__header-heading {
+  font-size: var(--roi-font-size-xl, 18px) !important;
+  font-weight: 600 !important;
+}
+
+.components-modal__frame.roi-fen-editor-modal .components-modal__content,
+.components-modal__frame.roi-pgn-editor-modal .components-modal__content {
+  padding: 20px 25px 25px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.fen-editor-board-col .main-board,
+.pgn-editor-left-col .main-board {
+  width: 380px !important;
+  height: 380px !important;
+  max-width: 380px !important;
+  max-height: 380px !important;
+  padding-bottom: 0 !important;
+  aspect-ratio: 1 / 1 !important;
+  position: relative !important;
+}
+
+/* Interactivity API Blocks: Diagramme & PGN */
+.roi-bloc-diagramme,
+.roi-bloc-pgn {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  margin: var(--wp--style--block-gap, 1.5rem) auto;
+}
+
+.roi-bloc-diagramme .main-wrap,
+.roi-bloc-pgn .main-wrap {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.pgn-navigation-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--roi-spacing-sm, 8px);
+  margin-top: 12px;
+  position: relative;
+  z-index: 20;
+}
+
+.pgn-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  background: var(--roi-color-bg, #ffffff);
+  border: 1px solid var(--roi-color-border, #ced4da);
+  border-radius: var(--roi-radius-md, 6px);
+  font-weight: bold;
+  font-size: var(--roi-font-size-base, 14px);
+  cursor: pointer;
+  transition: var(--roi-transition, all 0.2s ease);
+  color: var(--roi-color-text, #495057);
+  position: relative;
+  z-index: 21;
+  pointer-events: auto !important;
+  user-select: none;
+}
+
+.pgn-nav-btn:hover {
+  background: var(--roi-color-surface-hover, #e9ecef);
+  border-color: var(--roi-color-text-subtle, #adb5bd);
+  color: var(--roi-color-text, #212529);
+}
+
+.pgn-nav-btn:active {
+  transform: translateY(1px);
+}
+
+
+
+

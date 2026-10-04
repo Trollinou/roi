@@ -324,21 +324,33 @@ class Columns {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$current = isset( $_GET['roi_audience'] ) ? sanitize_key( (string) $_GET['roi_audience'] ) : '';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Audience counter query.
-		$total_cours = (int) $wpdb->get_var(
-			"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'roi_cours' AND post_status NOT IN ('trash', 'auto-draft')"
-		);
+		$cached_total = wp_cache_get( 'roi_total_cours_count', 'roi_chess' );
+		if ( false !== $cached_total && is_numeric( $cached_total ) ) {
+			$total_cours = (int) $cached_total;
+		} else {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Audience counter query.
+			$total_cours = (int) $wpdb->get_var(
+				"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'roi_cours' AND post_status NOT IN ('trash', 'auto-draft')"
+			);
+			wp_cache_set( 'roi_total_cours_count', $total_cours, 'roi_chess', 3600 );
+		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Audience counter query.
-		$assigned_cours = (int) $wpdb->get_var(
-			"SELECT COUNT(DISTINCT p.ID) 
-			 FROM {$wpdb->posts} p
-			 INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
-			 WHERE p.post_type = 'roi_cours'
-			   AND p.post_status NOT IN ('trash', 'auto-draft')
-			   AND pm.meta_key = '_roi_cours_audience_type'
-			   AND pm.meta_value = 'restricted'"
-		);
+		$cached_assigned = wp_cache_get( 'roi_assigned_cours_count', 'roi_chess' );
+		if ( false !== $cached_assigned && is_numeric( $cached_assigned ) ) {
+			$assigned_cours = (int) $cached_assigned;
+		} else {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Audience counter query.
+			$assigned_cours = (int) $wpdb->get_var(
+				"SELECT COUNT(DISTINCT p.ID) 
+				 FROM {$wpdb->posts} p
+				 INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+				 WHERE p.post_type = 'roi_cours'
+				   AND p.post_status NOT IN ('trash', 'auto-draft')
+				   AND pm.meta_key = '_roi_cours_audience_type'
+				   AND pm.meta_value = 'restricted'"
+			);
+			wp_cache_set( 'roi_assigned_cours_count', $assigned_cours, 'roi_chess', 3600 );
+		}
 
 		$eef_cours = max( 0, $total_cours - $assigned_cours );
 

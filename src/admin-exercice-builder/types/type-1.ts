@@ -130,27 +130,28 @@ function createQcmElement(qcmData: QcmItem | null = null): HTMLElement {
 			? parseInt(String(qcmData.bonne_reponse), 10)
 			: 0;
 
+	item.className = 'roi-qcm-item roi-t1-qcm-item';
 	item.innerHTML = `
-		<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px dashed #ddd; padding-bottom: 6px;">
+		<div class="roi-qcm-header">
 			<strong class="roi-t1-qcm-title">QCM #${index + 1}</strong>
-			<button type="button" class="button roi_t1_remove_qcm" style="color: #b32d2e; border-color: #b32d2e; font-weight: bold;">Supprimer ce QCM</button>
+			<button type="button" class="button roi-qcm-btn-remove roi_t1_remove_qcm">Supprimer ce QCM</button>
 		</div>
-		<p style="margin-top: 0;">
+		<p class="roi-qcm-field-question">
 			<label><strong>Question :</strong></label><br>
-			<input type="text" class="roi_t1_question large-text" value="${escapeAttr(qText)}" style="width: 100%;">
+			<input type="text" class="roi_t1_question large-text" value="${escapeAttr(qText)}">
 		</p>
-		<p style="margin-bottom: 5px;"><strong>Réponses (sélectionnez la bonne réponse) :</strong></p>
-		<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+		<p class="roi-qcm-reponses-title"><strong>Réponses (sélectionnez la bonne réponse) :</strong></p>
+		<div class="roi-qcm-reponse-row">
 			<input type="radio" class="roi_t1_correct" name="roi_t1_correct_${index}" value="0" ${bonne === 0 ? 'checked' : ''}>
-			<input type="text" class="roi_t1_reponse" data-opt="0" value="${escapeAttr(reps[0] || '')}" style="flex: 1;" placeholder="Réponse 1">
+			<input type="text" class="roi_t1_reponse" data-opt="0" value="${escapeAttr(reps[0] || '')}" placeholder="Réponse 1">
 		</div>
-		<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+		<div class="roi-qcm-reponse-row">
 			<input type="radio" class="roi_t1_correct" name="roi_t1_correct_${index}" value="1" ${bonne === 1 ? 'checked' : ''}>
-			<input type="text" class="roi_t1_reponse" data-opt="1" value="${escapeAttr(reps[1] || '')}" style="flex: 1;" placeholder="Réponse 2">
+			<input type="text" class="roi_t1_reponse" data-opt="1" value="${escapeAttr(reps[1] || '')}" placeholder="Réponse 2">
 		</div>
-		<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+		<div class="roi-qcm-reponse-row">
 			<input type="radio" class="roi_t1_correct" name="roi_t1_correct_${index}" value="2" ${bonne === 2 ? 'checked' : ''}>
-			<input type="text" class="roi_t1_reponse" data-opt="2" value="${escapeAttr(reps[2] || '')}" style="flex: 1;" placeholder="Réponse 3">
+			<input type="text" class="roi_t1_reponse" data-opt="2" value="${escapeAttr(reps[2] || '')}" placeholder="Réponse 3">
 		</div>
 	`;
 

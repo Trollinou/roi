@@ -2,10 +2,45 @@
 
 ## [Unreleased]
 
+*   **Refonte SCSS Modulaire, Éradication du CSS Inline & Harmonisation Thèmes WordPress (`src/scss/`, `src/blocks/`, `includes/Metaboxes/`) :**
+    *   **Architecture SCSS & Design Tokens WordPress (`src/scss/abstracts/`)** : Mise en place des variables et tokens basés sur les Custom Properties WordPress (`var(--wp--preset--*)`, `--wp-admin-theme-color`, `--wp--style--block-gap`) avec des valeurs de repli robustes permettant une adaptation immédiate aux thèmes FSE et classiques.
+    *   **Pipeline de Compilation Sass & RTL (`scripts/build-css.js`, `webpack.config.js`)** : Compilation Sass compressée et génération automatique des variantes RTL (`assets/css/admin-style.css`, `assets/css/admin-style-rtl.css`, et feuilles de styles dans `build/`).
+    *   **Externalisation Intégrale des Styles Inline (`includes/Metaboxes/Cours/Builder.php`, `Partie.php`, `TypeEchecEval.php`, `TypePosiPlan.php`)** : Suppression des balises `<style>` embarquées et des attributs `style="..."` au profit de classes BEM normées (`roi-cours-builder-col--*`, `roi-playlist-item--*`, `roi-t10-question-card`, etc.).
+    *   **Intégration Hybride `eg-chessboard` (SCSS Modulaire & CSS Pré-compilé)** : Adoption de `@use 'eg-chessboard/scss/base'` dans `src/blocks/chessboard/style.scss` et adaptation de `scripts/build-css.js` avec `NodePackageImporter` Dart Sass, allégeant la feuille de style du bloc et assurant la compatibilité avec les surcharges SCSS et les imports CSS modulaires du package.
+    *   **Migration des Composants React & Blocs Gutenberg** : Conversion de l'ensemble des fichiers `.css` sources vers des modules SCSS compilés (`FenEditor.scss`, `PgnEditor.scss`, `src/blocks/chessboard/style.scss`), déclaration des types TypeScript globaux pour `*.scss` et élimination des doublons de styles.
+
+*   **Modernisation WordPress 7.1 & Performance Backend (`roi.php`, `Plugin.php`, `Group_Service.php`, `Columns.php`, `Ajax_Handler.php`) :**
+    *   **Options API & Autoload WP 7.1** : Configuration explicite `'autoload' => false` lors de l'enregistrement des réglages et imports de sauvegarde pour préserver la mémoire du bootstrap.
+    *   **Cycle de vie & Lazy Loading REST** : Encapsulation stricte de l'instanciation des contrôleurs REST au sein du hook `rest_api_init` et extraction des écouteurs d'invalidation de cache dans des méthodes statiques.
+    *   **Schémas Déclaratifs REST API** : Déclaration systématique des arguments REST (`validate_callback`, `sanitize_callback`, typage, descriptions) sur les contrôleurs de contenu, parties et progression.
+    *   **Object Cache WordPress (`wp_cache_*`)** : Mise en cache déterministe sous le groupe `roi_chess` pour les métadonnées d'élèves suivis, le décompte des cours assignés et les éléments de cours, avec invalidation granulaire lors des mutations.
+
+*   **Pipeline Qualité, Linting & Packaging (`scripts/package.cjs`, `eslint.config.js`, `src/`) :**
+    *   **Contrôle Qualité Pré-Packaging** : Automatisation de la validation QA complète (`typecheck`, `lint`, `phpstan`) avant la génération de l'archive de production dans `scripts/package.cjs`.
+    *   **Conformité TypeScript & ESLint** : Nettoyage des imports inutilisés, résolution des conflits de règles Prettier/ESLint et typage strict sans avertissement sur l'ensemble de `src/`.
+    *   **Migration Interactivity API & Script Modules (`src/blocks/chessboard/`, `src/blocks/diagramme/`, `src/blocks/pgn/`, `webpack.config.js`) :**
+        *   Activation globale de `"interactivity": true` et basculement vers `viewScriptModule` sur les 3 blocs Gutenberg d'échecs (`roi/chessboard`, `roi/diagramme` et `roi/pgn`).
+        *   **Bloc Diagramme (`roi/diagramme`)** : Création du module réactif `src/blocks/diagramme/view.ts` (`roi/diagramme`), montage automatique de l'échiquier statique avec formes/flèches graphiques (`data-wp-init="callbacks.mountDiagramme"`) et encapsulation propre du contexte FEN/orientation.
+        *   **Bloc PGN (`roi/pgn`)** : Création du module réactif `src/blocks/pgn/view.ts` (`roi/pgn`), montage de l'étude PGN (`data-wp-init="callbacks.mountPgn"`) et barre de navigation interactive (début, précédent, suivant, fin, retournement) pilotée par les actions réactives (`data-wp-on--click="actions.*"`).
+        *   **Bloc Échiquier Jouable (`roi/chessboard`)** : Store réactif `@wordpress/interactivity` (actions de sélection de couleur, cadence, ELO, partie, retournement) et encapsulation du cycle de vie de `BoardCore` (`eg-chessboard`) via `data-wp-init="callbacks.mountBoard"`.
+        *   **Hydratation d'État Native WordPress 7.1 (`wp_interactivity_state`)** : Transmission et hydratation serveur de la configuration globale (`stockfishWorkerUrl`, `defaultFen`, `supportedCadences`, `minElo`, `maxElo`, `defaultElo`) consommée directement par le store réactif frontend.
+    *   **Block Bindings API & Métadonnées Typées (`includes/Blocks/Bindings_Manager.php`, `Exercice.php`, `Partie.php`, `Cours.php`) :**
+        *   Enregistrement des sources de liaison personnalisées `roi/post-meta` et `roi/exercice-config` pour lier dynamiquement les blocs aux métadonnées des CPT et extraire les positions FEN/PGN à la volée.
+        *   Déclaration formelle `register_post_meta()` avec `show_in_rest` sur les CPT `roi_exercice`, `roi_partie` et `roi_cours` pour la compatibilité native avec la source `core/post-meta`.
+    *   **Service de Traitement HTML Haute Performance (`ROI\Services\Html_Processor`) :**
+        *   Encapsulation de `WP_HTML_Tag_Processor` pour injecter en toute sécurité les directives `data-wp-*` et contextes d'interactivité sans manipulation par expressions régulières.
+    *   **Conformité SSOT & Validation Cross-Projet :**
+        *   Isolation stricte des types TypeScript partagés (`src/types/index.ts` / `roi-types`) validée conjointement avec `dame-pwa` (`vue-tsc` à 0 erreur).
+
 *   **Éradication Complète du JavaScript Embarqué & Migration TypeScript 100% :**
     *   **Migration du Visualiseur de Parties Admin (`src/admin-partie-viewer.ts`, `Partie.php`, `webpack.config.js`) :** Portage intégral en TypeScript strict avec typage des interfaces `boardAPI` et du DOM, suppression du fichier legacy dans `assets/js/admin-partie-viewer.js` et chargement du script compilé depuis `build/chessboard/admin-partie-viewer.js` avec son fichier de dépendances `.asset.php`.
     *   **Externalisation de la Metabox Audience (`src/admin-cours-builder/audience.ts`, `Audience.php`, `main.ts`) :** Création d'un module TypeScript dédié pour le basculement d'affichage et le filtrage en direct des élèves avec écouteurs d'événements standards, et suppression complète des attributs inline (`onchange`, `oninput`, `onkeydown`) ainsi que du bloc `<script>` inline dans `Audience.php`.
     *   **Externalisation de la Confirmation de Restauration (`src/admin-backup.ts`, `Admin_Page.php`, `Backup.php`, `webpack.config.js`) :** Création d'un module TypeScript pour intercepter la soumission du formulaire de restauration via `data-confirm-message`, enregistrement et mise en file d'attente propres via `admin_enqueue_scripts` et suppression de la balise `<script>` inline.
+
+*   **Assurance Qualité & Conformité Stricte (PHPStan Level 7, WPCS & Directives Globales) :**
+    *   **Correction de Typage Enum PHPStan (`includes/Blocks/Bindings_Manager.php`) :** Résolution de l'appel de méthode invalide sur `Exercice_Type` (`label()` au lieu de `get_label()`), portant l'analyse PHPStan 2.x à 0 erreur sur 67 fichiers.
+    *   **Formatage & Alignements WPCS (`ChessEngine.php`, `Partie.php`, `Exercice.php`, `Html_Processor.php`, `Backup.php`) :** Harmonisation automatique des tableaux associatifs et opérateurs via PHPCBF, renommage du paramètre réservé PHP `$namespace` en `$store_namespace`, ajout des points finaux sur les commentaires inline et justification de la directive de sécurité sur `$_FILES`.
+    *   **Mise à jour des Directives Globales & QA (`AGENTS.md`) :** Intégration des paramètres de commande fiabilisés pour l'environnement sandbox/CLI (`vendor/bin/phpstan analyze --debug --memory-limit=2G` et auto-correction préalable par `vendor/bin/phpcbf`).
 
 ## [1.8.1] - 2026-10-01
 

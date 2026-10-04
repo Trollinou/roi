@@ -22,6 +22,7 @@ class Partie {
 	 */
 	public function init(): void {
 		add_action( 'init', array( $this, 'register' ), 0 );
+		add_action( 'init', array( $this, 'register_meta' ) );
 	}
 
 	/**
@@ -70,5 +71,59 @@ class Partie {
 		);
 
 		register_post_type( 'roi_partie', $args );
+	}
+
+	/**
+	 * Register typed post meta for roi_partie.
+	 *
+	 * @return void
+	 */
+	public function register_meta(): void {
+		$scalar_fields = array(
+			'_roi_member_id'        => array(
+				'type'    => 'integer',
+				'default' => 0,
+			),
+			'_roi_difficulty_level' => array(
+				'type'    => 'integer',
+				'default' => 1,
+			),
+			'_roi_hints_count'      => array(
+				'type'    => 'integer',
+				'default' => 0,
+			),
+			'_roi_takebacks_count'  => array(
+				'type'    => 'integer',
+				'default' => 0,
+			),
+			'_roi_game_duration'    => array(
+				'type'    => 'integer',
+				'default' => 0,
+			),
+			'_roi_game_date'        => array(
+				'type'    => 'string',
+				'default' => '',
+			),
+			'_roi_pgn'              => array(
+				'type'    => 'string',
+				'default' => '',
+			),
+		);
+
+		foreach ( $scalar_fields as $meta_key => $config ) {
+			register_post_meta(
+				'roi_partie',
+				$meta_key,
+				array(
+					'show_in_rest'  => true,
+					'single'        => true,
+					'type'          => $config['type'],
+					'default'       => $config['default'],
+					'auth_callback' => function ( bool $allowed, string $key, int $post_id ): bool {
+						return current_user_can( 'edit_post', $post_id );
+					},
+				)
+			);
+		}
 	}
 }

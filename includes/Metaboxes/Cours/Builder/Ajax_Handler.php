@@ -50,28 +50,38 @@ class Ajax_Handler {
 		if ( $unassigned_only ) {
 			global $wpdb;
 
-			if ( $course_id > 0 ) {
-				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Specific aggregation query across courses.
-				$playlists = $wpdb->get_col(
-					$wpdb->prepare(
+			$cache_key = 'roi_assigned_elements_' . $course_id;
+			$cached    = wp_cache_get( $cache_key, 'roi_chess' );
+
+			if ( false !== $cached && is_array( $cached ) ) {
+				$playlists = $cached;
+			} else {
+				if ( $course_id > 0 ) {
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Specific aggregation query across courses.
+					$playlists = $wpdb->get_col(
+						$wpdb->prepare(
+							"SELECT pm.meta_value 
+							 FROM {$wpdb->postmeta} pm
+							 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+							 WHERE pm.meta_key = '_roi_cours_playlist'
+							   AND p.post_type = 'roi_cours'
+							   AND p.ID != %d",
+							$course_id
+						)
+					);
+				} else {
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Specific aggregation query across courses.
+					$playlists = $wpdb->get_col(
 						"SELECT pm.meta_value 
 						 FROM {$wpdb->postmeta} pm
 						 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
 						 WHERE pm.meta_key = '_roi_cours_playlist'
-						   AND p.post_type = 'roi_cours'
-						   AND p.ID != %d",
-						$course_id
-					)
-				);
-			} else {
-				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Specific aggregation query across courses.
-				$playlists = $wpdb->get_col(
-					"SELECT pm.meta_value 
-					 FROM {$wpdb->postmeta} pm
-					 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
-					 WHERE pm.meta_key = '_roi_cours_playlist'
-					   AND p.post_type = 'roi_cours'"
-				);
+						   AND p.post_type = 'roi_cours'"
+					);
+				}
+				if ( is_array( $playlists ) ) {
+					wp_cache_set( $cache_key, $playlists, 'roi_chess', 3600 );
+				}
 			}
 
 			$assigned_ids = array();
@@ -135,7 +145,7 @@ class Ajax_Handler {
 		if ( $query->have_posts() ) {
 			while ( $query->have_posts() ) {
 				$query->the_post();
-				$post_id   = get_the_ID();
+				$post_id = get_the_ID();
 				if ( ! $post_id ) {
 					continue;
 				}

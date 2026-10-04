@@ -42,7 +42,12 @@ module.exports = {
 			__dirname,
 			'src/blocks/diagramme/index.ts'
 		),
+		'diagramme/diagramme-view': path.resolve(
+			__dirname,
+			'src/blocks/diagramme/view.ts'
+		),
 		'pgn/index': path.resolve(__dirname, 'src/blocks/pgn/index.ts'),
+		'pgn/pgn-view': path.resolve(__dirname, 'src/blocks/pgn/view.ts'),
 		'suivi/index': path.resolve(__dirname, 'src/suivi/index.tsx'),
 		'admin-backup': path.resolve(__dirname, 'src/admin-backup.ts'),
 	},
@@ -66,33 +71,6 @@ module.exports = {
 		...defaultConfig.plugins,
 		new CopyWebpackPlugin({
 			patterns: [
-				{
-					from: path.resolve(
-						__dirname,
-						'src/blocks/chessboard/style.css'
-					),
-					to: path.resolve(__dirname, 'build/chessboard/style.css'),
-				},
-				{
-					from: path.resolve(
-						__dirname,
-						'src/blocks/chessboard/style.css'
-					),
-					to: path.resolve(
-						__dirname,
-						'build/diagramme/chessboard-style.css'
-					),
-				},
-				{
-					from: path.resolve(
-						__dirname,
-						'src/blocks/chessboard/style.css'
-					),
-					to: path.resolve(
-						__dirname,
-						'build/pgn/chessboard-style.css'
-					),
-				},
 				{
 					from: path.resolve(
 						__dirname,

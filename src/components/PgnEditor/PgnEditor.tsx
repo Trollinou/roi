@@ -6,7 +6,7 @@ import DrawingLegend from '../DrawingLegend';
 import { ensurePgnFenHeader, toFrenchNotation } from '../../utils/chessUtils';
 import useChessBoard, { type BoardApi } from '../../hooks/useChessBoard';
 import type { BoardShape, FenString, PgnString } from '../../types/chess';
-import './PgnEditor.css';
+import './PgnEditor.scss';
 
 export interface VariationItem {
   index?: number;
@@ -36,7 +36,7 @@ export interface PgnEditorProps {
 /**
  * PgnEditor - Éditeur de PGN interactif avec outils de dessin et commentaires.
  */
-export const PgnEditor = forwardRef<PgnEditorRef, PgnEditorProps>(function PgnEditor(
+export const PgnEditor = forwardRef<PgnEditorRef, PgnEditorProps>(function PgnEditorComponent(
   { initialPgn = '', initialFen = '', onSave, boardConfig = {} },
   ref
 ) {

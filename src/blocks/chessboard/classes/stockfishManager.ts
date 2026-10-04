@@ -7,11 +7,11 @@ export class StockfishManager {
 	private opponentWorker: Worker | null = null;
 
 	// Callbacks
-	private onBestMove: ((bestMove: string) => void) | null = null; // eslint-disable-line no-unused-vars
+	private onBestMove: ((bestMove: string) => void) | null = null;
 	private onEvaluation:
-		| ((scoreType: string, scoreValue: number) => void) // eslint-disable-line no-unused-vars
+		| ((scoreType: string, scoreValue: number) => void)
 		| null = null;
-	private onHint: ((bestMove: string) => void) | null = null; // eslint-disable-line no-unused-vars
+	private onHint: ((bestMove: string) => void) | null = null;
 
 	// Stabilité du moteur d'évaluation
 	private lastBestMove = '';
@@ -27,9 +27,9 @@ export class StockfishManager {
 	}
 
 	setCallbacks(callbacks: {
-		onBestMove?: (bestMove: string) => void; // eslint-disable-line no-unused-vars
-		onEvaluation?: (scoreType: string, scoreValue: number) => void; // eslint-disable-line no-unused-vars
-		onHint?: (bestMove: string) => void; // eslint-disable-line no-unused-vars
+		onBestMove?: (bestMove: string) => void;
+		onEvaluation?: (scoreType: string, scoreValue: number) => void;
+		onHint?: (bestMove: string) => void;
 	}) {
 		if (callbacks.onBestMove) {
 			this.onBestMove = callbacks.onBestMove;

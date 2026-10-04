@@ -3,6 +3,11 @@ declare module '*.css' {
   export default content;
 }
 
+declare module '*.scss' {
+  const content: Record<string, string>;
+  export default content;
+}
+
 declare module '@wordpress/blocks' {
   export function registerBlockType(name: string, settings: Record<string, unknown>): unknown;
 }
@@ -58,6 +63,25 @@ declare module '@wordpress/html-entities' {
 
 declare module '@wordpress/plugins' {
   export function registerPlugin(name: string, settings: { render: React.ComponentType<any>; [key: string]: unknown }): void;
+}
+
+declare module '@wordpress/interactivity' {
+  export interface StoreConfig<TState = Record<string, any>, TActions = Record<string, any>, TCallbacks = Record<string, any>> {
+    state?: TState;
+    actions?: TActions;
+    callbacks?: TCallbacks;
+  }
+  export function store<TState = Record<string, any>, TActions = Record<string, any>, TCallbacks = Record<string, any>>(
+    namespace: string,
+    config?: StoreConfig<TState, TActions, TCallbacks>
+  ): {
+    state: TState;
+    actions: TActions;
+    callbacks: TCallbacks;
+  };
+  export function getContext<TContext = Record<string, any>>(): TContext;
+  export function getElement(): { ref: HTMLElement; attributes?: Record<string, unknown> };
+  export function splitTask<T>(fn: () => T): Promise<T>;
 }
 
 declare module '@wordpress/editor' {

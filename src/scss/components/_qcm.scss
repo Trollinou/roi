@@ -1,0 +1,68 @@
+// ==========================================================================
+// ROI QCM & Exercice Components Styles
+// ==========================================================================
+
+.roi-qcm-item {
+  border: 1px solid var(--roi-color-border, #ccd0d4);
+  padding: 15px;
+  margin-bottom: 15px;
+  background: var(--roi-color-bg, #fff);
+  border-radius: var(--roi-radius-sm, 4px);
+  box-sizing: border-box;
+
+  .roi-qcm-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--roi-color-border-subtle, #eee);
+    padding-bottom: 6px;
+
+    strong {
+      font-size: var(--roi-font-size-base, 14px);
+      color: var(--roi-color-text, #1d2327);
+    }
+  }
+
+  .roi-qcm-btn-remove {
+    color: var(--roi-color-danger, #b32d2e) !important;
+    border-color: var(--roi-color-danger, #b32d2e) !important;
+    font-weight: 600 !important;
+
+    &:hover {
+      background: var(--roi-color-danger-bg, #ffebee) !important;
+    }
+  }
+
+  .roi-qcm-field-question {
+    margin-top: 0;
+    margin-bottom: 10px;
+
+    input[type="text"] {
+      width: 100%;
+      height: 32px;
+    }
+  }
+
+  .roi-qcm-reponses-title {
+    margin-bottom: 6px;
+    font-size: var(--roi-font-size-md, 13px);
+    font-weight: 600;
+  }
+
+  .roi-qcm-reponse-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+
+    input[type="text"] {
+      flex: 1;
+      height: 32px;
+    }
+
+    input[type="radio"] {
+      margin: 0;
+    }
+  }
+}

@@ -22,6 +22,7 @@ class Cours {
 	 */
 	public function init(): void {
 		add_action( 'init', array( $this, 'register' ), 0 );
+		add_action( 'init', array( $this, 'register_meta' ) );
 	}
 
 	/**
@@ -72,5 +73,41 @@ class Cours {
 		);
 
 		register_post_type( 'roi_cours', $args );
+	}
+
+	/**
+	 * Register typed post meta for roi_cours.
+	 *
+	 * @return void
+	 */
+	public function register_meta(): void {
+		register_post_meta(
+			'roi_cours',
+			'_roi_cours_niveau',
+			array(
+				'show_in_rest'      => true,
+				'single'            => true,
+				'type'              => 'integer',
+				'default'           => 1,
+				'sanitize_callback' => 'absint',
+				'auth_callback'     => function ( bool $allowed, string $key, int $post_id ): bool {
+					return current_user_can( 'edit_post', $post_id );
+				},
+			)
+		);
+
+		register_post_meta(
+			'roi_cours',
+			'_roi_cours_playlist',
+			array(
+				'show_in_rest'  => true,
+				'single'        => true,
+				'type'          => 'string',
+				'default'       => '[]',
+				'auth_callback' => function ( bool $allowed, string $key, int $post_id ): bool {
+					return current_user_can( 'edit_post', $post_id );
+				},
+			)
+		);
 	}
 }

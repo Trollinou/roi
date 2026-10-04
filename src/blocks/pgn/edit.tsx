@@ -9,7 +9,7 @@ import {
 } from '@wordpress/components';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import RoiPgnEditor from '../../components/PgnEditor';
-import '../../components/PgnEditor/PgnEditor.css';
+import '../../components/PgnEditor/PgnEditor.scss';
 import { BoardCore as EgBoardCore } from 'eg-chessboard';
 import 'eg-chessboard/base.css';
 import 'eg-chessboard/pieces/cburnett.css';

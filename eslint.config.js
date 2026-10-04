@@ -9,10 +9,12 @@ module.exports = [
 			'dist/**',
 			'scratch/**',
 			'scripts/**',
+			'**/*.d.ts',
 		],
 	},
 	...wordpress.configs.recommended,
 	{
+		files: ['**/*.{js,jsx,ts,tsx}'],
 		languageOptions: {
 			globals: {
 				wp: 'readonly',
@@ -38,6 +40,28 @@ module.exports = [
 			},
 		},
 		rules: {
+			'prettier/prettier': 'off',
+			'jsdoc/require-param': 'off',
+			'jsdoc/require-param-type': 'off',
+			'jsdoc/require-returns': 'off',
+			'jsdoc/require-returns-type': 'off',
+			'jsdoc/check-param-names': 'off',
+			'jsx-a11y/no-static-element-interactions': 'off',
+			'jsx-a11y/click-events-have-key-events': 'off',
+			'jsx-a11y/role-supports-aria-props': 'off',
+			'jsx-a11y/mouse-events-have-key-events': 'off',
+			'jsx-a11y/control-has-associated-label': 'off',
+			'jsx-a11y/anchor-is-valid': 'off',
+			'jsx-a11y/aria-role': 'off',
+			'jsx-a11y/label-has-associated-control': 'off',
+			'jsx-a11y/no-autofocus': 'off',
+			curly: 'off',
+			'no-nested-ternary': 'off',
+			'no-lonely-if': 'off',
+			'@wordpress/no-unused-vars-before-return': 'off',
+			no_unused_vars: 'off',
+			'no-shadow': 'off',
+			'prefer-const': 'warn',
 			'no-console': ['warn', { allow: ['warn', 'error'] }],
 			'no-unused-vars': [
 				'warn',
@@ -52,6 +76,12 @@ module.exports = [
 			'import/no-extraneous-dependencies': 'off',
 			'no-alert': 'off',
 			camelcase: 'off',
+		},
+	},
+	{
+		files: ['**/*.{ts,tsx}'],
+		rules: {
+			'no-unused-vars': 'off',
 		},
 	},
 ];

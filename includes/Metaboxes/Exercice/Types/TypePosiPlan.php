@@ -41,19 +41,19 @@ class TypePosiPlan implements TypeInterface {
 			$pgn = implode( "\n\n", $pgn_parts );
 		}
 		?>
-		<div id="roi_builder_type_5" class="roi-builder-section" style="display:none; margin-top: 15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
-			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice (Posi'Plan)", 'roi' ); ?></h4>
-			<p class="description" style="margin-bottom: 15px; color: #1d2327; background: #f0f6fc; border-left: 4px solid #72aee6; padding: 10px 12px; border-radius: 2px;">
+		<div id="roi_builder_type_5" class="roi-builder-section" style="display:none;">
+			<h4 class="roi-builder-section-title"><?php esc_html_e( "Constructeur d'exercice (Posi'Plan)", 'roi' ); ?></h4>
+			<p class="roi-builder-description">
 				<strong><?php esc_html_e( 'Principe :', 'roi' ); ?></strong> <?php esc_html_e( "Collez une étude PGN complète (ex: exportée depuis Lichess). Dès la position initiale, un choix parmi 3 plans est proposé (1 coup principal + variantes à explorer). Sur la ligne principale, d'autres choix peuvent suivre.", 'roi' ); ?>
 			</p>
 
-			<div style="margin-bottom: 20px;">
-				<label for="roi_t5_consigne"><strong><?php esc_html_e( 'Consigne générale :', 'roi' ); ?></strong></label><br>
-				<input type="text" id="roi_t5_consigne" class="large-text" style="width: 100%; height: 30px;" value="<?php echo esc_attr( $consigne ); ?>" placeholder="<?php esc_attr_e( 'Évaluez la position et choisissez le meilleur plan.', 'roi' ); ?>">
+			<div class="roi-form-row">
+				<label for="roi_t5_consigne"><?php esc_html_e( 'Consigne générale :', 'roi' ); ?></label>
+				<input type="text" id="roi_t5_consigne" class="large-text" value="<?php echo esc_attr( $consigne ); ?>" placeholder="<?php esc_attr_e( 'Évaluez la position et choisissez le meilleur plan.', 'roi' ); ?>">
 			</div>
 
-			<div class="roi-t5-diagramme-item" style="border: 1px solid #e5e5e5; padding: 14px; border-radius: 4px; background: #f9f9f9;">
-				<h4 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 600; color: #1d2327;">
+			<div class="roi-t5-diagramme-item">
+				<h4 class="roi-builder-section-title">
 					<?php esc_html_e( 'Étude PGN Complète', 'roi' ); ?>
 				</h4>
 
@@ -73,8 +73,8 @@ class TypePosiPlan implements TypeInterface {
 				?>
 
 				<!-- Aperçu interactif du PGN avec navigation et commentaires -->
-				<div style="margin-top: 15px;">
-					<label style="display: block; margin-bottom: 6px; font-size: 12px; color: #50575e;">
+				<div class="roi-form-row">
+					<label>
 						<strong><?php esc_html_e( 'Aperçu interactif & navigation des coups (lecture seule) :', 'roi' ); ?></strong>
 					</label>
 					<div id="roi_t5_preview_container" class="roi-t5-preview-container"></div>
@@ -84,3 +84,4 @@ class TypePosiPlan implements TypeInterface {
 		<?php
 	}
 }
+
