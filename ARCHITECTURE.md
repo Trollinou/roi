@@ -91,12 +91,13 @@ Le projet doit respecter cette structure stricte. L'agent doit placer les fichie
 ```
 
 wp-content/plugins/[SLUG]/
-├─ build/               # [PROD](GÉNÉRÉ) JS/CSS compilés des Blocs Gutenberg
-├─ src/                 # [DEV] (SOURCES) Code React/JSX des Blocs Gutenberg
-│  └─ blocks/           # [DEV]  Un sous-dossier par bloc
-├─ assets/              # [PROD] Assets classiques (Admin JS, Images, CSS global)
-│  ├─ css/              # [PROD] (GÉNÉRÉ) CSS compilé et minifié
-│  ├─ scss/             # [DEV]  (SOURCES) SCSS (Admin \& Front global)
+├─ build/               # [PROD](GÉNÉRÉ) JS/CSS compilés des Blocs Gutenberg et modules
+├─ src/                 # [DEV] (SOURCES) Code TypeScript/React et SCSS
+│  ├─ blocks/           # [DEV] Blocs Gutenberg (TypeScript, block.json, style.scss)
+│  ├─ scss/             # [DEV] Architecture SCSS modulaire (abstracts, admin, components)
+│  └─ types/            # [DEV] Contrats de types TypeScript partagés (roi-types)
+├─ assets/              # [PROD] Assets classiques (Images, CSS global compilé)
+│  ├─ css/              # [PROD] (GÉNÉRÉ) CSS compilé et minifié (avec variantes RTL)
 │  └─ ...
 ├─ includes/            # [PROD] Logique PHP (Namespace: [NAMESPACE])
 │  ├─ Core/             # Chargement, I18n, Plugin_Loader
@@ -237,11 +238,12 @@ Pour les fonctionnalités à multiples facettes (ex: une page d'options à ongle
 - **I18n** : Utiliser `wp.i18n` pour toutes les chaînes.
 
 ### Styles & SCSS
-- **Préprocesseur** : SCSS (`.scss`) obligatoire pour tous les styles.
+- **Préprocesseur** : SCSS (`.scss`) obligatoire pour tous les styles avec Dart Sass moderne (`@use`).
 - **Architecture** :
-  - **Global/Admin** : Sources dans `assets/scss/` -> Compilés vers `assets/css/`.
+  - **Global/Admin** : Sources dans `src/scss/` -> Compilés vers `assets/css/` (avec variantes RTL automatiques).
   - **Blocs** : Sources dans `src/blocks/` (`style.scss`, `editor.scss`) -> Compilés dans `build/`.
-- **Méthodologie** : Respecter la convention **BEM** (Block Element Modifier).
+  - **Bibliothèque d'échecs** : Support hybride de `eg-chessboard` (SCSS modulaire `@use 'eg-chessboard/scss/base'` et CSS pré-compilé).
+- **Méthodologie** : Respecter la convention **BEM** (Block Element Modifier) et les Design Tokens WordPress (`var(--wp--preset--*)`).
 - **Bonnes pratiques** :
   - Utiliser des variables CSS (Custom Properties) pour les couleurs/fonts.
   - Éviter le nesting excessif (max 3 niveaux).

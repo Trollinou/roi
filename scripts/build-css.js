@@ -19,6 +19,25 @@ function compileFile(srcPath, outPath, outRtlPath) {
     const result = sass.compile(srcPath, {
         style: 'compressed',
         sourceMap: false,
+        importers: [
+            new sass.NodePackageImporter(rootDir),
+            {
+                findFileUrl(url) {
+                    if (url === 'eg-chessboard/scss' || url === 'eg-chessboard/scss/index') {
+                        return new URL('file://' + path.resolve(rootDir, 'node_modules/eg-chessboard/dist/scss/style.scss'));
+                    }
+                    if (url.startsWith('eg-chessboard/scss/')) {
+                        const sub = url.replace('eg-chessboard/scss/', '');
+                        return new URL('file://' + path.resolve(rootDir, 'node_modules/eg-chessboard/dist/scss', sub));
+                    }
+                    return null;
+                },
+            },
+        ],
+        loadPaths: [
+            path.join(rootDir, 'node_modules'),
+            path.join(rootDir, 'node_modules/eg-chessboard/dist'),
+        ],
     });
 
     fs.writeFileSync(outPath, result.css);
