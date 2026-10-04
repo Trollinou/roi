@@ -88,11 +88,18 @@ const ignorePatterns = distIgnoreContent
 // Helper to check if a file should be ignored
 function shouldIgnore( relativePath ) {
 	const normalizedPath = relativePath.replace( /\\/g, '/' );
+	const baseName = path.basename( normalizedPath );
 	for ( const pattern of ignorePatterns ) {
 		const cleanPattern = pattern.replace( /\/$/, '' );
-		if (
+		if ( cleanPattern.startsWith( '*.' ) ) {
+			const ext = cleanPattern.slice( 1 );
+			if ( normalizedPath.endsWith( ext ) || baseName.endsWith( ext ) ) {
+				return true;
+			}
+		} else if (
 			normalizedPath === cleanPattern ||
-			normalizedPath.startsWith( cleanPattern + '/' )
+			normalizedPath.startsWith( cleanPattern + '/' ) ||
+			baseName === cleanPattern
 		) {
 			return true;
 		}

@@ -1,4 +1,7 @@
 .DS_Store
+._*
+.Spotlight-V100
+.Trashes
 node_modules/
 vendor/
 *.zip
@@ -6,3 +9,7 @@ scratch/
 build/
 dist-temp/
 *.tsbuildinfo
+*.log
+.phpunit.result.cache
+.vscode/
+.idea/
