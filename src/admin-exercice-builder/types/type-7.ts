@@ -86,23 +86,17 @@ export function renderT7Series(): void {
 		const div = document.createElement('div');
 		div.className = 'roi-t7-serie-card';
 		div.setAttribute('data-index', i.toString());
-		div.style.border = '1px solid #ccd0d4';
-		div.style.padding = '15px';
-		div.style.marginBottom = '20px';
-		div.style.background = '#fafafa';
-		div.style.borderRadius = '6px';
-		div.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
 
 		div.innerHTML = `
-			<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">
-				<strong style="font-size: 15px; color: #1e1e1e;">Série ${i + 1}</strong>
-				<span class="roi-t7-orientation-badge" style="font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 12px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;">
+			<div class="roi-t7-serie-header">
+				<strong>Série ${i + 1}</strong>
+				<span class="roi-t7-orientation-badge">
 					Orientation : ${serie.couleur_joueur === 'black' ? 'Noirs' : 'Blancs'}
 				</span>
 			</div>
 
 			<!-- Groupe de contrôle PGN standardisé -->
-			<div class="roi-control-group roi-control-pgn" style="margin-bottom: 15px;">
+			<div class="roi-control-group roi-control-pgn">
 				<label for="roi_t7_pgn_${i}" class="roi-control-label">
 					<strong>Séquence PGN (Partie / Séquence tactique) :</strong>
 				</label>
@@ -113,7 +107,7 @@ export function renderT7Series(): void {
 						placeholder="Collez un PGN ou utilisez 'Éditer le PGN'..." 
 						data-index="${i}">${serie.pgn_data || ''}</textarea>
 
-					<div class="roi-control-actions" style="margin-top: 6px; display: flex; gap: 8px;">
+					<div class="roi-control-actions">
 						<button type="button" 
 							id="btn_open_pgn_editor_t7_${i}" 
 							class="button btn_open_pgn_editor_t7" 
@@ -127,8 +121,8 @@ export function renderT7Series(): void {
 			</div>
 
 			<!-- Prévisualisation interactive avec coups et navigation -->
-			<div style="margin-top: 10px;">
-				<label style="display: block; margin-bottom: 6px; font-size: 12px; color: #50575e;">
+			<div class="roi-form-row">
+				<label>
 					<strong>Aperçu interactif & navigation des coups (lecture seule) :</strong>
 				</label>
 				<div id="roi_t7_preview_container_${i}" class="roi-t7-preview-container"></div>

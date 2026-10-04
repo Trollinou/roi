@@ -1,0 +1,123 @@
+// ==========================================================================
+// ROI Modals (Gutenberg Components Modal & Standalone Admin Modals)
+// ==========================================================================
+
+@keyframes roiModalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Standalone Overlay (Used in Classic WP Admin metaboxes)
+.roi-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 100000;
+  align-items: center;
+  justify-content: center;
+  isolation: isolate;
+  transform: translateZ(0);
+
+  &.is-open {
+    display: flex;
+  }
+}
+
+.roi-modal-container {
+  position: relative;
+  background: var(--roi-color-bg, #ffffff);
+  border-radius: var(--roi-radius-xl, 12px);
+  max-width: 800px;
+  width: 95%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--roi-shadow-lg, 0 10px 30px rgba(0, 0, 0, 0.25));
+  animation: roiModalFadeIn 0.2s ease-out;
+
+  &--pgn {
+    max-width: 840px;
+  }
+
+  .roi-modal-header {
+    padding: 18px 24px 14px;
+    border-bottom: 1px solid var(--roi-color-border-subtle, #eee);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+  }
+
+  .roi-modal-title {
+    margin: 0;
+    font-size: var(--roi-font-size-xl, 18px);
+    font-weight: 600;
+    color: var(--roi-color-text, #1d2327);
+  }
+
+  .roi-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--roi-color-text-subtle, #8c8f94);
+    transition: var(--roi-transition);
+
+    &:hover,
+    &:focus {
+      color: var(--roi-color-text, #000);
+    }
+  }
+
+  .roi-modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+    box-sizing: border-box;
+  }
+}
+
+// Gutenberg Components Modal Frame Customization
+.components-modal__frame.roi-fen-editor-modal,
+.components-modal__frame.roi-pgn-editor-modal {
+  animation: roiModalFadeIn 0.15s ease-out !important;
+  transform: none !important;
+  max-width: 860px !important;
+  width: 95% !important;
+  max-height: 92vh !important;
+  border-radius: var(--roi-radius-xl, 12px) !important;
+  box-shadow: var(--roi-shadow-lg) !important;
+  overflow: hidden !important;
+
+  .components-modal__header {
+    padding: 16px 24px !important;
+    border-bottom: 1px solid var(--roi-color-border-subtle, #eee) !important;
+  }
+
+  .components-modal__header-heading {
+    font-size: var(--roi-font-size-xl, 18px) !important;
+    font-weight: 600 !important;
+    color: var(--roi-color-text, #1d2327) !important;
+  }
+
+  .components-modal__content {
+    padding: 20px 24px 24px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+}

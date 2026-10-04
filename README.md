@@ -176,22 +176,25 @@ Le plugin expose plusieurs points de terminaison REST sous le namespace `/wp-jso
 
 Le plugin est organisé dans les répertoires principaux suivants :
 
-*   `/assets`: Contient les fichiers CSS et JS publics et d'administration de ROI.
-*   `/src`: Contient les sources React et Gutenberg du bloc `roi/chessboard`, les constructeurs d'exercices (`admin-exercice-builder`) et les utilitaires mathématiques/d'échecs (`src/utils/LoopTracker.js`, `src/utils/chessUtils.js`).
-*   `/build`: Contient les assets compilés du bloc d'échecs (CSS, JS).
+*   `/assets`: Contient les fichiers CSS (générés et minifiés avec RTL) et JS publics et d'administration de ROI.
+*   `/src`: Contient les sources TypeScript/React des blocs Gutenberg (`roi/chessboard`, `roi/diagramme`, `roi/pgn`), des constructeurs d'exercices et de cours, de l'application de suivi, des types partagés (`src/types/`), ainsi que l'architecture modulaire SCSS (`src/scss/`).
+*   `/build`: Contient les assets compilés des blocs Gutenberg et scripts d'administration (CSS, JS, `.asset.php`).
 *   `/includes`: La logique principale du plugin, structurée selon le standard PSR-4 (namespace `ROI\`).
 *   `/includes/Admin`: Fichiers relatifs à la zone d'administration de WordPress (metaboxes, menus, backup).
 *   `/includes/Core`: Bootstrap, assets, rôles et activation/désactivation.
 *   `/includes/CPT`: Fichiers de classes pour chaque Custom Post Type.
 *   `/includes/Services`: Logique métier du plugin (complétion, handlers).
-*   `/includes/chess`: Intégration du moteur d'échecs (shortcodes, templates PHP).
+*   `/includes/Chess`: Intégration du moteur d'échecs (shortcodes, templates PHP).
 *   `/roi.php`: Le fichier principal du plugin (contient l'autoloader SPL).
 
-### Processus de Build
+### Processus de Build & Qualité
 
-Les composants de l'échiquier sont intégrés via le package local `eg-chessboard` et compilés à l'aide de `@wordpress/scripts` avec la commande suivante :
+Le build complet compile les blocs Gutenberg, les scripts d'administration en TypeScript et les modules SCSS (avec génération RTL) :
 ```bash
-npm run build
+npm run build       # Compile blocks, JS TS et SCSS/CSS
+npm run build:css   # Compile spécifiquement les modules SCSS et variantes RTL
+npm run typecheck   # Vérification des types TypeScript
+npm run lint        # Validation ESLint
 ```
 
 ## Changelog

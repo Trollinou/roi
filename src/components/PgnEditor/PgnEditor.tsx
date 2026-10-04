@@ -6,7 +6,7 @@ import DrawingLegend from '../DrawingLegend';
 import { ensurePgnFenHeader, toFrenchNotation } from '../../utils/chessUtils';
 import useChessBoard, { type BoardApi } from '../../hooks/useChessBoard';
 import type { BoardShape, FenString, PgnString } from '../../types/chess';
-import './PgnEditor.css';
+import './PgnEditor.scss';
 
 export interface VariationItem {
   index?: number;

@@ -138,31 +138,31 @@ class Partie {
 		$pgn         = get_post_meta( $post->ID, '_roi_pgn', true );
 		$initial_fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 		?>
-		<div class="roi-pgn-viewer-container" style="display: flex; flex-direction: column; gap: 15px;">
+		<div class="roi-pgn-viewer-container">
 			<!-- Partie Haute : Boutons de navigation et résumé du coup -->
-			<div class="roi-viewer-header" style="display: flex; align-items: center; justify-content: space-between; background: #f6f7f7; padding: 10px; border: 1px solid #dcdcde; border-radius: 4px;">
-				<div class="roi-viewer-controls" style="display: flex; gap: 8px;">
+			<div class="roi-viewer-header">
+				<div class="roi-viewer-controls">
 					<button type="button" class="button" id="roi-prev-start-btn" title="<?php esc_attr_e( 'Début', 'roi' ); ?>">«</button>
 					<button type="button" class="button" id="roi-prev-btn" title="<?php esc_attr_e( 'Précédent', 'roi' ); ?>">‹</button>
 					<button type="button" class="button" id="roi-next-btn" title="<?php esc_attr_e( 'Suivant', 'roi' ); ?>">›</button>
 					<button type="button" class="button" id="roi-next-end-btn" title="<?php esc_attr_e( 'Fin', 'roi' ); ?>">»</button>
 				</div>
-				<div class="roi-viewer-move-info" id="roi-move-info" style="font-weight: bold; font-size: 1.1em; color: #1d2327;">
+				<div class="roi-viewer-move-info" id="roi-move-info">
 					<?php esc_html_e( 'Position de départ', 'roi' ); ?>
 				</div>
 			</div>
 
 			<!-- Partie Principale : Liste de coups à gauche, Échiquier à droite -->
-			<div class="roi-viewer-body" style="display: flex; gap: 20px;">
+			<div class="roi-viewer-body">
 				<!-- Colonne Gauche : Liste des coups -->
-				<div class="roi-viewer-moves-list-wrapper" style="flex: 1; border: 1px solid #dcdcde; border-radius: 4px; padding: 10px; background: #fff; max-height: 400px; overflow-y: auto;">
-					<div class="roi-viewer-moves-list" id="roi-moves-list" style="display: flex; flex-wrap: wrap; gap: 6px 12px; line-height: 2;">
-						<span style="color: #646970; font-style: italic;"><?php esc_html_e( 'Aucun coup disponible', 'roi' ); ?></span>
+				<div class="roi-viewer-moves-list-wrapper">
+					<div class="roi-viewer-moves-list" id="roi-moves-list">
+						<span style="color: var(--roi-color-text-muted); font-style: italic;"><?php esc_html_e( 'Aucun coup disponible', 'roi' ); ?></span>
 					</div>
 				</div>
 
 				<!-- Colonne Droite : L'échiquier -->
-				<div class="roi-viewer-board-wrapper" style="width: 350px; flex-shrink: 0; position: relative;">
+				<div class="roi-viewer-board-wrapper">
 					<div id="roi-partie-viewer-chessboard" 
 						class="chessboard-block"
 						data-fen="<?php echo esc_attr( $initial_fen ); ?>"
@@ -183,17 +183,18 @@ class Partie {
 			</div>
 
 			<!-- Zone de saisie/modification du PGN (Collapsible) -->
-			<div class="roi-viewer-pgn-editor" style="margin-top: 10px; border-top: 1px solid #dcdcde; padding-top: 15px;">
+			<div class="roi-viewer-pgn-editor">
 				<details>
-					<summary style="font-weight: bold; cursor: pointer; color: #2271b1; user-select: none;">
+					<summary>
 						<?php esc_html_e( 'Modifier le PGN brut', 'roi' ); ?>
 					</summary>
-					<div style="margin-top: 10px;">
-						<textarea name="roi_pgn" id="roi_pgn" rows="4" class="large-text code" style="width: 100%; font-family: monospace;"><?php echo esc_textarea( (string) $pgn ); ?></textarea>
+					<div>
+						<textarea name="roi_pgn" id="roi_pgn" rows="4" class="large-text code"><?php echo esc_textarea( (string) $pgn ); ?></textarea>
 					</div>
 				</details>
 			</div>
 		</div>
+
 		<?php
 	}
 
