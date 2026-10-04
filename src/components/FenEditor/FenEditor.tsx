@@ -8,7 +8,7 @@ import PiecePalette, { type SelectedPieceType } from './PiecePalette';
 import DrawingLegend from '../DrawingLegend';
 import useChessBoard, { type BoardApi } from '../../hooks/useChessBoard';
 import type { BoardShape, Color, FenString } from '../../types/chess';
-import './FenEditor.css';
+import './FenEditor.scss';
 
 export interface DiagramData {
   fen: FenString;

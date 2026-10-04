@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+*   **Refonte SCSS Modulaire, Éradication du CSS Inline & Harmonisation Thèmes WordPress (`src/scss/`, `src/blocks/`, `includes/Metaboxes/`) :**
+    *   **Architecture SCSS & Design Tokens WordPress (`src/scss/abstracts/`)** : Mise en place des variables et tokens basés sur les Custom Properties WordPress (`var(--wp--preset--*)`, `--wp-admin-theme-color`, `--wp--style--block-gap`) avec des valeurs de repli robustes permettant une adaptation immédiate aux thèmes FSE et classiques.
+    *   **Pipeline de Compilation Sass & RTL (`scripts/build-css.js`, `webpack.config.js`)** : Compilation Sass compressée et génération automatique des variantes RTL (`assets/css/admin-style.css`, `assets/css/admin-style-rtl.css`, et feuilles de styles dans `build/`).
+    *   **Externalisation Intégrale des Styles Inline (`includes/Metaboxes/Cours/Builder.php`, `Partie.php`, `TypeEchecEval.php`, `TypePosiPlan.php`)** : Suppression des balises `<style>` embarquées et des attributs `style="..."` au profit de classes BEM normées (`roi-cours-builder-col--*`, `roi-playlist-item--*`, `roi-t10-question-card`, etc.).
+    *   **Migration des Composants React & Blocs Gutenberg** : Conversion de l'ensemble des fichiers `.css` sources vers des modules SCSS compilés (`FenEditor.scss`, `PgnEditor.scss`, `src/blocks/chessboard/style.scss`), déclaration des types TypeScript globaux pour `*.scss` et élimination des doublons de styles.
+
 *   **Modernisation WordPress 7.1 & Performance Backend (`roi.php`, `Plugin.php`, `Group_Service.php`, `Columns.php`, `Ajax_Handler.php`) :**
     *   **Options API & Autoload WP 7.1** : Configuration explicite `'autoload' => false` lors de l'enregistrement des réglages et imports de sauvegarde pour préserver la mémoire du bootstrap.
     *   **Cycle de vie & Lazy Loading REST** : Encapsulation stricte de l'instanciation des contrôleurs REST au sein du hook `rest_api_init` et extraction des écouteurs d'invalidation de cache dans des méthodes statiques.

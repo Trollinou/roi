@@ -1,0 +1,107 @@
+// ==========================================================================
+// ROI Admin Partie Viewer Metabox Styles
+// ==========================================================================
+
+.roi-pgn-viewer-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  box-sizing: border-box;
+
+  .roi-viewer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--roi-color-surface, #f6f7f7);
+    padding: 10px 14px;
+    border: 1px solid var(--roi-color-border, #dcdcde);
+    border-radius: var(--roi-radius-sm, 4px);
+
+    .roi-viewer-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .roi-viewer-move-info {
+      font-weight: bold;
+      font-size: 1.1em;
+      color: var(--roi-color-text, #1d2327);
+    }
+  }
+
+  .roi-viewer-body {
+    display: flex;
+    gap: 20px;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
+
+    .roi-viewer-moves-list-wrapper {
+      flex: 1;
+      border: 1px solid var(--roi-color-border, #dcdcde);
+      border-radius: var(--roi-radius-sm, 4px);
+      padding: 12px;
+      background: var(--roi-color-bg, #fff);
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .roi-viewer-moves-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+      line-height: 2;
+
+      .roi-viewer-move-item {
+        cursor: pointer;
+        padding: 2px 6px;
+        border-radius: var(--roi-radius-xs, 3px);
+        transition: var(--roi-transition);
+
+        &:hover {
+          background-color: var(--roi-color-primary-subtle, #f0f6fc);
+          color: var(--roi-color-primary, #2271b1);
+        }
+
+        &.active {
+          background-color: var(--roi-color-primary, #2271b1);
+          color: #ffffff;
+          font-weight: 600;
+        }
+      }
+    }
+
+    .roi-viewer-board-wrapper {
+      width: 350px;
+      flex-shrink: 0;
+      position: relative;
+
+      @media (max-width: 768px) {
+        width: 100%;
+        max-width: 350px;
+        margin: 0 auto;
+      }
+    }
+  }
+
+  .roi-viewer-pgn-editor {
+    margin-top: 10px;
+    border-top: 1px solid var(--roi-color-border, #dcdcde);
+    padding-top: 15px;
+
+    summary {
+      font-weight: bold;
+      cursor: pointer;
+      color: var(--roi-color-primary, #2271b1);
+      user-select: none;
+    }
+
+    textarea#roi_pgn {
+      width: 100%;
+      font-family: var(--roi-font-family-mono);
+      margin-top: 8px;
+    }
+  }
+}

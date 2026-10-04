@@ -783,7 +783,7 @@ cg-board.editor-palette-board {
 
 .chessboard-block .chess-controls {
   display: flex !important;
-  gap: 8px !important;
+  gap: var(--roi-spacing-sm, 8px) !important;
   margin-top: 10px !important;
   width: 100% !important;
   box-sizing: border-box !important;
@@ -792,16 +792,15 @@ cg-board.editor-palette-board {
 .chessboard-block .control-btn {
   flex: 1 !important;
   padding: 10px 8px !important;
-  border: 1px solid #ccc !important;
-  border-radius: 4px !important;
-  background: #fff !important;
-  color: #333 !important;
-  font-size: 14px !important;
+  border: 1px solid var(--roi-color-border, #ccc) !important;
+  border-radius: var(--roi-radius-sm, 4px) !important;
+  background: var(--roi-color-bg, #fff) !important;
+  color: var(--roi-color-text, #333) !important;
+  font-size: var(--roi-font-size-base, 14px) !important;
   font-weight: 500 !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
-    Arial, sans-serif !important;
+  transition: var(--roi-transition, all 0.2s ease) !important;
+  font-family: var(--roi-font-family) !important;
   text-transform: none !important;
   box-shadow: none !important;
   height: auto !important;
@@ -811,17 +810,17 @@ cg-board.editor-palette-board {
 }
 
 .chessboard-block .control-btn:hover {
-  background: #f0f0f0 !important;
-  border-color: #bbb !important;
-  color: #333 !important;
+  background: var(--roi-color-surface-hover, #f0f0f0) !important;
+  border-color: var(--roi-color-text-subtle, #bbb) !important;
+  color: var(--roi-color-text, #333) !important;
 }
 
 .chessboard-block .captured-bar {
   display: flex !important;
   align-items: center !important;
   padding: 6px 12px !important;
-  background: #eee !important;
-  border: 1px solid #ccc !important;
+  background: var(--roi-color-surface, #eee) !important;
+  border: 1px solid var(--roi-color-border, #ccc) !important;
   box-sizing: border-box !important;
   width: 100% !important;
 }
@@ -831,12 +830,12 @@ cg-board.editor-palette-board {
 }
 
 .chessboard-block .captured-clock-top {
-  border-radius: 8px 8px 0 0 !important;
+  border-radius: var(--roi-radius-lg, 8px) var(--roi-radius-lg, 8px) 0 0 !important;
   border-bottom: none !important;
 }
 
 .chessboard-block .captured-clock-bottom {
-  border-radius: 0 0 8px 8px !important;
+  border-radius: 0 0 var(--roi-radius-lg, 8px) var(--roi-radius-lg, 8px) !important;
   border-top: none !important;
   margin-bottom: 12px !important;
 }
@@ -845,9 +844,9 @@ cg-board.editor-palette-board {
   font-size: 0.75rem !important;
   font-weight: bold !important;
   text-transform: uppercase !important;
-  color: #666 !important;
+  color: var(--roi-color-text-muted, #666) !important;
   min-width: 70px !important;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-family: var(--roi-font-family) !important;
 }
 
 .chessboard-block .captured-pieces {
@@ -861,8 +860,8 @@ cg-board.editor-palette-board {
 .chessboard-block .captured-piece {
   font-size: 1.2rem !important;
   line-height: 1 !important;
-  color: #333 !important;
-  font-family: "Lucida Sans Unicode", "Arial Unicode MS", "Noto Sans Chess", sans-serif !important;
+  color: var(--roi-color-text, #333) !important;
+  font-family: var(--roi-font-family-chess, "Lucida Sans Unicode", "Arial Unicode MS", "Noto Sans Chess", sans-serif) !important;
 }
 
 .chessboard-block .material-wrapper {
@@ -873,24 +872,24 @@ cg-board.editor-palette-board {
 .chessboard-block .material-count {
   font-size: 0.75rem !important;
   font-weight: bold !important;
-  color: #15781B !important;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  color: var(--roi-color-success, #15781B) !important;
+  font-family: var(--roi-font-family) !important;
 }
 
 .chessboard-block .game-clock {
-  font-family: monospace !important;
+  font-family: var(--roi-font-family-mono, monospace) !important;
   font-weight: bold !important;
   font-size: 1.1rem !important;
   padding: 2px 6px !important;
-  border-radius: 4px !important;
-  background: #ddd !important;
-  color: #333 !important;
+  border-radius: var(--roi-radius-sm, 4px) !important;
+  background: var(--roi-color-border, #ddd) !important;
+  color: var(--roi-color-text, #333) !important;
   min-width: 60px !important;
   text-align: center !important;
 }
 
 .chessboard-block .game-clock.active {
-  background: #15781B !important;
+  background: var(--roi-color-success, #15781B) !important;
   color: #fff !important;
 }
 
@@ -911,20 +910,20 @@ cg-board.editor-palette-board {
   max-width: 860px !important;
   width: 95% !important;
   max-height: 92vh !important;
-  border-radius: 12px !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
+  border-radius: var(--roi-radius-xl, 12px) !important;
+  box-shadow: var(--roi-shadow-lg, 0 10px 30px rgba(0, 0, 0, 0.25)) !important;
   overflow: hidden !important;
 }
 
 .components-modal__frame.roi-fen-editor-modal .components-modal__header,
 .components-modal__frame.roi-pgn-editor-modal .components-modal__header {
   padding: 16px 24px !important;
-  border-bottom: 1px solid #eee !important;
+  border-bottom: 1px solid var(--roi-color-border-subtle, #eee) !important;
 }
 
 .components-modal__frame.roi-fen-editor-modal .components-modal__header-heading,
 .components-modal__frame.roi-pgn-editor-modal .components-modal__header-heading {
-  font-size: 18px !important;
+  font-size: var(--roi-font-size-xl, 18px) !important;
   font-weight: 600 !important;
 }
 
@@ -954,7 +953,7 @@ cg-board.editor-palette-board {
   display: block;
   width: 100%;
   max-width: 480px;
-  margin: 1.5rem auto;
+  margin: var(--wp--style--block-gap, 1.5rem) auto;
 }
 
 .roi-bloc-diagramme .main-wrap,
@@ -968,7 +967,7 @@ cg-board.editor-palette-board {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--roi-spacing-sm, 8px);
   margin-top: 12px;
   position: relative;
   z-index: 20;
@@ -979,14 +978,14 @@ cg-board.editor-palette-board {
   align-items: center;
   justify-content: center;
   padding: 8px 14px;
-  background: #ffffff;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
+  background: var(--roi-color-bg, #ffffff);
+  border: 1px solid var(--roi-color-border, #ced4da);
+  border-radius: var(--roi-radius-md, 6px);
   font-weight: bold;
-  font-size: 14px;
+  font-size: var(--roi-font-size-base, 14px);
   cursor: pointer;
-  transition: all 0.2s ease;
-  color: #495057;
+  transition: var(--roi-transition, all 0.2s ease);
+  color: var(--roi-color-text, #495057);
   position: relative;
   z-index: 21;
   pointer-events: auto !important;
@@ -994,14 +993,15 @@ cg-board.editor-palette-board {
 }
 
 .pgn-nav-btn:hover {
-  background: #e9ecef;
-  border-color: #adb5bd;
-  color: #212529;
+  background: var(--roi-color-surface-hover, #e9ecef);
+  border-color: var(--roi-color-text-subtle, #adb5bd);
+  color: var(--roi-color-text, #212529);
 }
 
 .pgn-nav-btn:active {
   transform: translateY(1px);
 }
+
 
 
 

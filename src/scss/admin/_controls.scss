@@ -1,0 +1,143 @@
+// ==========================================================================
+// ROI Admin Unified Controls & Form Styles
+// ==========================================================================
+
+.roi-control-group {
+  margin-bottom: var(--roi-spacing-lg, 16px);
+
+  .roi-control-label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: var(--roi-color-text, #1d2327);
+    font-size: var(--roi-font-size-md, 13px);
+  }
+}
+
+.roi-control-inline {
+  display: flex;
+  gap: var(--roi-spacing-md, 12px);
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.roi-control-input-wrapper {
+  flex: 1;
+  min-width: 280px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+
+  input.roi-control-input {
+    flex: 1;
+    height: 34px;
+    font-family: var(--roi-font-family-mono);
+    font-size: var(--roi-font-size-sm, 12px);
+    border: 1px solid var(--roi-color-border, #8c8f94);
+    border-radius: var(--roi-radius-sm, 4px);
+    padding: 0 10px;
+    background-color: var(--roi-color-bg, #fff);
+    color: var(--roi-color-text, #2c3338);
+
+    &:focus {
+      border-color: var(--roi-color-primary, #2271b1);
+      box-shadow: 0 0 0 1px var(--roi-color-primary, #2271b1);
+    }
+  }
+}
+
+.roi-btn-open-fen-editor,
+.roi-btn-open-pgn-editor {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 34px !important;
+  padding: 0 12px !important;
+  font-size: var(--roi-font-size-md, 13px) !important;
+  font-weight: 500 !important;
+  white-space: nowrap;
+  border-radius: var(--roi-radius-sm, 4px) !important;
+
+  .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    line-height: 1;
+    margin: 0;
+  }
+}
+
+.roi-control-orientation-wrapper,
+.roi-control-shapes-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.roi-control-button-wrapper {
+  display: flex;
+  align-items: flex-end;
+}
+
+.roi-control-sublabel {
+  font-size: var(--roi-font-size-sm, 12px);
+  font-weight: 600;
+  color: var(--roi-color-text-muted, #50575e);
+}
+
+.roi-control-select,
+.roi-control-input-readonly {
+  height: 34px !important;
+  padding: 0 8px !important;
+  border-radius: var(--roi-radius-sm, 4px) !important;
+  font-size: var(--roi-font-size-md, 13px) !important;
+  border: 1px solid var(--roi-color-border, #8c8f94) !important;
+  box-shadow: none !important;
+}
+
+.roi-control-input-readonly {
+  background-color: var(--roi-color-surface, #f0f0f1) !important;
+  color: var(--roi-color-text, #2c3338) !important;
+  cursor: default;
+  text-align: center;
+  font-weight: 600 !important;
+}
+
+.roi-orientation-field {
+  width: 75px !important;
+  min-width: 75px;
+}
+
+.roi-shapes-summary-field {
+  width: 95px !important;
+  min-width: 95px;
+}
+
+.roi-control-textarea-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  textarea.roi-control-textarea {
+    width: 100%;
+    font-family: var(--roi-font-family-mono);
+    font-size: var(--roi-font-size-sm, 12px);
+    line-height: 1.4;
+    padding: 8px 10px;
+    border: 1px solid var(--roi-color-border, #8c8f94);
+    border-radius: var(--roi-radius-sm, 4px);
+    background-color: var(--roi-color-bg, #fff);
+    color: var(--roi-color-text, #2c3338);
+
+    &:focus {
+      border-color: var(--roi-color-primary, #2271b1);
+      box-shadow: 0 0 0 1px var(--roi-color-primary, #2271b1);
+    }
+  }
+}
+
+.roi-control-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}

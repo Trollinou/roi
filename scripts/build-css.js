@@ -4,53 +4,88 @@ const sass = require('sass');
 const rtlcss = require('rtlcss');
 
 const rootDir = path.resolve(__dirname, '..');
-const srcDir = path.join(rootDir, 'src/scss');
-const distDir = path.join(rootDir, 'assets/css');
+const scssDir = path.join(rootDir, 'src/scss');
+const assetsCssDir = path.join(rootDir, 'assets/css');
+const buildDir = path.join(rootDir, 'build');
 
-if (!fs.existsSync(distDir)) {
-    fs.mkdirSync(distDir, { recursive: true });
+function ensureDir(dir) {
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+}
+
+function compileFile(srcPath, outPath, outRtlPath) {
+    ensureDir(path.dirname(outPath));
+    const result = sass.compile(srcPath, {
+        style: 'compressed',
+        sourceMap: false,
+    });
+
+    fs.writeFileSync(outPath, result.css);
+    const relOut = path.relative(rootDir, outPath);
+    console.log(`  ✓ Built ${relOut}`);
+
+    if (outRtlPath) {
+        ensureDir(path.dirname(outRtlPath));
+        const rtlResult = rtlcss.process(result.css);
+        fs.writeFileSync(outRtlPath, rtlResult);
+        const relRtl = path.relative(rootDir, outRtlPath);
+        console.log(`  ✓ Built ${relRtl}`);
+    }
 }
 
 function buildCss() {
     const startTime = Date.now();
+    ensureDir(assetsCssDir);
 
-    const entries = fs.existsSync(srcDir)
-        ? fs
-            .readdirSync(srcDir, { withFileTypes: true })
+    console.log('🎨 Compiling SCSS stylesheets with Sass & RTL...');
+
+    // 1. Compile src/scss/*.scss -> assets/css/
+    if (fs.existsSync(scssDir)) {
+        const scssEntries = fs
+            .readdirSync(scssDir, { withFileTypes: true })
             .filter(
                 dirent =>
                     dirent.isFile() &&
                     dirent.name.endsWith('.scss') &&
                     !dirent.name.startsWith('_')
             )
-            .map(dirent => dirent.name)
-        : [];
+            .map(dirent => dirent.name);
 
-    if (entries.length === 0) {
-        console.log('🎨 No SCSS stylesheet to compile in src/scss/.');
-        return;
+        for (const file of scssEntries) {
+            const srcFile = path.join(scssDir, file);
+            const baseName = file.replace(/\.scss$/, '');
+            const outFile = path.join(assetsCssDir, `${baseName}.css`);
+            const outRtlFile = path.join(assetsCssDir, `${baseName}-rtl.css`);
+            compileFile(srcFile, outFile, outRtlFile);
+        }
     }
 
-    console.log(`🎨 Compiling ${entries.length} SCSS stylesheet(s) with Sass & RTL...`);
+    // 2. Compile block SCSS (e.g. src/blocks/chessboard/style.scss -> build/chessboard/, diagramme/, pgn/)
+    const chessboardScss = path.join(rootDir, 'src/blocks/chessboard/style.scss');
+    if (fs.existsSync(chessboardScss)) {
+        const targets = [
+            {
+                out: path.join(buildDir, 'chessboard/style.css'),
+                rtl: path.join(buildDir, 'chessboard/style-rtl.css'),
+            },
+            {
+                out: path.join(buildDir, 'chessboard/style-chessboard.css'),
+                rtl: path.join(buildDir, 'chessboard/style-chessboard-rtl.css'),
+            },
+            {
+                out: path.join(buildDir, 'diagramme/chessboard-style.css'),
+                rtl: path.join(buildDir, 'diagramme/chessboard-style-rtl.css'),
+            },
+            {
+                out: path.join(buildDir, 'pgn/chessboard-style.css'),
+                rtl: path.join(buildDir, 'pgn/chessboard-style-rtl.css'),
+            },
+        ];
 
-    for (const file of entries) {
-        const srcFile = path.join(srcDir, file);
-        const baseName = file.replace(/\.scss$/, '');
-        const outFile = path.join(distDir, `${baseName}.css`);
-        const outRtlFile = path.join(distDir, `${baseName}-rtl.css`);
-
-        const result = sass.compile(srcFile, {
-            style: 'compressed',
-            sourceMap: false,
-        });
-
-        fs.writeFileSync(outFile, result.css);
-        console.log(`  ✓ Built assets/css/${baseName}.css`);
-
-        // RTL generation
-        const rtlResult = rtlcss.process(result.css);
-        fs.writeFileSync(outRtlFile, rtlResult);
-        console.log(`  ✓ Built assets/css/${baseName}-rtl.css`);
+        for (const target of targets) {
+            compileFile(chessboardScss, target.out, target.rtl);
+        }
     }
 
     const elapsed = Date.now() - startTime;

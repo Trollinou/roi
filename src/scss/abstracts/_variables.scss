@@ -1,0 +1,73 @@
+// ==========================================================================
+// ROI Design Tokens & WordPress Theme Integration Variables
+// ==========================================================================
+
+:root {
+  // Brand & Accent Colors (inherits from WP theme or WP Admin)
+  --roi-color-primary: var(--wp--preset--color--primary, var(--wp-admin-theme-color, #2271b1));
+  --roi-color-primary-hover: var(--wp--preset--color--primary-hover, #135e96);
+  --roi-color-primary-subtle: var(--wp--preset--color--primary-subtle, #f0f6fc);
+  --roi-color-secondary: var(--wp--preset--color--secondary, #50575e);
+  
+  // Surfaces & Backgrounds
+  --roi-color-bg: var(--wp--preset--color--base, #ffffff);
+  --roi-color-surface: var(--wp--preset--color--surface, #f8f9fa);
+  --roi-color-surface-hover: #e9ecef;
+  --roi-color-card: #ffffff;
+  
+  // Text & Typography Colors
+  --roi-color-text: var(--wp--preset--color--contrast, #1d2327);
+  --roi-color-text-muted: var(--wp--preset--color--contrast-2, #646970);
+  --roi-color-text-subtle: #8c8f94;
+  
+  // Borders & Dividers
+  --roi-color-border: var(--wp--preset--color--border, #dcdcde);
+  --roi-color-border-subtle: #e2e8f0;
+  --roi-color-border-focus: var(--wp--preset--color--primary, #2271b1);
+  
+  // Feedback & Status Colors
+  --roi-color-success: #15803d;
+  --roi-color-success-bg: #dcfce7;
+  --roi-color-success-border: #bbf7d0;
+  
+  --roi-color-danger: #b32d2e;
+  --roi-color-danger-bg: #ffebee;
+  --roi-color-danger-border: #ffcdd2;
+  
+  --roi-color-info: #0369a1;
+  --roi-color-info-bg: #e0f2fe;
+  --roi-color-info-border: #bae6fd;
+  
+  // Typography
+  --roi-font-family: var(--wp--preset--font-family--base, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif);
+  --roi-font-family-mono: var(--wp--preset--font-family--monospace, "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace);
+  --roi-font-family-chess: "Lucida Sans Unicode", "Arial Unicode MS", "Noto Sans Chess", sans-serif;
+  
+  --roi-font-size-xs: 11px;
+  --roi-font-size-sm: 12px;
+  --roi-font-size-md: 13px;
+  --roi-font-size-base: 14px;
+  --roi-font-size-lg: 16px;
+  --roi-font-size-xl: 18px;
+  
+  // Spacings & Layout
+  --roi-spacing-xs: var(--wp--preset--spacing--20, 4px);
+  --roi-spacing-sm: var(--wp--preset--spacing--30, 8px);
+  --roi-spacing-md: var(--wp--preset--spacing--40, 12px);
+  --roi-spacing-lg: var(--wp--preset--spacing--50, 16px);
+  --roi-spacing-xl: var(--wp--preset--spacing--60, 24px);
+  
+  // Radii
+  --roi-radius-xs: 2px;
+  --roi-radius-sm: 4px;
+  --roi-radius-md: 6px;
+  --roi-radius-lg: 8px;
+  --roi-radius-xl: 12px;
+  --roi-radius-full: 9999px;
+  
+  // Shadows & Transitions
+  --roi-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --roi-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --roi-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.25);
+  --roi-transition: all 0.2s ease;
+}

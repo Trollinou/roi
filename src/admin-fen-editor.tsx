@@ -10,9 +10,9 @@ import 'eg-chessboard/base.css';
 import 'eg-chessboard/pieces/cburnett.css';
 import RoiFenEditor from './components/FenEditor';
 import RoiPgnEditor from './components/PgnEditor';
-import './components/FenEditor/FenEditor.css';
-import './components/PgnEditor/PgnEditor.css';
-import './blocks/chessboard/style.css';
+import './components/FenEditor/FenEditor.scss';
+import './components/PgnEditor/PgnEditor.scss';
+import './blocks/chessboard/style.scss';
 
 const PluginDocumentSettingPanel =
 	EditorPluginDocumentSettingPanel || EditPostPluginDocumentSettingPanel;

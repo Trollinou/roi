@@ -1,0 +1,61 @@
+// ==========================================================================
+// ROI SCSS Mixins & Utilities
+// ==========================================================================
+
+@mixin roi-custom-scrollbar($width: 6px, $track-color: #f1f1f1, $thumb-color: #c1c1c1, $thumb-hover: #a8a8a8) {
+  &::-webkit-scrollbar {
+    width: $width;
+    height: $width;
+  }
+  &::-webkit-scrollbar-track {
+    background: $track-color;
+    border-radius: calc(#{$width} / 2);
+  }
+  &::-webkit-scrollbar-thumb {
+    background: $thumb-color;
+    border-radius: calc(#{$width} / 2);
+    &:hover {
+      background: $thumb-hover;
+    }
+  }
+}
+
+@mixin roi-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin roi-badge($bg: var(--roi-color-info-bg), $color: var(--roi-color-info), $border: var(--roi-color-info-border)) {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--roi-font-size-xs);
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--roi-radius-full);
+  background: $bg;
+  color: $color;
+  border: 1px solid $border;
+}
+
+@mixin roi-interactive-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: var(--roi-radius-sm);
+  transition: var(--roi-transition);
+  user-select: none;
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+@mixin roi-card-surface {
+  background: var(--roi-color-card);
+  border: 1px solid var(--roi-color-border);
+  border-radius: var(--roi-radius-md);
+  box-sizing: border-box;
+}

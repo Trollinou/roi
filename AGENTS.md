@@ -15,7 +15,7 @@
   - Promoted properties, Enums typés, DTO `readonly`, strict return types.
   - Typage strict des paramètres : interdiction formelle des types implicites nullables (utiliser explicitement `?Type $param = null`).
   - ZÉRO Composer en prod. Autoloader SPL natif strict dans `roi.php`.
-- **Frontend** : TypeScript 5+ (TS / TSX / React 18 pour Gutenberg & Suivi), ES2021 Vanilla (pas de jQuery), SCSS avec BEM. Compilés dans `build/` et `assets/css/`.
+- **Frontend & Styles** : TypeScript 5+ (TS / TSX / React 18 pour Gutenberg & Suivi), ES2021 Vanilla (pas de jQuery). Architecture SCSS modulaire avec BEM (`src/scss/`, `src/blocks/**/style.scss`). Compilation Sass compressée et génération RTL automatique (`scripts/build-css.js`, `wp-scripts`) vers `assets/css/` et `build/`.
 
 ## 2.1. Contrats d'API & Partage avec la PWA (dame-pwa)
 - **Source Unique de Vérité (SSOT)** : Les types et contrats de données REST (`/wp-json/roi/v1/*`) et domaine échiquéen résident dans `src/types/` et sont exportés via `package.json` (`roi-types`).
@@ -43,6 +43,10 @@
 - **Manipulation HTML** : Utiliser `WP_HTML_Tag_Processor` (via `ROI\Services\Html_Processor`) pour toute altération/injection d'attributs HTML côté serveur. Jamais de regex pour parser ou modifier du HTML.
 - **Sécurité WP** : Nonce + Capability checks (`manage_options`, `edit_posts`) systématiques. Input sanitization + Output escaping (`esc_html`, `esc_attr`).
 - **Post Meta** : Attribut `name` HTML sans `_`, mais enregistrement meta BDD avec `_` (ex: `_roi_exercise_fen`). Déclarer systématiquement `register_post_meta()` avec `show_in_rest => true` pour la compatibilité Block Bindings `core/post-meta` et l'API REST.
+- **Styles, CSS Inline & Intégration Thèmes WordPress** :
+  - **Éradication du CSS Inline** : Interdiction formelle des balises `<style>` et attributs `style="..."` dans les fichiers PHP, les templates et les générateurs d'UI TypeScript/JavaScript. Tout style doit être externalisé dans un module SCSS dédié sous `src/scss/` ou dans le dossier du bloc.
+  - **Design Tokens WordPress & Adaptabilité Thèmes** : Utiliser impérativement les CSS Custom Properties standard de WordPress (`--wp--preset--color--*`, `--wp--preset--font-family--*`, `--wp--preset--spacing--*`, `--wp-admin-theme-color`, `--wp--style--block-gap`) avec des valeurs de repli (*fallbacks*) pour une adaptation transparente aux thèmes FSE (`theme.json`) et classiques.
+  - **Spécificité & BEM** : Maintenir une spécificité faible (BEM plat sans imbrications profondes) pour permettre la personnalisation par l'éditeur de site WordPress, et bannir l'utilisation de `!important` (hors isolation géométrique critique d'échiquier).
 - **Shortcodes** : Capturer `wp_editor()` via `ob_start()` / `ob_get_clean()`.
 
 ## 5. QA, Tests & Conformité
