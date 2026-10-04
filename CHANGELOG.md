@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-10-04
+
 *   **Refonte SCSS Modulaire, Éradication du CSS Inline & Harmonisation Thèmes WordPress (`src/scss/`, `src/blocks/`, `includes/Metaboxes/`) :**
     *   **Architecture SCSS & Design Tokens WordPress (`src/scss/abstracts/`)** : Mise en place des variables et tokens basés sur les Custom Properties WordPress (`var(--wp--preset--*)`, `--wp-admin-theme-color`, `--wp--style--block-gap`) avec des valeurs de repli robustes permettant une adaptation immédiate aux thèmes FSE et classiques.
     *   **Pipeline de Compilation Sass & RTL (`scripts/build-css.js`, `webpack.config.js`)** : Compilation Sass compressée et génération automatique des variantes RTL (`assets/css/admin-style.css`, `assets/css/admin-style-rtl.css`, et feuilles de styles dans `build/`).

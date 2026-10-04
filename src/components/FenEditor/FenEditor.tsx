@@ -115,52 +115,6 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
     positionRef.current = position;
   }, [position]);
 
-  // Met à jour la position FEN à partir de l'état actuel de l'échiquier
-  const syncPositionFromBoard = () => {
-    if (boardApiRef.current) {
-      const placement = (boardApiRef.current as unknown as { getPlacementFen?: () => string }).getPlacementFen?.();
-      if (placement && placement !== positionRef.current) {
-        positionRef.current = placement;
-        setPosition(placement);
-      }
-    }
-  };
-
-  // Synchronisation dynamique de l'orientation sur l'échiquier selon le trait (turn)
-  useEffect(() => {
-    const computed: Color = turn === 'b' ? 'black' : 'white';
-    setOrientation(computed);
-    if (boardApiRef.current) {
-      const currentOrient = (boardApiRef.current as unknown as { getOrientation?: () => Color }).getOrientation?.();
-      if (currentOrient !== computed) {
-        (boardApiRef.current as unknown as { setConfig?: (c: { orientation: Color }) => void }).setConfig?.({ orientation: computed });
-      }
-    }
-  }, [turn]);
-
-  // Gestion du clic sur une case (mode édition)
-  const handleSquareClick = (square: string) => {
-    if (!boardApiRef.current) return;
-
-    const activePiece = selectedPieceRef.current;
-
-    if (activePiece) {
-      const bApi = boardApiRef.current as unknown as {
-        removePiece: (sq: string) => void;
-        putPiece: (p: { type: string; color: string }, sq: string) => void;
-      };
-      if (activePiece === 'eraser') {
-        bApi.removePiece(square);
-      } else {
-        const type = activePiece.role === 'knight' ? 'n' : activePiece.role[0];
-        const color = activePiece.color === 'white' ? 'w' : 'b';
-        bApi.putPiece({ type, color }, square);
-      }
-
-      syncPositionFromBoard();
-    }
-  };
-
   // Initialisation et orchestration via custom hook
   const { boardApiRef } = useChessBoard<BoardApi>(
     boardElRef,
@@ -264,6 +218,52 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
     },
     []
   );
+
+  // Met à jour la position FEN à partir de l'état actuel de l'échiquier
+  function syncPositionFromBoard() {
+    if (boardApiRef.current) {
+      const placement = (boardApiRef.current as unknown as { getPlacementFen?: () => string }).getPlacementFen?.();
+      if (placement && placement !== positionRef.current) {
+        positionRef.current = placement;
+        setPosition(placement);
+      }
+    }
+  }
+
+  // Synchronisation dynamique de l'orientation sur l'échiquier selon le trait (turn)
+  useEffect(() => {
+    const computed: Color = turn === 'b' ? 'black' : 'white';
+    setOrientation(computed);
+    if (boardApiRef.current) {
+      const currentOrient = (boardApiRef.current as unknown as { getOrientation?: () => Color }).getOrientation?.();
+      if (currentOrient !== computed) {
+        (boardApiRef.current as unknown as { setConfig?: (c: { orientation: Color }) => void }).setConfig?.({ orientation: computed });
+      }
+    }
+  }, [turn, boardApiRef]);
+
+  // Gestion du clic sur une case (mode édition)
+  function handleSquareClick(square: string) {
+    if (!boardApiRef.current) return;
+
+    const activePiece = selectedPieceRef.current;
+
+    if (activePiece) {
+      const bApi = boardApiRef.current as unknown as {
+        removePiece: (sq: string) => void;
+        putPiece: (p: { type: string; color: string }, sq: string) => void;
+      };
+      if (activePiece === 'eraser') {
+        bApi.removePiece(square);
+      } else {
+        const type = activePiece.role === 'knight' ? 'n' : activePiece.role[0];
+        const color = activePiece.color === 'white' ? 'w' : 'b';
+        bApi.putPiece({ type, color }, square);
+      }
+
+      syncPositionFromBoard();
+    }
+  }
 
   function parsePgnOrFen(text: string): { fen: string; shapes: BoardShape[] } | null {
     if (!text || typeof text !== 'string') {

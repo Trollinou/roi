@@ -143,6 +143,7 @@ export default function Edit({ attributes, setAttributes, clientId }: EditProps)
     return () => {
       boardAPI?.destroy();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Sync orientation
