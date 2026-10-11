@@ -13,6 +13,12 @@
   font-family: var(--roi-font-family);
   box-sizing: border-box;
 
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: center;
@@ -42,17 +48,6 @@
     aspect-ratio: 1 / 1 !important;
     position: relative !important;
   }
-}
-
-.fen-editor-controls-col {
-  flex: 0 0 380px;
-  width: 380px;
-  max-width: 380px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--roi-spacing-lg, 16px);
-  justify-content: flex-start;
-  flex-shrink: 0;
 
   @media (max-width: 768px) {
     width: 100%;
@@ -60,10 +55,43 @@
   }
 }
 
+.fen-editor-controls-col {
+  flex: 1 1 380px;
+  width: 380px;
+  max-width: 380px;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--roi-spacing-md, 12px);
+  justify-content: flex-start;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    max-width: 380px;
+  }
+}
+
+.fen-editor-section {
+  background: var(--roi-color-surface, #f8f9fa);
+  border: 1px solid var(--roi-color-border-subtle, #e9ecef);
+  border-radius: var(--roi-radius-lg, 8px);
+  padding: var(--roi-spacing-md, 12px);
+  box-sizing: border-box;
+}
+
+.fen-editor-title {
+  font-size: var(--roi-font-size-md, 13px);
+  font-weight: 700;
+  color: var(--roi-color-text-muted, #495057);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--roi-spacing-sm, 8px);
+}
+
 .fen-editor-section-title {
-  font-size: var(--roi-font-size-base, 14px);
-  font-weight: 600;
-  color: var(--roi-color-text, #1d2327);
+  font-size: var(--roi-font-size-md, 13px);
+  font-weight: 700;
+  color: var(--roi-color-text-muted, #495057);
   margin-bottom: var(--roi-spacing-xs, 4px);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -165,22 +193,87 @@ cg-board.editor-palette-board {
   }
 }
 
+.fen-import-row {
+  display: flex;
+  gap: var(--roi-spacing-sm, 8px);
+  align-items: stretch;
+}
+
+.fen-import-textarea {
+  flex: 1;
+  height: 34px;
+  min-height: 34px;
+  max-height: 80px;
+  padding: 6px 10px;
+  border: 1px solid var(--roi-color-border, #dee2e6);
+  border-radius: var(--roi-radius-md, 6px);
+  background-color: var(--roi-color-bg, #ffffff);
+  font-family: var(--roi-font-family-mono);
+  font-size: var(--roi-font-size-sm, 12px);
+  line-height: 1.4;
+  color: var(--roi-color-text, #1d2327);
+  outline: none;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-color: var(--roi-color-primary, #2271b1);
+  }
+}
+
+.fen-import-btn {
+  padding: 0 14px;
+  height: 34px;
+  font-size: var(--roi-font-size-sm, 12px);
+  font-weight: 600;
+  border-radius: var(--roi-radius-md, 6px);
+  border: 1px solid var(--roi-color-border, #ced4da);
+  background: var(--roi-color-bg, #ffffff);
+  color: var(--roi-color-text, #334155);
+  cursor: pointer;
+  white-space: nowrap;
+  box-sizing: border-box;
+  transition: var(--roi-transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: var(--roi-color-surface-hover, #e2e8f0);
+    border-color: var(--roi-color-text-subtle, #94a3b8);
+  }
+}
+
+.fen-editor-options-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--roi-spacing-sm, 8px);
+}
+
 .fen-editor-option-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
+}
+
+.fen-editor-option-label {
+  font-size: var(--roi-font-size-sm, 12px);
+  font-weight: 600;
+  color: var(--roi-color-text-muted, #495057);
 }
 
 .fen-editor-select {
   width: 100%;
-  padding: 8px 12px;
+  padding: 6px 10px;
   border: 1px solid var(--roi-color-border, #dee2e6);
   border-radius: var(--roi-radius-md, 6px);
   background-color: var(--roi-color-bg, #ffffff);
-  font-size: var(--roi-font-size-base, 14px);
+  font-size: var(--roi-font-size-md, 13px);
   color: var(--roi-color-text, #1d2327);
   cursor: pointer;
   outline: none;
+  box-sizing: border-box;
   transition: border-color 0.2s;
 
   &:focus {
@@ -191,11 +284,12 @@ cg-board.editor-palette-board {
 .fen-editor-checkbox-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   background: var(--roi-color-surface, #f8f9fa);
-  padding: var(--roi-spacing-md, 12px);
-  border-radius: var(--roi-radius-lg, 8px);
+  padding: 8px 10px;
+  border-radius: var(--roi-radius-md, 6px);
   border: 1px solid var(--roi-color-border-subtle, #e9ecef);
+  box-sizing: border-box;
 }
 
 .fen-editor-checkbox-row {
@@ -207,24 +301,33 @@ cg-board.editor-palette-board {
 .fen-editor-checkbox-label {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: var(--roi-font-size-base, 14px);
+  gap: 6px;
+  font-size: var(--roi-font-size-md, 13px);
   color: var(--roi-color-text, #1d2327);
   cursor: pointer;
 
   input {
-    width: 16px;
-    height: 16px;
+    width: 15px;
+    height: 15px;
     cursor: pointer;
+    margin: 0;
   }
+}
+
+.fen-editor-castling-header {
+  font-size: var(--roi-font-size-xs, 12px);
+  font-weight: 600;
+  color: var(--roi-color-text-muted, #6c757d);
+  min-width: 55px;
 }
 
 .fen-editor-actions {
   display: flex;
   gap: 8px;
-  margin-top: 10px;
+  margin-top: 8px;
   position: relative;
   z-index: 5;
+  box-sizing: border-box;
 
   .fen-editor-btn {
     flex: 1;
@@ -232,16 +335,17 @@ cg-board.editor-palette-board {
 }
 
 .fen-editor-btn {
-  padding: 10px 16px;
+  padding: 8px 14px;
   border: none;
   border-radius: var(--roi-radius-md, 6px);
-  font-size: var(--roi-font-size-base, 14px);
+  font-size: var(--roi-font-size-md, 13px);
   font-weight: 600;
   cursor: pointer;
   transition: var(--roi-transition);
   text-align: center;
   position: relative;
   z-index: 5;
+  box-sizing: border-box;
 }
 
 .fen-editor-btn-secondary {
@@ -263,20 +367,42 @@ cg-board.editor-palette-board {
   }
 }
 
+.fen-editor-apply-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--roi-color-primary, #2271b1);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--roi-radius-lg, 8px);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--roi-transition);
+  box-shadow: 0 4px 12px rgba(34, 113, 177, 0.2);
+  text-align: center;
+  box-sizing: border-box;
+
+  &:hover {
+    background: var(--roi-color-primary-hover, #135e96);
+    box-shadow: 0 4px 16px rgba(34, 113, 177, 0.3);
+  }
+}
+
 .fen-editor-drawing-legend {
-  margin-top: 16px;
+  margin-top: 8px;
   background: var(--roi-color-surface, #f8f9fa);
   border: 1px solid var(--roi-color-border-subtle, #e9ecef);
   border-radius: var(--roi-radius-lg, 8px);
-  padding: 12px 16px;
+  padding: 10px 14px;
   font-size: var(--roi-font-size-sm, 12px);
   color: var(--roi-color-text-muted, #50575e);
-  line-height: 1.5;
+  line-height: 1.4;
+  box-sizing: border-box;
 
   .legend-title {
     font-weight: 600;
     color: var(--roi-color-text, #1d2327);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -285,8 +411,8 @@ cg-board.editor-palette-board {
   .legend-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 6px 12px;
-    margin-bottom: 8px;
+    gap: 4px 12px;
+    margin-bottom: 6px;
   }
 
   .legend-item {
@@ -307,7 +433,7 @@ cg-board.editor-palette-board {
     font-size: var(--roi-font-size-xs, 11px);
     color: var(--roi-color-text-subtle, #8c8f94);
     border-top: 1px dashed var(--roi-color-border, #dee2e6);
-    padding-top: 6px;
+    padding-top: 4px;
     margin-top: 4px;
   }
 }

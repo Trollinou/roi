@@ -548,7 +548,7 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
         </section>
 
         {/* Actions rapides sous l'échiquier */}
-        <div className="fen-editor-actions" style={{ marginTop: '12px' }}>
+        <div className="fen-editor-actions">
           <button
             type="button"
             className="fen-editor-btn fen-editor-btn-secondary"
@@ -572,20 +572,11 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
       {/* Colonne Droite - Contrôles */}
       <div className="fen-editor-controls-col">
         {/* Importer une FEN ou un PGN */}
-        <div>
-          <div className="fen-editor-section-title">Importer une FEN / PGN</div>
-          <div style={{ display: 'flex', gap: '8px' }}>
+        <div className="fen-editor-section">
+          <div className="fen-editor-title">Importer une FEN / PGN</div>
+          <div className="fen-import-row">
             <textarea
-              className="fen-editor-select"
-              style={{
-                flex: 1,
-                minHeight: '42px',
-                maxHeight: '100px',
-                resize: 'vertical',
-                fontFamily: 'monospace',
-                fontSize: '12px',
-                lineHeight: '1.4',
-              }}
+              className="fen-import-textarea"
               placeholder="Collez une position FEN ou un export PGN Lichess..."
               value={importFenText}
               onChange={(e) => setImportFenText(e.target.value)}
@@ -598,8 +589,7 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
             />
             <button
               type="button"
-              className="fen-editor-btn fen-editor-btn-secondary"
-              style={{ padding: '8px 14px', whiteSpace: 'nowrap', alignSelf: 'flex-start' }}
+              className="fen-import-btn"
               onClick={handleLoadFen}
             >
               Charger
@@ -607,9 +597,9 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
           </div>
         </div>
 
-        <div>
-          {/* Palette de pièces */}
-          <div className="fen-editor-section-title">Palette de pièces</div>
+        {/* Palette de pièces */}
+        <div className="fen-editor-section">
+          <div className="fen-editor-title">Palette de pièces</div>
           <PiecePalette
             selectedPiece={selectedPiece}
             onSelect={setSelectedPiece}
@@ -618,71 +608,72 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
         </div>
 
         {/* Options de position */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div className="fen-editor-section-title" style={{ marginBottom: '2px' }}>Options de position</div>
+        <div className="fen-editor-section">
+          <div className="fen-editor-title">Options de position</div>
+          <div className="fen-editor-options-container">
+            {/* Trait aux */}
+            <div className="fen-editor-option-field">
+              <label className="fen-editor-option-label">
+                Trait au tour de
+              </label>
+              <select
+                className="fen-editor-select"
+                value={turn}
+                onChange={(e) => {
+                  const newTurn = e.target.value;
+                  setTurn(newTurn);
+                  setOrientation(newTurn === 'b' ? 'black' : 'white');
+                }}
+              >
+                <option value="w">Blancs</option>
+                <option value="b">Noirs</option>
+              </select>
+            </div>
 
-          {/* Trait aux */}
-          <div className="fen-editor-option-field">
-            <label className="fen-editor-checkbox-label" style={{ fontWeight: '500' }}>
-              Trait au tour de
-            </label>
-            <select
-              className="fen-editor-select"
-              value={turn}
-              onChange={(e) => {
-                const newTurn = e.target.value;
-                setTurn(newTurn);
-                setOrientation(newTurn === 'b' ? 'black' : 'white');
-              }}
-            >
-              <option value="w">Blancs</option>
-              <option value="b">Noirs</option>
-            </select>
-          </div>
-
-          {/* Droits de roque */}
-          <div className="fen-editor-option-field">
-            <label className="fen-editor-checkbox-label" style={{ fontWeight: '500' }}>
-              Droits de roque
-            </label>
-            <div className="fen-editor-checkbox-group">
-              <div className="fen-editor-checkbox-row">
-                <span style={{ fontSize: '13px', fontWeight: '600', color: '#6c757d' }}>Blancs :</span>
-                <label className="fen-editor-checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={castling.includes('K')}
-                    onChange={(e) => handleCastlingChange('K', e.target.checked)}
-                  />
-                  Petit (O-O)
-                </label>
-                <label className="fen-editor-checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={castling.includes('Q')}
-                    onChange={(e) => handleCastlingChange('Q', e.target.checked)}
-                  />
-                  Grand (O-O-O)
-                </label>
-              </div>
-              <div className="fen-editor-checkbox-row">
-                <span style={{ fontSize: '13px', fontWeight: '600', color: '#6c757d' }}>Noirs :</span>
-                <label className="fen-editor-checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={castling.includes('k')}
-                    onChange={(e) => handleCastlingChange('k', e.target.checked)}
-                  />
-                  Petit (o-o)
-                </label>
-                <label className="fen-editor-checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={castling.includes('q')}
-                    onChange={(e) => handleCastlingChange('q', e.target.checked)}
-                  />
-                  Grand (o-o-o)
-                </label>
+            {/* Droits de roque */}
+            <div className="fen-editor-option-field">
+              <label className="fen-editor-option-label">
+                Droits de roque
+              </label>
+              <div className="fen-editor-checkbox-group">
+                <div className="fen-editor-checkbox-row">
+                  <span className="fen-editor-castling-header">Blancs :</span>
+                  <label className="fen-editor-checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={castling.includes('K')}
+                      onChange={(e) => handleCastlingChange('K', e.target.checked)}
+                    />
+                    Petit (O-O)
+                  </label>
+                  <label className="fen-editor-checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={castling.includes('Q')}
+                      onChange={(e) => handleCastlingChange('Q', e.target.checked)}
+                    />
+                    Grand (O-O-O)
+                  </label>
+                </div>
+                <div className="fen-editor-checkbox-row">
+                  <span className="fen-editor-castling-header">Noirs :</span>
+                  <label className="fen-editor-checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={castling.includes('k')}
+                      onChange={(e) => handleCastlingChange('k', e.target.checked)}
+                    />
+                    Petit (o-o)
+                  </label>
+                  <label className="fen-editor-checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={castling.includes('q')}
+                      onChange={(e) => handleCastlingChange('q', e.target.checked)}
+                    />
+                    Grand (o-o-o)
+                  </label>
+                </div>
               </div>
             </div>
           </div>
@@ -691,9 +682,8 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
         {/* Bouton d'application principal */}
         <button
           type="button"
-          className="fen-editor-btn fen-editor-btn-primary"
+          className="fen-editor-apply-btn"
           onClick={handleApply}
-          style={{ width: '100%', padding: '12px 16px', fontSize: '15px' }}
         >
           Appliquer cette position
         </button>

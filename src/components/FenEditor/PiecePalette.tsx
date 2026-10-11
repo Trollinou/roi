@@ -45,10 +45,7 @@ export function PiecePalette({
         }}
         title={`Placer ${color === 'white' ? 'un pion/pièce blanc' : 'un pion/pièce noir'}`}
       >
-        <cg-board
-          className="editor-palette-board"
-          style={{ backgroundImage: 'none' }}
-        >
+        <cg-board className="editor-palette-board">
           <piece className={`${role} ${color} piece-inner`} />
         </cg-board>
       </button>

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+*   **Correction du Rendu & Harmonisation FenEditor (`src/components/FenEditor/`, `src/scss/components/_fen-editor.scss`, `_modal.scss`) :**
+    *   **Résolution du Débordement Horizontal & Troncature** : Éradication de la rigidité des colonnes (`flex-shrink: 0`) et application systématique de `box-sizing: border-box` sur l'ensemble des conteneurs de `FenEditor` pour éliminer la barre de défilement horizontal et le décalage masquant le titre de la modale.
+    *   **Harmonisation Modulaire BEM avec PgnEditor** : Structuration de la colonne de contrôles en sections homogènes (`.fen-editor-section`, `.fen-editor-title`), champ d'import compact (`.fen-import-row`, `.fen-import-textarea`, `.fen-import-btn`) et bouton d'action principal (`.fen-editor-apply-btn`).
+    *   **Contrôle de Hauteur & Éradication du CSS Inline** : Suppression intégrale des attributs `style={{ ... }}` inline dans `FenEditor.tsx` et `PiecePalette.tsx` au profit des Design Tokens SCSS, et compacité des espacements verticaux sous l'échiquier pour garantir l'affichage complet de la légende d'annotations sans scroll forcé.
+    *   **Harmonisation des Modales d'Administration** : Alignement de la largeur maximale de `.roi-modal-container` à 840px (parité FEN/PGN).
+
 ## [1.9.0] - 2026-10-04
 
 *   **Refonte SCSS Modulaire, Éradication du CSS Inline & Harmonisation Thèmes WordPress (`src/scss/`, `src/blocks/`, `includes/Metaboxes/`) :**

@@ -472,6 +472,7 @@ cg-board.editor-palette-board {
 .components-modal__frame.roi-pgn-editor-modal .components-modal__header {
   padding: 16px 24px !important;
   border-bottom: 1px solid var(--roi-color-border-subtle, #eee) !important;
+  box-sizing: border-box !important;
 }
 
 .components-modal__frame.roi-fen-editor-modal .components-modal__header-heading,
@@ -487,6 +488,7 @@ cg-board.editor-palette-board {
   overflow-x: hidden !important;
   display: flex !important;
   justify-content: center !important;
+  box-sizing: border-box !important;
 }
 
 .fen-editor-board-col .main-board,
