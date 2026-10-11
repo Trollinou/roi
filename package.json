@@ -1,6 +1,6 @@
 {
   "name": "roi",
-  "version": "1.9.0",
+  "version": "1.9.1",
   "types": "./src/types/index.ts",
   "exports": {
     ".": {
@@ -34,7 +34,7 @@
     "react": "^18.3.1",
     "rtlcss": "^4.3.0",
     "sass": "^1.105.1",
-    "typescript": "^6.x.x"
+    "typescript": "^6.0.3"
   },
   "dependencies": {
     "eg-chessboard": "file:../eg-chessboard"
@@ -44,7 +44,8 @@
     "fsevents": true,
     "@parcel/watcher@2.6.0": true,
     "core-js-pure@3.50.0": true,
-    "core-js@3.50.0": true
+    "core-js@3.50.0": true,
+    "esbuild@0.28.2": true
   },
   "overrides": {
     "react": "^18.3.1"

@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.9.1] - 2026-10-11
+
 *   **Correction du Rendu & Harmonisation FenEditor (`src/components/FenEditor/`, `src/scss/components/_fen-editor.scss`, `_modal.scss`) :**
     *   **Résolution du Débordement Horizontal & Troncature** : Éradication de la rigidité des colonnes (`flex-shrink: 0`) et application systématique de `box-sizing: border-box` sur l'ensemble des conteneurs de `FenEditor` pour éliminer la barre de défilement horizontal et le décalage masquant le titre de la modale.
     *   **Harmonisation Modulaire BEM avec PgnEditor** : Structuration de la colonne de contrôles en sections homogènes (`.fen-editor-section`, `.fen-editor-title`), champ d'import compact (`.fen-import-row`, `.fen-import-textarea`, `.fen-import-btn`) et bouton d'action principal (`.fen-editor-apply-btn`).
