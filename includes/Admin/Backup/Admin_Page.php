@@ -72,7 +72,10 @@ class Admin_Page {
 			ROI_PLUGIN_URL . 'build/admin-backup.js',
 			$asset['dependencies'],
 			$asset['version'],
-			true
+			array(
+				'strategy'  => 'defer',
+				'in_footer' => true,
+			)
 		);
 	}
 

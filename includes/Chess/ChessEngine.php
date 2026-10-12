@@ -105,12 +105,21 @@ class ChessEngine {
 			ROI_VERSION
 		);
 
+		$view_asset_file = $this->plugin_path . 'build/chessboard/chessboard-view.asset.php';
+		$view_asset      = file_exists( $view_asset_file ) ? include $view_asset_file : array(
+			'dependencies' => array( 'wp-element' ),
+			'version'      => ROI_VERSION,
+		);
+
 		wp_register_script(
 			'roi-public-chessboard-view',
 			$chess_url . 'chessboard-view.js',
-			array( 'wp-element' ),
-			ROI_VERSION,
-			true
+			$view_asset['dependencies'],
+			$view_asset['version'],
+			array(
+				'strategy'  => 'defer',
+				'in_footer' => true,
+			)
 		);
 
 		wp_localize_script(

@@ -90,7 +90,10 @@ class Suivi_Page {
 			$script_url,
 			$asset['dependencies'],
 			$version,
-			true
+			array(
+				'strategy'  => 'defer',
+				'in_footer' => true,
+			)
 		);
 
 		wp_localize_script(

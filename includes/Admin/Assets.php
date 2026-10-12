@@ -81,7 +81,10 @@ class Assets {
 				$chess_url . 'admin-fen-editor.js',
 				$fen_asset['dependencies'],
 				$fen_asset['version'],
-				true
+				array(
+					'strategy'  => 'defer',
+					'in_footer' => true,
+				)
 			);
 
 			if ( 'roi_exercice' === $post_type ) {
@@ -96,7 +99,10 @@ class Assets {
 					$chess_url . 'admin-exercice-builder.js',
 					array_merge( array( 'roi-admin-fen-editor' ), $ex_asset['dependencies'] ),
 					$ex_asset['version'],
-					true
+					array(
+						'strategy'  => 'defer',
+						'in_footer' => true,
+					)
 				);
 			}
 		} elseif ( 'roi_cours' === $post_type ) {
@@ -111,7 +117,10 @@ class Assets {
 				$chess_url . 'admin-cours-builder.js',
 				$cours_asset['dependencies'],
 				$cours_asset['version'],
-				true
+				array(
+					'strategy'  => 'defer',
+					'in_footer' => true,
+				)
 			);
 
 			wp_localize_script(
@@ -133,7 +142,10 @@ class Assets {
 				$chess_url . 'admin-video-settings.js',
 				$video_asset['dependencies'],
 				$video_asset['version'],
-				true
+				array(
+					'strategy'  => 'defer',
+					'in_footer' => true,
+				)
 			);
 		}
 	}
