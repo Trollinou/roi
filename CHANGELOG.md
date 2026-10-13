@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.9.2] - 2026-10-13
+
 *   **Optimisation du Chargement des Assets & Performance (PageSpeed / DevTools Coverage) :**
     *   **Stratégie de Chargement Différé (WP 6.3+)** : Ajout systématique de `['strategy' => 'defer', 'in_footer' => true]` sur l'ensemble des scripts frontend et d'administration (`includes/Chess/ChessEngine.php`, `includes/Admin/Assets.php`, `includes/Admin/Suivi_Page.php`, `includes/Admin/Backup/Admin_Page.php`, `includes/Metaboxes/Partie.php`).
     *   **Résolution Déterministe des Dépendances & Versions (`.asset.php`)** : Lecture dynamique des métadonnées de build pour `roi-public-chessboard-view` au lieu d'une dépendance statique rigide.
