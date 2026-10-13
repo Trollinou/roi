@@ -274,7 +274,10 @@ class Partie {
 				$chess_url . 'chessboard-view.js',
 				$view_asset['dependencies'],
 				$view_asset['version'],
-				true
+				array(
+					'strategy'  => 'defer',
+					'in_footer' => true,
+				)
 			);
 
 			wp_localize_script(
@@ -296,7 +299,10 @@ class Partie {
 				$chess_url . 'admin-partie-viewer.js',
 				array_merge( array( 'roi-public-chessboard-view' ), $viewer_asset['dependencies'] ),
 				$viewer_asset['version'],
-				true
+				array(
+					'strategy'  => 'defer',
+					'in_footer' => true,
+				)
 			);
 		}
 	}

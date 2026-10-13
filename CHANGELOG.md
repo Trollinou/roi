@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+*   **Optimisation du Chargement des Assets & Performance (PageSpeed / DevTools Coverage) :**
+    *   **Stratégie de Chargement Différé (WP 6.3+)** : Ajout systématique de `['strategy' => 'defer', 'in_footer' => true]` sur l'ensemble des scripts frontend et d'administration (`includes/Chess/ChessEngine.php`, `includes/Admin/Assets.php`, `includes/Admin/Suivi_Page.php`, `includes/Admin/Backup/Admin_Page.php`, `includes/Metaboxes/Partie.php`).
+    *   **Résolution Déterministe des Dépendances & Versions (`.asset.php`)** : Lecture dynamique des métadonnées de build pour `roi-public-chessboard-view` au lieu d'une dépendance statique rigide.
+    *   **Isolation Contextuelle Strictes** : Vérification contextuelle du type d'écran (`post.php` / `post-new.php`), post-types ciblés (`roi_exercice`, `roi_cours`, `roi_lecon`, `roi_video`, `roi_partie`), hooks spécifiques de sous-menus d'administration (`roi-suivi-eleves`, `roi-backup-restore`), et chargement à la demande par bloc (`block.json` / `viewScriptModule`) ou shortcode (`[chess_board]`).
+
 ## [1.9.1] - 2026-10-11
 
 *   **Correction du Rendu & Harmonisation FenEditor (`src/components/FenEditor/`, `src/scss/components/_fen-editor.scss`, `_modal.scss`) :**
