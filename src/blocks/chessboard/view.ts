@@ -1,9 +1,9 @@
 import { store, getContext, getElement } from '@wordpress/interactivity';
-import { BoardCore } from 'eg-chessboard';
+import { BoardCore, computeEvalBarPercentage, getNodesForElo } from 'eg-chessboard';
+import type { StockfishConfig, StockfishEvaluation, EngineStatus } from 'eg-chessboard';
 import 'eg-chessboard/base.css';
 import 'eg-chessboard/pieces/cburnett.css';
 import { ChessClock } from './classes/ChessClock';
-import { StockfishManager } from './classes/stockfishManager';
 import type { Color } from '../../types';
 
 declare global {
@@ -11,6 +11,7 @@ declare global {
     chessboardViewInitialized?: boolean;
     roiChessConfig?: {
       stockfishWorkerUrl?: string;
+      stockfishWasmUrl?: string;
     };
   }
 }
@@ -197,9 +198,8 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
 
   let currentStockfishColor: Color | null = null;
   let currentStockfishElo = stockfishElo;
-  let stockfishManager: StockfishManager | null = null;
-  let lastScoreType = 'cp';
-  let lastScoreValue = 0;
+  let currentEngineStatus: EngineStatus = 'uninitialized';
+  let lastEvaluation: StockfishEvaluation | null = null;
   const isHintEnabled = false;
 
   const configDialog = block.querySelector<HTMLElement>('.chess-config-dialog');
@@ -220,10 +220,10 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
       return;
     }
 
-    const boardState: any = typeof boardAPI.getState === 'function' ? boardAPI.getState() : {};
-    const isGameOver = boardState.isGameOver ?? boardAPI.getIsGameOver();
-    const isCheck = boardState.isCheck ?? boardAPI.getIsCheck();
-    const turnColor = boardState.turnColor ?? boardAPI.getTurnColor();
+    const boardState: any = typeof boardAPI?.getState === 'function' ? boardAPI.getState() : {};
+    const isGameOver = boardState.isGameOver ?? boardAPI?.getIsGameOver();
+    const isCheck = boardState.isCheck ?? boardAPI?.getIsCheck();
+    const turnColor = boardState.turnColor ?? boardAPI?.getTurnColor();
 
     if (isGameOver) {
       statusElement.textContent = boardAPI.getGameOverReason();
@@ -235,7 +235,9 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
       statusElement.textContent = `Échec ! Au tour des ${inCheckColor}.`;
     } else {
       if (useStockfish) {
-        if (turnColor === currentStockfishColor) {
+        if (currentEngineStatus === 'loading') {
+          statusElement.textContent = 'Chargement de Stockfish 19...';
+        } else if (turnColor === currentStockfishColor) {
           statusElement.textContent = 'Le moteur réfléchit...';
         } else {
           statusElement.textContent = 'À vous de jouer.';
@@ -246,49 +248,57 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
     }
   };
 
-  const initialFen = fen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-
-  const getEnginePositionCommand = () => {
-    const history = boardAPI.getHistory(true) || [];
-    const movesStr = history
-      .map((m: any) => m.from + m.to + (m.promotion ? m.promotion : ''))
-      .join(' ');
-    return movesStr
-      ? `position startpos moves ${movesStr}`
-      : `position fen ${initialFen}`;
-  };
-
-  const makeStockfishMove = () => {
-    if (boardAPI.getIsGameOver()) return;
-    const turnColor = boardAPI.getTurnColor();
-    const positionCmd = getEnginePositionCommand();
-
-    if (turnColor === currentStockfishColor) {
-      if (stockfishManager) {
-        if (clockSettings.preset !== 'none') {
-          const timeParams = `wtime ${clockSettings.wtime} winc ${clockSettings.winc} btime ${clockSettings.btime} binc ${clockSettings.binc}`;
-          stockfishManager.startOpponentMove(positionCmd, timeParams);
-        } else {
-          stockfishManager.startOpponentMove(positionCmd, 5000);
-        }
-      }
-    } else {
-      if (stockfishManager) {
-        stockfishManager.startEvaluation(positionCmd);
-      }
+  const updateEvaluationBar = (evalData?: StockfishEvaluation | null) => {
+    if (evalData !== undefined) {
+      lastEvaluation = evalData;
     }
-  };
+    const barFill = block.querySelector<HTMLElement>('.evaluation-bar-fill');
+    if (!barFill) return;
+    const barContainer = block.querySelector<HTMLElement>('.evaluation-bar');
 
-  let updateEvaluationBar: (scoreType?: string, scoreValue?: number) => void = () => {};
+    if (!lastEvaluation) {
+      barFill.style.height = '50%';
+      if (barContainer) {
+        barContainer.removeAttribute('title');
+      }
+      return;
+    }
 
-  const emit = (event: string) => {
-    if (event === 'move') {
-      updateStatus();
-      setTimeout(() => {
-        makeStockfishMove();
-      }, 100);
-    } else if (['check', 'checkmate', 'draw', 'stalemate'].includes(event)) {
-      updateStatus();
+    const currentTurn = boardAPI.getTurnColor();
+    const percentageWhite = computeEvalBarPercentage(
+      currentTurn,
+      lastEvaluation.scoreType,
+      lastEvaluation.scoreValue,
+      lastEvaluation.wdl
+    );
+
+    if (barContainer) {
+      let tooltipText = '';
+      if (lastEvaluation.scoreType === 'cp') {
+        const evalScore = (lastEvaluation.whiteScoreValue ?? 0) / 100;
+        const sign = evalScore > 0 ? '+' : '';
+        tooltipText = `${sign}${evalScore.toFixed(2)}`;
+      } else if (lastEvaluation.scoreType === 'mate') {
+        const mateVal = lastEvaluation.scoreValue;
+        const absMoves = Math.abs(mateVal);
+        const sideChar = (lastEvaluation.whiteScoreValue ?? 0) > 0 ? 'B' : 'N';
+        tooltipText = `Mat #${absMoves} (${sideChar})`;
+      }
+      if (lastEvaluation.winChancePercentage !== undefined) {
+        tooltipText += ` (${Math.round(lastEvaluation.winChancePercentage)}% Blancs)`;
+      }
+      barContainer.setAttribute('title', tooltipText);
+    }
+
+    const currentOrientation = boardAPI.getOrientation();
+    if (currentOrientation === 'white') {
+      barFill.style.height = `${percentageWhite}%`;
+      barFill.style.marginTop = 'auto';
+      barFill.style.marginBottom = '0';
+    } else {
+      barFill.style.height = `${100 - percentageWhite}%`;
+      barFill.style.marginTop = '0';
+      barFill.style.marginBottom = 'auto';
     }
   };
 
@@ -298,15 +308,30 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
     block.getAttribute('data-stockfish-worker-url') ||
     '/wp-content/plugins/dame-pwa/pwa/dist/stockfish/stockfish.js';
 
-  const boardAPI = new BoardCore(
-    mountElement,
-    state,
-    () => {},
-    emit,
-    boardConfig,
-    { workerUrl }
-  );
-  (block as any).boardAPI = boardAPI;
+  const wasmUrl =
+    globalStoreState.stockfishWasmUrl ||
+    (typeof window !== 'undefined' && window.roiChessConfig?.stockfishWasmUrl) ||
+    block.getAttribute('data-stockfish-wasm-url') ||
+    '/wp-content/plugins/dame-pwa/pwa/dist/stockfish/stockfish.wasm';
+
+  const buildStockfishConfig = (
+    whiteMode: 'disabled' | 'hint' | 'bot' | 'elo',
+    blackMode: 'disabled' | 'hint' | 'bot' | 'elo',
+    elo: number
+  ): StockfishConfig => ({
+    workerUrl,
+    wasmUrl,
+    whiteMode,
+    whiteElo: whiteMode === 'elo' ? elo : undefined,
+    blackMode,
+    blackElo: blackMode === 'elo' ? elo : undefined,
+    stockfishMoveTime: 1000,
+    searchLimit: {
+      nodes: getNodesForElo(elo),
+    },
+    showWdl: true,
+    multiPv: 1,
+  });
 
   const clock = new ChessClock();
   const clockSettings = {
@@ -375,93 +400,72 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
     clockSettings.binc = clock.binc;
   };
   initClockSettings(initialClockPreset);
-  updateClockDisplays();
 
-  if (useStockfish || showEvaluationBar) {
-    try {
-      stockfishManager = new StockfishManager(workerUrl);
+  const emit = (event: string, ...args: unknown[]) => {
+    if (event === 'move' || event === 'turn-change') {
+      const val = args[0] as any;
+      const turnColor =
+        val?.turnColor ||
+        (typeof boardAPI?.getState === 'function' ? boardAPI.getState().turnColor : null) ||
+        boardAPI?.getTurnColor();
+      const plyCount =
+        val?.ply !== undefined
+          ? val.ply
+          : typeof boardAPI?.getState === 'function'
+          ? boardAPI.getState().ply
+          : boardAPI?.getCurrentPlyNumber() ?? 0;
 
-      if (showEvaluationBar) {
-        stockfishManager.initEvaluationWorker();
+      updateStatus();
+
+      const justFinishedColor = turnColor === 'white' ? 'black' : 'white';
+      clock.applyIncrement(justFinishedColor, plyCount);
+      clockSettings.wtime = clock.wtime;
+      clockSettings.btime = clock.btime;
+
+      if (plyCount === 1) {
+        startTimer();
       }
-      if (useStockfish) {
-        stockfishManager.initOpponentWorker(stockfishElo);
+
+      activeClockColor = turnColor;
+      clock.setActiveColor(turnColor);
+      updateClockDisplays();
+    } else if (['check', 'checkmate', 'draw', 'stalemate'].includes(event)) {
+      if (['checkmate', 'draw', 'stalemate'].includes(event)) {
+        stopTimer();
       }
-
-      stockfishManager.setCallbacks({
-        onBestMove: (bestMove: string) => {
-          const from = bestMove.slice(0, 2);
-          const to = bestMove.slice(2, 4);
-          const promotion = bestMove.length > 4 ? bestMove.charAt(4) : undefined;
-          boardAPI.move({ from, to, promotion });
-        },
-        onEvaluation: (scoreType: string, scoreValue: number) => {
-          updateEvaluationBar(scoreType, scoreValue);
-        },
-        onHint: (bestMove: string) => {
-          if (isHintEnabled) {
-            const from = bestMove.slice(0, 2);
-            const to = bestMove.slice(2, 4);
-            boardAPI.drawMove(from, to, 'green');
-          }
-        },
-      });
-
-      updateEvaluationBar = (scoreType?: string, scoreValue?: number) => {
-        if (scoreType !== undefined && scoreValue !== undefined) {
-          lastScoreType = scoreType;
-          lastScoreValue = scoreValue;
-        }
-
-        const barFill = block.querySelector<HTMLElement>('.evaluation-bar-fill');
-        if (!barFill) return;
-        const barContainer = block.querySelector<HTMLElement>('.evaluation-bar');
-
-        let scoreFromWhite = 0;
-        if (lastScoreType === 'cp') {
-          scoreFromWhite = currentStockfishColor === 'white' ? lastScoreValue : -lastScoreValue;
-        } else if (lastScoreType === 'mate') {
-          const isWhiteAdvantage =
-            (currentStockfishColor === 'white' && lastScoreValue > 0) ||
-            (currentStockfishColor === 'black' && lastScoreValue < 0);
-          scoreFromWhite = isWhiteAdvantage ? 1000 : -1000;
-        }
-
-        if (barContainer) {
-          let tooltipText = '';
-          if (lastScoreType === 'cp') {
-            const evalFromWhite = scoreFromWhite / 100;
-            const sign = evalFromWhite > 0 ? '+' : '';
-            tooltipText = `${sign}${evalFromWhite.toFixed(2)}`;
-          } else if (lastScoreType === 'mate') {
-            const isWhiteAdvantage =
-              (currentStockfishColor === 'white' && lastScoreValue > 0) ||
-              (currentStockfishColor === 'black' && lastScoreValue < 0);
-            const absMoves = Math.abs(lastScoreValue);
-            const sideChar = isWhiteAdvantage ? 'B' : 'N';
-            tooltipText = `Mat #${absMoves}${sideChar}`;
-          }
-          barContainer.setAttribute('title', tooltipText);
-        }
-
-        const clampedScore = Math.max(-1000, Math.min(1000, scoreFromWhite));
-        const percentageWhite = 50 + (clampedScore / 1000) * 50;
-        const currentOrientation = boardAPI.getOrientation();
-
-        if (currentOrientation === 'white') {
-          barFill.style.height = `${percentageWhite}%`;
-          barFill.style.marginTop = 'auto';
-          barFill.style.marginBottom = '0';
-        } else {
-          barFill.style.height = `${percentageWhite}%`;
-          barFill.style.marginTop = '0';
-          barFill.style.marginBottom = 'auto';
-        }
-      };
-    } catch (err) {
-      console.error('Stockfish Worker failed to load:', err);
+      updateStatus();
+    } else if (event === 'evaluation') {
+      const evaluation = args[0] as StockfishEvaluation;
+      updateEvaluationBar(evaluation);
+    } else if (event === 'engine-status') {
+      currentEngineStatus = args[0] as EngineStatus;
+      updateStatus();
+    } else if (event === 'stockfish-hint') {
+      const bestMove = args[0] as string;
+      if (isHintEnabled && bestMove && bestMove.length >= 4) {
+        const from = bestMove.slice(0, 2);
+        const to = bestMove.slice(2, 4);
+        boardAPI.drawMove(from, to, 'green');
+      }
     }
-  }
+  };
+
+  const initialStockfishConfig: StockfishConfig =
+    useStockfish || showEvaluationBar
+      ? buildStockfishConfig('disabled', 'disabled', stockfishElo)
+      : { workerUrl, wasmUrl };
+
+  const boardAPI = new BoardCore(
+    mountElement,
+    state,
+    () => {},
+    emit,
+    boardConfig,
+    initialStockfishConfig
+  );
+  (block as any).boardAPI = boardAPI;
+
+  updateClockDisplays();
 
   // Bind interactive actions
   const handleStartGame = () => {
@@ -513,37 +517,53 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
       fen: boardAPI.getFen(),
     });
 
-    if (stockfishManager) {
-      stockfishManager.initOpponentWorker(currentStockfishElo);
-      stockfishManager.setOpponentElo(currentStockfishElo);
+    if (useStockfish) {
+      const isWhiteBot = currentStockfishColor === 'white';
+      const isBlackBot = currentStockfishColor === 'black';
+
+      boardAPI.updateStockfishConfig(
+        buildStockfishConfig(
+          isWhiteBot ? 'elo' : 'hint',
+          isBlackBot ? 'elo' : 'hint',
+          currentStockfishElo
+        )
+      );
+
+      if (showEvaluationBar) {
+        boardAPI.startLiveAnalysis();
+      }
+    } else if (showEvaluationBar) {
+      boardAPI.updateStockfishConfig(
+        buildStockfishConfig('disabled', 'disabled', currentStockfishElo)
+      );
+      boardAPI.startLiveAnalysis();
     }
 
     updateStatus();
-    updateEvaluationBar('cp', 0);
+    updateEvaluationBar(null);
 
     stopTimer();
     activeClockColor = 'white';
     clock.setActiveColor('white');
     startTimer();
     updateClockDisplays();
-
-    if (playerChosenColor === 'black') {
-      makeStockfishMove();
-    } else {
-      if (stockfishManager && (showEvaluationBar || isHintEnabled)) {
-        stockfishManager.startEvaluation(getEnginePositionCommand());
-      }
-    }
   };
 
   const handleNewGame = () => {
     clock.reset();
+    if (useStockfish || showEvaluationBar) {
+      boardAPI.stopLiveAnalysis();
+      boardAPI.updateStockfishConfig(
+        buildStockfishConfig('disabled', 'disabled', currentStockfishElo)
+      );
+    }
     boardAPI.resetBoard();
     if (useStockfish && configDialog) {
       boardAPI.setConfig({ viewOnly: true });
       configDialog.style.display = 'flex';
     }
     updateStatus();
+    updateEvaluationBar(null);
   };
 
   const handleFlipBoard = () => {
@@ -553,7 +573,18 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
   };
 
   const handleUndoMove = () => {
-    (boardAPI as any).undoMove(useStockfish);
+    const activeColorBtn = block.querySelector('.color-btn.active');
+    const chosenColor = activeColorBtn ? activeColorBtn.getAttribute('data-color') : 'white';
+    const playerChosenColor = (chosenColor === 'random' ? mockProps.playerColor : chosenColor) as Color;
+
+    if (useStockfish && currentStockfishColor) {
+      boardAPI.undoLastMove();
+      if (boardAPI.getTurnColor() !== playerChosenColor && boardAPI.getCurrentPlyNumber() > 0) {
+        boardAPI.undoLastMove();
+      }
+    } else {
+      boardAPI.undoLastMove();
+    }
     clock.setActiveColor(boardAPI.getTurnColor());
     activeClockColor = clock.activeColor;
     updateClockDisplays();
@@ -578,54 +609,6 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
     });
   });
 
-  const newEmit = (event: string, val: any) => {
-    if (event === 'turn-change' || event === 'move') {
-      const turnColor =
-        val?.turnColor ||
-        (typeof boardAPI.getState === 'function' ? boardAPI.getState().turnColor : null) ||
-        boardAPI.getTurnColor();
-      const plyCount =
-        val?.ply !== undefined
-          ? val.ply
-          : typeof boardAPI.getState === 'function'
-          ? boardAPI.getState().ply
-          : boardAPI.getCurrentPlyNumber();
-
-      updateStatus();
-
-      const justFinishedColor = turnColor === 'white' ? 'black' : 'white';
-      clock.applyIncrement(justFinishedColor, plyCount);
-      clockSettings.wtime = clock.wtime;
-      clockSettings.btime = clock.btime;
-
-      if (plyCount === 1) {
-        startTimer();
-      }
-
-      activeClockColor = turnColor;
-      clock.setActiveColor(turnColor);
-      updateClockDisplays();
-
-      setTimeout(() => {
-        if (turnColor === currentStockfishColor) {
-          const positionCmd = getEnginePositionCommand();
-          if (clockSettings.preset !== 'none') {
-            const timeParams = `wtime ${clockSettings.wtime} winc ${clockSettings.winc} btime ${clockSettings.btime} binc ${clockSettings.binc}`;
-            stockfishManager?.startOpponentMove(positionCmd, timeParams);
-          } else {
-            stockfishManager?.startOpponentMove(positionCmd, 5000);
-          }
-        } else if (stockfishManager) {
-          stockfishManager.startEvaluation(getEnginePositionCommand());
-        }
-      }, 100);
-    } else if (['checkmate', 'draw', 'stalemate'].includes(event)) {
-      stopTimer();
-      updateStatus();
-    }
-  };
-
-  (boardAPI as any).emit = newEmit;
   updateStatus();
 
   if (showThreats) {
@@ -637,10 +620,11 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
 const { state: globalStoreState } = store('roi/chessboard', {
   state: {
     stockfishWorkerUrl: '',
+    stockfishWasmUrl: '',
     defaultFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     supportedCadences: ['none', '1+0', '3+2', '5+0', '10+5', '15+10'],
     minElo: 1320,
-    maxElo: 2800,
+    maxElo: 3190,
     defaultElo: 1500,
   },
   actions: {

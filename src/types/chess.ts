@@ -53,3 +53,76 @@ export interface ClockState {
   isRunning: boolean;
   increment: number;
 }
+
+export type StockfishMode = 'disabled' | 'hint' | 'bot' | 'elo';
+
+export interface StockfishSearchLimit {
+  movetime?: number;
+  depth?: number;
+  nodes?: number;
+}
+
+export interface StockfishConfig {
+  workerUrl: string; // ex: '/stockfish.js'
+  wasmUrl?: string; // ex: '/stockfish.wasm'
+  whiteMode?: StockfishMode;
+  whiteElo?: number; // 1320 à 3190
+  blackMode?: StockfishMode;
+  blackElo?: number; // 1320 à 3190
+  stockfishMoveTime?: number; // Temps de réflexion en ms pour le bot (défaut: 1000)
+  multiPv?: number; // Nombre de variantes (défaut: 1)
+  showWdl?: boolean; // Probabilités Gain/Nulle/Perte (défaut: true)
+  searchLimit?: StockfishSearchLimit;
+  threads?: number;
+  hashSize?: number;
+}
+
+export type EngineStatus = 'uninitialized' | 'loading' | 'ready' | 'searching' | 'stopping' | 'error';
+
+export interface StockfishEvaluation {
+  ply: number;
+  fen: string;
+  depth: number;
+  seldepth?: number;
+  scoreType: 'cp' | 'mate';
+  scoreValue: number;
+  whiteScoreValue: number;
+  winChancePercentage: number;
+  wdl?: [number, number, number];
+  bestMove?: string;
+  pv: string[];
+  multipvIndex: number;
+  nodes?: number;
+  nps?: number;
+  time?: number;
+}
+
+export type MoveJudgement =
+  | 'brilliant'
+  | 'best'
+  | 'excellent'
+  | 'good'
+  | 'inaccuracy'
+  | 'mistake'
+  | 'blunder'
+  | 'missed_win';
+
+export interface MoveAnalysisReport {
+  ply: number;
+  san: string;
+  uci: string;
+  color: 'white' | 'black';
+  judgement: MoveJudgement;
+  playedMoveScore: number;
+  bestMoveScore: number;
+  diffPercentage: number;
+  bestMoveUci: string;
+  bestMoveSan: string;
+  comment?: string;
+}
+
+export interface GameReviewReport {
+  accuracyWhite: number;
+  accuracyBlack: number;
+  moves: MoveAnalysisReport[];
+}

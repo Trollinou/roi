@@ -652,7 +652,7 @@ export default function Edit({ attributes, setAttributes, clientId }: EditProps)
                     value={attributes.stockfishElo || 1500}
                     onChange={(val: number) => setAttributes({ stockfishElo: val })}
                     min={1320}
-                    max={2800}
+                    max={3190}
                     step={10}
                   />
                   <SelectControl
