@@ -122,7 +122,19 @@ export interface MoveAnalysisReport {
 }
 
 export interface GameReviewReport {
-  accuracyWhite: number;
-  accuracyBlack: number;
+  accuracy: {
+    white: number;
+    black: number;
+  };
+  summary: {
+    white: Record<MoveJudgement, number>;
+    black: Record<MoveJudgement, number>;
+  };
   moves: MoveAnalysisReport[];
+  evalGraph?: {
+    ply: number;
+    whiteWinChance: number;
+  }[];
+  accuracyWhite?: number;
+  accuracyBlack?: number;
 }

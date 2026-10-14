@@ -200,7 +200,6 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
   let currentStockfishElo = stockfishElo;
   let currentEngineStatus: EngineStatus = 'uninitialized';
   let lastEvaluation: StockfishEvaluation | null = null;
-  const isHintEnabled = false;
 
   const configDialog = block.querySelector<HTMLElement>('.chess-config-dialog');
   const colorBtns = block.querySelectorAll<HTMLElement>('.color-btn');
@@ -442,7 +441,7 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
       updateStatus();
     } else if (event === 'stockfish-hint') {
       const bestMove = args[0] as string;
-      if (isHintEnabled && bestMove && bestMove.length >= 4) {
+      if (bestMove && bestMove.length >= 4) {
         const from = bestMove.slice(0, 2);
         const to = bestMove.slice(2, 4);
         boardAPI.drawMove(from, to, 'green');
@@ -510,7 +509,8 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
     if (configDialog) configDialog.style.display = 'none';
     mockProps.playerColor = playerChosenColor;
 
-    boardAPI.resetBoard();
+    boardAPI.cancelReview();
+    boardAPI.newGame();
     boardAPI.setConfig({
       viewOnly: false,
       orientation: playerChosenColor,
@@ -523,8 +523,8 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
 
       boardAPI.updateStockfishConfig(
         buildStockfishConfig(
-          isWhiteBot ? 'elo' : 'hint',
-          isBlackBot ? 'elo' : 'hint',
+          isWhiteBot ? 'elo' : 'disabled',
+          isBlackBot ? 'elo' : 'disabled',
           currentStockfishElo
         )
       );
@@ -552,12 +552,13 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
   const handleNewGame = () => {
     clock.reset();
     if (useStockfish || showEvaluationBar) {
+      boardAPI.cancelReview();
       boardAPI.stopLiveAnalysis();
       boardAPI.updateStockfishConfig(
         buildStockfishConfig('disabled', 'disabled', currentStockfishElo)
       );
     }
-    boardAPI.resetBoard();
+    boardAPI.newGame();
     if (useStockfish && configDialog) {
       boardAPI.setConfig({ viewOnly: true });
       configDialog.style.display = 'flex';
@@ -678,6 +679,14 @@ const { state: globalStoreState } = store('roi/chessboard', {
       const block = btn.closest<HTMLElement>('.chessboard-block');
       const undoBtn = block?.querySelector<HTMLButtonElement>('.control-btn.undo-move');
       undoBtn?.click();
+    },
+    requestHint(event: Event) {
+      const btn = event.target as HTMLElement;
+      const block = btn.closest<HTMLElement>('.chessboard-block');
+      const boardAPI = (block as any)?.boardAPI;
+      if (boardAPI && typeof boardAPI.requestHint === 'function') {
+        boardAPI.requestHint({ multiPv: 1, movetime: 1200 });
+      }
     },
   },
   callbacks: {
