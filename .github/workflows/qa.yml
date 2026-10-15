@@ -1,0 +1,117 @@
+name: QA & CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  php-qa:
+    name: PHP QA (PHP 8.4)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: dom, curl, libxml, mbstring, zip, gd
+          tools: composer:v2
+          coverage: none
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyze --debug --memory-limit=2G
+
+      - name: Run PHPCS
+        run: vendor/bin/phpcs
+
+      - name: Run PHPUnit (if configured)
+        run: |
+          if [ -f vendor/bin/phpunit ]; then
+            vendor/bin/phpunit
+          else
+            echo "ℹ️ PHPUnit n'est pas encore configuré (aucun fichier de test unitaire détecté)."
+          fi
+
+  front-qa:
+    name: Frontend QA (Node 24 LTS)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 24 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Checkout eg-chessboard dependency
+        uses: actions/checkout@v4
+        with:
+          repository: Trollinou/eg-chessboard
+          path: .deps/eg-chessboard
+
+      - name: Cache eg-chessboard build
+        id: cache-eg-chessboard
+        uses: actions/cache@v4
+        with:
+          path: |
+            .deps/eg-chessboard/dist
+            .deps/eg-chessboard/node_modules
+          key: ${{ runner.os }}-eg-chessboard-${{ hashFiles('.deps/eg-chessboard/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-eg-chessboard-
+
+      - name: Prepare and build eg-chessboard
+        run: |
+          ln -s "${GITHUB_WORKSPACE}/.deps/eg-chessboard" "${GITHUB_WORKSPACE}/../eg-chessboard"
+          if [ ! -d "${GITHUB_WORKSPACE}/.deps/eg-chessboard/dist" ]; then
+            cd "${GITHUB_WORKSPACE}/../eg-chessboard"
+            npm install --prefer-offline --no-audit
+            npm run build
+          fi
+
+      - name: Install ROI dependencies
+        run: npm install --prefer-offline --no-audit
+
+      - name: TypeScript Typecheck
+        run: npm run typecheck
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Unit Tests (if configured)
+        run: npm test --if-present
+
+      - name: Production Build
+        run: npm run build

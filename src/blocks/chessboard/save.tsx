@@ -145,7 +145,7 @@ export default function Save({ attributes }: SaveProps): React.ReactElement {
                     type="range"
                     className="elo-slider"
                     min="1320"
-                    max="2800"
+                    max="3190"
                     defaultValue={attributes.stockfishElo || 1500}
                     data-wp-on--input="actions.changeElo"
                   />
