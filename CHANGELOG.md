@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+*   **Intégration Continue & Chaîne QA GitHub Actions (`.github/workflows/qa.yml`) :**
+    *   **Architecture Double Job Parallèle** : Découpage optimisé pour le forfait gratuit GitHub en deux jobs concurrents (`php-qa` et `front-qa`) avec annulation des exécutions obsolètes (`concurrency: cancel-in-progress`).
+    *   **Pipeline PHP 8.4** : Validation PHPStan (niveau 7, `--debug`, 2G), PHPCS (standards WordPress complets WPCS 3.4) et vérification PHPUnit sous PHP 8.4 avec extensions légères sans imagick et cache Composer optimisé.
+    *   **Pipeline Frontend Node 24 LTS** : Typage TypeScript strict (`npm run typecheck`), linting ESLint (`npm run lint`), build complet des blocs et styles (`npm run build`) avec résolution et mise en cache de la dépendance locale `eg-chessboard`.
+
 *   **Intégration du Moteur Unifié Stockfish 19 (`eg-chessboard` v1.7.1, `src/blocks/chessboard/view.ts`, `src/types/chess.ts`, `includes/Chess/ChessEngine.php`) :**
     *   **Architecture Mono-Moteur Stockfish 19 WebAssembly** : Exploitation directe du moteur unifié WebAssembly (1.84 Mo, sans prérequis COOP/COEP) de `eg-chessboard`, remplaçant et supprimant l'ancien gestionnaire double-worker obsolète (`src/blocks/chessboard/classes/stockfishManager.ts`).
     *   **Contrats de Configuration & ELO Déterministe (`StockfishConfig`)** : Configuration fine du bot adverse (`whiteMode` / `blackMode` en `'elo'`, `'bot'` ou `'hint'`), calibrage de recherche déterministe par nœuds via `getNodesForElo(elo)` et extension de la plage ELO jusqu'à 3190 sur le bloc, l'éditeur Gutenberg et le store Interactivity API.
