@@ -42,29 +42,14 @@ module.exports = [
 			},
 		},
 		rules: {
-			'prettier/prettier': 'off',
-			'jsdoc/require-param': 'off',
-			'jsdoc/require-param-type': 'off',
-			'jsdoc/require-returns': 'off',
-			'jsdoc/require-returns-type': 'off',
-			'jsdoc/check-param-names': 'off',
-			'jsx-a11y/no-static-element-interactions': 'off',
-			'jsx-a11y/click-events-have-key-events': 'off',
-			'jsx-a11y/role-supports-aria-props': 'off',
-			'jsx-a11y/mouse-events-have-key-events': 'off',
-			'jsx-a11y/control-has-associated-label': 'off',
-			'jsx-a11y/anchor-is-valid': 'off',
-			'jsx-a11y/aria-role': 'off',
-			'jsx-a11y/label-has-associated-control': 'off',
-			'jsx-a11y/no-autofocus': 'off',
-			curly: 'off',
-			'no-nested-ternary': 'off',
-			'no-lonely-if': 'off',
-			'@wordpress/no-unused-vars-before-return': 'off',
-			no_unused_vars: 'off',
-			'no-shadow': 'off',
-			'prefer-const': 'warn',
-			'no-console': ['warn', { allow: ['warn', 'error'] }],
+			// =================================================================
+			// 1. RIGUEUR & QUALITÉ (Équivalent "Strict" JS/TS)
+			// =================================================================
+			'eqeqeq': [ 'error', 'smart' ], // Oblige === et !== (tolère == null)
+			'curly': [ 'error', 'all' ], // Oblige les accolades {} même sur 1 ligne
+			'prefer-const': 'error', // Impose const si la variable n'est pas réassignée
+			'no-shadow': 'error', // Interdit de masquer une variable parente
+			'no-console': [ 'warn', { allow: [ 'warn', 'error' ] } ],
 			'no-unused-vars': [
 				'warn',
 				{
@@ -73,17 +58,24 @@ module.exports = [
 					caughtErrorsIgnorePattern: '^_',
 				},
 			],
-			eqeqeq: 'warn',
-			'import/no-unresolved': 'off',
+
+			// =================================================================
+			// 2. ADAPTATIONS WORDPRESS & ARCHITECTURE (Légitimes)
+			// =================================================================
+			'camelcase': 'off', // Autorise le snake_case issu de PHP / WP
+			'no-alert': 'off', // Autorise alert() et confirm() dans l'admin WP
+			'prettier/prettier': 'off', // Ne bloque pas le linter sur du formatage pur
+			'import/no-unresolved': 'off', // Délégué à TypeScript / Bundler
 			'import/no-extraneous-dependencies': 'off',
-			'no-alert': 'off',
-			camelcase: 'off',
-		},
-	},
-	{
-		files: ['**/*.{ts,tsx}'],
-		rules: {
-			'no-unused-vars': 'off',
+
+			// =================================================================
+			// 3. ALLÈGEMENT JSDOC (Géré par TypeScript / Noms explicites)
+			// =================================================================
+			'jsdoc/require-param': 'off',
+			'jsdoc/require-param-type': 'off',
+			'jsdoc/require-returns': 'off',
+			'jsdoc/require-returns-type': 'off',
+			'jsdoc/check-param-names': 'off',
 		},
 	},
 ];

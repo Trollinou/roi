@@ -118,37 +118,41 @@ export default function Save({ attributes }: SaveProps): React.ReactElement {
                 
                 {/* Sélecteur de cadence (Pendule) */}
                 <div className="cadence-selector">
-                  <label>Cadence :</label>
-                  <select
-                    className="cadence-select"
-                    defaultValue={attributes.clockPreset || 'none'}
-                    data-wp-on--change="actions.changeCadence"
-                  >
-                    <option value="none">Sans pendule</option>
-                    <option value="1+0">1 min (Bullet)</option>
-                    <option value="3+2">3 min + 2 s (Blitz)</option>
-                    <option value="5+0">5 min KO (Blitz)</option>
-                    <option value="10+5">10 min + 5 s (Rapide)</option>
-                    <option value="15+10">15 min + 10 s (Rapide)</option>
-                  </select>
+                  <label htmlFor="roi-cadence-select">
+                    Cadence :
+                    <select
+                      id="roi-cadence-select"
+                      className="cadence-select"
+                      defaultValue={attributes.clockPreset || 'none'}
+                      data-wp-on--change="actions.changeCadence"
+                    >
+                      <option value="none">Sans pendule</option>
+                      <option value="1+0">1 min (Bullet)</option>
+                      <option value="3+2">3 min + 2 s (Blitz)</option>
+                      <option value="5+0">5 min KO (Blitz)</option>
+                      <option value="10+5">10 min + 5 s (Rapide)</option>
+                      <option value="15+10">15 min + 10 s (Rapide)</option>
+                    </select>
+                  </label>
                 </div>
 
-                <div className="difficulty-selector" style={{ marginTop: '12px' }}>
-                  <label>
+                <div className="difficulty-selector">
+                  <label htmlFor="roi-elo-slider">
                     Difficulté :{' '}
                     <span className="elo-value">
                       {attributes.stockfishElo || 1500}
                     </span>{' '}
                     ELO
+                    <input
+                      id="roi-elo-slider"
+                      type="range"
+                      className="elo-slider"
+                      min="1320"
+                      max="3190"
+                      defaultValue={attributes.stockfishElo || 1500}
+                      data-wp-on--input="actions.changeElo"
+                    />
                   </label>
-                  <input
-                    type="range"
-                    className="elo-slider"
-                    min="1320"
-                    max="3190"
-                    defaultValue={attributes.stockfishElo || 1500}
-                    data-wp-on--input="actions.changeElo"
-                  />
                 </div>
                 <button
                   type="button"

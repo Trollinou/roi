@@ -163,10 +163,10 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
       this._promotionDialogState = val;
       if (val && val.isEnabled) {
         const mainBoardEl = block.querySelector('.main-board');
-        if (!mainBoardEl) return;
+        if (!mainBoardEl) {return;}
 
         const existingDialog = mainBoardEl.querySelector('.promotion-dialog');
-        if (existingDialog) existingDialog.remove();
+        if (existingDialog) {existingDialog.remove();}
 
         const dialog = document.createElement('dialog');
         dialog.className = 'promotion-dialog';
@@ -212,7 +212,7 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
   const undoMoveBtn = block.querySelector<HTMLButtonElement>('.control-btn.undo-move');
 
   const updateStatus = () => {
-    if (!statusElement) return;
+    if (!statusElement) {return;}
 
     if (useStockfish && configDialog && configDialog.style.display !== 'none') {
       statusElement.textContent = 'Choisissez vos options et commencez la partie.';
@@ -232,8 +232,7 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
     if (isCheck) {
       const inCheckColor = turnColor === 'white' ? 'Blancs' : 'Noirs';
       statusElement.textContent = `Échec ! Au tour des ${inCheckColor}.`;
-    } else {
-      if (useStockfish) {
+    } else if (useStockfish) {
         if (currentEngineStatus === 'loading') {
           statusElement.textContent = 'Chargement de Stockfish 19...';
         } else if (turnColor === currentStockfishColor) {
@@ -244,7 +243,6 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
       } else {
         statusElement.textContent = `Au tour des ${turnColor === 'white' ? 'Blancs' : 'Noirs'}.`;
       }
-    }
   };
 
   const updateEvaluationBar = (evalData?: StockfishEvaluation | null) => {
@@ -252,7 +250,7 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
       lastEvaluation = evalData;
     }
     const barFill = block.querySelector<HTMLElement>('.evaluation-bar-fill');
-    if (!barFill) return;
+    if (!barFill) {return;}
     const barContainer = block.querySelector<HTMLElement>('.evaluation-bar');
 
     if (!lastEvaluation) {
@@ -407,12 +405,14 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
         val?.turnColor ||
         (typeof boardAPI?.getState === 'function' ? boardAPI.getState().turnColor : null) ||
         boardAPI?.getTurnColor();
-      const plyCount =
-        val?.ply !== undefined
-          ? val.ply
-          : typeof boardAPI?.getState === 'function'
-          ? boardAPI.getState().ply
-          : boardAPI?.getCurrentPlyNumber() ?? 0;
+      let plyCount = 0;
+      if (val?.ply !== undefined) {
+        plyCount = val.ply;
+      } else if (typeof boardAPI?.getState === 'function') {
+        plyCount = boardAPI.getState().ply ?? 0;
+      } else {
+        plyCount = boardAPI?.getCurrentPlyNumber() ?? 0;
+      }
 
       updateStatus();
 
@@ -470,12 +470,10 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
   const handleStartGame = () => {
     const activeColorBtn = block.querySelector('.color-btn.active');
     const chosenColor = activeColorBtn ? activeColorBtn.getAttribute('data-color') : 'white';
-    const playerChosenColor =
-      chosenColor === 'random'
-        ? Math.random() < 0.5
-          ? 'white'
-          : 'black'
-        : (chosenColor as Color);
+    let playerChosenColor: Color = chosenColor as Color;
+    if (chosenColor === 'random') {
+      playerChosenColor = Math.random() < 0.5 ? 'white' : 'black';
+    }
 
     currentStockfishColor = playerChosenColor === 'white' ? 'black' : 'white';
 
@@ -506,7 +504,7 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
       bottomBarEl.classList.toggle('hidden-bar', !barsActive);
     }
 
-    if (configDialog) configDialog.style.display = 'none';
+    if (configDialog) {configDialog.style.display = 'none';}
     mockProps.playerColor = playerChosenColor;
 
     boardAPI.cancelReview();
@@ -592,10 +590,10 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
     updateStatus();
   };
 
-  if (startBtn) startBtn.addEventListener('click', handleStartGame);
-  if (newGameBtn) newGameBtn.addEventListener('click', handleNewGame);
-  if (flipBoardBtn) flipBoardBtn.addEventListener('click', handleFlipBoard);
-  if (undoMoveBtn) undoMoveBtn.addEventListener('click', handleUndoMove);
+  if (startBtn) {startBtn.addEventListener('click', handleStartGame);}
+  if (newGameBtn) {newGameBtn.addEventListener('click', handleNewGame);}
+  if (flipBoardBtn) {flipBoardBtn.addEventListener('click', handleFlipBoard);}
+  if (undoMoveBtn) {undoMoveBtn.addEventListener('click', handleUndoMove);}
 
   if (eloSlider && eloValueDisplay) {
     eloSlider.addEventListener('input', (e: Event) => {
@@ -632,14 +630,14 @@ const { state: globalStoreState } = store('roi/chessboard', {
     selectColor(event: Event) {
       const btn = event.currentTarget as HTMLElement;
       const block = btn.closest<HTMLElement>('.chessboard-block');
-      if (!block) return;
+      if (!block) {return;}
       block.querySelectorAll('.color-btn').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
     },
     changeCadence(event: Event) {
       const select = event.target as HTMLSelectElement;
       const block = select.closest<HTMLElement>('.chessboard-block');
-      if (!block) return;
+      if (!block) {return;}
       const opponentClock = block.querySelector<HTMLElement>('.opponent-clock');
       const playerClock = block.querySelector<HTMLElement>('.player-clock');
       if (opponentClock && playerClock) {
@@ -692,9 +690,9 @@ const { state: globalStoreState } = store('roi/chessboard', {
   callbacks: {
     mountBoard() {
       const { ref } = getElement();
-      if (!ref) return;
+      if (!ref) {return;}
       const block = ref.closest<HTMLElement>('.chessboard-block');
-      if (!block) return;
+      if (!block) {return;}
       const context = getContext();
       initChessboardInstance(block, ref, context);
     },
@@ -711,7 +709,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const blocks = document.querySelectorAll<HTMLElement>('.chessboard-block');
   for (const block of blocks) {
     const mountElement = block.querySelector<HTMLElement>('.chessboard-mount-element');
-    if (!mountElement) continue;
+    if (!mountElement) {continue;}
     initChessboardInstance(block, mountElement);
   }
 });

@@ -44,7 +44,7 @@ class PgnInput {
 		if ( isset( $args['data_attributes'] ) ) {
 			if ( is_array( $args['data_attributes'] ) ) {
 				foreach ( $args['data_attributes'] as $attr_key => $attr_val ) {
-					$data_attrs_str .= ' data-' . esc_attr( $attr_key ) . '="' . esc_attr( (string) $attr_val ) . '"';
+					$data_attrs_str .= ' data-' . esc_attr( (string) $attr_key ) . '="' . esc_attr( (string) $attr_val ) . '"';
 				}
 			} elseif ( is_string( $args['data_attributes'] ) ) {
 				$data_attrs_str = ' ' . trim( $args['data_attributes'] );

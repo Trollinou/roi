@@ -17,8 +17,8 @@ export interface StudentDetailItemRowProps {
 	stat?: GroupStatItem | null;
 	isResettingItem?: boolean;
 	isValidatingItem?: boolean;
-	onResetElement: ( studentId: string, itemId: number, itemTitle?: string ) => void;
-	onValidateElement: ( studentId: string, itemId: number, itemTitle?: string ) => void;
+	onResetElement: ( _studentId: string, _itemId: number, _itemTitle?: string ) => void;
+	onValidateElement: ( _studentId: string, _itemId: number, _itemTitle?: string ) => void;
 	studentId: string;
 }
 
@@ -93,6 +93,63 @@ export default function StudentDetailItemRow( {
 		}
 	}
 
+	let typeBg = '#f4ebff';
+	let typeColor = '#8224e3';
+	let typeLabel = 'Exercice';
+
+	if ( item.type === 'roi_lecon' ) {
+		typeBg = '#e7f3ff';
+		typeColor = '#0073aa';
+		typeLabel = 'Leçon';
+	} else if ( item.type === 'roi_video' ) {
+		typeBg = '#ffebee';
+		typeColor = '#c62828';
+		typeLabel = 'Vidéo';
+	}
+
+	const renderTimeStats = () => {
+		if ( ! isValidated ) {
+			return null;
+		}
+		if ( typeof itemTimeSpent === 'number' && itemTimeSpent > 0 ) {
+			return (
+				<>
+					<span
+						style={ {
+							fontWeight: '600',
+							color: '#2c3338',
+							whiteSpace: 'nowrap',
+						} }
+						title="Temps passé par l'élève"
+					>
+						⏱ { formatDuration( itemTimeSpent ) }
+					</span>
+					{ typeof avgTimeSpent === 'number' && avgTimeSpent > 0 && (
+						<span
+							style={ {
+								fontSize: '11px',
+								color: '#8c8f94',
+								whiteSpace: 'nowrap',
+							} }
+							title={ `Moyenne calculée sur ${ stat?.count || 1 } élève(s)` }
+						>
+							(Moy: { formatDuration( avgTimeSpent ) })
+						</span>
+					) }
+					{ comparisonBadge }
+				</>
+			);
+		}
+		return (
+			<span
+				style={ { color: '#a7aaad', fontSize: '12px' } }
+				title="Temps non enregistré"
+			>
+				-
+			</span>
+		);
+	};
+
 	return (
 		<div
 			style={ {
@@ -123,25 +180,11 @@ export default function StudentDetailItemRow( {
 						fontWeight: '600',
 						textTransform: 'uppercase',
 						flexShrink: 0,
-						background:
-							item.type === 'roi_lecon'
-								? '#e7f3ff'
-								: item.type === 'roi_video'
-								? '#ffebee'
-								: '#f4ebff',
-						color:
-							item.type === 'roi_lecon'
-								? '#0073aa'
-								: item.type === 'roi_video'
-								? '#c62828'
-								: '#8224e3',
+						background: typeBg,
+						color: typeColor,
 					} }
 				>
-					{ item.type === 'roi_lecon'
-						? 'Leçon'
-						: item.type === 'roi_video'
-						? 'Vidéo'
-						: 'Exercice' }
+					{ typeLabel }
 				</span>
 				<span
 					style={ {
@@ -223,45 +266,7 @@ export default function StudentDetailItemRow( {
 					fontSize: '12px',
 				} }
 			>
-				{ isValidated &&
-				typeof itemTimeSpent === 'number' &&
-				itemTimeSpent > 0 ? (
-					<>
-						<span
-							style={ {
-								fontWeight: '600',
-								color: '#2c3338',
-								whiteSpace: 'nowrap',
-							} }
-							title="Temps passé par l'élève"
-						>
-							⏱ { formatDuration( itemTimeSpent ) }
-						</span>
-						{ typeof avgTimeSpent === 'number' &&
-							avgTimeSpent > 0 && (
-								<span
-									style={ {
-										fontSize: '11px',
-										color: '#8c8f94',
-										whiteSpace: 'nowrap',
-									} }
-									title={ `Moyenne calculée sur ${
-										stat?.count || 1
-									} élève(s)` }
-								>
-									(Moy: { formatDuration( avgTimeSpent ) })
-								</span>
-							) }
-						{ comparisonBadge }
-					</>
-				) : isValidated ? (
-					<span
-						style={ { color: '#a7aaad', fontSize: '12px' } }
-						title="Temps non enregistré"
-					>
-						-
-					</span>
-				) : null }
+				{ renderTimeStats() }
 			</div>
 
 			{ /* Col 4: Action Button */ }
@@ -294,6 +299,12 @@ export default function StudentDetailItemRow( {
 						onMouseOut={ ( e ) => {
 							e.currentTarget.style.backgroundColor = '#fff';
 						} }
+						onFocus={ ( e ) => {
+							e.currentTarget.style.backgroundColor = '#fbeaea';
+						} }
+						onBlur={ ( e ) => {
+							e.currentTarget.style.backgroundColor = '#fff';
+						} }
 					>
 						{ isResettingItem ? '...' : '↺ Réinitialiser' }
 					</button>
@@ -324,6 +335,12 @@ export default function StudentDetailItemRow( {
 							e.currentTarget.style.backgroundColor = '#dcfce7';
 						} }
 						onMouseOut={ ( e ) => {
+							e.currentTarget.style.backgroundColor = '#f0fdf4';
+						} }
+						onFocus={ ( e ) => {
+							e.currentTarget.style.backgroundColor = '#dcfce7';
+						} }
+						onBlur={ ( e ) => {
 							e.currentTarget.style.backgroundColor = '#f0fdf4';
 						} }
 					>

@@ -42,19 +42,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const availableItemsContainer = document.getElementById('roi_available_items');
   const playlistContainer = document.getElementById('roi_playlist_items');
 
-  const availableCountBadge = document.getElementById('roi_available_count');
-  const playlistCountBadge = document.getElementById('roi_playlist_count');
-
   if (!catalogSearch || !catalogFilter || !availableItemsContainer || !playlistContainer) {
     return;
   }
+
+  const availableCountBadge = document.getElementById('roi_available_count');
+  const playlistCountBadge = document.getElementById('roi_playlist_count');
 
   let draggedSource: 'catalog' | 'playlist' | null = null;
   let draggedData: DraggedCatalogData | null = null;
   let draggedElement: HTMLElement | null = null;
 
   // Helper: Debounce
-  const debounce = <F extends (...args: any[]) => any>(func: F, delay = 300) => {
+  const debounce = <F extends (..._args: any[]) => any>(func: F, delay = 300) => {
     let timer: ReturnType<typeof setTimeout>;
     return (...args: Parameters<F>) => {
       clearTimeout(timer);

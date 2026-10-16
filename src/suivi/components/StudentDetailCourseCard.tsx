@@ -13,13 +13,13 @@ export interface StudentDetailCourseCardProps {
 	groupStats?: Record<string | number, GroupStatItem>;
 	filterType: 'all' | 'validated' | 'pending';
 	isExpanded: boolean;
-	toggleCourse: ( courseId: number ) => void;
+	toggleCourse: ( _courseId: number ) => void;
 	assigningCourseId: number | null;
-	handleToggleCourseAssignment: ( courseId: number, isCurrentlyAssigned: boolean ) => void;
-	onValidateCourse: ( studentId: string, courseId: number, courseTitle: string ) => void;
-	onResetCourse: ( studentId: string, courseId: number, courseTitle: string ) => void;
-	onValidateElement: ( studentId: string, elementId: number, elementTitle?: string ) => void;
-	onResetElement: ( studentId: string, elementId: number, elementTitle?: string ) => void;
+	handleToggleCourseAssignment: ( _courseId: number, _isCurrentlyAssigned: boolean ) => void;
+	onValidateCourse: ( _studentId: string, _courseId: number, _courseTitle: string ) => void;
+	onResetCourse: ( _studentId: string, _courseId: number, _courseTitle: string ) => void;
+	onValidateElement: ( _studentId: string, _elementId: number, _elementTitle?: string ) => void;
+	onResetElement: ( _studentId: string, _elementId: number, _elementTitle?: string ) => void;
 	resettingAction: ActionPayload | null;
 	validatingAction: ActionPayload | null;
 }
@@ -46,8 +46,8 @@ export default function StudentDetailCourseCard( {
 
 	const displayedItems = playlist.filter( ( item ) => {
 		const isValidated = validesSet.has( Number( item.id ) );
-		if ( filterType === 'validated' ) return isValidated;
-		if ( filterType === 'pending' ) return ! isValidated;
+		if ( filterType === 'validated' ) {return isValidated;}
+		if ( filterType === 'pending' ) {return ! isValidated;}
 		return true;
 	} );
 
@@ -75,6 +75,10 @@ export default function StudentDetailCourseCard( {
 	const isAssigned = ( student.assigned_course_ids || [] ).includes(
 		course.id
 	);
+	let assignText = isAssigned ? '📌 Désassigner' : '＋ Assigner';
+	if ( assigningCourseId === course.id ) {
+		assignText = '...';
+	}
 
 	return (
 		<div
@@ -87,6 +91,8 @@ export default function StudentDetailCourseCard( {
 		>
 			{ /* Course Header */ }
 			<div
+				role="button"
+				tabIndex={ 0 }
 				style={ {
 					padding: '10px 14px',
 					display: 'flex',
@@ -97,6 +103,12 @@ export default function StudentDetailCourseCard( {
 					cursor: 'pointer',
 				} }
 				onClick={ () => toggleCourse( course.id ) }
+				onKeyDown={ ( e ) => {
+					if ( e.key === 'Enter' || e.key === ' ' ) {
+						e.preventDefault();
+						toggleCourse( course.id );
+					}
+				} }
 			>
 				<div
 					style={ {
@@ -183,11 +195,7 @@ export default function StudentDetailCourseCard( {
 								cursor: 'pointer',
 							} }
 						>
-							{ assigningCourseId === course.id
-								? '...'
-								: isAssigned
-								? '📌 Désassigner'
-								: '＋ Assigner' }
+							{ assignText }
 						</button>
 					) }
 					{ courseValidatedCount < playlist.length && (
@@ -218,6 +226,14 @@ export default function StudentDetailCourseCard( {
 									'#dcfce7';
 							} }
 							onMouseOut={ ( e ) => {
+								e.currentTarget.style.backgroundColor =
+									'#f0fdf4';
+							} }
+							onFocus={ ( e ) => {
+								e.currentTarget.style.backgroundColor =
+									'#dcfce7';
+							} }
+							onBlur={ ( e ) => {
 								e.currentTarget.style.backgroundColor =
 									'#f0fdf4';
 							} }

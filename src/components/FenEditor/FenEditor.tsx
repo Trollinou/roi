@@ -20,7 +20,7 @@ export interface FenEditorRef {
   clearDomBounds: () => void;
   redrawBoard: () => void;
   getDiagram: () => DiagramData;
-  setDiagram: (newDiagram: DiagramData | string) => void;
+  setDiagram: (_newDiagram: DiagramData | string) => void;
 }
 
 export interface FenEditorSavePayload {
@@ -33,7 +33,7 @@ export interface FenEditorSavePayload {
 export interface BoardConfigOptions {
   pieceSet?: string;
   boardTheme?: string;
-  onBoardCreated?: (boardAPI: BoardCore) => void;
+  onBoardCreated?: (_boardAPI: BoardCore) => void;
   [key: string]: unknown;
 }
 
@@ -41,7 +41,7 @@ export interface FenEditorProps {
   initialFen?: string;
   fen?: string;
   orientation?: Color;
-  onSave?: (payload: FenEditorSavePayload) => void;
+  onSave?: (_payload: FenEditorSavePayload) => void;
   boardConfig?: BoardConfigOptions;
   initialShapes?: BoardShape[];
   diagram?: DiagramData;
@@ -90,7 +90,7 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
   const [promotionState, setPromotionState] = useState<{
     isEnabled: boolean;
     color?: Color;
-    callback?: (piece: string) => void;
+    callback?: (_piece: string) => void;
   }>({ isEnabled: false });
 
   const boardElRef = useRef<HTMLDivElement | null>(null);
@@ -119,7 +119,7 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
   const { boardApiRef } = useChessBoard<BoardApi>(
     boardElRef,
     () => {
-      if (!boardElRef.current) return null;
+      if (!boardElRef.current) {return null;}
 
       const currentFen = effectiveFen;
       const fParts = currentFen.split(' ');
@@ -237,21 +237,21 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
     if (boardApiRef.current) {
       const currentOrient = (boardApiRef.current as unknown as { getOrientation?: () => Color }).getOrientation?.();
       if (currentOrient !== computed) {
-        (boardApiRef.current as unknown as { setConfig?: (c: { orientation: Color }) => void }).setConfig?.({ orientation: computed });
+        (boardApiRef.current as unknown as { setConfig?: (_c: { orientation: Color }) => void }).setConfig?.({ orientation: computed });
       }
     }
   }, [turn, boardApiRef]);
 
   // Gestion du clic sur une case (mode édition)
   function handleSquareClick(square: string) {
-    if (!boardApiRef.current) return;
+    if (!boardApiRef.current) {return;}
 
     const activePiece = selectedPieceRef.current;
 
     if (activePiece) {
       const bApi = boardApiRef.current as unknown as {
-        removePiece: (sq: string) => void;
-        putPiece: (p: { type: string; color: string }, sq: string) => void;
+        removePiece: (_sq: string) => void;
+        putPiece: (_p: { type: string; color: string }, _sq: string) => void;
       };
       if (activePiece === 'eraser') {
         bApi.removePiece(square);
@@ -339,12 +339,12 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
     },
     getDiagram(): DiagramData {
       const finalFen = `${position} ${turn} ${castling} - 0 1`;
-      let shapes =
-        currentShapesRef.current && Array.isArray(currentShapesRef.current)
-          ? currentShapesRef.current
-          : currentShapes && Array.isArray(currentShapes)
-          ? currentShapes
-          : [];
+      let shapes: BoardShape[] = [];
+      if (currentShapesRef.current && Array.isArray(currentShapesRef.current)) {
+        shapes = currentShapesRef.current;
+      } else if (currentShapes && Array.isArray(currentShapes)) {
+        shapes = currentShapes;
+      }
       if (
         (!shapes || shapes.length === 0) &&
         boardApiRef.current &&
@@ -359,7 +359,7 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
       };
     },
     setDiagram(newDiagram: DiagramData | string) {
-      if (!newDiagram) return;
+      if (!newDiagram) {return;}
       const fenStr =
         typeof newDiagram === 'string'
           ? newDiagram.trim()
@@ -397,7 +397,7 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
   // Chargement d'une FEN ou d'un PGN personnalisé
   const handleLoadFen = () => {
     const input = importFenText.trim();
-    if (!input) return;
+    if (!input) {return;}
 
     try {
       const parsed = parsePgnOrFen(input);
@@ -443,12 +443,12 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
     if (onSave) {
       const finalFen = `${position} ${turn} ${castling} - 0 1`;
       const currentOrientation: Color = turn === 'b' ? 'black' : 'white';
-      let shapes =
-        currentShapesRef.current && Array.isArray(currentShapesRef.current)
-          ? currentShapesRef.current
-          : currentShapes && Array.isArray(currentShapes)
-          ? currentShapes
-          : [];
+      let shapes: BoardShape[] = [];
+      if (currentShapesRef.current && Array.isArray(currentShapesRef.current)) {
+        shapes = currentShapesRef.current;
+      } else if (currentShapes && Array.isArray(currentShapes)) {
+        shapes = currentShapes;
+      }
       if (
         (!shapes || shapes.length === 0) &&
         boardApiRef.current &&
@@ -490,16 +490,16 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
     if (checked) {
       if (!current.includes(flag)) {
         let next = '';
-        if (flag === 'K' || current.includes('K')) next += 'K';
-        if (flag === 'Q' || current.includes('Q')) next += 'Q';
-        if (flag === 'k' || current.includes('k')) next += 'k';
-        if (flag === 'q' || current.includes('q')) next += 'q';
+        if (flag === 'K' || current.includes('K')) {next += 'K';}
+        if (flag === 'Q' || current.includes('Q')) {next += 'Q';}
+        if (flag === 'k' || current.includes('k')) {next += 'k';}
+        if (flag === 'q' || current.includes('q')) {next += 'q';}
         current = next || '-';
       }
     } else {
       current = current.replace(flag, '');
     }
-    if (!current) current = '-';
+    if (!current) {current = '-';}
     setCastling(current);
   };
 
@@ -613,10 +613,11 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
           <div className="fen-editor-options-container">
             {/* Trait aux */}
             <div className="fen-editor-option-field">
-              <label className="fen-editor-option-label">
+              <label className="fen-editor-option-label" htmlFor="fen-editor-turn-select">
                 Trait au tour de
               </label>
               <select
+                id="fen-editor-turn-select"
                 className="fen-editor-select"
                 value={turn}
                 onChange={(e) => {
@@ -632,22 +633,24 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
 
             {/* Droits de roque */}
             <div className="fen-editor-option-field">
-              <label className="fen-editor-option-label">
+              <span className="fen-editor-option-label">
                 Droits de roque
-              </label>
+              </span>
               <div className="fen-editor-checkbox-group">
                 <div className="fen-editor-checkbox-row">
                   <span className="fen-editor-castling-header">Blancs :</span>
-                  <label className="fen-editor-checkbox-label">
+                  <label className="fen-editor-checkbox-label" htmlFor="fen-castling-K">
                     <input
+                      id="fen-castling-K"
                       type="checkbox"
                       checked={castling.includes('K')}
                       onChange={(e) => handleCastlingChange('K', e.target.checked)}
                     />
                     Petit (O-O)
                   </label>
-                  <label className="fen-editor-checkbox-label">
+                  <label className="fen-editor-checkbox-label" htmlFor="fen-castling-Q">
                     <input
+                      id="fen-castling-Q"
                       type="checkbox"
                       checked={castling.includes('Q')}
                       onChange={(e) => handleCastlingChange('Q', e.target.checked)}
@@ -657,16 +660,18 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
                 </div>
                 <div className="fen-editor-checkbox-row">
                   <span className="fen-editor-castling-header">Noirs :</span>
-                  <label className="fen-editor-checkbox-label">
+                  <label className="fen-editor-checkbox-label" htmlFor="fen-castling-k">
                     <input
+                      id="fen-castling-k"
                       type="checkbox"
                       checked={castling.includes('k')}
                       onChange={(e) => handleCastlingChange('k', e.target.checked)}
                     />
                     Petit (o-o)
                   </label>
-                  <label className="fen-editor-checkbox-label">
+                  <label className="fen-editor-checkbox-label" htmlFor="fen-castling-q">
                     <input
+                      id="fen-castling-q"
                       type="checkbox"
                       checked={castling.includes('q')}
                       onChange={(e) => handleCastlingChange('q', e.target.checked)}

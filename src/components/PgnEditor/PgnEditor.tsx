@@ -23,12 +23,12 @@ export interface PgnEditorRef {
 export interface PgnEditorProps {
   initialPgn?: PgnString;
   initialFen?: FenString;
-  onSave?: (pgn: PgnString, finalFen: FenString) => void;
+  onSave?: (_pgn: PgnString, _finalFen: FenString) => void;
   boardConfig?: {
     pieceSet?: string;
     boardTheme?: string;
     orientation?: 'white' | 'black';
-    onBoardCreated?: (api: BoardCore) => void;
+    onBoardCreated?: (_api: BoardCore) => void;
     [key: string]: unknown;
   };
 }
@@ -65,7 +65,7 @@ export const PgnEditor = forwardRef<PgnEditorRef, PgnEditorProps>(function PgnEd
 
   // Synchronise les données de la position actuelle
   const syncPositionData = (api: BoardCore | BoardApi | null = boardApiRef.current) => {
-    if (!api) return;
+    if (!api) {return;}
     const bCore = api as any;
     const state = typeof bCore.getState === 'function' ? bCore.getState() : {};
     const comment = typeof bCore.getCurrentComment === 'function' ? bCore.getCurrentComment() : '';
@@ -77,12 +77,12 @@ export const PgnEditor = forwardRef<PgnEditorRef, PgnEditorProps>(function PgnEd
     if (typeof bCore.getVariationsAtPly === 'function') {
       setVariations(bCore.getVariationsAtPly() || []);
     }
-    const currentPly =
-      state.ply !== undefined
-        ? state.ply
-        : typeof bCore.getCurrentPlyNumber === 'function'
-        ? bCore.getCurrentPlyNumber()
-        : 0;
+    let currentPly = 0;
+    if (state.ply !== undefined) {
+      currentPly = state.ply;
+    } else if (typeof bCore.getCurrentPlyNumber === 'function') {
+      currentPly = bCore.getCurrentPlyNumber();
+    }
     const historyState =
       typeof bCore.getHistoryViewerState === 'function'
         ? bCore.getHistoryViewerState()
@@ -102,7 +102,7 @@ export const PgnEditor = forwardRef<PgnEditorRef, PgnEditorProps>(function PgnEd
   const { boardApiRef } = useChessBoard<BoardApi>(
     boardElRef,
     () => {
-      if (!boardElRef.current) return null;
+      if (!boardElRef.current) {return null;}
 
       const config = {
         mode: 'study',

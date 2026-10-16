@@ -17,11 +17,11 @@ export interface StudentCardProps {
   selectedChapter: string;
   expandedLevels: Record<string, boolean>;
   expandedChapters: Record<string, boolean>;
-  toggleLevelExpanded: (studentId: string, level: number) => void;
-  toggleChapterExpanded: (studentId: string, level: number, chapter: string) => void;
-  onSelectStudent: (studentId: string) => void;
-  handleValidateCourse: (studentId: string, courseId: number, courseTitle: string) => void;
-  handleResetCourse: (studentId: string, courseId: number, courseTitle: string) => void;
+  toggleLevelExpanded: (_studentId: string, _level: number) => void;
+  toggleChapterExpanded: (_studentId: string, _level: number, _chapter: string) => void;
+  onSelectStudent: (_studentId: string) => void;
+  handleValidateCourse: (_studentId: string, _courseId: number, _courseTitle: string) => void;
+  handleResetCourse: (_studentId: string, _courseId: number, _courseTitle: string) => void;
   resettingAction: ActionPayload | null;
   validatingAction: ActionPayload | null;
 }
@@ -99,6 +99,8 @@ export default function StudentCard({
     >
       {/* CARD HEADER */}
       <div
+        role="button"
+        tabIndex={0}
         style={{
           borderBottom: '1px solid #f0f0f1',
           paddingBottom: '10px',
@@ -108,6 +110,12 @@ export default function StudentCard({
           cursor: 'pointer',
         }}
         onClick={() => onSelectStudent(student.id)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onSelectStudent(student.id);
+          }
+        }}
         title="Cliquer pour afficher la vue détaillée de l'élève"
       >
         <div
@@ -505,6 +513,12 @@ export default function StudentCard({
                                             onMouseOut={(e) => {
                                               e.currentTarget.style.backgroundColor = 'transparent';
                                             }}
+                                            onFocus={(e) => {
+                                              e.currentTarget.style.backgroundColor = '#dcfce7';
+                                            }}
+                                            onBlur={(e) => {
+                                              e.currentTarget.style.backgroundColor = 'transparent';
+                                            }}
                                           >
                                             {isValidatingThisCourse ? '...' : '✓'}
                                           </button>
@@ -549,6 +563,14 @@ export default function StudentCard({
                                             }
                                           }}
                                           onMouseOut={(e) => {
+                                            e.currentTarget.style.backgroundColor = 'transparent';
+                                          }}
+                                          onFocus={(e) => {
+                                            if (validatedCount > 0) {
+                                              e.currentTarget.style.backgroundColor = '#fbeaea';
+                                            }
+                                          }}
+                                          onBlur={(e) => {
                                             e.currentTarget.style.backgroundColor = 'transparent';
                                           }}
                                         >

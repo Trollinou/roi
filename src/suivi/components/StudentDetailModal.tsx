@@ -13,15 +13,15 @@ export interface StudentDetailModalProps {
 	courses: CoursItem[];
 	groupStats?: Record<string | number, GroupStatItem>;
 	onClose: () => void;
-	onResetElement: ( studentId: string, elementId: number, elementName?: string ) => void;
-	onResetCourse: ( studentId: string, courseId: number, courseName?: string ) => void;
+	onResetElement: ( _studentId: string, _elementId: number, _elementName?: string ) => void;
+	onResetCourse: ( _studentId: string, _courseId: number, _courseName?: string ) => void;
 	resettingAction: ActionPayload | null;
-	onValidateElement: ( studentId: string, elementId: number, elementName?: string ) => void;
-	onValidateCourse: ( studentId: string, courseId: number, courseName?: string ) => void;
+	onValidateElement: ( _studentId: string, _elementId: number, _elementName?: string ) => void;
+	onValidateCourse: ( _studentId: string, _courseId: number, _courseName?: string ) => void;
 	validatingAction: ActionPayload | null;
 	apiUrl: string;
 	nonce: string;
-	onStudentRemoved?: ( studentId: string ) => void;
+	onStudentRemoved?: ( _studentId: string ) => void;
 	onCourseAssigned?: () => void;
 }
 
@@ -52,7 +52,7 @@ export default function StudentDetailModal( {
 		courseId: number,
 		isCurrentlyAssigned: boolean
 	) => {
-		if ( ! student || student.identity_type !== 'member' ) return;
+		if ( ! student || student.identity_type !== 'member' ) {return;}
 		setAssigningCourseId( courseId );
 		try {
 			const res = await fetch( `${ apiUrl }/progression/assigner-cours`, {
@@ -86,7 +86,7 @@ export default function StudentDetailModal( {
 	};
 
 	const handleRemoveFromTracking = async () => {
-		if ( ! student ) return;
+		if ( ! student ) {return;}
 		const nomAffiche = student.display_name || 'cet élève';
 		if (
 			! window.confirm(
@@ -122,7 +122,7 @@ export default function StudentDetailModal( {
 		}
 	};
 
-	if ( ! student ) return null;
+	if ( ! student ) {return null;}
 
 	const validesSet = new Set<number>( student.elements_valides || [] );
 	const detailsMap = student.details || {};
@@ -205,6 +205,8 @@ export default function StudentDetailModal( {
 	return (
 		<div
 			className="roi-student-detail-modal-overlay"
+			role="button"
+			tabIndex={ 0 }
 			style={ {
 				position: 'fixed',
 				top: 0,
@@ -219,10 +221,20 @@ export default function StudentDetailModal( {
 				padding: '30px 20px',
 				boxSizing: 'border-box',
 			} }
-			onClick={ onClose }
+			onClick={ ( e ) => {
+				if ( e.target === e.currentTarget ) {
+					onClose();
+				}
+			} }
+			onKeyDown={ ( e ) => {
+				if ( e.key === 'Escape' ) {
+					onClose();
+				}
+			} }
 		>
 			<div
 				className="roi-student-detail-modal"
+				role="document"
 				style={ {
 					background: '#fff',
 					borderRadius: '8px',
@@ -237,7 +249,6 @@ export default function StudentDetailModal( {
 					position: 'relative',
 					boxSizing: 'border-box',
 				} }
-				onClick={ ( e ) => e.stopPropagation() }
 			>
 				{ /* HEADER */ }
 				<StudentModalHeader

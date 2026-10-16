@@ -36,7 +36,7 @@ export interface ChessboardBlockAttributes {
 
 interface EditProps {
   attributes: ChessboardBlockAttributes;
-  setAttributes: (attrs: Partial<ChessboardBlockAttributes>) => void;
+  setAttributes: (_attrs: Partial<ChessboardBlockAttributes>) => void;
   clientId: string;
 }
 
@@ -75,7 +75,7 @@ export default function Edit({ attributes, setAttributes, clientId }: EditProps)
 
   // Initialize board once on mount
   useEffect(() => {
-    if (!boardRef.current) return;
+    if (!boardRef.current) {return;}
 
     // Force editor/setup mode configurations
     const boardConfig = {
@@ -203,20 +203,20 @@ export default function Edit({ attributes, setAttributes, clientId }: EditProps)
 
   const updateCastling = (flag: string, checked: boolean): void => {
     let current = getFenPart(2, 'KQkq');
-    if (current === '-') current = '';
+    if (current === '-') {current = '';}
     if (checked) {
       if (!current.includes(flag)) {
         let newCastling = '';
-        if (flag === 'K' || current.includes('K')) newCastling += 'K';
-        if (flag === 'Q' || current.includes('Q')) newCastling += 'Q';
-        if (flag === 'k' || current.includes('k')) newCastling += 'k';
-        if (flag === 'q' || current.includes('q')) newCastling += 'q';
+        if (flag === 'K' || current.includes('K')) {newCastling += 'K';}
+        if (flag === 'Q' || current.includes('Q')) {newCastling += 'Q';}
+        if (flag === 'k' || current.includes('k')) {newCastling += 'k';}
+        if (flag === 'q' || current.includes('q')) {newCastling += 'q';}
         current = newCastling || '-';
       }
     } else {
       current = current.replace(flag, '');
     }
-    if (!current) current = '-';
+    if (!current) {current = '-';}
     setFenPart(2, current);
   };
 
@@ -239,13 +239,12 @@ export default function Edit({ attributes, setAttributes, clientId }: EditProps)
     }
   };
 
-  const gameMode = attributes.freeMode
-    ? 'freemove'
-    : !attributes.viewOnly
-    ? attributes.playerColor === 'both'
-      ? '2players'
-      : '1player'
-    : 'visualize';
+  let gameMode = 'visualize';
+  if (attributes.freeMode) {
+    gameMode = 'freemove';
+  } else if (!attributes.viewOnly) {
+    gameMode = attributes.playerColor === 'both' ? '2players' : '1player';
+  }
 
   const handleGameModeChange = (newMode: string): void => {
     if (newMode === 'freemove') {

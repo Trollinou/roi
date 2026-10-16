@@ -2,22 +2,33 @@
     "name": "trollinou/roi",
     "description": "Ressources et Organisation pour l'Initiation aux échecs",
     "type": "wordpress-plugin",
-    "license": "GPL-2.0-or-later",
-    "require-dev": {
-        "phpstan/phpstan": "^2.1",
-        "szepeviktor/phpstan-wordpress": "^2.0",
-        "squizlabs/php_codesniffer": "^3.13",
-        "wp-coding-standards/wpcs": "^3.4",
-        "dealerdirect/phpcodesniffer-composer-installer": "^1.2"
-    },
+    "license": "GPL-3.0-or-later",
+  "require": {
+    "php": ">=8.4",
+    "setasign/fpdf": "^1.8",
+    "setasign/fpdi": "^2.6"
+  },
+  "require-dev": {
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.2",
+    "phpcompatibility/phpcompatibility-wp": "*",
+    "phpstan/extension-installer": "^1.4",
+    "phpstan/phpstan": "^2.2",
+    "phpstan/phpstan-deprecation-rules": "^2.0",
+    "phpunit/phpunit": "^11.0",
+    "szepeviktor/phpstan-wordpress": "^2.0",
+    "wp-coding-standards/wpcs": "^3.4"
+  },
+  "scripts": {
+    "lint:php": "phpstan analyze --memory-limit=2G",
+    "lint": "phpcs",
+    "fix": "phpcbf",
+    "test": "phpunit"
+  },
     "config": {
-        "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true
-        }
-    },
-    "scripts": {
-        "lint:php": "phpstan analyze --memory-limit=2G",
-        "lint": "phpcs",
-        "fix": "phpcbf"
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "phpstan/extension-installer": true,
+      "szepeviktor/phpstan-wordpress": true
     }
+  }
 }

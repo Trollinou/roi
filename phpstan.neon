@@ -1,17 +1,36 @@
-includes:
-    - vendor/szepeviktor/phpstan-wordpress/extension.neon
-
 parameters:
     level: 7
     phpVersion: 80400
+
+    # =========================================================================
+    # 1. OPTIONS DE RIGUEUR (Alternative propre au mode "Strict" global)
+    # =========================================================================
     treatPhpDocTypesAsCertain: false
+    checkUninitializedProperties: true
+    checkBenevolentUnionTypes: true
+    checkExplicitMixedMissingReturn: true
+    checkFunctionNameCase: true
+    checkInternalClassCaseSensitivity: true
+
+    # =========================================================================
+    # 2. GESTION DES ERREURS IGNORÉES
+    # =========================================================================
+    # Mettre à "true" une fois le Level 8 atteint pour nettoyer les vieux @phpstan-ignore inutiles
+    reportUnmatchedIgnoredErrors: false
+
+    # =========================================================================
+    # 3. FICHIERS ET DOSSIERS À ANALYSER
+    # =========================================================================
     paths:
         - roi.php
         - includes/
+
     bootstrapFiles:
         - tests/phpstan/bootstrap.php
+
     scanFiles:
         - roi.php
+
     ignoreErrors:
         -
             message: '#build/.*\.asset\.php#'

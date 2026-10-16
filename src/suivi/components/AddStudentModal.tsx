@@ -12,7 +12,7 @@ const normalizeText = (str: string | null | undefined): string =>
 export interface AddStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onStudentAdded: (student: StudentProgress) => void;
+  onStudentAdded: (_student: StudentProgress) => void;
   apiUrl: string;
   nonce: string;
 }
@@ -31,7 +31,7 @@ export default function AddStudentModal({
   const [addingId, setAddingId] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {return;}
 
     setLoading(true);
     setError(null);
@@ -54,7 +54,7 @@ export default function AddStudentModal({
       });
   }, [isOpen, apiUrl, nonce]);
 
-  if (!isOpen) return null;
+  if (!isOpen) {return null;}
 
   const filteredCandidates = candidates.filter((cand) => {
     const name = normalizeText(
@@ -93,6 +93,8 @@ export default function AddStudentModal({
   return (
     <div
       className="roi-add-student-modal-overlay"
+      role="button"
+      tabIndex={0}
       style={{
         position: 'fixed',
         top: 0,
@@ -107,10 +109,20 @@ export default function AddStudentModal({
         padding: '20px',
         boxSizing: 'border-box',
       }}
-      onClick={onClose}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          onClose();
+        }
+      }}
     >
       <div
         className="roi-add-student-modal"
+        role="document"
         style={{
           background: '#fff',
           borderRadius: '8px',
@@ -123,7 +135,6 @@ export default function AddStudentModal({
           overflow: 'hidden',
           boxSizing: 'border-box',
         }}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* HEADER */}
         <div
@@ -183,7 +194,6 @@ export default function AddStudentModal({
               fontSize: '13px',
               boxSizing: 'border-box',
             }}
-            autoFocus
           />
         </div>
 

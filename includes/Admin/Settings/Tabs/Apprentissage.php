@@ -43,12 +43,12 @@ class Apprentissage {
 								<span><?php esc_html_e( 'Rôles autorisés pour le module Apprentissage', 'roi' ); ?></span>
 							</legend>
 							<?php foreach ( $wp_roles as $role_key => $role_name ) : ?>
-								<label for="role_<?php echo esc_attr( $role_key ); ?>" style="display: block; margin-bottom: 8px;">
+								<label for="role_<?php echo esc_attr( (string) $role_key ); ?>" style="display: block; margin-bottom: 8px;">
 									<input 
 										name="roi_apprentissage_allowed_roles[]" 
 										type="checkbox" 
-										id="role_<?php echo esc_attr( $role_key ); ?>" 
-										value="<?php echo esc_attr( $role_key ); ?>" 
+										id="role_<?php echo esc_attr( (string) $role_key ); ?>" 
+										value="<?php echo esc_attr( (string) $role_key ); ?>" 
 										<?php checked( in_array( $role_key, $allowed_roles, true ) ); ?>
 									>
 									<?php echo esc_html( translate_user_role( $role_name ) ); ?>

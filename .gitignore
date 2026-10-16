@@ -11,6 +11,7 @@ dist-temp/
 *.tsbuildinfo
 *.log
 .phpunit.result.cache
+.phpcs.cache
 .vscode/
 .idea/
 .antigravityrules
