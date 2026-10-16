@@ -319,7 +319,7 @@ class Games_Controller {
 		$query = new WP_Query( $query_args );
 
 		$games = array();
-		if ( $query->have_posts() ) {
+		if ( $query->have_posts() && is_array( $query->posts ) ) {
 			foreach ( $query->posts as $post ) {
 				if ( ! $post instanceof \WP_Post ) {
 					continue;

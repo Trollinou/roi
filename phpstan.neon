@@ -1,5 +1,5 @@
 parameters:
-    level: 7
+    level: 8
     phpVersion: 80400
 
     # =========================================================================
@@ -16,7 +16,7 @@ parameters:
     # 2. GESTION DES ERREURS IGNORÉES
     # =========================================================================
     # Mettre à "true" une fois le Level 8 atteint pour nettoyer les vieux @phpstan-ignore inutiles
-    reportUnmatchedIgnoredErrors: false
+    reportUnmatchedIgnoredErrors: true
 
     # =========================================================================
     # 3. FICHIERS ET DOSSIERS À ANALYSER
