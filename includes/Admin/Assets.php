@@ -55,18 +55,11 @@ class Assets {
 
 		if ( in_array( $post_type, array( 'roi_exercice', 'roi_lecon' ), true ) ) {
 
-			// Enqueue eg-chessboard styles & script.
-			wp_enqueue_style(
-				'roi-admin-chessboard-style',
-				$chess_url . 'eg-chessboard.css',
-				array(),
-				ROI_VERSION
-			);
-
+			// Enqueue FEN & PGN editor styles & script.
 			wp_enqueue_style(
 				'roi-admin-fen-editor-style',
 				$chess_url . 'admin-fen-editor.css',
-				array( 'roi-admin-chessboard-style' ),
+				array(),
 				ROI_VERSION
 			);
 

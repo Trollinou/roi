@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+*   **Suppression de `eg-chessboard.css` déprécié (`includes/Admin/Assets.php`, `webpack.config.js`, `scripts/build-css.js`) :**
+    *   **Éradication du Bundle `eg-chessboard.css`** : Suppression de la génération Webpack (`CopyWebpackPlugin`) de `build/chessboard/eg-chessboard.css` et de son enfilement dans `Assets.php` (`roi-admin-chessboard-style`), au profit de l'utilisation exclusive de `eg-chessboard/base.css` et du style de pièces `eg-chessboard/pieces/cburnett.css` (embarqué également dans les feuilles de style des blocs via `scripts/build-css.js`).
+
 *   **Optimisation Globale en 3 Lots (Backend/REST/Cache, Refactorisation Modulaire SRP < 500 lignes, et Frontend Suivi / SCSS) :**
     *   **Lot 1 — Backend, API REST, Performances SQL/Cache & Sécurité :**
         *   **Parser JSON Centralisé (`Exercice_Config_DTO`)** : Extraction de `Exercice_Config_DTO::parse_raw_config()` et `decode_nested_json()` comme source unique de décodage des configurations d'exercices dans `Contenu_Controller`, `Metaboxes\Exercice\Manager` et `Admin\Backup\Importer`.
