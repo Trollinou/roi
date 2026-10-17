@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { decodeEntities } from '@wordpress/html-entities';
+import { normalizeText } from '../utils/suiviHelpers';
 import type { CandidateStudent, StudentProgress } from '../../types/api/progression';
-
-const normalizeText = (str: string | null | undefined): string =>
-  (str || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim();
 
 export interface AddStudentModalProps {
   isOpen: boolean;
@@ -95,20 +89,6 @@ export default function AddStudentModal({
       className="roi-add-student-modal-overlay"
       role="button"
       tabIndex={0}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.65)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 100000,
-        padding: '20px',
-        boxSizing: 'border-box',
-      }}
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();
@@ -120,123 +100,48 @@ export default function AddStudentModal({
         }
       }}
     >
-      <div
-        className="roi-add-student-modal"
-        role="document"
-        style={{
-          background: '#fff',
-          borderRadius: '8px',
-          width: '100%',
-          maxWidth: '600px',
-          maxHeight: '80vh',
-          display: 'flex',
-          flexDirection: 'column',
-          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
-          overflow: 'hidden',
-          boxSizing: 'border-box',
-        }}
-      >
+      <div className="roi-add-student-modal" role="document">
         {/* HEADER */}
-        <div
-          style={{
-            padding: '16px 20px',
-            borderBottom: '1px solid #e0e0e0',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            background: '#f8f9fa',
-          }}
-        >
-          <h2
-            style={{
-              margin: 0,
-              fontSize: '18px',
-              fontWeight: '600',
-              color: '#1d2327',
-            }}
-          >
+        <div className="roi-add-student-modal__header">
+          <h2 className="roi-add-student-modal__title">
             Ajouter un élève au suivi
           </h2>
           <button
             type="button"
             onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: '20px',
-              color: '#646970',
-              cursor: 'pointer',
-              padding: '4px',
-            }}
+            className="roi-add-student-modal__close-btn"
           >
             ✕
           </button>
         </div>
 
         {/* SEARCH BAR */}
-        <div
-          style={{
-            padding: '16px 20px',
-            borderBottom: '1px solid #f0f0f1',
-            background: '#fff',
-          }}
-        >
+        <div className="roi-add-student-modal__search-wrap">
           <input
             type="search"
             placeholder="Rechercher un adhérent par nom, prénom ou email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              border: '1px solid #8c8f94',
-              borderRadius: '4px',
-              fontSize: '13px',
-              boxSizing: 'border-box',
-            }}
+            className="roi-add-student-modal__search-input"
           />
         </div>
 
         {/* CANDIDATES LIST */}
-        <div
-          style={{
-            flex: '1 1 auto',
-            overflowY: 'auto',
-            padding: '10px 20px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
-          }}
-        >
+        <div className="roi-add-student-modal__list">
           {loading && (
-            <div
-              style={{
-                padding: '30px',
-                textAlign: 'center',
-                color: '#646970',
-              }}
-            >
+            <div className="roi-add-student-modal__empty">
               Chargement des adhérents du club...
             </div>
           )}
 
           {error && (
-            <div
-              className="notice notice-error"
-              style={{ padding: '10px', margin: '10px 0' }}
-            >
+            <div className="notice notice-error roi-suivi-notice">
               <p>{error}</p>
             </div>
           )}
 
           {!loading && !error && filteredCandidates.length === 0 && (
-            <div
-              style={{
-                padding: '30px',
-                textAlign: 'center',
-                color: '#646970',
-              }}
-            >
+            <div className="roi-add-student-modal__empty">
               {searchQuery
                 ? 'Aucun adhérent ne correspond à cette recherche.'
                 : 'Tous les adhérents du club sont déjà suivis.'}
@@ -249,37 +154,13 @@ export default function AddStudentModal({
               return (
                 <div
                   key={cand.id}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '10px 14px',
-                    background: '#f8f9fa',
-                    border: '1px solid #e0e0e0',
-                    borderRadius: '4px',
-                    gap: '12px',
-                  }}
+                  className="roi-add-student-modal__candidate"
                 >
                   <div>
-                    <div
-                      style={{
-                        fontWeight: '600',
-                        fontSize: '14px',
-                        color: '#1d2327',
-                      }}
-                    >
+                    <div className="roi-add-student-modal__candidate-name">
                       {decodeEntities(cand.display_name)}
                     </div>
-                    <div
-                      style={{
-                        fontSize: '11px',
-                        color: '#646970',
-                        marginTop: '2px',
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: '6px',
-                      }}
-                    >
+                    <div className="roi-add-student-modal__candidate-meta">
                       <span>Adhérent #{cand.id}</span>
                       {cand.birth_date ? (
                         <span>
@@ -301,17 +182,7 @@ export default function AddStudentModal({
                     type="button"
                     onClick={() => handleAdd(cand.id)}
                     disabled={isAdding || addingId !== null}
-                    style={{
-                      padding: '5px 12px',
-                      fontSize: '12px',
-                      fontWeight: '600',
-                      background: '#0073aa',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '3px',
-                      cursor: isAdding ? 'default' : 'pointer',
-                      whiteSpace: 'nowrap',
-                    }}
+                    className="roi-add-student-modal__add-btn"
                   >
                     {isAdding ? 'Ajout...' : '＋ Ajouter au suivi'}
                   </button>
@@ -321,25 +192,12 @@ export default function AddStudentModal({
         </div>
 
         {/* FOOTER */}
-        <div
-          style={{
-            padding: '12px 20px',
-            borderTop: '1px solid #e0e0e0',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            background: '#f8f9fa',
-          }}
-        >
+        <div className="roi-add-student-modal__footer">
           <a
             href="post-new.php?post_type=adherent"
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              fontSize: '12px',
-              color: '#0073aa',
-              textDecoration: 'none',
-            }}
+            className="roi-add-student-modal__dame-link"
           >
             ＋ Créer un nouvel adhérent dans DAME ↗
           </a>
@@ -348,7 +206,6 @@ export default function AddStudentModal({
             type="button"
             onClick={onClose}
             className="button button-secondary"
-            style={{ padding: '5px 14px', fontSize: '12px' }}
           >
             Fermer
           </button>

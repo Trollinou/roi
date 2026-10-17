@@ -68,15 +68,8 @@ class Config_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function get_config( WP_REST_Request $request ): WP_REST_Response { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-		$default_roles = array( 'administrator', 'staff', 'entraineur', 'editor', 'membre' );
-		$allowed_roles = get_option( 'roi_apprentissage_allowed_roles', $default_roles );
-
-		if ( false === $allowed_roles ) {
-			$allowed_roles = $default_roles;
-		}
-
 		$data = array(
-			'apprentissage_allowed_roles' => $allowed_roles,
+			'apprentissage_allowed_roles' => Permissions_Helper::get_allowed_roles(),
 		);
 
 		return rest_ensure_response( $data );

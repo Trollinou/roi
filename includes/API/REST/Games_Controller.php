@@ -170,42 +170,51 @@ class Games_Controller {
 			return new WP_Error( 'invalid_member', __( 'ID de membre invalide.', 'roi' ), array( 'status' => 400 ) );
 		}
 
-		// Contrôle anti-doublons (Même membre et même PGN).
-		$existing_games = get_posts(
+		// Vérifier que le membre existe bien (CPT adherent de Dame).
+		$member = get_post( $member_id );
+		if ( ! $member || 'adherent' !== $member->post_type ) {
+			return new WP_Error( 'member_not_found', __( 'Membre non trouvé.', 'roi' ), array( 'status' => 404 ) );
+		}
+
+		// Contrôle d'autorisation sur l'adhérent cible (prévention IDOR).
+		if ( ! Permissions_Helper::can_access_member( $member_id ) ) {
+			return new WP_Error( 'rest_forbidden', __( 'Vous n\'êtes pas autorisé à enregistrer une partie pour ce membre.', 'roi' ), array( 'status' => 403 ) );
+		}
+
+		// Contrôle anti-doublons rapide : comparer le PGN sur les 5 dernières parties du membre uniquement (évite un JOIN SQL sur LONGTEXT _roi_pgn).
+		$recent_game_ids = get_posts(
 			array(
 				'post_type'      => 'roi_partie',
-				'posts_per_page' => 1,
+				'posts_per_page' => 5,
 				'fields'         => 'ids',
 				'no_found_rows'  => true,
-				'cache_results'  => false,
+				'orderby'        => 'ID',
+				'order'          => 'DESC',
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 				'meta_query'     => array(
 					array(
 						'key'   => '_roi_member_id',
 						'value' => $member_id,
-					),
-					array(
-						'key'   => '_roi_pgn',
-						'value' => $pgn,
+						'type'  => 'NUMERIC',
 					),
 				),
 			)
 		);
 
-		if ( ! empty( $existing_games ) ) {
-			return rest_ensure_response(
-				array(
-					'success' => true,
-					'id'      => $existing_games[0],
-					'message' => __( 'Partie déjà enregistrée.', 'roi' ),
-				)
-			);
-		}
-
-		// Vérifier que le membre existe bien (CPT adherent de Dame).
-		$member = get_post( $member_id );
-		if ( ! $member || 'adherent' !== $member->post_type ) {
-			return new WP_Error( 'member_not_found', __( 'Membre non trouvé.', 'roi' ), array( 'status' => 404 ) );
+		if ( ! empty( $recent_game_ids ) ) {
+			update_meta_cache( 'post', $recent_game_ids );
+			foreach ( $recent_game_ids as $recent_id ) {
+				$existing_pgn = (string) get_post_meta( (int) $recent_id, '_roi_pgn', true );
+				if ( trim( $existing_pgn ) === trim( $pgn ) ) {
+					return rest_ensure_response(
+						array(
+							'success' => true,
+							'id'      => (int) $recent_id,
+							'message' => __( 'Partie déjà enregistrée.', 'roi' ),
+						)
+					);
+				}
+			}
 		}
 
 		// Formater la date fournie ou repli sur la date actuelle.
@@ -238,7 +247,7 @@ class Games_Controller {
 				'post_type'    => 'roi_partie',
 				'post_status'  => 'publish',
 				'post_title'   => $post_title,
-				'post_content' => $pgn, // Stockage du PGN dans le contenu également.
+				'post_content' => '',
 				'post_author'  => $current_user->ID,
 				'post_date'    => $post_date,
 			),
@@ -307,11 +316,36 @@ class Games_Controller {
 		);
 
 		if ( $member_id > 0 ) {
+			if ( ! Permissions_Helper::can_access_member( $member_id ) ) {
+				return new WP_Error( 'rest_forbidden', __( 'Accès refusé aux parties de ce membre.', 'roi' ), array( 'status' => 403 ) );
+			}
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			$query_args['meta_query'] = array(
 				array(
 					'key'   => '_roi_member_id',
 					'value' => $member_id,
+					'type'  => 'NUMERIC',
+				),
+			);
+		} elseif ( ! Permissions_Helper::is_trainer_or_admin() ) {
+			$linked_member = (int) get_user_meta( get_current_user_id(), '_dame_adherent_id', true );
+			if ( $linked_member <= 0 ) {
+				return rest_ensure_response(
+					array(
+						'games'       => array(),
+						'total'       => 0,
+						'total_pages' => 0,
+						'page'        => $page,
+						'per_page'    => $per_page,
+					)
+				);
+			}
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			$query_args['meta_query'] = array(
+				array(
+					'key'   => '_roi_member_id',
+					'value' => $linked_member,
+					'type'  => 'NUMERIC',
 				),
 			);
 		}

@@ -20,7 +20,6 @@ class Settings {
 	 * Registers actions.
 	 */
 	public function __construct() {
-		add_action( 'init', array( $this, 'enregistrer_meta' ) );
 		add_action( 'save_post', array( $this, 'sauvegarder_metabox' ) );
 	}
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type DependencyList, type MutableRefObject, type RefObject } from 'react';
 
 export interface BoardApi {
-  redraw?: (now?: boolean) => void;
+  redraw?: (_now?: boolean) => void;
   clearDomBounds?: () => void;
   destroy?: () => void;
   [key: string]: unknown;
@@ -109,7 +109,7 @@ export function useChessBoard<T extends BoardApi = BoardApi>(
 
     // Relai d'événements et synchronisation des coordonnées lorsque le plateau est dans une iFrame (ex: Gutenberg canvas)
     const doc = containerRef.current.ownerDocument;
-    let forwardEvent: ((e: MouseEvent | TouchEvent) => void) | null = null;
+    let forwardEvent: ((_e: MouseEvent | TouchEvent) => void) | null = null;
     let win: Window | null = null;
 
     if (doc && doc !== document) {

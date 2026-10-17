@@ -60,19 +60,28 @@ class Plugin {
 			5
 		);
 
-		// Metaboxes & Meta handlers (must run for both Admin UI and REST API requests).
-		new \ROI\Metaboxes\Exercice\Manager();
-		new \ROI\Metaboxes\Cours\Builder();
-		new \ROI\Metaboxes\Cours\Audience();
-		new \ROI\Metaboxes\Lecon\Settings();
-		new \ROI\Metaboxes\Video\Settings();
-		( new \ROI\Metaboxes\Partie() )->init();
+		// Clean playlists when elements are trashed or deleted (Admin, REST, or CLI).
+		( new \ROI\Metaboxes\Cours\Builder\Playlist_Cleaner() )->init();
 
-		// Always register DAME backup hook (for WP-Cron & background tasks).
-		add_filter( 'dame_scheduled_backup_attachments', array( new \ROI\Admin\Backup(), 'add_to_dame_scheduled_backup' ), 10, 2 );
+		// Lazy-load DAME backup hook (for WP-Cron & background tasks).
+		add_filter(
+			'dame_scheduled_backup_attachments',
+			static function ( array $attachments, string $backup_dir ): array {
+				return ( new \ROI\Admin\Backup\Exporter() )->add_to_dame_scheduled_backup( $attachments, $backup_dir );
+			},
+			10,
+			2
+		);
 
-		// Admin pages & assets UI.
+		// Admin pages, metaboxes & assets UI (strictly isolated under is_admin()).
 		if ( is_admin() ) {
+			new \ROI\Metaboxes\Exercice\Manager();
+			new \ROI\Metaboxes\Cours\Builder();
+			new \ROI\Metaboxes\Cours\Audience();
+			new \ROI\Metaboxes\Lecon\Settings();
+			new \ROI\Metaboxes\Video\Settings();
+			( new \ROI\Metaboxes\Partie() )->init();
+
 			$admin_menu = new \ROI\Admin\Menu();
 			$admin_menu->init();
 			$admin_assets = new \ROI\Admin\Assets();

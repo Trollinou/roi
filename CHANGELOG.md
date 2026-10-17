@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+*   **Optimisation Globale en 3 Lots (Backend/REST/Cache, Refactorisation Modulaire SRP < 500 lignes, et Frontend Suivi / SCSS) :**
+    *   **Lot 1 — Backend, API REST, Performances SQL/Cache & Sécurité :**
+        *   **Parser JSON Centralisé (`Exercice_Config_DTO`)** : Extraction de `Exercice_Config_DTO::parse_raw_config()` et `decode_nested_json()` comme source unique de décodage des configurations d'exercices dans `Contenu_Controller`, `Metaboxes\Exercice\Manager` et `Admin\Backup\Importer`.
+        *   **Sécurité REST & Prévention IDOR (`Permissions_Helper`, `Games_Controller`)** : Centralisation des contrôles d'accès (`is_trainer_or_admin()`, `check_entraineur_access()`, `can_access_member()`) et vérification systématique du rattachement parent/adhérent lors de l'enregistrement et de la lecture des parties d'échecs.
+        *   **Éradication du Goulot SQL sur `_roi_pgn` (`Games_Controller`)** : Remplacement de la `meta_query` SQL non indexée sur `_roi_pgn` par une comparaison PHP rapide sur les 5 dernières parties du joueur et suppression de la duplication du PGN brut dans `post_content`.
+        *   **Élimination des Requêtes N+1 & Object Cache de Groupe (`Group_Service`, `Progression_Service`, `Roster_Service`)** : Pré-chargement groupé des posts et taxonomies (`_prime_post_caches`, `get_the_terms`), mise en cache déterministe de la progression de groupe (`roi_group_prog_v{ver}_{hash}` dans `roi_chess`) et remplacement de la réinitialisation destructive par des suppressions ciblées `delete_user_meta($student_id, $meta_key, $entry)`.
+        *   **Isolation Admin & CPT Headless (`Plugin.php`, `CPT\*`)** : Relocalisation des déclarations `register_post_meta()` dans les classes CPT respectives, instanciation des `Metaboxes\*` strictement isolée sous `if ( is_admin() )`, et désactivation de l'exposition publique (`public => false`, `publicly_queryable => false`) des CPT consommés par la PWA.
+    *   **Lot 3 — Refactorisation Modulaire SRP (100% des fichiers sous le seuil de 500 lignes) :**
+        *   **Backend PHP** : Extraction de `Roster_Service` (`includes/Services/Progression/Roster_Service.php`) depuis `Group_Service.php` et factorisation de `Progression_Controller.php` (`parse_student_target()`, enregistrement déclaratif des routes).
+        *   **Blocs & Composants TypeScript/React** : Extraction de `ChessboardInspector.tsx` et `ChessboardUiHelper.ts` pour le bloc `roi/chessboard`, de `fenParser.ts` et `FenControlsPanel.tsx` pour `FenEditor`, de `updateType14Visibility` dans `type-14-options.ts`, de `pgn-status.ts` depuis `controls.ts`, et de `StudentCardCourseRow.tsx` depuis `StudentCard.tsx`.
+    *   **Lot 2 — Optimisation Frontend Application Suivi, Éradication du CSS Inline & Conformité Linter :**
+        *   **Rafraîchissement Ciblage REST (`SuiviApp.tsx`)** : Séparation de `fetchProgressions()` et du chargement initial du catalogue (`fetchData()`), évitant de re-télécharger l'intégralité de `/parcours` à chaque validation ou assignation de cours.
+        *   **Module SCSS Dédié & Rendu Virtuel (`src/scss/admin/_suivi.scss`, `Suivi_Page.php`)** : Externalisation intégrale de tous les styles inline (`style={{ ... }}`) des 10 composants de `src/suivi/` et de `src/blocks/chessboard/edit.tsx` vers des classes BEM normées, ajout de `content-visibility: auto; contain-intrinsic-size: 0 320px;` sur `.roi-student-card`, suppression de `backdrop-filter: blur(...)` sur la modale de fin de partie et isolation matérielle Safari (`isolation: isolate; transform: translateZ(0);`).
+        *   **Zéro Avertissement QA (`ESLint`, `PHPCS`, `PHPStan`)** : Résolution intégrale des 62 avertissements ESLint et des avertissements PHPCS sur l'ensemble du dépôt.
+
 *   **Intégration Continue & Chaîne QA GitHub Actions (`.github/workflows/qa.yml`) :**
     *   **Architecture Double Job Parallèle** : Découpage optimisé pour le forfait gratuit GitHub en deux jobs concurrents (`php-qa` et `front-qa`) avec annulation des exécutions obsolètes (`concurrency: cancel-in-progress`).
     *   **Pipeline PHP 8.4** : Validation PHPStan (niveau 7, `--debug`, 2G), PHPCS (standards WordPress complets WPCS 3.4) et vérification PHPUnit sous PHP 8.4 avec extensions légères sans imagick et cache Composer optimisé.

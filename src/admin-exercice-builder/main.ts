@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			window.wp.data.select('core/editor')
 		) {
 			const editor = window.wp.data.select('core/editor') as {
-				getEditedPostAttribute: (attr: string) => unknown;
+				getEditedPostAttribute: (_attr: string) => unknown;
 				getCurrentPost: () => { title?: string | { raw?: string } };
 			};
 			const titleAttr = editor.getEditedPostAttribute('title');
@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			window.wp.data.select('core/editor')
 		) {
 			const editor = window.wp.data.select('core/editor') as {
-				getEditedPostAttribute: (attr: string) => unknown;
+				getEditedPostAttribute: (_attr: string) => unknown;
 				getCurrentPost: () => { roi_chapitre?: unknown };
 			};
 			const chapitresAttr = editor.getEditedPostAttribute('roi_chapitre');

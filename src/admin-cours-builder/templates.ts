@@ -9,7 +9,7 @@ export interface CatalogItem {
 
 export function createCatalogItemElement(
   item: CatalogItem,
-  onDragStart?: (e: DragEvent, item: CatalogItem) => void
+  onDragStart?: (_e: DragEvent, _item: CatalogItem) => void
 ): HTMLDivElement {
   const el = document.createElement('div');
   el.classList.add('roi-catalog-item');
@@ -56,9 +56,9 @@ export interface PlaylistItemData {
 }
 
 export interface PlaylistItemCallbacks {
-  onRemove?: (el: HTMLElement) => void;
-  onDragStart?: (el: HTMLElement) => void;
-  onDragEnd?: (el: HTMLElement) => void;
+  onRemove?: (_el: HTMLElement) => void;
+  onDragStart?: (_el: HTMLElement) => void;
+  onDragEnd?: (_el: HTMLElement) => void;
 }
 
 export function createPlaylistItemElement(

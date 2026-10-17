@@ -4,7 +4,7 @@ import type { Color } from '../../../types/chess';
 export interface PromotionState {
   isEnabled?: boolean;
   color?: Color | string;
-  callback?: (piece: string) => void;
+  callback?: (_piece: string) => void;
   [key: string]: unknown;
 }
 

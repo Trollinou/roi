@@ -1,6 +1,6 @@
 import React from 'react';
 import { decodeEntities } from '@wordpress/html-entities';
-import { CHAPTER_COLOR_MAP, CHAPTER_ORDER_MAP } from '../utils/suiviHelpers';
+import { CHAPTER_ORDER_MAP } from '../utils/suiviHelpers';
 import StudentDetailCourseCard from './StudentDetailCourseCard';
 import type { GroupStatItem } from './StudentDetailItemRow';
 import type { CoursItem } from '../../types/api/parcours';
@@ -11,22 +11,22 @@ export interface StudentModalCurriculumProps {
 	coursesByLevel: Record<number, Record<string, CoursItem[]>>;
 	sortedLevels: number[];
 	expandedLevels: Record<number | string, boolean>;
-	toggleLevel: ( level: number ) => void;
+	toggleLevel: ( _level: number ) => void;
 	expandedChapters: Record<string, boolean>;
-	toggleChapter: ( level: number, chapter: string ) => void;
+	toggleChapter: ( _level: number, _chapter: string ) => void;
 	expandedCourses: Record<number | string, boolean>;
-	toggleCourse: ( courseId: number ) => void;
+	toggleCourse: ( _courseId: number ) => void;
 	student: StudentProgress;
 	validesSet: Set<number>;
 	detailsMap: Record<number | string, ProgressionDetail>;
 	groupStats?: Record<string | number, GroupStatItem>;
 	filterType: 'all' | 'validated' | 'pending';
 	assigningCourseId: number | null;
-	handleToggleCourseAssignment: ( courseId: number, isCurrentlyAssigned: boolean ) => void;
-	onValidateCourse: ( studentId: string, courseId: number, courseTitle: string ) => void;
-	onResetCourse: ( studentId: string, courseId: number, courseTitle: string ) => void;
-	onValidateElement: ( studentId: string, elementId: number, elementTitle?: string ) => void;
-	onResetElement: ( studentId: string, elementId: number, elementTitle?: string ) => void;
+	handleToggleCourseAssignment: ( _courseId: number, _isCurrentlyAssigned: boolean ) => void;
+	onValidateCourse: ( _studentId: string, _courseId: number, _courseTitle: string ) => void;
+	onResetCourse: ( _studentId: string, _courseId: number, _courseTitle: string ) => void;
+	onValidateElement: ( _studentId: string, _elementId: number, _elementTitle?: string ) => void;
+	onResetElement: ( _studentId: string, _elementId: number, _elementTitle?: string ) => void;
 	resettingAction: ActionPayload | null;
 	validatingAction: ActionPayload | null;
 }
@@ -55,24 +55,8 @@ export default function StudentModalCurriculum( {
 	validatingAction,
 }: StudentModalCurriculumProps ): React.JSX.Element {
 	return (
-		<div
-			style={ {
-				flex: '1 1 auto',
-				minHeight: 0,
-				maxHeight: '100%',
-				overflowY: 'auto',
-				overflowX: 'hidden',
-				padding: '20px 24px',
-				boxSizing: 'border-box',
-			} }
-		>
-			<div
-				style={ {
-					display: 'flex',
-					flexDirection: 'column',
-					gap: '16px',
-				} }
-			>
+		<div className="roi-student-modal-curriculum">
+			<div className="roi-student-modal-curriculum__levels">
 				{ sortedLevels.map( ( level ) => {
 					const chapters = coursesByLevel[ level ];
 					const isLevelExpanded = expandedLevels[ level ] !== false;
@@ -87,40 +71,19 @@ export default function StudentModalCurriculum( {
 					return (
 						<div
 							key={ level }
-							style={ {
-								border: '1px solid #dcdcde',
-								borderRadius: '6px',
-								overflow: 'hidden',
-							} }
+							className="roi-student-modal-curriculum__level"
 						>
 							<button
 								type="button"
 								onClick={ () => toggleLevel( level ) }
-								style={ {
-									width: '100%',
-									background: '#f0f0f1',
-									padding: '10px 16px',
-									fontWeight: '700',
-									fontSize: '14px',
-									color: '#1d2327',
-									border: 'none',
-									borderBottom: isLevelExpanded
-										? '1px solid #dcdcde'
-										: 'none',
-									cursor: 'pointer',
-									display: 'flex',
-									justifyContent: 'space-between',
-									alignItems: 'center',
-									textAlign: 'left',
-								} }
+								className={ `roi-student-modal-curriculum__level-btn${
+									isLevelExpanded
+										? ' roi-student-modal-curriculum__level-btn--expanded'
+										: ''
+								}` }
 							>
 								<span>Niveau { level }</span>
-								<span
-									style={ {
-										fontSize: '11px',
-										color: '#646970',
-									} }
-								>
+								<span className="roi-student-modal-curriculum__level-toggle">
 									{ isLevelExpanded
 										? '▲ Cacher'
 										: '▼ Afficher' }
@@ -128,14 +91,7 @@ export default function StudentModalCurriculum( {
 							</button>
 
 							{ isLevelExpanded && (
-								<div
-									style={ {
-										padding: '12px',
-										display: 'flex',
-										flexDirection: 'column',
-										gap: '14px',
-									} }
-								>
+								<div className="roi-student-modal-curriculum__chapters">
 									{ sortedChapters.map( ( chapter ) => {
 										const chapterCourses =
 											chapters[ chapter ];
@@ -148,19 +104,11 @@ export default function StudentModalCurriculum( {
 										const colorSlug =
 											firstCourse.chapitre_couleur ||
 											'tertiary';
-										const chapterColor =
-											CHAPTER_COLOR_MAP[ colorSlug ] ||
-											colorSlug ||
-											'#8224e3';
 
 										return (
 											<div
 												key={ chapter }
-												style={ {
-													border: `1px solid ${ chapterColor }30`,
-													borderRadius: '6px',
-													overflow: 'hidden',
-												} }
+												className={ `roi-student-modal-curriculum__chapter roi-chapter-color--${ colorSlug }` }
 											>
 												<button
 													type="button"
@@ -170,37 +118,14 @@ export default function StudentModalCurriculum( {
 															chapter
 														)
 													}
-													style={ {
-														width: '100%',
-														background:
-															chapterColor,
-														color: '#fff',
-														padding: '8px 12px',
-														fontSize: '11px',
-														fontWeight: '700',
-														textTransform:
-															'uppercase',
-														letterSpacing: '0.5px',
-														border: 'none',
-														cursor: 'pointer',
-														display: 'flex',
-														justifyContent:
-															'space-between',
-														alignItems: 'center',
-														textAlign: 'left',
-													} }
+													className="roi-student-modal-curriculum__chapter-btn"
 												>
 													<span>
 														{ decodeEntities(
 															chapter
 														) }
 													</span>
-													<span
-														style={ {
-															fontSize: '10px',
-															opacity: 0.8,
-														} }
-													>
+													<span className="roi-student-modal-curriculum__chapter-toggle">
 														{ isChapterExpanded
 															? '▲'
 															: '▼' }
@@ -208,17 +133,7 @@ export default function StudentModalCurriculum( {
 												</button>
 
 												{ isChapterExpanded && (
-													<div
-														style={ {
-															padding: '10px',
-															display: 'flex',
-															flexDirection:
-																'column',
-															gap: '10px',
-															background:
-																'#fafafa',
-														} }
-													>
+													<div className="roi-student-modal-curriculum__courses">
 														{ chapterCourses.map(
 															( course ) => (
 																<StudentDetailCourseCard

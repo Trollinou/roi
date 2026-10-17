@@ -47,6 +47,66 @@ readonly class Exercice_Config_DTO {
 	}
 
 	/**
+	 * Parses raw exercise config (array, serialized string, double-encoded JSON, or slashed JSON) into a normalized associative array.
+	 *
+	 * @param mixed $config_meta Raw metadata value.
+	 * @return array<string, mixed>|null Decoded config array or null if invalid/empty.
+	 */
+	public static function parse_raw_config( mixed $config_meta ): ?array {
+		if ( is_array( $config_meta ) ) {
+			return $config_meta;
+		}
+
+		if ( is_object( $config_meta ) ) {
+			return (array) $config_meta;
+		}
+
+		if ( ! is_string( $config_meta ) || '' === trim( $config_meta ) ) {
+			return null;
+		}
+
+		$unserialized = maybe_unserialize( $config_meta );
+		if ( is_array( $unserialized ) ) {
+			return $unserialized;
+		}
+		if ( is_object( $unserialized ) ) {
+			return (array) $unserialized;
+		}
+
+		$decoded = self::decode_nested_json( $config_meta );
+		if ( is_array( $decoded ) ) {
+			return $decoded;
+		}
+
+		$decoded_unslashed = self::decode_nested_json( wp_unslash( $config_meta ) );
+		if ( is_array( $decoded_unslashed ) ) {
+			return $decoded_unslashed;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Helper to recursively decode JSON strings that may be double-encoded.
+	 *
+	 * @param string $raw Raw JSON string.
+	 * @return array<string, mixed>|null
+	 */
+	private static function decode_nested_json( string $raw ): ?array {
+		$decoded = json_decode( $raw, true );
+		while ( is_string( $decoded ) ) {
+			$sub = json_decode( $decoded, true );
+			if ( JSON_ERROR_NONE === json_last_error() ) {
+				$decoded = $sub;
+			} else {
+				break;
+			}
+		}
+
+		return is_array( $decoded ) ? $decoded : null;
+	}
+
+	/**
 	 * Creates a DTO instance from a WP_Post object and raw post meta.
 	 *
 	 * @param \WP_Post $post The post object.
@@ -57,44 +117,9 @@ readonly class Exercice_Config_DTO {
 		$niveau_meta = (int) get_post_meta( $post->ID, '_roi_exercice_niveau', true );
 		$config_meta = get_post_meta( $post->ID, '_roi_exercice_config', true );
 
-		$type   = Exercice_Type::from( $type_meta > 0 ? $type_meta : 1 );
-		$niveau = Exercice_Niveau::from( $niveau_meta > 0 ? $niveau_meta : 1 );
-
-		$config = null;
-		if ( is_array( $config_meta ) ) {
-			$config = $config_meta;
-		} elseif ( is_string( $config_meta ) && '' !== trim( $config_meta ) ) {
-			$unserialized = maybe_unserialize( $config_meta );
-			if ( is_array( $unserialized ) ) {
-				$config = $unserialized;
-			} else {
-				$decoded = json_decode( $config_meta, true );
-				while ( is_string( $decoded ) ) {
-					$sub = json_decode( $decoded, true );
-					if ( json_last_error() === JSON_ERROR_NONE ) {
-						$decoded = $sub;
-					} else {
-						break;
-					}
-				}
-				if ( is_array( $decoded ) ) {
-					$config = $decoded;
-				} else {
-					$decoded_unslashed = json_decode( wp_unslash( $config_meta ), true );
-					while ( is_string( $decoded_unslashed ) ) {
-						$sub = json_decode( $decoded_unslashed, true );
-						if ( json_last_error() === JSON_ERROR_NONE ) {
-							$decoded_unslashed = $sub;
-						} else {
-							break;
-						}
-					}
-					if ( is_array( $decoded_unslashed ) ) {
-						$config = $decoded_unslashed;
-					}
-				}
-			}
-		}
+		$type   = Exercice_Type::tryFrom( $type_meta ) ?? Exercice_Type::COMMANDEMENTS_100;
+		$niveau = Exercice_Niveau::tryFrom( $niveau_meta ) ?? Exercice_Niveau::LEVEL_1;
+		$config = self::parse_raw_config( $config_meta );
 
 		$variante_meta = (string) get_post_meta( $post->ID, '_roi_exercice_variante', true );
 		$variante      = '' !== $variante_meta ? $variante_meta : null;

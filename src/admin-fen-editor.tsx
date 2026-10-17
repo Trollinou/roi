@@ -58,7 +58,7 @@ const LeconSettingsPanel: React.FC = () => {
 		return '1';
 	}, []);
 
-	const dispatchObj = useDispatch('core/editor') as { editPost?: (data: any) => void } | undefined;
+	const dispatchObj = useDispatch('core/editor') as { editPost?: (_data: any) => void } | undefined;
 	const editPost = dispatchObj ? dispatchObj.editPost : null;
 
 	if (postType !== 'roi_lecon' || !editPost) {

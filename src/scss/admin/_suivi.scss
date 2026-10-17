@@ -1,0 +1,1085 @@
+// ==========================================================================
+// ROI Admin — Suivi des élèves (Dashboard & Modals)
+// ==========================================================================
+
+.roi-suivi-loading {
+	padding: 20px;
+	font-size: 16px;
+	color: var(--roi-color-text-muted, #666);
+}
+
+.roi-suivi-error {
+	margin: 20px 0;
+	padding: 10px;
+}
+
+.roi-suivi-app {
+	font-family: var(--wp--preset--font-family--system, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+	color: var(--wp--preset--color--contrast, #1d2327);
+	max-width: 1200px;
+	margin: 20px 0;
+}
+
+.roi-suivi-empty {
+	background: var(--wp--preset--color--base, #fff);
+	padding: 40px;
+	text-align: center;
+	border: 1px solid #c3c4c7;
+	border-radius: 6px;
+	color: #646970;
+}
+
+.roi-suivi-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+	gap: var(--wp--style--block-gap, 20px);
+}
+
+// ==========================================================================
+// Filters Bar
+// ==========================================================================
+
+.roi-suivi-filters {
+	background: var(--wp--preset--color--base, #fff);
+	border: 1px solid #c3c4c7;
+	border-radius: 6px;
+	padding: 15px 20px;
+	margin-bottom: 20px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 15px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.roi-suivi-filters__title {
+	margin: 0;
+	font-size: 22px;
+	font-weight: 600;
+}
+
+.roi-suivi-filters__controls {
+	display: flex;
+	gap: 15px;
+	flex-wrap: wrap;
+	align-items: center;
+}
+
+.roi-suivi-filters__add-btn {
+	padding: 6px 14px;
+	border: 1px solid var(--wp-admin-theme-color, #0073aa);
+	background: var(--wp-admin-theme-color, #0073aa);
+	color: #fff;
+	border-radius: 4px;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.roi-suivi-filters__search {
+	padding: 6px 12px;
+	width: 220px;
+	border: 1px solid #8c8f94;
+	border-radius: 4px;
+	font-size: 13px;
+}
+
+.roi-suivi-filters__select {
+	padding: 6px 12px;
+	border: 1px solid #8c8f94;
+	border-radius: 4px;
+	font-size: 13px;
+	background: #fff;
+}
+
+// ==========================================================================
+// Student Card (with Web Vitals content-visibility)
+// ==========================================================================
+
+.roi-student-card {
+	content-visibility: auto;
+	contain-intrinsic-size: 0 320px;
+	background: var(--wp--preset--color--base, #fff);
+	border: 1px solid #c3c4c7;
+	border-radius: 6px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+}
+
+.roi-student-card__header {
+	border-bottom: 1px solid #f0f0f1;
+	padding-bottom: 10px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	cursor: pointer;
+}
+
+.roi-student-card__identity {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.roi-student-card__title-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.roi-student-card__name {
+	margin: 0;
+	font-size: 17px;
+	font-weight: 600;
+	color: var(--wp-admin-theme-color, #0073aa);
+}
+
+.roi-student-card__group-badge {
+	font-size: 11px;
+	background: #e0f2fe;
+	color: #0369a1;
+	border: 1px solid #bae6fd;
+	padding: 1px 6px;
+	border-radius: 12px;
+	font-weight: 500;
+}
+
+.roi-student-card__assigned-badge {
+	font-size: 11px;
+	background: #fef3c7;
+	color: #92400e;
+	border: 1px solid #fde68a;
+	padding: 1px 6px;
+	border-radius: 12px;
+	font-weight: 500;
+}
+
+.roi-student-card__details-hint {
+	font-size: 11px;
+	color: var(--wp-admin-theme-color, #0073aa);
+	opacity: 0.8;
+}
+
+.roi-student-card__parent {
+	font-size: 11px;
+	color: #646970;
+}
+
+.roi-student-card__parent-link {
+	color: var(--wp-admin-theme-color, #0073aa);
+	text-decoration: none;
+}
+
+.roi-student-card__ext-link {
+	font-size: 10px;
+	color: #444;
+	background: #f0f0f1;
+	padding: 3px 8px;
+	border-radius: 3px;
+	font-weight: 600;
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+}
+
+.roi-student-card__ext-link--member {
+	color: #0369a1;
+	background: #e0f2fe;
+}
+
+.roi-student-card__body {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.roi-student-card__empty {
+	font-size: 13px;
+	color: #8c8f94;
+	font-style: italic;
+	text-align: center;
+	padding: 10px 0;
+}
+
+.roi-student-card__level {
+	border: 1px solid #e0e0e0;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.roi-student-card__level-btn {
+	width: 100%;
+	background: #f8f9fa;
+	border: none;
+	padding: 8px 12px;
+	text-align: left;
+	font-weight: 600;
+	font-size: 13px;
+	color: #444;
+	cursor: pointer;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.roi-student-card__level-btn--expanded {
+	border-bottom: 1px solid #e0e0e0;
+}
+
+.roi-student-card__level-toggle {
+	font-size: 10px;
+	color: #888;
+}
+
+.roi-student-card__chapters {
+	padding: 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	background: #fff;
+}
+
+.roi-student-card__chapter {
+	border: 1px solid var(--roi-chapter-border, rgba(130, 36, 227, 0.16));
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.roi-student-card__chapter-btn {
+	width: 100%;
+	background: var(--roi-chapter-color, #8224e3);
+	border: none;
+	padding: 8px 12px;
+	text-align: left;
+	font-weight: 600;
+	font-size: 11px;
+	text-transform: uppercase;
+	color: #fff;
+	letter-spacing: 0.5px;
+	cursor: pointer;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.roi-student-card__chapter-caret {
+	font-size: 9px;
+	opacity: 0.8;
+}
+
+.roi-student-card__courses {
+	padding: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	background: #fff;
+}
+
+// ==========================================================================
+// Student Card Course Row
+// ==========================================================================
+
+.roi-course-row {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.roi-course-row__top {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 10px;
+}
+
+.roi-course-row__title {
+	font-weight: 600;
+	font-size: 13px;
+	color: #1d2327;
+	max-width: 75%;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.roi-course-row__actions {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.roi-course-row__count {
+	color: #646970;
+	font-size: 11px;
+	font-weight: 500;
+}
+
+.roi-course-row__icon-btn {
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	font-size: 14px;
+	padding: 2px 4px;
+	line-height: 1;
+	border-radius: 3px;
+	transition: background-color 0.15s ease;
+}
+
+.roi-course-row__icon-btn--validate {
+	color: #00a32a;
+}
+
+.roi-course-row__icon-btn--validate:hover,
+.roi-course-row__icon-btn--validate:focus {
+	background-color: #dcfce7;
+}
+
+.roi-course-row__icon-btn--reset {
+	color: #d63638;
+}
+
+.roi-course-row__icon-btn--reset:hover:not(:disabled),
+.roi-course-row__icon-btn--reset:focus:not(:disabled) {
+	background-color: #fbeaea;
+}
+
+.roi-course-row__icon-btn--disabled {
+	color: #ccd0d4;
+	cursor: default;
+}
+
+.roi-course-row__progress-wrap {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.roi-course-row__progress-native {
+	flex-grow: 1;
+	height: 6px;
+	appearance: none;
+	-webkit-appearance: none;
+	border: none;
+	background: #f0f0f1;
+	border-radius: 3px;
+	overflow: hidden;
+}
+
+.roi-course-row__progress-native::-webkit-progress-bar {
+	background: #f0f0f1;
+	border-radius: 3px;
+}
+
+.roi-course-row__progress-native::-webkit-progress-value {
+	background: #00a32a;
+	border-radius: 3px;
+}
+
+.roi-course-row__progress-native::-moz-progress-bar {
+	background: #00a32a;
+	border-radius: 3px;
+}
+
+.roi-course-row__percent {
+	font-size: 10px;
+	font-weight: 600;
+	color: #444;
+	min-width: 28px;
+	text-align: right;
+}
+
+// ==========================================================================
+// Chapter Color Modifiers (No inline styles needed)
+// ==========================================================================
+
+.roi-chapter-color--primary {
+	--roi-chapter-color: #2ecc71;
+	--roi-chapter-border: rgba(46, 204, 113, 0.18);
+}
+
+.roi-chapter-color--secondary {
+	--roi-chapter-color: #3498db;
+	--roi-chapter-border: rgba(52, 152, 219, 0.18);
+}
+
+.roi-chapter-color--tertiary {
+	--roi-chapter-color: #9b59b6;
+	--roi-chapter-border: rgba(155, 89, 182, 0.18);
+}
+
+.roi-chapter-color--quaternary {
+	--roi-chapter-color: #e67e22;
+	--roi-chapter-border: rgba(230, 126, 34, 0.18);
+}
+
+.roi-chapter-color--quinary {
+	--roi-chapter-color: #e74c3c;
+	--roi-chapter-border: rgba(231, 76, 60, 0.18);
+}
+
+.roi-chapter-color--senary {
+	--roi-chapter-color: #1abc9c;
+	--roi-chapter-border: rgba(26, 188, 156, 0.18);
+}
+
+// ==========================================================================
+// Modals (AddStudentModal & StudentDetailModal — Safari GPU Isolated)
+// ==========================================================================
+
+.roi-suivi-modal-overlay {
+	position: fixed;
+	inset: 0;
+	isolation: isolate;
+	transform: translateZ(0);
+	background-color: rgba(0, 0, 0, 0.65);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 100000;
+	padding: 20px;
+	box-sizing: border-box;
+}
+
+.roi-add-student-modal {
+	background: #fff;
+	border-radius: 8px;
+	width: 100%;
+	max-width: 600px;
+	max-height: 80vh;
+	display: flex;
+	flex-direction: column;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+	overflow: hidden;
+	box-sizing: border-box;
+}
+
+.roi-add-student-modal__header {
+	padding: 16px 20px;
+	border-bottom: 1px solid #e0e0e0;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	background: #f8f9fa;
+}
+
+.roi-add-student-modal__title {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.roi-add-student-modal__close {
+	background: none;
+	border: none;
+	font-size: 20px;
+	color: #646970;
+	cursor: pointer;
+	padding: 4px 8px;
+	line-height: 1;
+	border-radius: 4px;
+}
+
+.roi-add-student-modal__search-wrap {
+	padding: 16px 20px;
+	border-bottom: 1px solid #f0f0f1;
+	background: #fff;
+}
+
+.roi-add-student-modal__search {
+	width: 100%;
+	padding: 8px 12px;
+	border: 1px solid #8c8f94;
+	border-radius: 4px;
+	font-size: 13px;
+	box-sizing: border-box;
+}
+
+.roi-add-student-modal__list {
+	flex: 1 1 auto;
+	overflow-y: auto;
+	padding: 10px 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.roi-add-student-modal__status {
+	padding: 30px;
+	text-align: center;
+	color: #646970;
+}
+
+.roi-add-student-modal__candidate {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 10px 14px;
+	background: #f8f9fa;
+	border: 1px solid #e0e0e0;
+	border-radius: 4px;
+	gap: 12px;
+}
+
+.roi-add-student-modal__cand-name {
+	font-weight: 600;
+	font-size: 14px;
+	color: #1d2327;
+}
+
+.roi-add-student-modal__cand-meta {
+	font-size: 11px;
+	color: #646970;
+	margin-top: 2px;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.roi-add-student-modal__cand-btn {
+	padding: 5px 12px;
+	font-size: 12px;
+	font-weight: 600;
+	background: var(--wp-admin-theme-color, #0073aa);
+	color: #fff;
+	border: none;
+	border-radius: 3px;
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.roi-add-student-modal__cand-btn:disabled {
+	cursor: default;
+	opacity: 0.7;
+}
+
+.roi-add-student-modal__footer {
+	padding: 12px 20px;
+	border-top: 1px solid #e0e0e0;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	background: #f8f9fa;
+}
+
+.roi-add-student-modal__create-link {
+	font-size: 12px;
+	color: var(--wp-admin-theme-color, #0073aa);
+	text-decoration: none;
+}
+
+// ==========================================================================
+// Student Detail Modal
+// ==========================================================================
+
+.roi-student-detail-modal {
+	background: #fff;
+	border-radius: 8px;
+	width: 100%;
+	max-width: 900px;
+	height: 85vh;
+	max-height: 850px;
+	display: flex;
+	flex-direction: column;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+	overflow: hidden;
+	position: relative;
+	box-sizing: border-box;
+}
+
+.roi-student-detail-modal__header {
+	padding: 16px 24px;
+	border-bottom: 1px solid #e0e0e0;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	background: #f8f9fa;
+	flex-shrink: 0;
+}
+
+.roi-student-detail-modal__title-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+	margin-bottom: 4px;
+}
+
+.roi-student-detail-modal__title {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 700;
+	color: #1d2327;
+}
+
+.roi-student-detail-modal__meta-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+	font-size: 12px;
+	color: #646970;
+}
+
+.roi-student-detail-modal__parent-badge {
+	background: #e0e7ff;
+	color: #3730a3;
+	padding: 1px 6px;
+	border-radius: 3px;
+	font-size: 11px;
+	font-weight: 500;
+	text-decoration: none;
+}
+
+.roi-student-detail-modal__stats {
+	padding: 16px 24px;
+	background: #fff;
+	border-bottom: 1px solid #e5e5e5;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: 16px;
+	flex-shrink: 0;
+}
+
+.roi-student-detail-modal__stat-box {
+	padding: 12px 16px;
+	border-radius: 6px;
+}
+
+.roi-student-detail-modal__stat-box--progress {
+	background: #f0f6fc;
+	border-left: 4px solid var(--wp-admin-theme-color, #0073aa);
+}
+
+.roi-student-detail-modal__stat-box--time {
+	background: #f0fdf4;
+	border-left: 4px solid #00a32a;
+}
+
+.roi-student-detail-modal__stat-label {
+	font-size: 11px;
+	text-transform: uppercase;
+	color: #646970;
+	font-weight: 600;
+}
+
+.roi-student-detail-modal__stat-value {
+	font-size: 20px;
+	font-weight: 700;
+	margin-top: 2px;
+}
+
+.roi-student-detail-modal__stat-value--blue {
+	color: var(--wp-admin-theme-color, #0073aa);
+}
+
+.roi-student-detail-modal__stat-value--green {
+	color: #00a32a;
+}
+
+.roi-student-detail-modal__stat-sub {
+	font-size: 12px;
+	color: #646970;
+	margin-top: 2px;
+}
+
+.roi-student-detail-modal__filter-col {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.roi-student-detail-modal__filter-title {
+	font-size: 12px;
+	font-weight: 600;
+	color: #444;
+	margin-bottom: 6px;
+}
+
+.roi-student-detail-modal__filter-btns {
+	display: flex;
+	gap: 6px;
+}
+
+.roi-student-detail-modal__filter-btn {
+	padding: 4px 10px;
+	font-size: 11px;
+	border-radius: 4px;
+	border: 1px solid #c3c4c7;
+	background: #fff;
+	color: #444;
+	cursor: pointer;
+}
+
+.roi-student-detail-modal__filter-btn--active-all {
+	border-color: var(--wp-admin-theme-color, #0073aa);
+	background: var(--wp-admin-theme-color, #0073aa);
+	color: #fff;
+}
+
+.roi-student-detail-modal__filter-btn--active-validated {
+	border-color: #00a32a;
+	background: #00a32a;
+	color: #fff;
+}
+
+.roi-student-detail-modal__filter-btn--active-pending {
+	border-color: #d94f00;
+	background: #d94f00;
+	color: #fff;
+}
+
+.roi-student-detail-modal__curriculum {
+	flex: 1 1 auto;
+	min-height: 0;
+	max-height: 100%;
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding: 20px 24px;
+	box-sizing: border-box;
+}
+
+.roi-student-detail-modal__levels {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.roi-student-detail-modal__level-card {
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.roi-student-detail-modal__level-header {
+	width: 100%;
+	background: #f0f0f1;
+	padding: 10px 16px;
+	font-weight: 700;
+	font-size: 14px;
+	color: #1d2327;
+	border: none;
+	cursor: pointer;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	text-align: left;
+}
+
+.roi-student-detail-modal__level-header--expanded {
+	border-bottom: 1px solid #dcdcde;
+}
+
+.roi-student-detail-modal__level-body {
+	padding: 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.roi-student-detail-modal__chapter-card {
+	border: 1px solid var(--roi-chapter-border, rgba(130, 36, 227, 0.18));
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.roi-student-detail-modal__chapter-body {
+	padding: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	background: #fafafa;
+}
+
+.roi-student-detail-modal__footer {
+	padding: 12px 24px;
+	border-top: 1px solid #e0e0e0;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	background: #f8f9fa;
+	flex-shrink: 0;
+}
+
+.roi-student-detail-modal__remove-btn {
+	background: #fff;
+	border: 1px solid #d63638;
+	color: #d63638;
+	padding: 6px 14px;
+	font-size: 13px;
+	border-radius: 4px;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.roi-student-detail-modal__remove-btn:disabled {
+	cursor: default;
+	opacity: 0.7;
+}
+
+// ==========================================================================
+// Detail Course Card & Item Rows
+// ==========================================================================
+
+.roi-detail-course-card {
+	background: #fff;
+	border: 1px solid #e0e0e0;
+	border-radius: 5px;
+	overflow: hidden;
+}
+
+.roi-detail-course-card__header {
+	padding: 10px 14px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	background: #fff;
+	cursor: pointer;
+}
+
+.roi-detail-course-card__header--expanded {
+	border-bottom: 1px solid #f0f0f1;
+}
+
+.roi-detail-course-card__info {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.roi-detail-course-card__caret {
+	font-size: 12px;
+	color: #888;
+}
+
+.roi-detail-course-card__title {
+	font-weight: 600;
+	font-size: 13px;
+	color: #1d2327;
+}
+
+.roi-detail-course-card__count-badge {
+	font-size: 11px;
+	color: #646970;
+	background: #f0f0f1;
+	padding: 2px 6px;
+	border-radius: 3px;
+}
+
+.roi-detail-course-card__actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.roi-detail-course-card__assign-btn {
+	padding: 4px 8px;
+	font-size: 11px;
+	font-weight: 600;
+	border-radius: 3px;
+	border: 1px solid #c3c4c7;
+	background: #fff;
+	color: #50575e;
+	cursor: pointer;
+}
+
+.roi-detail-course-card__assign-btn--assigned {
+	border-color: #f59e0b;
+	background: #fffbeb;
+	color: #b45309;
+}
+
+.roi-detail-course-card__validate-btn {
+	padding: 4px 10px;
+	font-size: 11px;
+	font-weight: 600;
+	color: #00a32a;
+	border: 1px solid #b8e6b8;
+	border-radius: 3px;
+	background: #f0fdf4;
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.roi-detail-course-card__validate-btn:hover:not(:disabled),
+.roi-detail-course-card__validate-btn:focus:not(:disabled) {
+	background-color: #dcfce7;
+}
+
+.roi-detail-course-card__reset-btn {
+	padding: 4px 8px;
+	font-size: 11px;
+	color: #d63638;
+	border: 1px solid #f0b8b8;
+	border-radius: 3px;
+	background: #fff;
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.roi-detail-course-card__reset-btn:hover:not(:disabled),
+.roi-detail-course-card__reset-btn:focus:not(:disabled) {
+	background-color: #fbeaea;
+}
+
+.roi-detail-course-card__reset-btn:disabled {
+	color: #a7aaad;
+	border-color: #dcdcde;
+	cursor: default;
+}
+
+.roi-detail-course-card__items {
+	padding: 8px 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.roi-detail-item-row {
+	display: grid;
+	grid-template-columns: minmax(200px, 1fr) 130px 200px 95px;
+	align-items: center;
+	padding: 8px 12px;
+	border-radius: 4px;
+	background: #fff;
+	border: 1px solid #f0f0f1;
+	gap: 12px;
+}
+
+.roi-detail-item-row--validated {
+	background: #fbfdfb;
+	border-color: #d1eed1;
+}
+
+.roi-detail-item-row__title-col {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	overflow: hidden;
+}
+
+.roi-detail-item-row__type-badge {
+	font-size: 10px;
+	padding: 2px 6px;
+	border-radius: 3px;
+	font-weight: 600;
+	text-transform: uppercase;
+	flex-shrink: 0;
+	background: #f4ebff;
+	color: #8224e3;
+}
+
+.roi-detail-item-row__type-badge--lecon {
+	background: #e7f3ff;
+	color: #0073aa;
+}
+
+.roi-detail-item-row__type-badge--video {
+	background: #ffebee;
+	color: #c62828;
+}
+
+.roi-detail-item-row__title {
+	font-size: 13px;
+	font-weight: 500;
+	color: #1d2327;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.roi-detail-item-row__status-col {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	font-size: 12px;
+}
+
+.roi-detail-item-row__validated-label {
+	color: #00a32a;
+	font-weight: 600;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.roi-detail-item-row__club-badge {
+	font-size: 10px;
+	background: #e6f6e6;
+	color: #007017;
+	padding: 1px 5px;
+	border-radius: 3px;
+	font-weight: 400;
+}
+
+.roi-detail-item-row__date {
+	font-size: 11px;
+	color: #8c8f94;
+}
+
+.roi-detail-item-row__pending {
+	color: #8c8f94;
+	font-style: italic;
+}
+
+.roi-detail-item-row__time-col {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+}
+
+.roi-detail-item-row__time-val {
+	font-weight: 600;
+	color: #2c3338;
+	white-space: nowrap;
+}
+
+.roi-detail-item-row__time-avg {
+	font-size: 11px;
+	color: #8c8f94;
+	white-space: nowrap;
+}
+
+.roi-detail-item-row__time-empty {
+	color: #a7aaad;
+	font-size: 12px;
+}
+
+.roi-detail-item-row__cmp-badge {
+	font-size: 10px;
+	padding: 2px 6px;
+	border-radius: 3px;
+	font-weight: 600;
+}
+
+.roi-detail-item-row__cmp-badge--fast {
+	background: #e6f6e6;
+	color: #007017;
+}
+
+.roi-detail-item-row__cmp-badge--slow {
+	background: #fff3e0;
+	color: #d94f00;
+}
+
+.roi-detail-item-row__cmp-badge--avg {
+	background: #f0f6fc;
+	color: #0073aa;
+	font-weight: 500;
+}
+
+.roi-detail-item-row__action-col {
+	display: flex;
+	justify-content: flex-end;
+}

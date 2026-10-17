@@ -17,8 +17,8 @@ export function renderOptionsReponseList(
 		onOptionChange,
 		onOptionDelete,
 	}: {
-		onOptionChange?: (optIdx: number, val: string) => void;
-		onOptionDelete?: (optIdx: number) => void;
+		onOptionChange?: (_optIdx: number, _val: string) => void;
+		onOptionDelete?: (_optIdx: number) => void;
 	}
 ): void {
 	const listContainer = document.getElementById(
@@ -80,7 +80,7 @@ export function renderOptionsReponseList(
 export function renderSingleReponseContainers(
 	optionsReponse: string[],
 	exercices: Type14ExerciceState[],
-	onAnswerChange?: (idx: number, finalVal: boolean | string) => void
+	onAnswerChange?: (_idx: number, _finalVal: boolean | string) => void
 ): void {
 	for (let i = 0; i < 5; i++) {
 		const container = document.querySelector<HTMLElement>(
@@ -166,7 +166,7 @@ export function renderMultipleReponsesContainers(
 	propositions: string[],
 	optionsReponse: string[],
 	exercices: Type14ExerciceState[],
-	onMultipleAnswerChange?: (exoIdx: number, propIdx: number, finalVal: boolean | string) => void
+	onMultipleAnswerChange?: (_exoIdx: number, _propIdx: number, _finalVal: boolean | string) => void
 ): void {
 	for (let i = 0; i < 5; i++) {
 		const container = document.querySelector<HTMLElement>(
@@ -291,8 +291,8 @@ export function renderPropositionsList(
 		onPropositionChange,
 		onPropositionDelete,
 	}: {
-		onPropositionChange?: (propIdx: number, val: string) => void;
-		onPropositionDelete?: (propIdx: number) => void;
+		onPropositionChange?: (_propIdx: number, _val: string) => void;
+		onPropositionDelete?: (_propIdx: number) => void;
 	}
 ): void {
 	const listContainer = document.getElementById('roi_t14_propositions_list');
@@ -336,5 +336,44 @@ export function renderPropositionsList(
 		itemDiv.appendChild(input);
 		itemDiv.appendChild(btnDelete);
 		listContainer.appendChild(itemDiv);
+	});
+}
+
+/**
+ * Updates visibility of Type 14 blocks depending on selected variante.
+ */
+export function updateType14Visibility(): void {
+	const varianteSelect = document.getElementById('roi_t14_variante') as HTMLSelectElement | null;
+	const variante = varianteSelect ? varianteSelect.value : 'qcm_oui_non';
+
+	const toggleById = (id: string, visible: boolean) => {
+		const el = document.getElementById(id);
+		if (el) {
+			el.style.display = visible ? 'block' : 'none';
+		}
+	};
+
+	toggleById(
+		'roi_t14_bloc_global_options_reponse',
+		variante === 'qcm_multiple' || variante === 'qcm_oui_non'
+	);
+	toggleById('roi_t14_bloc_global_propositions', variante === 'qcm_multiple');
+	toggleById('roi_t14_bloc_global_question', variante === 'qcm_oui_non');
+	toggleById('roi_t14_bloc_global_clic', variante === 'clic');
+	toggleById('roi_t14_bloc_global_setup', variante === 'setup');
+
+	const classVisibilityMap: Array<[string, string]> = [
+		['.roi_t14_bloc_qcm_multiple', 'qcm_multiple'],
+		['.roi_t14_bloc_qcm_oui_non', 'qcm_oui_non'],
+		['.roi_t14_bloc_move', 'move'],
+		['.roi_t14_bloc_notation', 'notation'],
+		['.roi_t14_bloc_clic', 'clic'],
+		['.roi_t14_bloc_setup', 'setup'],
+	];
+
+	classVisibilityMap.forEach(([selector, expectedVariante]) => {
+		document.querySelectorAll<HTMLElement>(selector).forEach((bloc) => {
+			bloc.style.display = variante === expectedVariante ? 'block' : 'none';
+		});
 	});
 }

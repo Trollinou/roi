@@ -57,15 +57,15 @@ class Cours {
 			'supports'            => array( 'title', 'page-attributes' ),
 			'taxonomies'          => array( 'roi_chapitre' ),
 			'hierarchical'        => false,
-			'public'              => true,
+			'public'              => false,
 			'show_ui'             => true,
 			'show_in_menu'        => 'roi-apprentissage',
 			'show_in_admin_bar'   => true,
-			'show_in_nav_menus'   => true,
+			'show_in_nav_menus'   => false,
 			'can_export'          => true,
-			'has_archive'         => true,
-			'exclude_from_search' => false,
-			'publicly_queryable'  => true,
+			'has_archive'         => false,
+			'exclude_from_search' => true,
+			'publicly_queryable'  => false,
 			'capability_type'     => 'page',
 			'map_meta_cap'        => true,
 			'show_in_rest'        => true,
@@ -99,6 +99,52 @@ class Cours {
 		register_post_meta(
 			'roi_cours',
 			'_roi_cours_playlist',
+			array(
+				'show_in_rest'  => true,
+				'single'        => true,
+				'type'          => 'string',
+				'default'       => '[]',
+				'auth_callback' => function ( bool $allowed, string $key, int $post_id ): bool {
+					return current_user_can( 'edit_post', $post_id );
+				},
+			)
+		);
+
+		register_post_meta(
+			'roi_cours',
+			'_roi_cours_audience_type',
+			array(
+				'show_in_rest'      => true,
+				'single'            => true,
+				'type'              => 'string',
+				'default'           => 'all',
+				'sanitize_callback' => static function ( mixed $value ): string {
+					$str = is_string( $value ) ? sanitize_key( $value ) : 'all';
+					return in_array( $str, array( 'all', 'restricted' ), true ) ? $str : 'all';
+				},
+				'auth_callback'     => function ( bool $allowed, string $key, int $post_id ): bool {
+					return current_user_can( 'edit_post', $post_id );
+				},
+			)
+		);
+
+		register_post_meta(
+			'roi_cours',
+			'_roi_cours_target_groups',
+			array(
+				'show_in_rest'  => true,
+				'single'        => true,
+				'type'          => 'string',
+				'default'       => '[]',
+				'auth_callback' => function ( bool $allowed, string $key, int $post_id ): bool {
+					return current_user_can( 'edit_post', $post_id );
+				},
+			)
+		);
+
+		register_post_meta(
+			'roi_cours',
+			'_roi_cours_target_members',
 			array(
 				'show_in_rest'  => true,
 				'single'        => true,

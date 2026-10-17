@@ -22,7 +22,7 @@ export interface DiagrammeBlockAttributes {
 
 interface EditProps {
 	attributes: DiagrammeBlockAttributes;
-	setAttributes: (attrs: Partial<DiagrammeBlockAttributes>) => void;
+	setAttributes: (_attrs: Partial<DiagrammeBlockAttributes>) => void;
 }
 
 export default function Edit({ attributes, setAttributes }: EditProps): React.ReactElement {

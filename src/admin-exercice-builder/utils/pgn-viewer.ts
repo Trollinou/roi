@@ -20,7 +20,7 @@ export interface MoveData {
 }
 
 export interface PgnPreviewViewerInstance {
-  update: (newPgn: PgnString) => void;
+  update: (_newPgn: PgnString) => void;
   destroy: () => void;
 }
 
@@ -207,8 +207,8 @@ export function createPgnPreviewViewer(
     movesListEl.innerHTML = html;
 
     movesListEl.querySelectorAll('.roi-pgn-move-item').forEach((el) => {
-      el.addEventListener('click', function (this: HTMLElement) {
-        const ply = parseInt(this.getAttribute('data-ply') || '0', 10);
+      el.addEventListener('click', () => {
+        const ply = parseInt(el.getAttribute('data-ply') || '0', 10);
         goToPly(ply);
       });
     });

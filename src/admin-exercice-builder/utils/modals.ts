@@ -7,7 +7,7 @@ import type { DiagramData, FenEditorSavePayload } from '../../components/FenEdit
 
 export function openFenEditor(
   initialData: DiagramData | FenString,
-  onSaveCallback: (payload: FenEditorSavePayload) => void
+  onSaveCallback: (_payload: FenEditorSavePayload) => void
 ): void {
   const modalOverlay = document.getElementById('roi_fen_modal_overlay');
   const reactRoot = document.getElementById('roi_fen_react_root');
@@ -69,7 +69,7 @@ export function openFenEditor(
 
 export function openPgnEditor(
   initialPgn: PgnString,
-  onSaveCallback: (newPgn: PgnString, finalFen: FenString) => void,
+  onSaveCallback: (_newPgn: PgnString, _finalFen: FenString) => void,
   initialFen: FenString = ''
 ): void {
   const pgnModalOverlay = document.getElementById('roi_pgn_modal_overlay');

@@ -1,9 +1,17 @@
 import { store, getContext, getElement } from '@wordpress/interactivity';
-import { BoardCore, computeEvalBarPercentage, getNodesForElo } from 'eg-chessboard';
+import { BoardCore } from 'eg-chessboard';
 import type { StockfishConfig, StockfishEvaluation, EngineStatus } from 'eg-chessboard';
 import 'eg-chessboard/base.css';
 import 'eg-chessboard/pieces/cburnett.css';
 import { ChessClock } from './classes/ChessClock';
+import {
+  ensureCapturedBarsAndClocks,
+  ensureCadenceSelector,
+  renderPromotionDialogDom,
+  updateStatusDisplay,
+  updateEvalBarDom,
+  buildStockfishEngineConfig,
+} from './classes/ChessboardUiHelper';
 import type { Color } from '../../types';
 
 declare global {
@@ -45,88 +53,8 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
   const showEvaluationBar = contextData?.showEvaluationBar !== undefined ? contextData.showEvaluationBar : block.getAttribute('data-show-evaluation-bar') === 'true';
   const initialClockPreset = contextData?.clockPreset || block.getAttribute('data-clock-preset') || 'none';
 
-  // Ensure captured bars exist in the DOM (for backwards compatibility)
-  let topBar = block.querySelector<HTMLElement>('.captured-clock-top');
-  let bottomBar = block.querySelector<HTMLElement>('.captured-clock-bottom');
-  const mainWrap = block.querySelector<HTMLElement>('.main-wrap');
-  const mainBoard = block.querySelector<HTMLElement>('.main-board');
-
-  if (mainWrap && mainBoard) {
-    if (!topBar) {
-      topBar = document.createElement('div');
-      topBar.className = 'captured-clock-top captured-bar';
-      topBar.innerHTML = `
-        <div class="material-wrapper opponent-material" style="display: ${showMaterialIndicator ? 'block' : 'none'};"></div>
-        <div class="player-info">Adversaire</div>
-        <span class="captured-pieces-clock-opp captured-pieces"></span>
-        <div class="game-clock opponent-clock" style="display: ${initialClockPreset !== 'none' ? 'block' : 'none'};">--:--</div>
-      `;
-      mainWrap.insertBefore(topBar, mainBoard);
-    }
-    if (!bottomBar) {
-      bottomBar = document.createElement('div');
-      bottomBar.className = 'captured-clock-bottom captured-bar';
-      bottomBar.innerHTML = `
-        <div class="material-wrapper player-material" style="display: ${showMaterialIndicator ? 'block' : 'none'};"></div>
-        <div class="player-info">Toi</div>
-        <span class="captured-pieces-clock-player captured-pieces"></span>
-        <div class="game-clock player-clock" style="display: ${initialClockPreset !== 'none' ? 'block' : 'none'};">--:--</div>
-      `;
-      mainWrap.insertBefore(bottomBar, mainBoard.nextSibling);
-    }
-
-    const barsActive = showMaterialIndicator || initialClockPreset !== 'none';
-    topBar.classList.toggle('hidden-bar', !barsActive);
-    bottomBar.classList.toggle('hidden-bar', !barsActive);
-  }
-
-  // Ensure correct display of clocks based on preset on load
-  const opponentClockEl = block.querySelector<HTMLElement>('.opponent-clock');
-  const playerClockEl = block.querySelector<HTMLElement>('.player-clock');
-  if (opponentClockEl && playerClockEl) {
-    if (initialClockPreset !== 'none') {
-      opponentClockEl.style.display = 'block';
-      playerClockEl.style.display = 'block';
-    } else {
-      opponentClockEl.style.display = 'none';
-      playerClockEl.style.display = 'none';
-    }
-  }
-
-  const activeConfigDialog = block.querySelector<HTMLElement>('.chess-config-dialog');
-  if (useStockfish && activeConfigDialog) {
-    const dialogContent = activeConfigDialog.querySelector<HTMLElement>('.config-dialog-content');
-    let cadenceSelector = activeConfigDialog.querySelector<HTMLElement>('.cadence-selector');
-    if (dialogContent && !cadenceSelector) {
-      cadenceSelector = document.createElement('div');
-      cadenceSelector.className = 'cadence-selector';
-      cadenceSelector.innerHTML = `
-        <label>Cadence :</label>
-        <select class="cadence-select">
-          <option value="none" ${initialClockPreset === 'none' ? 'selected' : ''}>Sans pendule</option>
-          <option value="1+0" ${initialClockPreset === '1+0' ? 'selected' : ''}>1 min (Bullet)</option>
-          <option value="3+2" ${initialClockPreset === '3+2' ? 'selected' : ''}>3 min + 2 s (Blitz)</option>
-          <option value="5+0" ${initialClockPreset === '5+0' ? 'selected' : ''}>5 min KO (Blitz)</option>
-          <option value="10+5" ${initialClockPreset === '10+5' ? 'selected' : ''}>10 min + 5 s (Rapide)</option>
-          <option value="15+10" ${initialClockPreset === '15+10' ? 'selected' : ''}>15 min + 10 s (Rapide)</option>
-        </select>
-      `;
-      const difficultySelector = dialogContent.querySelector('.difficulty-selector');
-      if (difficultySelector) {
-        dialogContent.insertBefore(cadenceSelector, difficultySelector);
-      } else {
-        const startBtnEl = dialogContent.querySelector('.start-btn');
-        if (startBtnEl) {
-          dialogContent.insertBefore(cadenceSelector, startBtnEl);
-        }
-      }
-    }
-  }
-
-  const cadenceSelect = block.querySelector<HTMLSelectElement>('.cadence-select');
-  if (cadenceSelect) {
-    cadenceSelect.value = initialClockPreset;
-  }
+  ensureCapturedBarsAndClocks(block, showMaterialIndicator, initialClockPreset);
+  ensureCadenceSelector(block, useStockfish, initialClockPreset);
 
   const initialViewOnly = useStockfish ? true : viewOnly;
 
@@ -145,13 +73,6 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
     freeMode,
   };
 
-  const promotionPieces = [
-    { name: 'Queen', data: 'q' },
-    { name: 'Knight', data: 'n' },
-    { name: 'Rook', data: 'r' },
-    { name: 'Bishop', data: 'b' },
-  ];
-
   const state: any = {
     mode: 'game' as const,
     showThreats,
@@ -161,37 +82,9 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
     },
     set promotionDialogState(val: any) {
       this._promotionDialogState = val;
-      if (val && val.isEnabled) {
-        const mainBoardEl = block.querySelector('.main-board');
-        if (!mainBoardEl) {return;}
-
-        const existingDialog = mainBoardEl.querySelector('.promotion-dialog');
-        if (existingDialog) {existingDialog.remove();}
-
-        const dialog = document.createElement('dialog');
-        dialog.className = 'promotion-dialog';
-        dialog.setAttribute('open', '');
-
-        promotionPieces.forEach((piece) => {
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = `${piece.name.toLowerCase()} ${val.color}`;
-          btn.setAttribute('aria-label', piece.name);
-
-          const selectPiece = (e: Event) => {
-            e.preventDefault();
-            val.callback(piece.data);
-            dialog.remove();
-            state._promotionDialogState = { isEnabled: false };
-          };
-
-          btn.addEventListener('click', selectPiece);
-          btn.addEventListener('touchstart', selectPiece);
-          dialog.appendChild(btn);
-        });
-
-        mainBoardEl.appendChild(dialog);
-      }
+      renderPromotionDialogDom(block, val, () => {
+        state._promotionDialogState = { isEnabled: false };
+      });
     },
     historyViewerState: { isEnabled: false },
   };
@@ -212,91 +105,21 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
   const undoMoveBtn = block.querySelector<HTMLButtonElement>('.control-btn.undo-move');
 
   const updateStatus = () => {
-    if (!statusElement) {return;}
-
-    if (useStockfish && configDialog && configDialog.style.display !== 'none') {
-      statusElement.textContent = 'Choisissez vos options et commencez la partie.';
-      return;
-    }
-
-    const boardState: any = typeof boardAPI?.getState === 'function' ? boardAPI.getState() : {};
-    const isGameOver = boardState.isGameOver ?? boardAPI?.getIsGameOver();
-    const isCheck = boardState.isCheck ?? boardAPI?.getIsCheck();
-    const turnColor = boardState.turnColor ?? boardAPI?.getTurnColor();
-
-    if (isGameOver) {
-      statusElement.textContent = boardAPI.getGameOverReason();
-      return;
-    }
-
-    if (isCheck) {
-      const inCheckColor = turnColor === 'white' ? 'Blancs' : 'Noirs';
-      statusElement.textContent = `Échec ! Au tour des ${inCheckColor}.`;
-    } else if (useStockfish) {
-        if (currentEngineStatus === 'loading') {
-          statusElement.textContent = 'Chargement de Stockfish 19...';
-        } else if (turnColor === currentStockfishColor) {
-          statusElement.textContent = 'Le moteur réfléchit...';
-        } else {
-          statusElement.textContent = 'À vous de jouer.';
-        }
-      } else {
-        statusElement.textContent = `Au tour des ${turnColor === 'white' ? 'Blancs' : 'Noirs'}.`;
-      }
+    updateStatusDisplay({
+      statusElement,
+      useStockfish,
+      configDialog,
+      boardAPI,
+      currentEngineStatus,
+      currentStockfishColor,
+    });
   };
 
   const updateEvaluationBar = (evalData?: StockfishEvaluation | null) => {
     if (evalData !== undefined) {
       lastEvaluation = evalData;
     }
-    const barFill = block.querySelector<HTMLElement>('.evaluation-bar-fill');
-    if (!barFill) {return;}
-    const barContainer = block.querySelector<HTMLElement>('.evaluation-bar');
-
-    if (!lastEvaluation) {
-      barFill.style.height = '50%';
-      if (barContainer) {
-        barContainer.removeAttribute('title');
-      }
-      return;
-    }
-
-    const currentTurn = boardAPI.getTurnColor();
-    const percentageWhite = computeEvalBarPercentage(
-      currentTurn,
-      lastEvaluation.scoreType,
-      lastEvaluation.scoreValue,
-      lastEvaluation.wdl
-    );
-
-    if (barContainer) {
-      let tooltipText = '';
-      if (lastEvaluation.scoreType === 'cp') {
-        const evalScore = (lastEvaluation.whiteScoreValue ?? 0) / 100;
-        const sign = evalScore > 0 ? '+' : '';
-        tooltipText = `${sign}${evalScore.toFixed(2)}`;
-      } else if (lastEvaluation.scoreType === 'mate') {
-        const mateVal = lastEvaluation.scoreValue;
-        const absMoves = Math.abs(mateVal);
-        const sideChar = (lastEvaluation.whiteScoreValue ?? 0) > 0 ? 'B' : 'N';
-        tooltipText = `Mat #${absMoves} (${sideChar})`;
-      }
-      if (lastEvaluation.winChancePercentage !== undefined) {
-        tooltipText += ` (${Math.round(lastEvaluation.winChancePercentage)}% Blancs)`;
-      }
-      barContainer.setAttribute('title', tooltipText);
-    }
-
-    const currentOrientation = boardAPI.getOrientation();
-    if (currentOrientation === 'white') {
-      barFill.style.height = `${percentageWhite}%`;
-      barFill.style.marginTop = 'auto';
-      barFill.style.marginBottom = '0';
-    } else {
-      barFill.style.height = `${100 - percentageWhite}%`;
-      barFill.style.marginTop = '0';
-      barFill.style.marginBottom = 'auto';
-    }
+    updateEvalBarDom(block, boardAPI, lastEvaluation);
   };
 
   const workerUrl =
@@ -315,20 +138,7 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
     whiteMode: 'disabled' | 'hint' | 'bot' | 'elo',
     blackMode: 'disabled' | 'hint' | 'bot' | 'elo',
     elo: number
-  ): StockfishConfig => ({
-    workerUrl,
-    wasmUrl,
-    whiteMode,
-    whiteElo: whiteMode === 'elo' ? elo : undefined,
-    blackMode,
-    blackElo: blackMode === 'elo' ? elo : undefined,
-    stockfishMoveTime: 1000,
-    searchLimit: {
-      nodes: getNodesForElo(elo),
-    },
-    showWdl: true,
-    multiPv: 1,
-  });
+  ): StockfishConfig => buildStockfishEngineConfig(workerUrl, wasmUrl, whiteMode, blackMode, elo);
 
   const clock = new ChessClock();
   const clockSettings = {

@@ -10,7 +10,7 @@ export type SelectedPieceType = PalettePieceItem | 'eraser' | null;
 
 export interface PiecePaletteProps {
   selectedPiece: SelectedPieceType;
-  onSelect: (piece: SelectedPieceType) => void;
+  onSelect: (_piece: SelectedPieceType) => void;
   pieceSet?: string;
 }
 

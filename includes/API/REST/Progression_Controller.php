@@ -79,7 +79,9 @@ class Progression_Controller {
 	 * @return void
 	 */
 	public function register_routes(): void {
-		// Tâche 1 : Route d'enregistrement (Élève) - POST /wp-json/roi/v1/progression.
+		$positive_int_cb = static fn( $param ): bool => is_numeric( $param ) && (int) $param > 0;
+		$non_empty_str   = static fn( $param ): bool => is_string( $param ) && '' !== trim( $param );
+
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
@@ -90,40 +92,32 @@ class Progression_Controller {
 					'permission_callback' => array( $this, 'check_adherent_permissions' ),
 					'args'                => array(
 						'student_id'  => array(
-							'description'       => __( 'ID étudiant cible (pour les entraîneurs).', 'roi' ),
 							'type'              => 'string',
 							'required'          => false,
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 						'course_id'   => array(
-							'description'       => __( 'ID du cours complété.', 'roi' ),
 							'type'              => 'integer',
 							'required'          => false,
 							'sanitize_callback' => 'absint',
 						),
 						'element_id'  => array(
-							'description'       => __( 'ID de l\'élément validé.', 'roi' ),
 							'type'              => 'integer',
 							'required'          => false,
 							'sanitize_callback' => 'absint',
 						),
 						'element_ids' => array(
-							'description' => __( 'IDs des éléments validés.', 'roi' ),
-							'type'        => 'array',
-							'required'    => false,
-							'items'       => array(
-								'type' => 'integer',
-							),
+							'type'     => 'array',
+							'required' => false,
+							'items'    => array( 'type' => 'integer' ),
 						),
 						'time_spent'  => array(
-							'description'       => __( 'Temps passé en secondes.', 'roi' ),
 							'type'              => 'integer',
 							'required'          => false,
 							'default'           => 0,
 							'sanitize_callback' => 'absint',
 						),
 						'attempts'    => array(
-							'description'       => __( 'Nombre de tentatives.', 'roi' ),
 							'type'              => 'integer',
 							'required'          => false,
 							'default'           => 1,
@@ -139,20 +133,26 @@ class Progression_Controller {
 			)
 		);
 
-		// Tâche 2 : Route de consultation (Entraîneur) - GET /wp-json/roi/v1/progression/groupe.
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/groupe',
-			array(
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'obtenir_progression_groupe' ),
-					'permission_callback' => array( $this, 'check_entraineur_permissions' ),
-				),
-			)
+		$trainer_read_routes = array(
+			'/groupe'    => 'obtenir_progression_groupe',
+			'/candidats' => 'obtenir_candidats_eleves',
+			'/groupes'   => 'obtenir_groupes_eleves',
 		);
 
-		// Route de réinitialisation de progression (Entraîneur) - POST /wp-json/roi/v1/progression/reset.
+		foreach ( $trainer_read_routes as $subpath => $method ) {
+			register_rest_route(
+				$this->namespace,
+				'/' . $this->rest_base . $subpath,
+				array(
+					array(
+						'methods'             => WP_REST_Server::READABLE,
+						'callback'            => array( $this, $method ),
+						'permission_callback' => array( $this, 'check_entraineur_permissions' ),
+					),
+				)
+			);
+		}
+
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/reset',
@@ -163,19 +163,16 @@ class Progression_Controller {
 					'permission_callback' => array( $this, 'check_entraineur_permissions' ),
 					'args'                => array(
 						'student_id' => array(
-							'description'       => __( 'ID de l\'élève dont réinitialiser la progression.', 'roi' ),
 							'type'              => 'string',
 							'required'          => true,
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 						'course_id'  => array(
-							'description'       => __( 'ID du cours à réinitialiser.', 'roi' ),
 							'type'              => 'integer',
 							'required'          => false,
 							'sanitize_callback' => 'absint',
 						),
 						'element_id' => array(
-							'description'       => __( 'ID de l\'élément individuel à réinitialiser.', 'roi' ),
 							'type'              => 'integer',
 							'required'          => false,
 							'sanitize_callback' => 'absint',
@@ -185,20 +182,6 @@ class Progression_Controller {
 			)
 		);
 
-		// Route des candidats élèves (Entraîneur) - GET /wp-json/roi/v1/progression/candidats.
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/candidats',
-			array(
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'obtenir_candidats_eleves' ),
-					'permission_callback' => array( $this, 'check_entraineur_permissions' ),
-				),
-			)
-		);
-
-		// Route d'ajout d'un élève au suivi (Entraîneur) - POST /wp-json/roi/v1/progression/ajouter-eleve.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/ajouter-eleve',
@@ -209,12 +192,9 @@ class Progression_Controller {
 					'permission_callback' => array( $this, 'check_entraineur_permissions' ),
 					'args'                => array(
 						'adherent_id' => array(
-							'description'       => __( 'ID de l\'adhérent (CPT adherent) à ajouter au suivi.', 'roi' ),
 							'type'              => 'integer',
 							'required'          => true,
-							'validate_callback' => static function ( $param ): bool {
-								return is_numeric( $param ) && (int) $param > 0;
-							},
+							'validate_callback' => $positive_int_cb,
 							'sanitize_callback' => 'absint',
 						),
 					),
@@ -222,7 +202,6 @@ class Progression_Controller {
 			)
 		);
 
-		// Route de retrait d'un élève du suivi (Entraîneur) - POST /wp-json/roi/v1/progression/retirer-eleve.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/retirer-eleve',
@@ -233,12 +212,9 @@ class Progression_Controller {
 					'permission_callback' => array( $this, 'check_entraineur_permissions' ),
 					'args'                => array(
 						'student_id' => array(
-							'description'       => __( 'Identifiant unique de l\'élève à retirer.', 'roi' ),
 							'type'              => 'string',
 							'required'          => true,
-							'validate_callback' => static function ( $param ): bool {
-								return is_string( $param ) && '' !== trim( $param );
-							},
+							'validate_callback' => $non_empty_str,
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 					),
@@ -246,20 +222,6 @@ class Progression_Controller {
 			)
 		);
 
-		// Route des groupes d'adhérents (Entraîneur) - GET /wp-json/roi/v1/progression/groupes.
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/groupes',
-			array(
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'obtenir_groupes_eleves' ),
-					'permission_callback' => array( $this, 'check_entraineur_permissions' ),
-				),
-			)
-		);
-
-		// Route d'assignation d'un cours à un élève (Entraîneur) - POST /wp-json/roi/v1/progression/assigner-cours.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/assigner-cours',
@@ -270,31 +232,22 @@ class Progression_Controller {
 					'permission_callback' => array( $this, 'check_entraineur_permissions' ),
 					'args'                => array(
 						'adherent_id' => array(
-							'description'       => __( 'ID de l\'adhérent cible.', 'roi' ),
 							'type'              => 'integer',
 							'required'          => true,
-							'validate_callback' => static function ( $param ): bool {
-								return is_numeric( $param ) && (int) $param > 0;
-							},
+							'validate_callback' => $positive_int_cb,
 							'sanitize_callback' => 'absint',
 						),
 						'cours_id'    => array(
-							'description'       => __( 'ID du cours ciblé.', 'roi' ),
 							'type'              => 'integer',
 							'required'          => true,
-							'validate_callback' => static function ( $param ): bool {
-								return is_numeric( $param ) && (int) $param > 0;
-							},
+							'validate_callback' => $positive_int_cb,
 							'sanitize_callback' => 'absint',
 						),
 						'action'      => array(
-							'description'       => __( 'Action: "assign" ou "unassign".', 'roi' ),
 							'type'              => 'string',
 							'required'          => false,
 							'default'           => 'assign',
-							'validate_callback' => static function ( $param ): bool {
-								return in_array( $param, array( 'assign', 'unassign' ), true );
-							},
+							'validate_callback' => static fn( $param ): bool => in_array( $param, array( 'assign', 'unassign' ), true ),
 							'sanitize_callback' => 'sanitize_key',
 						),
 					),
@@ -318,42 +271,7 @@ class Progression_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function check_entraineur_permissions(): bool|WP_Error {
-		if ( ! is_user_logged_in() ) {
-			return new WP_Error(
-				'rest_forbidden',
-				__( 'Vous devez être connecté.', 'roi' ),
-				array( 'status' => 401 )
-			);
-		}
-
-		$user  = wp_get_current_user();
-		$roles = (array) $user->roles;
-
-		if ( ! in_array( 'entraineur', $roles, true ) && ! in_array( 'administrator', $roles, true ) ) {
-			return new WP_Error(
-				'rest_forbidden',
-				__( 'Accès réservé aux entraîneurs et administrateurs.', 'roi' ),
-				array( 'status' => 403 )
-			);
-		}
-
-		$default_roles = array( 'administrator', 'staff', 'entraineur', 'editor', 'membre' );
-		$allowed_roles = get_option( 'roi_apprentissage_allowed_roles', $default_roles );
-
-		if ( false === $allowed_roles ) {
-			$allowed_roles = $default_roles;
-		}
-
-		$intersect = array_intersect( $allowed_roles, $roles );
-		if ( empty( $intersect ) ) {
-			return new WP_Error(
-				'rest_forbidden',
-				__( 'Accès non autorisé.', 'roi' ),
-				array( 'status' => 403 )
-			);
-		}
-
-		return true;
+		return Permissions_Helper::check_entraineur_access();
 	}
 
 	/**
@@ -368,6 +286,32 @@ class Progression_Controller {
 			return '_roi_element_valide_' . sanitize_key( $identity );
 		}
 		return '_roi_element_valide';
+	}
+
+	/**
+	 * Parses a composite student identifier (`user_id__meta_key` or numeric `user_id`).
+	 *
+	 * @param mixed $student_id_raw Raw student ID parameter.
+	 * @return array{user_id: int, meta_key: string}
+	 */
+	private function parse_student_target( mixed $student_id_raw ): array {
+		$meta_key = '_roi_element_valide';
+		$user_id  = 0;
+
+		if ( is_string( $student_id_raw ) && str_contains( $student_id_raw, '__' ) ) {
+			$parts   = explode( '__', $student_id_raw, 2 );
+			$user_id = (int) $parts[0];
+			if ( isset( $parts[1] ) && '' !== $parts[1] ) {
+				$meta_key = sanitize_key( $parts[1] );
+			}
+		} elseif ( is_numeric( $student_id_raw ) ) {
+			$user_id = (int) $student_id_raw;
+		}
+
+		return array(
+			'user_id'  => $user_id,
+			'meta_key' => $meta_key,
+		);
 	}
 
 	/**
@@ -386,18 +330,9 @@ class Progression_Controller {
 				return $can_edit;
 			}
 			$is_trainer = true;
-			$meta_key   = '_roi_element_valide';
-			$user_id    = 0;
-
-			if ( is_string( $student_id_raw ) && str_contains( $student_id_raw, '__' ) ) {
-				$parts   = explode( '__', $student_id_raw );
-				$user_id = (int) $parts[0];
-				if ( isset( $parts[1] ) && '' !== $parts[1] ) {
-					$meta_key = $parts[1];
-				}
-			} else {
-				$user_id = (int) $student_id_raw;
-			}
+			$target     = $this->parse_student_target( $student_id_raw );
+			$user_id    = $target['user_id'];
+			$meta_key   = $target['meta_key'];
 		} else {
 			$user_id  = get_current_user_id();
 			$meta_key = $this->get_progression_meta_key( $request );
@@ -475,14 +410,8 @@ class Progression_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function obtenir_progression_groupe( WP_REST_Request $request ): WP_REST_Response { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-		$default_roles = array( 'administrator', 'staff', 'entraineur', 'editor', 'membre' );
-		$allowed_roles = get_option( 'roi_apprentissage_allowed_roles', $default_roles );
-
-		if ( false === $allowed_roles || empty( $allowed_roles ) ) {
-			$allowed_roles = $default_roles;
-		}
-
-		$groupe = $this->group_service->obtenir_progression_groupe( $allowed_roles );
+		$allowed_roles = Permissions_Helper::get_allowed_roles();
+		$groupe        = $this->group_service->obtenir_progression_groupe( $allowed_roles );
 
 		return new WP_REST_Response( $groupe, 200 );
 	}
@@ -508,20 +437,9 @@ class Progression_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function reset_progression_cours( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$student_id_raw = $request->get_param( 'student_id' );
-		$meta_key       = '_roi_element_valide';
-		$student_id     = 0;
-
-		if ( is_string( $student_id_raw ) && str_contains( $student_id_raw, '__' ) ) {
-			$parts      = explode( '__', $student_id_raw );
-			$student_id = (int) $parts[0];
-			if ( isset( $parts[1] ) ) {
-				$meta_key = $parts[1];
-			}
-		} else {
-			$student_id = (int) $student_id_raw;
-		}
-
+		$target     = $this->parse_student_target( $request->get_param( 'student_id' ) );
+		$student_id = $target['user_id'];
+		$meta_key   = $target['meta_key'];
 		$course_id  = (int) $request->get_param( 'course_id' );
 		$element_id = (int) $request->get_param( 'element_id' );
 
@@ -556,8 +474,7 @@ class Progression_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function obtenir_candidats_eleves( WP_REST_Request $request ): WP_REST_Response { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-		$candidats = $this->group_service->obtenir_candidats_eleves();
-		return new WP_REST_Response( $candidats, 200 );
+		return new WP_REST_Response( $this->group_service->obtenir_candidats_eleves(), 200 );
 	}
 
 	/**
@@ -568,7 +485,6 @@ class Progression_Controller {
 	 */
 	public function ajouter_eleve_suivi( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$adherent_id = (int) $request->get_param( 'adherent_id' );
-
 		if ( $adherent_id <= 0 ) {
 			return new WP_Error(
 				'invalid_adherent_id',
@@ -599,7 +515,6 @@ class Progression_Controller {
 	 */
 	public function retirer_eleve_suivi( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$student_id = (string) $request->get_param( 'student_id' );
-
 		if ( empty( $student_id ) ) {
 			return new WP_Error(
 				'missing_student_id',
@@ -608,17 +523,9 @@ class Progression_Controller {
 			);
 		}
 
-		$user_id  = 0;
-		$meta_key = '';
-
-		if ( str_contains( $student_id, '__' ) ) {
-			$parts    = explode( '__', $student_id, 2 );
-			$user_id  = (int) $parts[0];
-			$meta_key = sanitize_key( $parts[1] );
-		} elseif ( is_numeric( $student_id ) ) {
-			$user_id  = (int) $student_id;
-			$meta_key = '_roi_element_valide';
-		}
+		$target   = $this->parse_student_target( $student_id );
+		$user_id  = $target['user_id'];
+		$meta_key = $target['meta_key'];
 
 		if ( $user_id <= 0 || empty( $meta_key ) || ! str_starts_with( $meta_key, '_roi_element_valide' ) ) {
 			return new WP_Error(
@@ -683,7 +590,6 @@ class Progression_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function obtenir_groupes_eleves( WP_REST_Request $request ): WP_REST_Response { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-		$groups = $this->group_service->obtenir_groupes_eleves();
-		return new WP_REST_Response( $groups, 200 );
+		return new WP_REST_Response( $this->group_service->obtenir_groupes_eleves(), 200 );
 	}
 }
