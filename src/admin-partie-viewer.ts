@@ -26,7 +26,15 @@ interface ChessboardBlockElement extends HTMLElement {
 	boardAPI?: BoardAPI;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function onDomReady(fn: () => void) {
+	if (document.readyState !== 'loading') {
+		fn();
+	} else {
+		document.addEventListener('DOMContentLoaded', fn);
+	}
+}
+
+onDomReady(() => {
 	const block = document.getElementById(
 		'roi-partie-viewer-chessboard'
 	) as ChessboardBlockElement | null;
@@ -216,11 +224,15 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	// Poll for boardAPI initialization on the block element
+	let attempts = 0;
 	const checkInterval = setInterval(() => {
+		attempts++;
 		if (block.boardAPI) {
 			clearInterval(checkInterval);
 			boardAPI = block.boardAPI;
 			initViewer();
+		} else if (attempts > 200) {
+			clearInterval(checkInterval);
 		}
 	}, 50);
 });

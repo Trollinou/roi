@@ -35,8 +35,8 @@ class Assets {
 	public function enqueue_admin_assets( string $hook ): void {
 		global $post_type;
 
-		// Only load on CPT Exercice, Lecon, Cours or Video post editing screen.
-		if ( ! in_array( $post_type, array( 'roi_exercice', 'roi_cours', 'roi_lecon', 'roi_video' ), true ) || ( 'post.php' !== $hook && 'post-new.php' !== $hook ) ) {
+		// Only load on CPT Exercice, Lecon, Cours, Video or Partie post editing screen.
+		if ( ! in_array( $post_type, array( 'roi_exercice', 'roi_cours', 'roi_lecon', 'roi_video', 'roi_partie' ), true ) || ( 'post.php' !== $hook && 'post-new.php' !== $hook ) ) {
 			return;
 		}
 

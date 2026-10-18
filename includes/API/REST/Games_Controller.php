@@ -239,38 +239,27 @@ class Games_Controller {
 			}
 		}
 
-		// Formater la date fournie ou repli sur la date actuelle.
-		$post_date = (string) current_time( 'mysql' );
-		if ( ! empty( $game_date_raw ) && is_string( $game_date_raw ) ) {
-			$timestamp = strtotime( $game_date_raw );
-			if ( false !== $timestamp ) {
-				$formatted = wp_date( 'Y-m-d H:i:s', $timestamp );
-				if ( false !== $formatted ) {
-					$post_date = $formatted;
-				}
-			}
-		}
+		// Formater la date fournie ou repli sur l'instant présent.
+		$timestamp = ! empty( $game_date_raw ) && is_string( $game_date_raw ) && false !== strtotime( $game_date_raw )
+			? (int) strtotime( $game_date_raw )
+			: time();
 
-		// Insérer le post roi_partie.
-		$date_ts  = strtotime( $post_date );
-		$date_str = '';
-		if ( false !== $date_ts ) {
-			$formatted_title_date = wp_date( 'd/m/Y H:i', $date_ts );
-			if ( false !== $formatted_title_date ) {
-				$date_str = $formatted_title_date;
-			}
-		}
+		$post_date     = (string) wp_date( 'Y-m-d H:i:s', $timestamp ); // Heure locale du site.
+		$post_date_gmt = (string) gmdate( 'Y-m-d H:i:s', $timestamp );  // Heure UTC.
+		$date_str      = (string) wp_date( 'd/m/Y H:i', $timestamp );   // Titre formaté directement sans double décalage.
+
 		// 4. Titre de la partie adapté.
 		$post_title = sprintf( 'Partie de %s - %s', $player_name, $date_str );
 
 		$post_id = wp_insert_post(
 			array(
-				'post_type'    => 'roi_partie',
-				'post_status'  => 'publish',
-				'post_title'   => $post_title,
-				'post_content' => '',
-				'post_author'  => $current_user->ID,
-				'post_date'    => $post_date,
+				'post_type'     => 'roi_partie',
+				'post_status'   => 'publish',
+				'post_title'    => $post_title,
+				'post_content'  => '',
+				'post_author'   => $current_user->ID,
+				'post_date'     => $post_date,
+				'post_date_gmt' => $post_date_gmt,
 			),
 			true
 		);

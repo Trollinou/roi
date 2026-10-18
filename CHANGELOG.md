@@ -5,7 +5,12 @@
 *   **Enregistrement des parties PWA & Résolution d'identité (`includes/API/REST/Games_Controller.php`, `src/types/api/games.ts`) :**
     *   **Assouplissement de la route `POST /roi/v1/games`** : `member_id` rendu optionnel (`default => 0`, validation `>= 0`), avec déduction automatique de l'identité via l'en-tête `X-Selected-Identity` (formats `member_123` ou numérique) ou le compte utilisateur WordPress (`_dame_adherent_id`).
     *   **Gestion des permissions Adhérent & Admin/Entraîneur** : Autorisation de sauvegarde pour les administrateurs et entraîneurs lorsqu'aucun adhérent n'est rattaché (`member_id = 0`), et génération dynamique du titre de la partie à partir de l'identité du joueur résolue.
+    *   **Correction du décalage de fuseau horaire (GMT+4 / +2h)** : Résolution de la double conversion de fuseau horaire lors de la génération du titre de publication et enregistrement explicite de `post_date_gmt` en UTC (`time()` / `gmdate()`) et `post_date` en heure locale (`wp_date()`).
 
+
+*   **Correction de l'affichage de l'échiquier dans le visualiseur de parties (`Metaboxes/Partie.php`, `Assets.php`, `src/blocks/chessboard/view.ts`, `src/admin-partie-viewer.ts`, `style.scss`) :**
+    *   **Résolution du blocage de chargement JS** : Découplage de la dépendance dure `@wordpress/interactivity` (`wp-interactivity`) inexistante dans le runtime admin classique, permettant le chargement effectif de `chessboard-view.js` et `admin-partie-viewer.js`.
+    *   **Restauration géométrique et visuelle de l'échiquier** : Application de `position: absolute; inset: 0; width: 100%; height: 100%;` sur `.chessboard-mount-element` afin d'éviter une hauteur nulle lors du calcul des dimensions par Chessground, injection des classes `.piece-set-cburnett .board-theme-brown .fit-container` sur `.main-wrap`, et enfilement de la feuille de style d'administration (`admin-style.css`) sur le CPT `roi_partie`.
 
 *   **Suppression de `eg-chessboard.css` déprécié (`includes/Admin/Assets.php`, `webpack.config.js`, `scripts/build-css.js`) :**
     *   **Éradication du Bundle `eg-chessboard.css`** : Suppression de la génération Webpack (`CopyWebpackPlugin`) de `build/chessboard/eg-chessboard.css` et de son enfilement dans `Assets.php` (`roi-admin-chessboard-style`), au profit de l'utilisation exclusive de `eg-chessboard/base.css` et du style de pièces `eg-chessboard/pieces/cburnett.css` (embarqué également dans les feuilles de style des blocs via `scripts/build-css.js`).

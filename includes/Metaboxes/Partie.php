@@ -173,7 +173,7 @@ class Partie {
 						data-show-threats="false"
 						data-use-stockfish="false"
 						data-free-mode="false">
-						<section class="main-wrap">
+						<section class="main-wrap fit-container piece-set-cburnett board-theme-brown">
 							<div class="main-board">
 								<div class="chessboard-mount-element"></div>
 							</div>
@@ -257,9 +257,16 @@ class Partie {
 			$chess_dir  = ROI_PLUGIN_DIR . 'build/chessboard/';
 
 			wp_enqueue_style(
+				'roi-admin-style',
+				$plugin_url . 'assets/css/admin-style.css',
+				array(),
+				ROI_VERSION
+			);
+
+			wp_enqueue_style(
 				'roi-public-chessboard-style',
 				$chess_url . 'style.css',
-				array(),
+				array( 'roi-admin-style' ),
 				ROI_VERSION
 			);
 
@@ -268,11 +275,12 @@ class Partie {
 				'dependencies' => array( 'wp-element' ),
 				'version'      => ROI_VERSION,
 			);
+			$view_deps       = array_values( array_filter( (array) $view_asset['dependencies'], fn( $dep ) => 'wp-interactivity' !== $dep ) );
 
 			wp_enqueue_script(
 				'roi-public-chessboard-view',
 				$chess_url . 'chessboard-view.js',
-				$view_asset['dependencies'],
+				$view_deps,
 				$view_asset['version'],
 				array(
 					'strategy'  => 'defer',
@@ -293,11 +301,13 @@ class Partie {
 				'dependencies' => array( 'roi-public-chessboard-view' ),
 				'version'      => ROI_VERSION,
 			);
+			$viewer_deps       = array_values( array_unique( array_merge( array( 'roi-public-chessboard-view' ), (array) $viewer_asset['dependencies'] ) ) );
+			$viewer_deps       = array_values( array_filter( $viewer_deps, fn( $dep ) => 'wp-interactivity' !== $dep ) );
 
 			wp_enqueue_script(
 				'roi-admin-partie-viewer',
 				$chess_url . 'admin-partie-viewer.js',
-				array_merge( array( 'roi-public-chessboard-view' ), $viewer_asset['dependencies'] ),
+				$viewer_deps,
 				$viewer_asset['version'],
 				array(
 					'strategy'  => 'defer',

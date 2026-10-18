@@ -1,4 +1,9 @@
-import { store, getContext, getElement } from '@wordpress/interactivity';
+import type { StoreConfig } from '@wordpress/interactivity';
+
+const wpInteractivity = typeof window !== 'undefined' ? (window as any).wp?.interactivity : null;
+const store = wpInteractivity?.store || ((_namespace: string, config: any) => config || { state: {} });
+const getElement: () => { ref: HTMLElement | null } = wpInteractivity?.getElement || (() => ({ ref: null }));
+const getContext = wpInteractivity?.getContext || (() => ({}));
 import { BoardCore } from 'eg-chessboard';
 import type { StockfishConfig, StockfishEvaluation, EngineStatus } from 'eg-chessboard';
 import 'eg-chessboard/base.css';
@@ -509,8 +514,16 @@ const { state: globalStoreState } = store('roi/chessboard', {
   },
 });
 
+function onDomReady(fn: () => void) {
+  if (document.readyState !== 'loading') {
+    fn();
+  } else {
+    document.addEventListener('DOMContentLoaded', fn);
+  }
+}
+
 // Fallback initialization for DOM without Interactivity API runtime
-document.addEventListener('DOMContentLoaded', () => {
+onDomReady(() => {
   if (window.chessboardViewInitialized) {
     return;
   }

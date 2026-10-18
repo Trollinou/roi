@@ -111,10 +111,12 @@ class ChessEngine {
 			'version'      => ROI_VERSION,
 		);
 
+		$view_deps = array_values( array_filter( (array) $view_asset['dependencies'], fn( $dep ) => 'wp-interactivity' !== $dep ) );
+
 		wp_register_script(
 			'roi-public-chessboard-view',
 			$chess_url . 'chessboard-view.js',
-			$view_asset['dependencies'],
+			$view_deps,
 			$view_asset['version'],
 			array(
 				'strategy'  => 'defer',
