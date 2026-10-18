@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+*   **Enregistrement des parties PWA & Résolution d'identité (`includes/API/REST/Games_Controller.php`, `src/types/api/games.ts`) :**
+    *   **Assouplissement de la route `POST /roi/v1/games`** : `member_id` rendu optionnel (`default => 0`, validation `>= 0`), avec déduction automatique de l'identité via l'en-tête `X-Selected-Identity` (formats `member_123` ou numérique) ou le compte utilisateur WordPress (`_dame_adherent_id`).
+    *   **Gestion des permissions Adhérent & Admin/Entraîneur** : Autorisation de sauvegarde pour les administrateurs et entraîneurs lorsqu'aucun adhérent n'est rattaché (`member_id = 0`), et génération dynamique du titre de la partie à partir de l'identité du joueur résolue.
+
+
 *   **Suppression de `eg-chessboard.css` déprécié (`includes/Admin/Assets.php`, `webpack.config.js`, `scripts/build-css.js`) :**
     *   **Éradication du Bundle `eg-chessboard.css`** : Suppression de la génération Webpack (`CopyWebpackPlugin`) de `build/chessboard/eg-chessboard.css` et de son enfilement dans `Assets.php` (`roi-admin-chessboard-style`), au profit de l'utilisation exclusive de `eg-chessboard/base.css` et du style de pièces `eg-chessboard/pieces/cburnett.css` (embarqué également dans les feuilles de style des blocs via `scripts/build-css.js`).
 

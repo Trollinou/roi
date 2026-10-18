@@ -18,7 +18,7 @@ export interface SavedGame {
 }
 
 export interface SaveGameRequest {
-  member_id: number;
+  member_id?: number;
   difficulty_level?: number;
   hints_count?: number;
   takebacks_count?: number;

@@ -62,9 +62,10 @@ class Games_Controller {
 						'member_id'        => array(
 							'description'       => __( 'ID du membre ayant joué la partie.', 'roi' ),
 							'type'              => 'integer',
-							'required'          => true,
+							'required'          => false,
+							'default'           => 0,
 							'validate_callback' => static function ( $param ): bool {
-								return is_numeric( $param ) && (int) $param > 0;
+								return is_numeric( $param ) && (int) $param >= 0;
 							},
 							'sanitize_callback' => 'absint',
 						),
@@ -158,27 +159,48 @@ class Games_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function save_game( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$member_id        = (int) $request->get_param( 'member_id' );
-		$difficulty_level = (int) $request->get_param( 'difficulty_level' );
-		$hints_count      = (int) $request->get_param( 'hints_count' );
-		$takebacks_count  = (int) $request->get_param( 'takebacks_count' );
-		$pgn              = sanitize_textarea_field( (string) $request->get_param( 'pgn' ) );
-		$duration         = (int) $request->get_param( 'duration' );
-		$game_date_raw    = sanitize_text_field( (string) $request->get_param( 'game_date' ) );
+		$member_id         = (int) $request->get_param( 'member_id' );
+		$selected_identity = (string) $request->get_header( 'X-Selected-Identity' );
+		$current_user      = wp_get_current_user();
+		$difficulty_level  = (int) $request->get_param( 'difficulty_level' );
+		$hints_count       = (int) $request->get_param( 'hints_count' );
+		$takebacks_count   = (int) $request->get_param( 'takebacks_count' );
+		$pgn               = sanitize_textarea_field( (string) $request->get_param( 'pgn' ) );
+		$duration          = (int) $request->get_param( 'duration' );
+		$game_date_raw     = sanitize_text_field( (string) $request->get_param( 'game_date' ) );
 
-		if ( $member_id <= 0 ) {
+		// 1. Si member_id absent ou 0, déduction depuis l'en-tête X-Selected-Identity.
+		if ( $member_id <= 0 && ! empty( $selected_identity ) ) {
+			if ( str_starts_with( $selected_identity, 'member_' ) ) {
+				$member_id = (int) str_replace( 'member_', '', $selected_identity );
+			} elseif ( is_numeric( $selected_identity ) ) {
+				$member_id = (int) $selected_identity;
+			}
+		}
+
+		// 2. Repli éventuel sur le lien adhérent du compte WordPress (_dame_adherent_id).
+		if ( $member_id <= 0 && $current_user->ID > 0 ) {
+			$meta_adh = (int) get_user_meta( $current_user->ID, '_dame_adherent_id', true );
+			if ( $meta_adh > 0 ) {
+				$member_id = $meta_adh;
+			}
+		}
+
+		// 3. Validation des permissions selon le cas (Adhérent CPT vs Admin wp_virtual).
+		$player_name = (string) $current_user->display_name;
+
+		if ( $member_id > 0 ) {
+			$member = get_post( $member_id );
+			if ( ! $member || 'adherent' !== $member->post_type ) {
+				return new WP_Error( 'member_not_found', __( 'Membre non trouvé.', 'roi' ), array( 'status' => 404 ) );
+			}
+			if ( ! Permissions_Helper::can_access_member( $member_id ) ) {
+				return new WP_Error( 'rest_forbidden', __( 'Accès refusé pour ce membre.', 'roi' ), array( 'status' => 403 ) );
+			}
+			$player_name = (string) $member->post_title;
+		} elseif ( ! Permissions_Helper::is_trainer_or_admin() ) {
+			// Si member_id est 0, seuls les administrateurs et entraîneurs sont autorisés.
 			return new WP_Error( 'invalid_member', __( 'ID de membre invalide.', 'roi' ), array( 'status' => 400 ) );
-		}
-
-		// Vérifier que le membre existe bien (CPT adherent de Dame).
-		$member = get_post( $member_id );
-		if ( ! $member || 'adherent' !== $member->post_type ) {
-			return new WP_Error( 'member_not_found', __( 'Membre non trouvé.', 'roi' ), array( 'status' => 404 ) );
-		}
-
-		// Contrôle d'autorisation sur l'adhérent cible (prévention IDOR).
-		if ( ! Permissions_Helper::can_access_member( $member_id ) ) {
-			return new WP_Error( 'rest_forbidden', __( 'Vous n\'êtes pas autorisé à enregistrer une partie pour ce membre.', 'roi' ), array( 'status' => 403 ) );
 		}
 
 		// Contrôle anti-doublons rapide : comparer le PGN sur les 5 dernières parties du membre uniquement (évite un JOIN SQL sur LONGTEXT _roi_pgn).
@@ -229,8 +251,6 @@ class Games_Controller {
 			}
 		}
 
-		$current_user = wp_get_current_user();
-
 		// Insérer le post roi_partie.
 		$date_ts  = strtotime( $post_date );
 		$date_str = '';
@@ -240,7 +260,8 @@ class Games_Controller {
 				$date_str = $formatted_title_date;
 			}
 		}
-		$post_title = sprintf( 'Partie de %s - %s', (string) $member->post_title, $date_str );
+		// 4. Titre de la partie adapté.
+		$post_title = sprintf( 'Partie de %s - %s', $player_name, $date_str );
 
 		$post_id = wp_insert_post(
 			array(
