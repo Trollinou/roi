@@ -81,27 +81,14 @@ export default function StudentDetailCourseCard( {
 	}
 
 	return (
-		<div
-			style={ {
-				background: '#fff',
-				border: '1px solid #e0e0e0',
-				borderRadius: '5px',
-				overflow: 'hidden',
-			} }
-		>
+		<div className="roi-detail-course-card">
 			{ /* Course Header */ }
 			<div
 				role="button"
 				tabIndex={ 0 }
-				style={ {
-					padding: '10px 14px',
-					display: 'flex',
-					justifyContent: 'space-between',
-					alignItems: 'center',
-					background: '#fff',
-					borderBottom: isExpanded ? '1px solid #f0f0f1' : 'none',
-					cursor: 'pointer',
-				} }
+				className={ `roi-detail-course-card__header${
+					isExpanded ? ' roi-detail-course-card__header--expanded' : ''
+				}` }
 				onClick={ () => toggleCourse( course.id ) }
 				onKeyDown={ ( e ) => {
 					if ( e.key === 'Enter' || e.key === ' ' ) {
@@ -110,62 +97,25 @@ export default function StudentDetailCourseCard( {
 					}
 				} }
 			>
-				<div
-					style={ {
-						display: 'flex',
-						alignItems: 'center',
-						gap: '8px',
-						flexWrap: 'wrap',
-					} }
-				>
-					<span style={ { fontSize: '12px', color: '#888' } }>
+				<div className="roi-detail-course-card__info">
+					<span className="roi-detail-course-card__toggle">
 						{ isExpanded ? '▲' : '▼' }
 					</span>
-					<span
-						style={ {
-							fontWeight: '600',
-							fontSize: '13px',
-							color: '#1d2327',
-						} }
-					>
+					<span className="roi-detail-course-card__title">
 						{ decodeEntities( course.titre ) }
 					</span>
 					{ ( course.is_assigned || isAssigned ) && (
-						<span
-							style={ {
-								fontSize: '10px',
-								background: '#fef3c7',
-								color: '#92400e',
-								border: '1px solid #fde68a',
-								padding: '1px 6px',
-								borderRadius: '3px',
-								fontWeight: '600',
-							} }
-						>
+						<span className="roi-detail-course-card__assigned-badge">
 							📌 Assigné
 						</span>
 					) }
-					<span
-						style={ {
-							fontSize: '11px',
-							color: '#646970',
-							background: '#f0f0f1',
-							padding: '2px 6px',
-							borderRadius: '3px',
-						} }
-					>
+					<span className="roi-detail-course-card__stats-badge">
 						{ courseValidatedCount }/{ playlist.length } (
 						{ coursePercentage }%)
 					</span>
 				</div>
 
-				<div
-					style={ {
-						display: 'flex',
-						alignItems: 'center',
-						gap: '8px',
-					} }
-				>
+				<div className="roi-detail-course-card__actions">
 					{ student.identity_type === 'member' && (
 						<button
 							type="button"
@@ -182,18 +132,11 @@ export default function StudentDetailCourseCard( {
 									? 'Retirer ce cours des assignations de cet élève'
 									: 'Assigner ce cours à cet élève'
 							}
-							style={ {
-								padding: '4px 8px',
-								fontSize: '11px',
-								fontWeight: '600',
-								borderRadius: '3px',
-								border: isAssigned
-									? '1px solid #f59e0b'
-									: '1px solid #c3c4c7',
-								background: isAssigned ? '#fffbeb' : '#fff',
-								color: isAssigned ? '#b45309' : '#50575e',
-								cursor: 'pointer',
-							} }
+							className={ `roi-detail-course-card__assign-btn${
+								isAssigned
+									? ' roi-detail-course-card__assign-btn--assigned'
+									: ''
+							}` }
 						>
 							{ assignText }
 						</button>
@@ -211,32 +154,7 @@ export default function StudentDetailCourseCard( {
 							} }
 							disabled={ Boolean( isValidatingCourse || isResettingCourse ) }
 							title="Valider tous les exercices restants de ce cours (Club)"
-							style={ {
-								padding: '4px 10px',
-								fontSize: '11px',
-								fontWeight: '600',
-								color: '#00a32a',
-								border: '1px solid #b8e6b8',
-								borderRadius: '3px',
-								background: '#f0fdf4',
-								cursor: 'pointer',
-							} }
-							onMouseOver={ ( e ) => {
-								e.currentTarget.style.backgroundColor =
-									'#dcfce7';
-							} }
-							onMouseOut={ ( e ) => {
-								e.currentTarget.style.backgroundColor =
-									'#f0fdf4';
-							} }
-							onFocus={ ( e ) => {
-								e.currentTarget.style.backgroundColor =
-									'#dcfce7';
-							} }
-							onBlur={ ( e ) => {
-								e.currentTarget.style.backgroundColor =
-									'#f0fdf4';
-							} }
+							className="roi-detail-course-card__validate-btn"
 						>
 							{ isValidatingCourse
 								? 'Validation...'
@@ -262,21 +180,7 @@ export default function StudentDetailCourseCard( {
 							)
 						}
 						title="Réinitialiser tout le cours"
-						style={ {
-							padding: '4px 8px',
-							fontSize: '11px',
-							color:
-								courseValidatedCount === 0
-									? '#a7aaad'
-									: '#d63638',
-							border: '1px solid currentColor',
-							borderRadius: '3px',
-							background: 'none',
-							cursor:
-								courseValidatedCount === 0
-									? 'default'
-									: 'pointer',
-						} }
+						className="roi-detail-course-card__reset-btn"
 					>
 						{ isResettingCourse
 							? 'Réinitialisation...'
@@ -287,14 +191,7 @@ export default function StudentDetailCourseCard( {
 
 			{ /* Item details list */ }
 			{ isExpanded && (
-				<div
-					style={ {
-						padding: '8px 12px',
-						display: 'flex',
-						flexDirection: 'column',
-						gap: '6px',
-					} }
-				>
+				<div className="roi-detail-course-card__items">
 					{ displayedItems.map( ( item, idx ) => {
 						const isValidated = validesSet.has(
 							Number( item.id )

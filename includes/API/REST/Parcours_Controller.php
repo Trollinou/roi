@@ -81,6 +81,7 @@ class Parcours_Controller {
 		wp_cache_delete( 'roi_total_cours_count', 'roi_chess' );
 		wp_cache_delete( 'roi_assigned_cours_count', 'roi_chess' );
 		wp_cache_delete( 'roi_assigned_elements_0', 'roi_chess' );
+		\ROI\Services\Progression\Group_Service::flush_group_progression_cache();
 	}
 
 	/**

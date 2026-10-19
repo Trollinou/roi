@@ -139,45 +139,93 @@ class Partie {
 		$initial_fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 		?>
 		<div class="roi-pgn-viewer-container">
-			<!-- Partie Haute : Boutons de navigation et résumé du coup -->
-			<div class="roi-viewer-header">
-				<div class="roi-viewer-controls">
-					<button type="button" class="button" id="roi-prev-start-btn" title="<?php esc_attr_e( 'Début', 'roi' ); ?>">«</button>
-					<button type="button" class="button" id="roi-prev-btn" title="<?php esc_attr_e( 'Précédent', 'roi' ); ?>">‹</button>
-					<button type="button" class="button" id="roi-next-btn" title="<?php esc_attr_e( 'Suivant', 'roi' ); ?>">›</button>
-					<button type="button" class="button" id="roi-next-end-btn" title="<?php esc_attr_e( 'Fin', 'roi' ); ?>">»</button>
+			<!-- Barre d'outils d'analyse Stockfish -->
+			<div class="roi-analysis-toolbar" id="roi-analysis-toolbar">
+				<button type="button" class="button button-secondary" id="roi-eval-direct-btn">
+					<span class="dashicons dashicons-controls-play" aria-hidden="true"></span>
+					<span class="btn-text"><?php esc_html_e( 'Éval direct', 'roi' ); ?></span>
+				</button>
+				<button type="button" class="button button-secondary" id="roi-hint-btn">
+					<span class="dashicons dashicons-lightbulb" aria-hidden="true"></span>
+					<span class="btn-text"><?php esc_html_e( 'Conseil', 'roi' ); ?></span>
+				</button>
+				<button type="button" class="button button-secondary" id="roi-bilan-btn">
+					<span class="dashicons dashicons-awards" aria-hidden="true"></span>
+					<span class="btn-text"><?php esc_html_e( 'Bilan', 'roi' ); ?></span>
+				</button>
+			</div>
+
+			<!-- Message informatif de conseil / statut -->
+			<div class="roi-analysis-feedback is-hidden" id="roi-analysis-feedback" aria-live="polite"></div>
+
+			<!-- Barre de chargement / progression de la revue -->
+			<div class="roi-review-progress is-hidden" id="roi-review-progress">
+				<div class="roi-review-progress-header">
+					<span class="roi-review-progress-label"><?php esc_html_e( 'Revue de la partie en cours...', 'roi' ); ?></span>
+					<span class="roi-review-progress-percent" id="roi-review-progress-percent">0%</span>
 				</div>
-				<div class="roi-viewer-move-info" id="roi-move-info">
-					<?php esc_html_e( 'Position de départ', 'roi' ); ?>
+				<div class="roi-review-progress-bar-wrap">
+					<div class="roi-review-progress-bar-fill" id="roi-review-progress-bar-fill"></div>
 				</div>
 			</div>
+
+			<!-- Tableau de bord du Bilan (Précision, compteurs, fiche didactique du coup) -->
+			<div class="roi-review-dashboard is-hidden" id="roi-review-dashboard"></div>
 
 			<!-- Partie Principale : Liste de coups à gauche, Échiquier à droite -->
 			<div class="roi-viewer-body">
 				<!-- Colonne Gauche : Liste des coups -->
 				<div class="roi-viewer-moves-list-wrapper">
 					<div class="roi-viewer-moves-list" id="roi-moves-list">
-						<span style="color: var(--roi-color-text-muted); font-style: italic;"><?php esc_html_e( 'Aucun coup disponible', 'roi' ); ?></span>
+						<span class="roi-no-moves-message"><?php esc_html_e( 'Aucun coup disponible', 'roi' ); ?></span>
 					</div>
 				</div>
 
-				<!-- Colonne Droite : L'échiquier -->
-				<div class="roi-viewer-board-wrapper">
-					<div id="roi-partie-viewer-chessboard" 
-						class="chessboard-block"
-						data-fen="<?php echo esc_attr( $initial_fen ); ?>"
-						data-orientation="white"
-						data-coordinates="true"
-						data-view-only="true"
-						data-player-color="both"
-						data-show-threats="false"
-						data-use-stockfish="false"
-						data-free-mode="false">
-						<section class="main-wrap">
-							<div class="main-board">
-								<div class="chessboard-mount-element"></div>
+				<!-- Colonne Droite : L'échiquier et la barre d'évaluation -->
+				<div class="roi-viewer-board-layout">
+					<!-- Jauge d'évaluation verticale Stockfish -->
+					<div id="roi-eval-bar-container" class="roi-eval-bar-container is-hidden">
+						<div class="roi-eval-bar">
+							<div class="roi-eval-fill" id="roi-eval-bar-fill"></div>
+						</div>
+						<div class="roi-eval-score-badge" id="roi-eval-score-badge">0.0</div>
+					</div>
+
+					<div class="roi-viewer-board-wrapper">
+						<div id="roi-partie-viewer-chessboard" 
+							class="chessboard-block"
+							data-fen="<?php echo esc_attr( $initial_fen ); ?>"
+							data-orientation="white"
+							data-coordinates="true"
+							data-view-only="true"
+							data-player-color="both"
+							data-show-threats="false"
+							data-show-material-indicator="false"
+							data-clock-preset="none"
+							data-use-stockfish="true"
+							data-free-mode="false">
+							<section class="main-wrap piece-set-cburnett board-theme-brown">
+								<div class="main-board">
+									<div class="chessboard-mount-element"></div>
+								</div>
+							</section>
+						</div>
+
+						<!-- Barre de navigation sous l'échiquier -->
+						<div class="roi-viewer-board-controls" id="roi-viewer-board-controls">
+							<div class="roi-viewer-controls">
+								<button type="button" class="button" id="roi-prev-start-btn" title="<?php esc_attr_e( 'Début', 'roi' ); ?>">«</button>
+								<button type="button" class="button" id="roi-prev-btn" title="<?php esc_attr_e( 'Précédent', 'roi' ); ?>">‹</button>
+								<button type="button" class="button" id="roi-next-btn" title="<?php esc_attr_e( 'Suivant', 'roi' ); ?>">›</button>
+								<button type="button" class="button" id="roi-next-end-btn" title="<?php esc_attr_e( 'Fin', 'roi' ); ?>">»</button>
 							</div>
-						</section>
+							<div class="roi-viewer-move-info" id="roi-move-info">
+								<?php esc_html_e( 'Position de départ', 'roi' ); ?>
+							</div>
+						</div>
+
+						<!-- Variante PV -->
+						<div id="roi-pv-container" class="roi-pv-container is-hidden"></div>
 					</div>
 				</div>
 			</div>
@@ -257,9 +305,16 @@ class Partie {
 			$chess_dir  = ROI_PLUGIN_DIR . 'build/chessboard/';
 
 			wp_enqueue_style(
+				'roi-admin-style',
+				$plugin_url . 'assets/css/admin-style.css',
+				array(),
+				ROI_VERSION
+			);
+
+			wp_enqueue_style(
 				'roi-public-chessboard-style',
 				$chess_url . 'style.css',
-				array(),
+				array( 'roi-admin-style' ),
 				ROI_VERSION
 			);
 
@@ -268,11 +323,12 @@ class Partie {
 				'dependencies' => array( 'wp-element' ),
 				'version'      => ROI_VERSION,
 			);
+			$view_deps       = array_values( array_filter( (array) $view_asset['dependencies'], fn( $dep ) => 'wp-interactivity' !== $dep ) );
 
 			wp_enqueue_script(
 				'roi-public-chessboard-view',
 				$chess_url . 'chessboard-view.js',
-				$view_asset['dependencies'],
+				$view_deps,
 				$view_asset['version'],
 				array(
 					'strategy'  => 'defer',
@@ -285,6 +341,7 @@ class Partie {
 				'roiChessConfig',
 				array(
 					'stockfishWorkerUrl' => \ROI\Chess\ChessEngine::get_stockfish_worker_url(),
+					'stockfishWasmUrl'   => \ROI\Chess\ChessEngine::get_stockfish_wasm_url(),
 				)
 			);
 
@@ -293,11 +350,13 @@ class Partie {
 				'dependencies' => array( 'roi-public-chessboard-view' ),
 				'version'      => ROI_VERSION,
 			);
+			$viewer_deps       = array_values( array_unique( array_merge( array( 'roi-public-chessboard-view' ), (array) $viewer_asset['dependencies'] ) ) );
+			$viewer_deps       = array_values( array_filter( $viewer_deps, fn( $dep ) => 'wp-interactivity' !== $dep ) );
 
 			wp_enqueue_script(
 				'roi-admin-partie-viewer',
 				$chess_url . 'admin-partie-viewer.js',
-				array_merge( array( 'roi-public-chessboard-view' ), $viewer_asset['dependencies'] ),
+				$viewer_deps,
 				$viewer_asset['version'],
 				array(
 					'strategy'  => 'defer',

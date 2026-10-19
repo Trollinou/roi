@@ -13,7 +13,7 @@ const t4ConsigneInput = document.getElementById('roi_t4_consigne') as HTMLInputE
 const t4PgnTextarea = document.getElementById('roi_t4_pgn') as HTMLTextAreaElement | null;
 const btnPgnEditor = document.getElementById('btn_open_pgn_editor_t4');
 
-let previewViewer: { update: (pgn: string) => void } | null = null;
+let previewViewer: { update: (_pgn: string) => void } | null = null;
 
 export function updateConfig(): void {
 	if (!textarea) {

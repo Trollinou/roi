@@ -22,7 +22,7 @@ const t3Exercices: ExerciceItem[] = [
 	{ consigne: '', pgn: '' },
 	{ consigne: '', pgn: '' },
 ];
-const previewViewers: Array<{ update: (pgn: string) => void } | null> = [null, null, null, null];
+const previewViewers: Array<{ update: (_pgn: string) => void } | null> = [null, null, null, null];
 
 export function updateConfig(): void {
 	if (!textarea) {

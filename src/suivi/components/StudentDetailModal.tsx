@@ -207,20 +207,6 @@ export default function StudentDetailModal( {
 			className="roi-student-detail-modal-overlay"
 			role="button"
 			tabIndex={ 0 }
-			style={ {
-				position: 'fixed',
-				top: 0,
-				left: 0,
-				right: 0,
-				bottom: 0,
-				backgroundColor: 'rgba(0, 0, 0, 0.65)',
-				display: 'flex',
-				justifyContent: 'center',
-				alignItems: 'center',
-				zIndex: 100000,
-				padding: '30px 20px',
-				boxSizing: 'border-box',
-			} }
 			onClick={ ( e ) => {
 				if ( e.target === e.currentTarget ) {
 					onClose();
@@ -235,20 +221,6 @@ export default function StudentDetailModal( {
 			<div
 				className="roi-student-detail-modal"
 				role="document"
-				style={ {
-					background: '#fff',
-					borderRadius: '8px',
-					width: '100%',
-					maxWidth: '900px',
-					height: '85vh',
-					maxHeight: '850px',
-					display: 'flex',
-					flexDirection: 'column',
-					boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
-					overflow: 'hidden',
-					position: 'relative',
-					boxSizing: 'border-box',
-				} }
 			>
 				{ /* HEADER */ }
 				<StudentModalHeader
@@ -295,33 +267,12 @@ export default function StudentDetailModal( {
 				/>
 
 				{ /* FOOTER */ }
-				<div
-					style={ {
-						padding: '12px 24px',
-						borderTop: '1px solid #e0e0e0',
-						display: 'flex',
-						justifyContent: 'space-between',
-						alignItems: 'center',
-						background: '#f8f9fa',
-						flexShrink: 0,
-					} }
-				>
+				<div className="roi-student-detail-modal__footer">
 					<button
 						type="button"
 						onClick={ handleRemoveFromTracking }
 						disabled={ removing }
-						style={ {
-							background: '#fff',
-							border: '1px solid #d63638',
-							color: '#d63638',
-							padding: '6px 14px',
-							fontSize: '13px',
-							borderRadius: '4px',
-							cursor: removing ? 'default' : 'pointer',
-							display: 'inline-flex',
-							alignItems: 'center',
-							gap: '6px',
-						} }
+						className="roi-student-detail-modal__remove-btn"
 					>
 						{ removing
 							? 'Retrait en cours...'
@@ -332,7 +283,6 @@ export default function StudentDetailModal( {
 						type="button"
 						onClick={ onClose }
 						className="button button-secondary"
-						style={ { padding: '6px 16px', fontSize: '13px' } }
 					>
 						Fermer
 					</button>

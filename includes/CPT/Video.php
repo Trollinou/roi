@@ -22,6 +22,7 @@ class Video {
 	 */
 	public function init(): void {
 		add_action( 'init', array( $this, 'register' ), 0 );
+		add_action( 'init', array( $this, 'register_meta' ) );
 	}
 
 	/**
@@ -67,15 +68,15 @@ class Video {
 			'supports'            => array( 'title', 'revision' ),
 			'taxonomies'          => array( 'roi_chapitre' ),
 			'hierarchical'        => false,
-			'public'              => true,
+			'public'              => false,
 			'show_ui'             => true,
 			'show_in_menu'        => 'roi-apprentissage',
 			'show_in_admin_bar'   => true,
-			'show_in_nav_menus'   => true,
+			'show_in_nav_menus'   => false,
 			'can_export'          => true,
-			'has_archive'         => true,
-			'exclude_from_search' => false,
-			'publicly_queryable'  => true,
+			'has_archive'         => false,
+			'exclude_from_search' => true,
+			'publicly_queryable'  => false,
 			'capability_type'     => 'post',
 			'capabilities'        => array(
 				'edit_post'          => 'edit_exercice',
@@ -92,5 +93,74 @@ class Video {
 		);
 
 		register_post_type( 'roi_video', $args );
+	}
+
+	/**
+	 * Register typed post meta for roi_video.
+	 *
+	 * @return void
+	 */
+	public function register_meta(): void {
+		register_post_meta(
+			'roi_video',
+			'_roi_video_url',
+			array(
+				'show_in_rest'      => true,
+				'single'            => true,
+				'type'              => 'string',
+				'sanitize_callback' => 'esc_url_raw',
+				'auth_callback'     => function ( bool $allowed, string $meta_key, int $post_id ): bool {
+					return current_user_can( 'edit_post', $post_id );
+				},
+			)
+		);
+
+		register_post_meta(
+			'roi_video',
+			'_roi_video_id',
+			array(
+				'show_in_rest'      => true,
+				'single'            => true,
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+				'auth_callback'     => function ( bool $allowed, string $meta_key, int $post_id ): bool {
+					return current_user_can( 'edit_post', $post_id );
+				},
+			)
+		);
+
+		register_post_meta(
+			'roi_video',
+			'_roi_video_duree',
+			array(
+				'show_in_rest'      => true,
+				'single'            => true,
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+				'auth_callback'     => function ( bool $allowed, string $meta_key, int $post_id ): bool {
+					return current_user_can( 'edit_post', $post_id );
+				},
+			)
+		);
+
+		register_post_meta(
+			'roi_video',
+			'_roi_video_niveau',
+			array(
+				'show_in_rest'      => array(
+					'schema' => array(
+						'type'    => 'integer',
+						'default' => 1,
+					),
+				),
+				'single'            => true,
+				'type'              => 'integer',
+				'default'           => 1,
+				'sanitize_callback' => 'absint',
+				'auth_callback'     => function ( bool $allowed, string $meta_key, int $post_id ): bool {
+					return current_user_can( 'edit_post', $post_id );
+				},
+			)
+		);
 	}
 }

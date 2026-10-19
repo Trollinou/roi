@@ -18,10 +18,10 @@ const t6Paires: PaireItem[] = [{ pgn: '' }, { pgn: '' }, { pgn: '' }, { pgn: '' 
 
 const previewAPIs: Array<{
 	destroy: () => void;
-	setPosition: (fen: string) => void;
-	setConfig?: (config: Record<string, unknown>) => void;
-	setShapes?: (shapes: Shape[]) => void;
-	redraw?: (force?: boolean) => void;
+	setPosition: (_fen: string) => void;
+	setConfig?: (_config: Record<string, unknown>) => void;
+	setShapes?: (_shapes: Shape[]) => void;
+	redraw?: (_force?: boolean) => void;
 } | null> = [null, null, null, null];
 
 export function updateConfig(): void {

@@ -62,9 +62,10 @@ class Games_Controller {
 						'member_id'        => array(
 							'description'       => __( 'ID du membre ayant joué la partie.', 'roi' ),
 							'type'              => 'integer',
-							'required'          => true,
+							'required'          => false,
+							'default'           => 0,
 							'validate_callback' => static function ( $param ): bool {
-								return is_numeric( $param ) && (int) $param > 0;
+								return is_numeric( $param ) && (int) $param >= 0;
 							},
 							'sanitize_callback' => 'absint',
 						),
@@ -158,89 +159,107 @@ class Games_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function save_game( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$member_id        = (int) $request->get_param( 'member_id' );
-		$difficulty_level = (int) $request->get_param( 'difficulty_level' );
-		$hints_count      = (int) $request->get_param( 'hints_count' );
-		$takebacks_count  = (int) $request->get_param( 'takebacks_count' );
-		$pgn              = sanitize_textarea_field( (string) $request->get_param( 'pgn' ) );
-		$duration         = (int) $request->get_param( 'duration' );
-		$game_date_raw    = sanitize_text_field( (string) $request->get_param( 'game_date' ) );
+		$member_id         = (int) $request->get_param( 'member_id' );
+		$selected_identity = (string) $request->get_header( 'X-Selected-Identity' );
+		$current_user      = wp_get_current_user();
+		$difficulty_level  = (int) $request->get_param( 'difficulty_level' );
+		$hints_count       = (int) $request->get_param( 'hints_count' );
+		$takebacks_count   = (int) $request->get_param( 'takebacks_count' );
+		$pgn               = sanitize_textarea_field( (string) $request->get_param( 'pgn' ) );
+		$duration          = (int) $request->get_param( 'duration' );
+		$game_date_raw     = sanitize_text_field( (string) $request->get_param( 'game_date' ) );
 
-		if ( $member_id <= 0 ) {
+		// 1. Si member_id absent ou 0, déduction depuis l'en-tête X-Selected-Identity.
+		if ( $member_id <= 0 && ! empty( $selected_identity ) ) {
+			if ( str_starts_with( $selected_identity, 'member_' ) ) {
+				$member_id = (int) str_replace( 'member_', '', $selected_identity );
+			} elseif ( is_numeric( $selected_identity ) ) {
+				$member_id = (int) $selected_identity;
+			}
+		}
+
+		// 2. Repli éventuel sur le lien adhérent du compte WordPress (_dame_adherent_id).
+		if ( $member_id <= 0 && $current_user->ID > 0 ) {
+			$meta_adh = (int) get_user_meta( $current_user->ID, '_dame_adherent_id', true );
+			if ( $meta_adh > 0 ) {
+				$member_id = $meta_adh;
+			}
+		}
+
+		// 3. Validation des permissions selon le cas (Adhérent CPT vs Admin wp_virtual).
+		$player_name = (string) $current_user->display_name;
+
+		if ( $member_id > 0 ) {
+			$member = get_post( $member_id );
+			if ( ! $member || 'adherent' !== $member->post_type ) {
+				return new WP_Error( 'member_not_found', __( 'Membre non trouvé.', 'roi' ), array( 'status' => 404 ) );
+			}
+			if ( ! Permissions_Helper::can_access_member( $member_id ) ) {
+				return new WP_Error( 'rest_forbidden', __( 'Accès refusé pour ce membre.', 'roi' ), array( 'status' => 403 ) );
+			}
+			$player_name = (string) $member->post_title;
+		} elseif ( ! Permissions_Helper::is_trainer_or_admin() ) {
+			// Si member_id est 0, seuls les administrateurs et entraîneurs sont autorisés.
 			return new WP_Error( 'invalid_member', __( 'ID de membre invalide.', 'roi' ), array( 'status' => 400 ) );
 		}
 
-		// Contrôle anti-doublons (Même membre et même PGN).
-		$existing_games = get_posts(
+		// Contrôle anti-doublons rapide : comparer le PGN sur les 5 dernières parties du membre uniquement (évite un JOIN SQL sur LONGTEXT _roi_pgn).
+		$recent_game_ids = get_posts(
 			array(
 				'post_type'      => 'roi_partie',
-				'posts_per_page' => 1,
+				'posts_per_page' => 5,
 				'fields'         => 'ids',
 				'no_found_rows'  => true,
-				'cache_results'  => false,
+				'orderby'        => 'ID',
+				'order'          => 'DESC',
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 				'meta_query'     => array(
 					array(
 						'key'   => '_roi_member_id',
 						'value' => $member_id,
-					),
-					array(
-						'key'   => '_roi_pgn',
-						'value' => $pgn,
+						'type'  => 'NUMERIC',
 					),
 				),
 			)
 		);
 
-		if ( ! empty( $existing_games ) ) {
-			return rest_ensure_response(
-				array(
-					'success' => true,
-					'id'      => $existing_games[0],
-					'message' => __( 'Partie déjà enregistrée.', 'roi' ),
-				)
-			);
-		}
-
-		// Vérifier que le membre existe bien (CPT adherent de Dame).
-		$member = get_post( $member_id );
-		if ( ! $member || 'adherent' !== $member->post_type ) {
-			return new WP_Error( 'member_not_found', __( 'Membre non trouvé.', 'roi' ), array( 'status' => 404 ) );
-		}
-
-		// Formater la date fournie ou repli sur la date actuelle.
-		$post_date = (string) current_time( 'mysql' );
-		if ( ! empty( $game_date_raw ) && is_string( $game_date_raw ) ) {
-			$timestamp = strtotime( $game_date_raw );
-			if ( false !== $timestamp ) {
-				$formatted = wp_date( 'Y-m-d H:i:s', $timestamp );
-				if ( false !== $formatted ) {
-					$post_date = $formatted;
+		if ( ! empty( $recent_game_ids ) ) {
+			update_meta_cache( 'post', $recent_game_ids );
+			foreach ( $recent_game_ids as $recent_id ) {
+				$existing_pgn = (string) get_post_meta( (int) $recent_id, '_roi_pgn', true );
+				if ( trim( $existing_pgn ) === trim( $pgn ) ) {
+					return rest_ensure_response(
+						array(
+							'success' => true,
+							'id'      => (int) $recent_id,
+							'message' => __( 'Partie déjà enregistrée.', 'roi' ),
+						)
+					);
 				}
 			}
 		}
 
-		$current_user = wp_get_current_user();
+		// Formater la date fournie ou repli sur l'instant présent.
+		$timestamp = ! empty( $game_date_raw ) && is_string( $game_date_raw ) && false !== strtotime( $game_date_raw )
+			? (int) strtotime( $game_date_raw )
+			: time();
 
-		// Insérer le post roi_partie.
-		$date_ts  = strtotime( $post_date );
-		$date_str = '';
-		if ( false !== $date_ts ) {
-			$formatted_title_date = wp_date( 'd/m/Y H:i', $date_ts );
-			if ( false !== $formatted_title_date ) {
-				$date_str = $formatted_title_date;
-			}
-		}
-		$post_title = sprintf( 'Partie de %s - %s', (string) $member->post_title, $date_str );
+		$post_date     = (string) wp_date( 'Y-m-d H:i:s', $timestamp ); // Heure locale du site.
+		$post_date_gmt = (string) gmdate( 'Y-m-d H:i:s', $timestamp );  // Heure UTC.
+		$date_str      = (string) wp_date( 'd/m/Y H:i', $timestamp );   // Titre formaté directement sans double décalage.
+
+		// 4. Titre de la partie adapté.
+		$post_title = sprintf( 'Partie de %s - %s', $player_name, $date_str );
 
 		$post_id = wp_insert_post(
 			array(
-				'post_type'    => 'roi_partie',
-				'post_status'  => 'publish',
-				'post_title'   => $post_title,
-				'post_content' => $pgn, // Stockage du PGN dans le contenu également.
-				'post_author'  => $current_user->ID,
-				'post_date'    => $post_date,
+				'post_type'     => 'roi_partie',
+				'post_status'   => 'publish',
+				'post_title'    => $post_title,
+				'post_content'  => '',
+				'post_author'   => $current_user->ID,
+				'post_date'     => $post_date,
+				'post_date_gmt' => $post_date_gmt,
 			),
 			true
 		);
@@ -307,11 +326,36 @@ class Games_Controller {
 		);
 
 		if ( $member_id > 0 ) {
+			if ( ! Permissions_Helper::can_access_member( $member_id ) ) {
+				return new WP_Error( 'rest_forbidden', __( 'Accès refusé aux parties de ce membre.', 'roi' ), array( 'status' => 403 ) );
+			}
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			$query_args['meta_query'] = array(
 				array(
 					'key'   => '_roi_member_id',
 					'value' => $member_id,
+					'type'  => 'NUMERIC',
+				),
+			);
+		} elseif ( ! Permissions_Helper::is_trainer_or_admin() ) {
+			$linked_member = (int) get_user_meta( get_current_user_id(), '_dame_adherent_id', true );
+			if ( $linked_member <= 0 ) {
+				return rest_ensure_response(
+					array(
+						'games'       => array(),
+						'total'       => 0,
+						'total_pages' => 0,
+						'page'        => $page,
+						'per_page'    => $per_page,
+					)
+				);
+			}
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			$query_args['meta_query'] = array(
+				array(
+					'key'   => '_roi_member_id',
+					'value' => $linked_member,
+					'type'  => 'NUMERIC',
 				),
 			);
 		}

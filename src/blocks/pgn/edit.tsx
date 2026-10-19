@@ -21,7 +21,7 @@ export interface PgnBlockAttributes {
 
 interface EditProps {
 	attributes: PgnBlockAttributes;
-	setAttributes: (attrs: Partial<PgnBlockAttributes>) => void;
+	setAttributes: (_attrs: Partial<PgnBlockAttributes>) => void;
 }
 
 export default function Edit({ attributes, setAttributes }: EditProps): React.ReactElement {

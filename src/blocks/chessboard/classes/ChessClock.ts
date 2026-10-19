@@ -10,8 +10,8 @@ export class ChessClock {
 	public timerTenths = 0;
 	private timerInterval: ReturnType<typeof setInterval> | null = null;
 
-	public onTick: ((wtime: number, btime: number) => void) | null = null;
-	public onTimeOut: ((flaggedColor: 'white' | 'black') => void) | null = null;
+	public onTick: ((_wtime: number, _btime: number) => void) | null = null;
+	public onTimeOut: ((_flaggedColor: 'white' | 'black') => void) | null = null;
 
 	constructor() {
 		this.setPreset('none');

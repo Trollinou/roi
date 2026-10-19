@@ -26,7 +26,6 @@ class Builder {
 
 		// Child handlers.
 		( new Builder\Ajax_Handler() )->init();
-		( new Builder\Playlist_Cleaner() )->init();
 	}
 
 	/**

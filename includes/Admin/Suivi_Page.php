@@ -85,6 +85,17 @@ class Suivi_Page {
 			$version .= '.' . filemtime( $script_path );
 		}
 
+		$css_path = $plugin_dir . 'assets/css/admin-style.css';
+		$css_ver  = file_exists( $css_path ) ? ROI_VERSION . '.' . filemtime( $css_path ) : ROI_VERSION;
+
+		wp_enqueue_style(
+			'roi-suivi-admin-style',
+			$plugin_url . 'assets/css/admin-style.css',
+			array(),
+			$css_ver
+		);
+		wp_style_add_data( 'roi-suivi-admin-style', 'rtl', 'replace' );
+
 		wp_enqueue_script(
 			'roi-suivi-react',
 			$script_url,

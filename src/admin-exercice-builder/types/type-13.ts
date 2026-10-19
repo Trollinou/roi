@@ -21,7 +21,7 @@ const t13Exercices: ExercicePgnItem[] = [
 	{ pgn: '' },
 ];
 
-const previewViewers: Array<{ update: (pgn: string) => void } | null> = [
+const previewViewers: Array<{ update: (_pgn: string) => void } | null> = [
 	null,
 	null,
 	null,

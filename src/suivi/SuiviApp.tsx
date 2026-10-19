@@ -24,6 +24,30 @@ export default function SuiviApp(): React.JSX.Element {
 	const [ expandedChapters, setExpandedChapters ] = useState<Record<string, boolean>>( {} );
 	const [ isAddModalOpen, setIsAddModalOpen ] = useState<boolean>( false );
 
+	const fetchProgressions = () => {
+		const config = window.roiSuiviConfig || {};
+		const apiUrl = config.apiUrl || '';
+		const nonce = config.nonce || '';
+		if ( ! apiUrl ) {
+			return;
+		}
+		fetch( `${ apiUrl }/progression/groupe`, {
+			headers: { 'X-WP-Nonce': nonce },
+		} )
+			.then( ( res ) => {
+				if ( ! res.ok ) {
+					throw new Error( 'Erreur de chargement des progressions.' );
+				}
+				return res.json();
+			} )
+			.then( ( progressionData ) => {
+				setStudents( ( progressionData as StudentProgress[] ) || [] );
+			} )
+			.catch( ( err: Error ) => {
+				console.error( 'Progression refresh error', err );
+			} );
+	};
+
 	const fetchData = () => {
 		const config = window.roiSuiviConfig || {};
 		const apiUrl = config.apiUrl || '';
@@ -147,7 +171,7 @@ export default function SuiviApp(): React.JSX.Element {
 
 			const resJson = await response.json();
 			if ( response.ok && resJson.success ) {
-				fetchData();
+				fetchProgressions();
 			} else {
 				alert(
 					resJson.message ||
@@ -193,7 +217,7 @@ export default function SuiviApp(): React.JSX.Element {
 
 			const resJson = await response.json();
 			if ( response.ok && resJson.success ) {
-				fetchData();
+				fetchProgressions();
 			} else {
 				alert(
 					resJson.message ||
@@ -239,7 +263,7 @@ export default function SuiviApp(): React.JSX.Element {
 
 			const resJson = await response.json();
 			if ( response.ok && resJson.success ) {
-				fetchData();
+				fetchProgressions();
 			} else {
 				alert(
 					resJson.message ||
@@ -279,7 +303,7 @@ export default function SuiviApp(): React.JSX.Element {
 
 			const resJson = await response.json();
 			if ( response.ok && resJson.success ) {
-				fetchData();
+				fetchProgressions();
 			} else {
 				alert(
 					resJson.message ||
@@ -295,7 +319,7 @@ export default function SuiviApp(): React.JSX.Element {
 	};
 
 	const handleStudentAdded = ( newStudent?: StudentProgress ) => {
-		fetchData();
+		fetchProgressions();
 		if ( newStudent && newStudent.id ) {
 			setSelectedStudentId( newStudent.id );
 		}
@@ -324,10 +348,7 @@ export default function SuiviApp(): React.JSX.Element {
 
 	if ( loading ) {
 		return (
-			<div
-				className="roi-suivi-loading"
-				style={ { padding: '20px', fontSize: '16px', color: '#666' } }
-			>
+			<div className="roi-suivi-loading">
 				Chargement des progressions en cours...
 			</div>
 		);
@@ -335,10 +356,7 @@ export default function SuiviApp(): React.JSX.Element {
 
 	if ( error ) {
 		return (
-			<div
-				className="notice notice-error"
-				style={ { margin: '20px 0', padding: '10px' } }
-			>
+			<div className="notice notice-error roi-suivi-error">
 				<p>
 					<strong>Erreur :</strong> { error }
 				</p>
@@ -371,15 +389,7 @@ export default function SuiviApp(): React.JSX.Element {
 	} );
 
 	return (
-		<div
-			className="roi-suivi-app"
-			style={ {
-				fontFamily: 'sans-serif',
-				color: '#1d2327',
-				maxWidth: '1200px',
-				margin: '20px 0',
-			} }
-		>
+		<div className="roi-suivi-app">
 			{ /* TOP CONTROLS & FILTERS */ }
 			<SuiviFilters
 				onOpenAddModal={ () => setIsAddModalOpen( true ) }
@@ -397,27 +407,11 @@ export default function SuiviApp(): React.JSX.Element {
 			/>
 
 			{ filteredStudents.length === 0 ? (
-				<div
-					style={ {
-						background: '#fff',
-						padding: '40px',
-						textAlign: 'center',
-						border: '1px solid #c3c4c7',
-						borderRadius: '6px',
-						color: '#646970',
-					} }
-				>
+				<div className="roi-suivi-empty">
 					Aucun élève trouvé.
 				</div>
 			) : (
-				<div
-					style={ {
-						display: 'grid',
-						gridTemplateColumns:
-							'repeat(auto-fill, minmax(360px, 1fr))',
-						gap: '20px',
-					} }
-				>
+				<div className="roi-suivi-grid">
 					{ filteredStudents.map( ( student ) => (
 						<StudentCard
 							key={ student.id }
@@ -465,7 +459,7 @@ export default function SuiviApp(): React.JSX.Element {
 						''
 					}
 					onStudentRemoved={ handleStudentRemoved }
-					onCourseAssigned={ fetchData }
+					onCourseAssigned={ fetchProgressions }
 				/>
 			) }
 

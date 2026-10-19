@@ -46,6 +46,11 @@ class Progression_Service {
 		}
 
 		$validated_count = 0;
+		$modified        = false;
+
+		if ( count( $elements_todo ) > 1 ) {
+			_prime_post_caches( array_values( array_unique( $elements_todo ) ), false, false );
+		}
 
 		foreach ( $elements_todo as $elem_id ) {
 			$post = get_post( $elem_id );
@@ -66,6 +71,7 @@ class Progression_Service {
 				add_user_meta( $user_id, $meta_key, $data, false );
 				$already_val_map[ $elem_id ] = $data;
 				++$validated_count;
+				$modified = true;
 			} elseif ( ! $is_trainer && $time_spent > 0 ) {
 				$old_entry = $already_val_map[ $elem_id ];
 				if ( empty( $old_entry['time_spent'] ) ) {
@@ -76,8 +82,13 @@ class Progression_Service {
 					}
 					update_user_meta( $user_id, $meta_key, $updated_entry, $old_entry );
 					$already_val_map[ $elem_id ] = $updated_entry;
+					$modified                    = true;
 				}
 			}
+		}
+
+		if ( $modified ) {
+			Group_Service::flush_group_progression_cache();
 		}
 
 		return $validated_count;

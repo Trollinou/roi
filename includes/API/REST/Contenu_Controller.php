@@ -125,47 +125,14 @@ class Contenu_Controller {
 		);
 
 		if ( $is_exercice ) {
-			$type_meta   = get_post_meta( $post->ID, '_roi_exercice_type', true );
-			$config_meta = get_post_meta( $post->ID, '_roi_exercice_config', true );
-
+			$type_meta      = get_post_meta( $post->ID, '_roi_exercice_type', true );
+			$config_meta    = get_post_meta( $post->ID, '_roi_exercice_config', true );
+			$parsed_config  = \ROI\DTO\Exercice_Config_DTO::parse_raw_config( $config_meta );
 			$data['type']   = is_numeric( $type_meta ) ? (int) $type_meta : 0;
-			$data['config'] = null;
+			$data['config'] = $parsed_config;
 
-			if ( is_array( $config_meta ) ) {
-				$data['config'] = $config_meta;
-			} elseif ( is_string( $config_meta ) && '' !== trim( $config_meta ) ) {
-				$unserialized = maybe_unserialize( $config_meta );
-				if ( is_array( $unserialized ) ) {
-					$data['config'] = $unserialized;
-				} else {
-					$decoded = json_decode( $config_meta, true );
-					while ( is_string( $decoded ) ) {
-						$sub = json_decode( $decoded, true );
-						if ( json_last_error() === JSON_ERROR_NONE ) {
-							$decoded = $sub;
-						} else {
-							break;
-						}
-					}
-					if ( is_array( $decoded ) ) {
-						$data['config'] = $decoded;
-					} else {
-						$decoded_unslashed = json_decode( wp_unslash( $config_meta ), true );
-						while ( is_string( $decoded_unslashed ) ) {
-							$sub = json_decode( $decoded_unslashed, true );
-							if ( json_last_error() === JSON_ERROR_NONE ) {
-								$decoded_unslashed = $sub;
-							} else {
-								break;
-							}
-						}
-						if ( is_array( $decoded_unslashed ) ) {
-							$data['config'] = $decoded_unslashed;
-						} else {
-							$data['config'] = array( 'raw_json' => $config_meta );
-						}
-					}
-				}
+			if ( null === $parsed_config && is_string( $config_meta ) && '' !== trim( $config_meta ) ) {
+				$data['config'] = array( 'raw_json' => $config_meta );
 			}
 		} elseif ( $is_video ) {
 			$data['video_url']    = (string) get_post_meta( $post->ID, '_roi_video_url', true );

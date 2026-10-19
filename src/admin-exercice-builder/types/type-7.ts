@@ -21,7 +21,7 @@ const t7SeriesContainer = document.getElementById('roi_t7_series_container');
 
 let t7Series: SerieItem[] = [];
 let t7Mode = '3x5';
-let previewViewers: Array<{ update: (pgn: string) => void; destroy?: () => void } | null> = [];
+let previewViewers: Array<{ update: (_pgn: string) => void; destroy?: () => void } | null> = [];
 
 /**
  * Met à jour la configuration globale au format JSON.
@@ -139,7 +139,7 @@ export function renderT7Series(): void {
 		const orientationBadge = div.querySelector<HTMLElement>('.roi-t7-orientation-badge');
 
 		// Créer le viewer interactif
-		let viewer: { update: (pgn: string) => void; destroy?: () => void } | null = null;
+		let viewer: { update: (_pgn: string) => void; destroy?: () => void } | null = null;
 		if (previewContainer) {
 			viewer = createPgnPreviewViewer(previewContainer, {
 				pgn: serie.pgn_data || '',

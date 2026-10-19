@@ -15,6 +15,22 @@
   margin: 0 !important;
 }
 
+.chessboard-mount-element {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+
+  cg-container svg,
+  .cg-shapes,
+  .cg-shapes-below,
+  .cg-custom-svgs,
+  .cg-custom-below {
+    pointer-events: none !important;
+  }
+}
+
+
 /* Editor Piece Palette Styles */
 
 .editor-palette-container {
@@ -146,6 +162,75 @@ cg-board.editor-palette-board {
   aspect-ratio: auto;
 }
 
+.editor-palette-container--sidebar {
+  margin-top: 0;
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.roi-inspector-fen-header {
+  padding: 8px 16px 16px;
+}
+
+.roi-inspector-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.roi-inspector-field {
+  margin-bottom: 16px;
+}
+
+.roi-inspector-field--compact {
+  margin-bottom: 8px;
+}
+
+.roi-inspector-btn-row {
+  display: flex;
+  gap: 8px;
+}
+
+.roi-inspector-flex-btn {
+  flex: 1;
+}
+
+.roi-inspector-castling-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: none;
+  margin-top: 8px;
+}
+
+.roi-inspector-castling-label-cell {
+  width: 70px;
+  padding: 2px 0;
+  vertical-align: middle;
+  border: none;
+}
+
+.roi-inspector-castling-check-cell {
+  width: 90px;
+  padding: 2px 0;
+  vertical-align: middle;
+  border: none;
+}
+
+.roi-inspector-castling-cell {
+  padding: 2px 0;
+  vertical-align: middle;
+  border: none;
+}
+
+.roi-inspector-castling-side {
+  font-weight: 500;
+}
+
+.chessboard-block .is-hidden {
+  display: none !important;
+}
+
 /* Evaluation Bar */
 .main-wrap.has-evaluation-bar .main-board {
   width: calc(100% - 20px);
@@ -175,15 +260,20 @@ cg-board.editor-palette-board {
   margin-top: auto;
 }
 
+.evaluation-bar-fill--flipped {
+  margin-top: 0;
+  margin-bottom: auto;
+}
+
 /* Visitor Interface Styles */
 .chess-config-dialog {
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
-  background: rgba(26, 26, 26, 0.85);
-  backdrop-filter: blur(8px);
+  background: rgba(26, 26, 26, 0.92);
+  isolation: isolate;
+  transform: translateZ(0);
   z-index: 100;
   display: flex;
   align-items: center;

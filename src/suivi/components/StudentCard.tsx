@@ -1,6 +1,7 @@
 import React from 'react';
 import { decodeEntities } from '@wordpress/html-entities';
-import { CHAPTER_COLOR_MAP, CHAPTER_ORDER_MAP } from '../utils/suiviHelpers';
+import { CHAPTER_ORDER_MAP } from '../utils/suiviHelpers';
+import StudentCardCourseRow from './StudentCardCourseRow';
 import type { StudentProgress } from '../../types/api/progression';
 import type { CoursItem } from '../../types/api/parcours';
 
@@ -84,31 +85,15 @@ export default function StudentCard({
     .map(Number)
     .sort((a, b) => a - b);
 
+  const isMember = student.identity_type === 'member';
+
   return (
-    <div
-      style={{
-        background: '#fff',
-        border: '1px solid #c3c4c7',
-        borderRadius: '6px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-        padding: '20px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '15px',
-      }}
-    >
+    <div className="roi-student-card">
       {/* CARD HEADER */}
       <div
         role="button"
         tabIndex={0}
-        style={{
-          borderBottom: '1px solid #f0f0f1',
-          paddingBottom: '10px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          cursor: 'pointer',
-        }}
+        className="roi-student-card__header"
         onClick={() => onSelectStudent(student.id)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -118,58 +103,22 @@ export default function StudentCard({
         }}
         title="Cliquer pour afficher la vue détaillée de l'élève"
       >
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '2px',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              flexWrap: 'wrap',
-            }}
-          >
-            <h3
-              style={{
-                margin: 0,
-                fontSize: '17px',
-                fontWeight: 600,
-                color: '#0073aa',
-              }}
-            >
+        <div className="roi-student-card__identity">
+          <div className="roi-student-card__title-row">
+            <h3 className="roi-student-card__name">
               {studentName}
             </h3>
             {(student.groups || []).map((g) => (
               <span
                 key={g.id}
-                style={{
-                  fontSize: '11px',
-                  background: '#e0f2fe',
-                  color: '#0369a1',
-                  border: '1px solid #bae6fd',
-                  padding: '1px 6px',
-                  borderRadius: '12px',
-                  fontWeight: 500,
-                }}
+                className="roi-student-card__group-badge"
               >
                 {decodeEntities(g.name)}
               </span>
             ))}
             {(student.assigned_course_ids || []).length > 0 && (
               <span
-                style={{
-                  fontSize: '11px',
-                  background: '#fef3c7',
-                  color: '#92400e',
-                  border: '1px solid #fde68a',
-                  padding: '1px 6px',
-                  borderRadius: '12px',
-                  fontWeight: 500,
-                }}
+                className="roi-student-card__assigned-badge"
                 title="Cet élève a des cours assignés"
               >
                 📌 {(student.assigned_course_ids || []).length}{' '}
@@ -177,28 +126,19 @@ export default function StudentCard({
                 {(student.assigned_course_ids || []).length > 1 ? 's' : ''}
               </span>
             )}
-            <span
-              style={{
-                fontSize: '11px',
-                color: '#0073aa',
-                opacity: 0.8,
-              }}
-            >
+            <span className="roi-student-card__details-hint">
               🔍 Détails
             </span>
           </div>
           {student.parent_user && (
-            <span style={{ fontSize: '11px', color: '#646970' }}>
+            <span className="roi-student-card__parent">
               Rattaché à :{' '}
               <a
                 href={`user-edit.php?user_id=${student.parent_user.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                style={{
-                  color: '#0073aa',
-                  textDecoration: 'none',
-                }}
+                className="roi-student-card__parent-link"
                 title="Ouvrir le profil WordPress parent (nouvel onglet)"
               >
                 {decodeEntities(student.parent_user.display_name)}{' '}
@@ -209,61 +149,32 @@ export default function StudentCard({
         </div>
         <a
           href={
-            student.identity_type === 'member'
+            isMember
               ? `post.php?post=${student.display_id}&action=edit`
               : `user-edit.php?user_id=${student.display_id || student.id}`
           }
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
-          style={{
-            fontSize: '10px',
-            color:
-              student.identity_type === 'member'
-                ? '#0369a1'
-                : '#444',
-            background:
-              student.identity_type === 'member'
-                ? '#e0f2fe'
-                : '#f0f0f1',
-            padding: '3px 8px',
-            borderRadius: '3px',
-            fontWeight: '600',
-            textDecoration: 'none',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '3px',
-          }}
+          className={`roi-student-card__ext-link ${
+            isMember ? 'roi-student-card__ext-link--member' : ''
+          }`}
           title={
-            student.identity_type === 'member'
+            isMember
               ? 'Voir la fiche adhérent DAME (nouvel onglet)'
               : 'Voir le compte utilisateur WP (nouvel onglet)'
           }
         >
-          {student.identity_type === 'member'
+          {isMember
             ? `Adhérent #${student.display_id} ↗`
             : `Compte WP #${student.display_id || student.id} ↗`}
         </a>
       </div>
 
       {/* CARD CONTENT - LEVEL ACCORDIONS */}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '10px',
-        }}
-      >
+      <div className="roi-student-card__body">
         {studentLevels.length === 0 ? (
-          <div
-            style={{
-              fontSize: '13px',
-              color: '#8c8f94',
-              fontStyle: 'italic',
-              textAlign: 'center',
-              padding: '10px 0',
-            }}
-          >
+          <div className="roi-student-card__empty">
             Aucun cours ne correspond aux filtres.
           </div>
         ) : (
@@ -281,64 +192,31 @@ export default function StudentCard({
             return (
               <div
                 key={level}
-                style={{
-                  border: '1px solid #e0e0e0',
-                  borderRadius: '4px',
-                  overflow: 'hidden',
-                }}
+                className="roi-student-card__level"
               >
                 {/* Level Header */}
                 <button
                   type="button"
                   onClick={() => toggleLevelExpanded(student.id, level)}
-                  style={{
-                    width: '100%',
-                    background: '#f8f9fa',
-                    border: 'none',
-                    borderBottom: isLevelExpanded
-                      ? '1px solid #e0e0e0'
-                      : 'none',
-                    padding: '8px 12px',
-                    textAlign: 'left',
-                    fontWeight: '600',
-                    fontSize: '13px',
-                    color: '#444',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
+                  className={`roi-student-card__level-btn ${
+                    isLevelExpanded ? 'roi-student-card__level-btn--expanded' : ''
+                  }`}
                 >
                   <span>Niveau {level}</span>
-                  <span
-                    style={{
-                      fontSize: '10px',
-                      color: '#888',
-                    }}
-                  >
+                  <span className="roi-student-card__level-toggle">
                     {isLevelExpanded ? '▲ Cacher' : '▼ Afficher'}
                   </span>
                 </button>
 
                 {/* Chapters (Nested Accordions) */}
                 {isLevelExpanded && (
-                  <div
-                    style={{
-                      padding: '8px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '8px',
-                      background: '#fff',
-                    }}
-                  >
+                  <div className="roi-student-card__chapters">
                     {sortedChapters.map((chapter) => {
                       const chapterCourses = chapters[chapter];
                       const isChapterExpanded =
                         expandedChapters[`${student.id}_${level}_${chapter}`] !== false;
                       const firstCourse = chapterCourses[0] || ({} as Partial<CoursItem>);
                       const colorSlug = firstCourse.chapitre_couleur || 'tertiary';
-                      const chapterColor =
-                        CHAPTER_COLOR_MAP[colorSlug] || colorSlug || '#8224e3';
 
                       const sortedCourses = [...chapterCourses].sort(
                         (a, b) => (a.ordre || 0) - (b.ordre || 0)
@@ -347,11 +225,7 @@ export default function StudentCard({
                       return (
                         <div
                           key={chapter}
-                          style={{
-                            border: `1px solid ${chapterColor}25`,
-                            borderRadius: '4px',
-                            overflow: 'hidden',
-                          }}
+                          className={`roi-student-card__chapter roi-chapter-color--${colorSlug}`}
                         >
                           {/* Chapter Header */}
                           <button
@@ -363,262 +237,29 @@ export default function StudentCard({
                                 chapter
                               )
                             }
-                            style={{
-                              width: '100%',
-                              background: chapterColor,
-                              border: 'none',
-                              borderBottom: 'none',
-                              padding: '8px 12px',
-                              textAlign: 'left',
-                              fontWeight: '600',
-                              fontSize: '11px',
-                              textTransform: 'uppercase',
-                              color: '#fff',
-                              letterSpacing: '0.5px',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'center',
-                            }}
+                            className="roi-student-card__chapter-btn"
                           >
                             <span>{decodeEntities(chapter)}</span>
-                            <span
-                              style={{
-                                fontSize: '9px',
-                                opacity: 0.8,
-                              }}
-                            >
+                            <span className="roi-student-card__chapter-caret">
                               {isChapterExpanded ? '▲' : '▼'}
                             </span>
                           </button>
 
                           {/* Courses list within chapter */}
                           {isChapterExpanded && (
-                            <div
-                              style={{
-                                padding: '10px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '12px',
-                                background: '#fff',
-                              }}
-                            >
-                              {sortedCourses.map((course) => {
-                                const playlist = course.playlist || [];
-                                const totalElements = playlist.length;
-
-                                let validatedCount = 0;
-                                playlist.forEach((item) => {
-                                  if (
-                                    item &&
-                                    item.id &&
-                                    validesSet.has(Number(item.id))
-                                  ) {
-                                    validatedCount++;
-                                  }
-                                });
-
-                                const percentage =
-                                  totalElements > 0
-                                    ? Math.round((validatedCount / totalElements) * 100)
-                                    : 0;
-                                const isResettingThisCourse =
-                                  resettingAction &&
-                                  resettingAction.type === 'course' &&
-                                  resettingAction.studentId === student.id &&
-                                  resettingAction.id === course.id;
-                                const isValidatingThisCourse =
-                                  validatingAction &&
-                                  validatingAction.type === 'course' &&
-                                  validatingAction.studentId === student.id &&
-                                  validatingAction.id === course.id;
-
-                                return (
-                                  <div
-                                    key={course.id}
-                                    style={{
-                                      display: 'flex',
-                                      flexDirection: 'column',
-                                      gap: '4px',
-                                    }}
-                                  >
-                                    {/* Course Row */}
-                                    <div
-                                      style={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        gap: '10px',
-                                      }}
-                                    >
-                                      <span
-                                        style={{
-                                          fontWeight: '600',
-                                          fontSize: '13px',
-                                          color: '#1d2327',
-                                          maxWidth: '75%',
-                                          whiteSpace: 'nowrap',
-                                          overflow: 'hidden',
-                                          textOverflow: 'ellipsis',
-                                        }}
-                                        title={decodeEntities(course.titre)}
-                                      >
-                                        {decodeEntities(course.titre)}
-                                      </span>
-
-                                      <div
-                                        style={{
-                                          display: 'flex',
-                                          alignItems: 'center',
-                                          gap: '6px',
-                                        }}
-                                      >
-                                        <span
-                                          style={{
-                                            color: '#646970',
-                                            fontSize: '11px',
-                                            fontWeight: '500',
-                                          }}
-                                        >
-                                          {validatedCount} / {totalElements}
-                                        </span>
-
-                                        {validatedCount < totalElements && (
-                                          <button
-                                            type="button"
-                                            onClick={() =>
-                                              handleValidateCourse(
-                                                student.id,
-                                                course.id,
-                                                course.titre
-                                              )
-                                            }
-                                            disabled={
-                                              Boolean(isValidatingThisCourse || isResettingThisCourse)
-                                            }
-                                            title="Valider tous les exercices restants de ce cours (Club)"
-                                            style={{
-                                              background: 'none',
-                                              border: 'none',
-                                              color: '#00a32a',
-                                              cursor: 'pointer',
-                                              fontSize: '14px',
-                                              padding: '2px 4px',
-                                              lineHeight: 1,
-                                              borderRadius: '3px',
-                                            }}
-                                            onMouseOver={(e) => {
-                                              e.currentTarget.style.backgroundColor = '#dcfce7';
-                                            }}
-                                            onMouseOut={(e) => {
-                                              e.currentTarget.style.backgroundColor = 'transparent';
-                                            }}
-                                            onFocus={(e) => {
-                                              e.currentTarget.style.backgroundColor = '#dcfce7';
-                                            }}
-                                            onBlur={(e) => {
-                                              e.currentTarget.style.backgroundColor = 'transparent';
-                                            }}
-                                          >
-                                            {isValidatingThisCourse ? '...' : '✓'}
-                                          </button>
-                                        )}
-
-                                        <button
-                                          type="button"
-                                          onClick={() =>
-                                            handleResetCourse(
-                                              student.id,
-                                              course.id,
-                                              course.titre
-                                            )
-                                          }
-                                          disabled={
-                                            Boolean(
-                                              isResettingThisCourse ||
-                                              isValidatingThisCourse ||
-                                              validatedCount === 0
-                                            )
-                                          }
-                                          title="Réinitialiser la progression de ce cours"
-                                          style={{
-                                            background: 'none',
-                                            border: 'none',
-                                            color:
-                                              validatedCount === 0
-                                                ? '#ccd0d4'
-                                                : '#d63638',
-                                            cursor:
-                                              validatedCount === 0
-                                                ? 'default'
-                                                : 'pointer',
-                                            fontSize: '14px',
-                                            padding: '2px 4px',
-                                            lineHeight: 1,
-                                            borderRadius: '3px',
-                                          }}
-                                          onMouseOver={(e) => {
-                                            if (validatedCount > 0) {
-                                              e.currentTarget.style.backgroundColor = '#fbeaea';
-                                            }
-                                          }}
-                                          onMouseOut={(e) => {
-                                            e.currentTarget.style.backgroundColor = 'transparent';
-                                          }}
-                                          onFocus={(e) => {
-                                            if (validatedCount > 0) {
-                                              e.currentTarget.style.backgroundColor = '#fbeaea';
-                                            }
-                                          }}
-                                          onBlur={(e) => {
-                                            e.currentTarget.style.backgroundColor = 'transparent';
-                                          }}
-                                        >
-                                          {isResettingThisCourse ? '...' : '↺'}
-                                        </button>
-                                      </div>
-                                    </div>
-
-                                    {/* Progress Bar Row */}
-                                    <div
-                                      style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '10px',
-                                      }}
-                                    >
-                                      <div
-                                        style={{
-                                          flexGrow: 1,
-                                          height: '6px',
-                                          background: '#f0f0f1',
-                                          borderRadius: '3px',
-                                          overflow: 'hidden',
-                                        }}
-                                      >
-                                        <div
-                                          style={{
-                                            width: `${percentage}%`,
-                                            height: '100%',
-                                            background: '#00a32a',
-                                          }}
-                                        />
-                                      </div>
-                                      <span
-                                        style={{
-                                          fontSize: '10px',
-                                          fontWeight: '600',
-                                          color: '#444',
-                                          minWidth: '28px',
-                                          textAlign: 'right',
-                                        }}
-                                      >
-                                        {percentage}%
-                                      </span>
-                                    </div>
-                                  </div>
-                                );
-                              })}
+                            <div className="roi-student-card__courses">
+                              {sortedCourses.map((course) => (
+                                <StudentCardCourseRow
+                                  key={course.id}
+                                  course={course}
+                                  studentId={student.id}
+                                  validesSet={validesSet}
+                                  resettingAction={resettingAction}
+                                  validatingAction={validatingAction}
+                                  handleValidateCourse={handleValidateCourse}
+                                  handleResetCourse={handleResetCourse}
+                                />
+                              ))}
                             </div>
                           )}
                         </div>

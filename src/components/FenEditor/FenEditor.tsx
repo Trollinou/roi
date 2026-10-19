@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } f
 import { BoardCore } from 'eg-chessboard';
 import 'eg-chessboard/base.css';
 import 'eg-chessboard/pieces/cburnett.css';
-import { parsePgn } from 'chessops/pgn';
-import { extractShapesFromComments } from '../../utils/chessUtils';
-import PiecePalette, { type SelectedPieceType } from './PiecePalette';
+import type { SelectedPieceType } from './PiecePalette';
 import DrawingLegend from '../DrawingLegend';
+import FenControlsPanel from './FenControlsPanel';
+import { parsePgnOrFen, updateCastlingFlags, DEFAULT_FEN } from './fenParser';
 import useChessBoard, { type BoardApi } from '../../hooks/useChessBoard';
 import type { BoardShape, Color, FenString } from '../../types/chess';
 import './FenEditor.scss';
@@ -265,70 +265,6 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
     }
   }
 
-  function parsePgnOrFen(text: string): { fen: string; shapes: BoardShape[] } | null {
-    if (!text || typeof text !== 'string') {
-      return null;
-    }
-    const trimmed = text.trim();
-    if (!trimmed) {
-      return null;
-    }
-
-    let parsedFen = '';
-    const shapes: BoardShape[] = [];
-
-    // 1. Extraire la FEN depuis l'en-tête [FEN "..."] si présent
-    const fenMatch = trimmed.match(/\[FEN\s+"([^"]+)"\]/i);
-    if (fenMatch && fenMatch[1]) {
-      parsedFen = fenMatch[1].trim();
-    }
-
-    // 2. Récupérer les commentaires racine via parsePgn
-    let rootComments: string[] = [];
-    try {
-      const games = parsePgn(trimmed);
-      if (games && games.length > 0) {
-        const game = games[0];
-        if (game.headers && typeof game.headers.get === 'function') {
-          const fenHeader = game.headers.get('FEN');
-          if (fenHeader) {
-            parsedFen = fenHeader.trim();
-          }
-        }
-        if (Array.isArray(game.comments) && game.comments.length > 0) {
-          rootComments = game.comments;
-        }
-      }
-    } catch {
-      const firstMoveIndex = trimmed.search(/\b\d+\s*\./);
-      const initialSection =
-        firstMoveIndex !== -1 ? trimmed.slice(0, firstMoveIndex) : trimmed;
-      const fallbackMatches = initialSection.match(/\{([^}]*)\}/g);
-      if (fallbackMatches) {
-        rootComments = fallbackMatches.map((c) => c.slice(1, -1));
-      }
-    }
-
-    if (rootComments.length > 0) {
-      const parsed = extractShapesFromComments(rootComments.join(' '));
-      shapes.push(...parsed.shapes);
-    }
-
-    // 3. Si aucune FEN n'a été trouvée dans les balises PGN
-    if (!parsedFen) {
-      const firstLine = trimmed.split('\n')[0].trim();
-      if (firstLine.includes('/') && !firstLine.startsWith('[')) {
-        parsedFen = firstLine;
-      } else if (trimmed.startsWith('[') && trimmed.includes(']')) {
-        parsedFen = defaultFen;
-      } else {
-        parsedFen = trimmed;
-      }
-    }
-
-    return { fen: parsedFen, shapes };
-  }
-
   // Exposer redrawBoard(), getDiagram() et setDiagram() au composant parent via ref
   useImperativeHandle(ref, () => ({
     clearDomBounds() {
@@ -363,7 +299,7 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
       const fenStr =
         typeof newDiagram === 'string'
           ? newDiagram.trim()
-          : newDiagram.fen || defaultFen;
+          : newDiagram.fen || DEFAULT_FEN;
       const shapesArr =
         typeof newDiagram === 'object' && Array.isArray(newDiagram.shapes)
           ? newDiagram.shapes
@@ -400,7 +336,7 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
     if (!input) {return;}
 
     try {
-      const parsed = parsePgnOrFen(input);
+      const parsed = parsePgnOrFen(input, DEFAULT_FEN);
       if (!parsed || !parsed.fen) {
         alert('Format FEN ou PGN non reconnu.');
         return;
@@ -475,7 +411,7 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
 
   const handleReset = () => {
     const bApi = boardApiRef.current as any;
-    bApi?.setPosition?.(defaultFen);
+    bApi?.setPosition?.(DEFAULT_FEN);
     bApi?.setShapes?.([]);
     setCurrentShapes([]);
     currentShapesRef.current = [];
@@ -486,21 +422,7 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
   };
 
   const handleCastlingChange = (flag: string, checked: boolean) => {
-    let current = castling === '-' ? '' : castling;
-    if (checked) {
-      if (!current.includes(flag)) {
-        let next = '';
-        if (flag === 'K' || current.includes('K')) {next += 'K';}
-        if (flag === 'Q' || current.includes('Q')) {next += 'Q';}
-        if (flag === 'k' || current.includes('k')) {next += 'k';}
-        if (flag === 'q' || current.includes('q')) {next += 'q';}
-        current = next || '-';
-      }
-    } else {
-      current = current.replace(flag, '');
-    }
-    if (!current) {current = '-';}
-    setCastling(current);
+    setCastling(updateCastlingFlags(castling, flag, checked));
   };
 
   const pieceSet = boardConfig.pieceSet || 'cburnett';
@@ -570,129 +492,22 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
       </div>
 
       {/* Colonne Droite - Contrôles */}
-      <div className="fen-editor-controls-col">
-        {/* Importer une FEN ou un PGN */}
-        <div className="fen-editor-section">
-          <div className="fen-editor-title">Importer une FEN / PGN</div>
-          <div className="fen-import-row">
-            <textarea
-              className="fen-import-textarea"
-              placeholder="Collez une position FEN ou un export PGN Lichess..."
-              value={importFenText}
-              onChange={(e) => setImportFenText(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleLoadFen();
-                }
-              }}
-            />
-            <button
-              type="button"
-              className="fen-import-btn"
-              onClick={handleLoadFen}
-            >
-              Charger
-            </button>
-          </div>
-        </div>
-
-        {/* Palette de pièces */}
-        <div className="fen-editor-section">
-          <div className="fen-editor-title">Palette de pièces</div>
-          <PiecePalette
-            selectedPiece={selectedPiece}
-            onSelect={setSelectedPiece}
-            pieceSet={pieceSet}
-          />
-        </div>
-
-        {/* Options de position */}
-        <div className="fen-editor-section">
-          <div className="fen-editor-title">Options de position</div>
-          <div className="fen-editor-options-container">
-            {/* Trait aux */}
-            <div className="fen-editor-option-field">
-              <label className="fen-editor-option-label" htmlFor="fen-editor-turn-select">
-                Trait au tour de
-              </label>
-              <select
-                id="fen-editor-turn-select"
-                className="fen-editor-select"
-                value={turn}
-                onChange={(e) => {
-                  const newTurn = e.target.value;
-                  setTurn(newTurn);
-                  setOrientation(newTurn === 'b' ? 'black' : 'white');
-                }}
-              >
-                <option value="w">Blancs</option>
-                <option value="b">Noirs</option>
-              </select>
-            </div>
-
-            {/* Droits de roque */}
-            <div className="fen-editor-option-field">
-              <span className="fen-editor-option-label">
-                Droits de roque
-              </span>
-              <div className="fen-editor-checkbox-group">
-                <div className="fen-editor-checkbox-row">
-                  <span className="fen-editor-castling-header">Blancs :</span>
-                  <label className="fen-editor-checkbox-label" htmlFor="fen-castling-K">
-                    <input
-                      id="fen-castling-K"
-                      type="checkbox"
-                      checked={castling.includes('K')}
-                      onChange={(e) => handleCastlingChange('K', e.target.checked)}
-                    />
-                    Petit (O-O)
-                  </label>
-                  <label className="fen-editor-checkbox-label" htmlFor="fen-castling-Q">
-                    <input
-                      id="fen-castling-Q"
-                      type="checkbox"
-                      checked={castling.includes('Q')}
-                      onChange={(e) => handleCastlingChange('Q', e.target.checked)}
-                    />
-                    Grand (O-O-O)
-                  </label>
-                </div>
-                <div className="fen-editor-checkbox-row">
-                  <span className="fen-editor-castling-header">Noirs :</span>
-                  <label className="fen-editor-checkbox-label" htmlFor="fen-castling-k">
-                    <input
-                      id="fen-castling-k"
-                      type="checkbox"
-                      checked={castling.includes('k')}
-                      onChange={(e) => handleCastlingChange('k', e.target.checked)}
-                    />
-                    Petit (o-o)
-                  </label>
-                  <label className="fen-editor-checkbox-label" htmlFor="fen-castling-q">
-                    <input
-                      id="fen-castling-q"
-                      type="checkbox"
-                      checked={castling.includes('q')}
-                      onChange={(e) => handleCastlingChange('q', e.target.checked)}
-                    />
-                    Grand (o-o-o)
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Bouton d'application principal */}
-        <button
-          type="button"
-          className="fen-editor-apply-btn"
-          onClick={handleApply}
-        >
-          Appliquer cette position
-        </button>
-      </div>
+      <FenControlsPanel
+        importFenText={importFenText}
+        setImportFenText={setImportFenText}
+        handleLoadFen={handleLoadFen}
+        selectedPiece={selectedPiece}
+        setSelectedPiece={setSelectedPiece}
+        pieceSet={pieceSet}
+        turn={turn}
+        onTurnChange={(newTurn, newOrient) => {
+          setTurn(newTurn);
+          setOrientation(newOrient);
+        }}
+        castling={castling}
+        handleCastlingChange={handleCastlingChange}
+        handleApply={handleApply}
+      />
     </div>
   );
 });

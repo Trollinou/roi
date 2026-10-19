@@ -23,9 +23,6 @@ function compileFile(srcPath, outPath, outRtlPath) {
             new sass.NodePackageImporter(rootDir),
             {
                 findFileUrl(url) {
-                    if (url === 'eg-chessboard/scss' || url === 'eg-chessboard/scss/index') {
-                        return new URL('file://' + path.resolve(rootDir, 'node_modules/eg-chessboard/dist/scss/style.scss'));
-                    }
                     if (url.startsWith('eg-chessboard/scss/')) {
                         const sub = url.replace('eg-chessboard/scss/', '');
                         return new URL('file://' + path.resolve(rootDir, 'node_modules/eg-chessboard/dist/scss', sub));
@@ -82,6 +79,11 @@ function buildCss() {
 
     // 2. Compile block SCSS (e.g. src/blocks/chessboard/style.scss -> build/chessboard/, diagramme/, pgn/)
     const chessboardScss = path.join(rootDir, 'src/blocks/chessboard/style.scss');
+    const cburnettCssPath = path.join(rootDir, 'node_modules/eg-chessboard/dist/pieces/cburnett.css');
+    const cburnettCss = fs.existsSync(cburnettCssPath)
+        ? '\n' + fs.readFileSync(cburnettCssPath, 'utf8')
+        : '';
+
     if (fs.existsSync(chessboardScss)) {
         const targets = [
             {
@@ -104,6 +106,12 @@ function buildCss() {
 
         for (const target of targets) {
             compileFile(chessboardScss, target.out, target.rtl);
+            if (cburnettCss) {
+                fs.appendFileSync(target.out, cburnettCss);
+                if (target.rtl) {
+                    fs.appendFileSync(target.rtl, cburnettCss);
+                }
+            }
         }
     }
 

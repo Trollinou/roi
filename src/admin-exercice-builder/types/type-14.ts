@@ -12,6 +12,7 @@ import {
 	renderSingleReponseContainers,
 	renderMultipleReponsesContainers,
 	renderPropositionsList,
+	updateType14Visibility,
 	type Type14ExerciceState,
 } from './type-14-options';
 
@@ -33,132 +34,22 @@ let t14ModeSetup = 'memoire';
 let t14OptionsReponse = ['OUI', 'NON'];
 let t14Propositions: string[] = [];
 let t14Question = '';
-const t14Exercices: ExerciceItem14[] = [
-	{
-		pgn: '',
-		reponses_multiple: [],
-		reponse_oui_non: true,
-		move_san: '',
-		move_explication: '',
-		conseil: '',
-	},
-	{
-		pgn: '',
-		reponses_multiple: [],
-		reponse_oui_non: true,
-		move_san: '',
-		move_explication: '',
-		conseil: '',
-	},
-	{
-		pgn: '',
-		reponses_multiple: [],
-		reponse_oui_non: true,
-		move_san: '',
-		move_explication: '',
-		conseil: '',
-	},
-	{
-		pgn: '',
-		reponses_multiple: [],
-		reponse_oui_non: true,
-		move_san: '',
-		move_explication: '',
-		conseil: '',
-	},
-	{
-		pgn: '',
-		reponses_multiple: [],
-		reponse_oui_non: true,
-		move_san: '',
-		move_explication: '',
-		conseil: '',
-	},
-];
+const t14Exercices: ExerciceItem14[] = Array.from({ length: 5 }, () => ({
+	pgn: '',
+	reponses_multiple: [],
+	reponse_oui_non: true,
+	move_san: '',
+	move_explication: '',
+	conseil: '',
+}));
 
-const previewViewers: Array<{ update: (pgn: string) => void } | null> = [
+const previewViewers: Array<{ update: (_pgn: string) => void } | null> = [
 	null,
 	null,
 	null,
 	null,
 	null,
 ];
-
-/**
- * Updates visibility of blocks depending on variante.
- */
-function updateVisibility(): void {
-	const varianteSelect = document.getElementById('roi_t14_variante') as HTMLSelectElement | null;
-	const variante = varianteSelect ? varianteSelect.value : 'qcm_oui_non';
-
-	const blocOptionsReponse = document.getElementById(
-		'roi_t14_bloc_global_options_reponse'
-	);
-	const blocPropositions = document.getElementById(
-		'roi_t14_bloc_global_propositions'
-	);
-	const blocQuestion = document.getElementById(
-		'roi_t14_bloc_global_question'
-	);
-	const blocClic = document.getElementById('roi_t14_bloc_global_clic');
-	const blocSetup = document.getElementById('roi_t14_bloc_global_setup');
-
-	if (blocOptionsReponse) {
-		blocOptionsReponse.style.display =
-			variante === 'qcm_multiple' || variante === 'qcm_oui_non'
-				? 'block'
-				: 'none';
-	}
-	if (blocPropositions) {
-		blocPropositions.style.display =
-			variante === 'qcm_multiple' ? 'block' : 'none';
-	}
-	if (blocQuestion) {
-		blocQuestion.style.display =
-			variante === 'qcm_oui_non' ? 'block' : 'none';
-	}
-	if (blocClic) {
-		blocClic.style.display = variante === 'clic' ? 'block' : 'none';
-	}
-	if (blocSetup) {
-		blocSetup.style.display = variante === 'setup' ? 'block' : 'none';
-	}
-
-	const qcmMultipleBlocs = document.querySelectorAll<HTMLElement>(
-		'.roi_t14_bloc_qcm_multiple'
-	);
-	const qcmOuiNonBlocs = document.querySelectorAll<HTMLElement>(
-		'.roi_t14_bloc_qcm_oui_non'
-	);
-	const moveBlocs = document.querySelectorAll<HTMLElement>('.roi_t14_bloc_move');
-	const notationBlocs = document.querySelectorAll<HTMLElement>('.roi_t14_bloc_notation');
-	const clicBlocs = document.querySelectorAll<HTMLElement>('.roi_t14_bloc_clic');
-	const setupBlocs = document.querySelectorAll<HTMLElement>('.roi_t14_bloc_setup');
-
-	qcmMultipleBlocs.forEach((bloc) => {
-		bloc.style.display = variante === 'qcm_multiple' ? 'block' : 'none';
-	});
-
-	qcmOuiNonBlocs.forEach((bloc) => {
-		bloc.style.display = variante === 'qcm_oui_non' ? 'block' : 'none';
-	});
-
-	moveBlocs.forEach((bloc) => {
-		bloc.style.display = variante === 'move' ? 'block' : 'none';
-	});
-
-	notationBlocs.forEach((bloc) => {
-		bloc.style.display = variante === 'notation' ? 'block' : 'none';
-	});
-
-	clicBlocs.forEach((bloc) => {
-		bloc.style.display = variante === 'clic' ? 'block' : 'none';
-	});
-
-	setupBlocs.forEach((bloc) => {
-		bloc.style.display = variante === 'setup' ? 'block' : 'none';
-	});
-}
 
 /**
  * Serializes configuration to JSON.
@@ -501,12 +392,12 @@ export function init(): void {
 	});
 
 	// Update visibility of blocks initially
-	updateVisibility();
+	updateType14Visibility();
 
 	if (varianteSelect) {
 		varianteSelect.addEventListener('change', function () {
 			t14Variante = varianteSelect.value;
-			updateVisibility();
+			updateType14Visibility();
 			updateConfig();
 		});
 	}

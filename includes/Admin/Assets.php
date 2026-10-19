@@ -35,8 +35,8 @@ class Assets {
 	public function enqueue_admin_assets( string $hook ): void {
 		global $post_type;
 
-		// Only load on CPT Exercice, Lecon, Cours or Video post editing screen.
-		if ( ! in_array( $post_type, array( 'roi_exercice', 'roi_cours', 'roi_lecon', 'roi_video' ), true ) || ( 'post.php' !== $hook && 'post-new.php' !== $hook ) ) {
+		// Only load on CPT Exercice, Lecon, Cours, Video or Partie post editing screen.
+		if ( ! in_array( $post_type, array( 'roi_exercice', 'roi_cours', 'roi_lecon', 'roi_video', 'roi_partie' ), true ) || ( 'post.php' !== $hook && 'post-new.php' !== $hook ) ) {
 			return;
 		}
 
@@ -55,18 +55,11 @@ class Assets {
 
 		if ( in_array( $post_type, array( 'roi_exercice', 'roi_lecon' ), true ) ) {
 
-			// Enqueue eg-chessboard styles & script.
-			wp_enqueue_style(
-				'roi-admin-chessboard-style',
-				$chess_url . 'eg-chessboard.css',
-				array(),
-				ROI_VERSION
-			);
-
+			// Enqueue FEN & PGN editor styles & script.
 			wp_enqueue_style(
 				'roi-admin-fen-editor-style',
 				$chess_url . 'admin-fen-editor.css',
-				array( 'roi-admin-chessboard-style' ),
+				array(),
 				ROI_VERSION
 			);
 

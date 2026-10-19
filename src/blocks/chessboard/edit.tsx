@@ -1,17 +1,9 @@
 import React from 'react';
-import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
-import {
-  PanelBody,
-  TextControl,
-  ToggleControl,
-  SelectControl,
-  Button,
-  RangeControl,
-  CheckboxControl,
-} from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import PromotionDialog from './components/PromotionDialog';
+import ChessboardInspector from './components/ChessboardInspector';
 import { BoardCore } from 'eg-chessboard';
 import 'eg-chessboard/base.css';
 import 'eg-chessboard/pieces/cburnett.css';
@@ -285,58 +277,6 @@ export default function Edit({ attributes, setAttributes, clientId }: EditProps)
     setAttributes(updates);
   };
 
-  const roles: PieceRole[] = ['pawn', 'knight', 'bishop', 'rook', 'queen', 'king'];
-
-  const renderPalettePiece = (role: PieceRole, color: Color): React.ReactElement => {
-    const isActive =
-      selectedPiece &&
-      typeof selectedPiece === 'object' &&
-      selectedPiece.role === role &&
-      selectedPiece.color === color;
-    return (
-      <button
-        key={`${role}-${color}`}
-        type="button"
-        className={`editor-palette-piece ${isActive ? 'active' : ''}`}
-        onClick={() => {
-          if (isActive) {
-            setSelectedPiece(null);
-          } else {
-            setSelectedPiece({ role, color });
-          }
-        }}
-        title={`Place ${color} ${role}`}
-      >
-        <cg-board
-          className="editor-palette-board"
-          style={{ backgroundImage: 'none' }}
-        >
-          <piece className={`${role} ${color} piece-inner`} />
-        </cg-board>
-      </button>
-    );
-  };
-
-  const renderEraser = (withLabel = false): React.ReactElement => {
-    const isActive = selectedPiece === 'eraser';
-    return (
-      <button
-        type="button"
-        className={`editor-palette-eraser ${isActive ? 'active' : ''}`}
-        onClick={() => {
-          if (isActive) {
-            setSelectedPiece(null);
-          } else {
-            setSelectedPiece('eraser');
-          }
-        }}
-        title="Remove piece on click"
-      >
-        🗑️ {withLabel && 'Gomme (Effacer une pièce)'}
-      </button>
-    );
-  };
-
   const wrapClasses = [
     'main-wrap',
     boardState.promotionDialogState.isEnabled ? 'disabledBoard' : '',
@@ -348,7 +288,9 @@ export default function Edit({ attributes, setAttributes, clientId }: EditProps)
     .filter(Boolean)
     .join(' ');
 
-  const showTopBottomBars = (attributes.showMaterialIndicator !== false) || (attributes.clockPreset && attributes.clockPreset !== 'none');
+  const hasClock = Boolean(attributes.clockPreset && attributes.clockPreset !== 'none');
+  const showMaterial = attributes.showMaterialIndicator !== false;
+  const showTopBottomBars = showMaterial || hasClock;
 
   return (
     <div
@@ -359,353 +301,39 @@ export default function Edit({ attributes, setAttributes, clientId }: EditProps)
         }
       }}
     >
-      <InspectorControls>
-        <div style={{ padding: '8px 16px 16px 16px' }}>
-          <span
-            style={{
-              display: 'block',
-              marginBottom: '8px',
-              fontWeight: '500',
-            }}
-          >
-            {__('Position FEN', 'roi')}
-          </span>
-          <TextControl
-            __next40pxDefaultSize
-            value={attributes.fen || ''}
-            onChange={(val: string) => {
-              lastFenRef.current = val;
-              setAttributes({ fen: val });
-            }}
-          />
-        </div>
-
-        <PanelBody
-          title={__('Configuration', 'roi')}
-          initialOpen={false}
-        >
-          <div style={{ marginBottom: '16px' }}>
-            <span
-              style={{
-                display: 'block',
-                marginBottom: '8px',
-                fontWeight: '500',
-              }}
-            >
-              {__('Charger une position', 'roi')}
-            </span>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <Button
-                isDestructive
-                isSecondary
-                onClick={handleClearBoard}
-                style={{ flex: 1 }}
-              >
-                {__('Échiquier vide', 'roi')}
-              </Button>
-              <Button
-                isSecondary
-                onClick={handleResetBoard}
-                style={{ flex: 1 }}
-              >
-                {__('Position initiale', 'roi')}
-              </Button>
-            </div>
-          </div>
-
-          <div style={{ marginBottom: '16px' }}>
-            <span
-              style={{
-                display: 'block',
-                marginBottom: '8px',
-                fontWeight: '500',
-              }}
-            >
-              {__('Palette de pièces', 'roi')}
-            </span>
-            <div
-              className="editor-palette-container"
-              style={{
-                marginTop: 0,
-                padding: 0,
-                border: 'none',
-                background: 'none',
-              }}
-            >
-              <div className="editor-palette-grid-sidebar">
-                <div className="editor-palette-row-sidebar">
-                  {roles.map((role) => renderPalettePiece(role, 'white'))}
-                </div>
-                <div className="editor-palette-row-sidebar">
-                  {roles.map((role) => renderPalettePiece(role, 'black'))}
-                </div>
-                <div className="editor-palette-row-eraser">
-                  {renderEraser(true)}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ marginBottom: '16px' }}>
-            <span
-              style={{
-                display: 'block',
-                marginBottom: '8px',
-                fontWeight: '500',
-              }}
-            >
-              {__('Traits aux', 'roi')}
-            </span>
-            <SelectControl
-              __next40pxDefaultSize
-              value={activeColor}
-              options={[
-                { label: __('Blanc', 'roi'), value: 'w' },
-                { label: __('Noir', 'roi'), value: 'b' },
-              ]}
-              onChange={(val: string) => setFenPart(1, val)}
-            />
-          </div>
-
-          <div style={{ marginBottom: '8px' }}>
-            <span
-              style={{
-                display: 'block',
-                marginBottom: '8px',
-                fontWeight: '500',
-              }}
-            >
-              {__('Roques', 'roi')}
-            </span>
-            <table
-              style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                border: 'none',
-                marginTop: '8px',
-              }}
-            >
-              <tbody>
-                <tr>
-                  <td
-                    style={{
-                      width: '70px',
-                      padding: '2px 0',
-                      verticalAlign: 'middle',
-                      border: 'none',
-                    }}
-                  >
-                    <span style={{ fontWeight: '500' }}>
-                      {__('Blanc :', 'roi')}
-                    </span>
-                  </td>
-                  <td
-                    style={{
-                      width: '90px',
-                      padding: '2px 0',
-                      verticalAlign: 'middle',
-                      border: 'none',
-                    }}
-                  >
-                    <CheckboxControl
-                      label="O-O"
-                      checked={castling.includes('K')}
-                      onChange={(val: boolean) => updateCastling('K', val)}
-                    />
-                  </td>
-                  <td
-                    style={{
-                      padding: '2px 0',
-                      verticalAlign: 'middle',
-                      border: 'none',
-                    }}
-                  >
-                    <CheckboxControl
-                      label="O-O-O"
-                      checked={castling.includes('Q')}
-                      onChange={(val: boolean) => updateCastling('Q', val)}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td
-                    style={{
-                      padding: '2px 0',
-                      verticalAlign: 'middle',
-                      border: 'none',
-                    }}
-                  >
-                    <span style={{ fontWeight: '500' }}>
-                      {__('Noir :', 'roi')}
-                    </span>
-                  </td>
-                  <td
-                    style={{
-                      padding: '2px 0',
-                      verticalAlign: 'middle',
-                      border: 'none',
-                    }}
-                  >
-                    <CheckboxControl
-                      label="O-O"
-                      checked={castling.includes('k')}
-                      onChange={(val: boolean) => updateCastling('k', val)}
-                    />
-                  </td>
-                  <td
-                    style={{
-                      padding: '2px 0',
-                      verticalAlign: 'middle',
-                      border: 'none',
-                    }}
-                  >
-                    <CheckboxControl
-                      label="O-O-O"
-                      checked={castling.includes('q')}
-                      onChange={(val: boolean) => updateCastling('q', val)}
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </PanelBody>
-
-        <PanelBody
-          title={__("Style de l'échiquier", 'roi')}
-          initialOpen={true}
-        >
-          <ToggleControl
-            label={__('Afficher les coordonnées', 'roi')}
-            checked={attributes.coordinates !== false}
-            onChange={(val: boolean) => setAttributes({ coordinates: val })}
-          />
-          <ToggleControl
-            label={__('Afficher les menaces', 'roi')}
-            checked={!!attributes.showThreats}
-            onChange={(val: boolean) => setAttributes({ showThreats: val })}
-          />
-          <ToggleControl
-            label={__('Indicateur matériel', 'roi')}
-            checked={attributes.showMaterialIndicator !== false}
-            onChange={(val: boolean) => setAttributes({ showMaterialIndicator: val })}
-          />
-        </PanelBody>
-
-        <PanelBody
-          title={__('Mode de jeu', 'roi')}
-          initialOpen={true}
-        >
-          <SelectControl
-            __next40pxDefaultSize
-            label={__('Orientation', 'roi')}
-            value={attributes.orientation || 'white'}
-            options={[
-              { label: __('Blanc', 'roi'), value: 'white' },
-              { label: __('Noir', 'roi'), value: 'black' },
-            ]}
-            onChange={(val: string) => handleOrientationChange(val as Color)}
-          />
-          <SelectControl
-            __next40pxDefaultSize
-            label={__(
-              'Mode de jeu (Mode visualisation)',
-              'roi'
-            )}
-            value={gameMode}
-            options={[
-              {
-                label: __('Visualiser', 'roi'),
-                value: 'visualize',
-              },
-              {
-                label: __('1 Joueur', 'roi'),
-                value: '1player',
-              },
-              {
-                label: __('2 Joueurs', 'roi'),
-                value: '2players',
-              },
-              {
-                label: __('Mode libre', 'roi'),
-                value: 'freemove',
-              },
-            ]}
-            onChange={handleGameModeChange}
-          />
-          {gameMode === '1player' && (
-            <>
-              <ToggleControl
-                label={__('Activer Stockfish', 'roi')}
-                checked={!!attributes.useStockfish}
-                onChange={(val: boolean) => setAttributes({ useStockfish: val })}
-              />
-              {attributes.useStockfish && (
-                <>
-                  <RangeControl
-                    __next40pxDefaultSize
-                    label={__(
-                      'Niveau de difficulté (ELO)',
-                      'roi'
-                    )}
-                    value={attributes.stockfishElo || 1500}
-                    onChange={(val: number) => setAttributes({ stockfishElo: val })}
-                    min={1320}
-                    max={3190}
-                    step={10}
-                  />
-                  <SelectControl
-                    __next40pxDefaultSize
-                    label={__('Cadence (Pendule)', 'roi')}
-                    value={attributes.clockPreset || 'none'}
-                    options={[
-                      { label: __('Sans pendule', 'roi'), value: 'none' },
-                      { label: __('1 min (Bullet)', 'roi'), value: '1+0' },
-                      { label: __('3 min + 2 s (Blitz)', 'roi'), value: '3+2' },
-                      { label: __('5 min KO (Blitz)', 'roi'), value: '5+0' },
-                      { label: __('10 min + 5 s (Rapide)', 'roi'), value: '10+5' },
-                      { label: __('15 min + 10 s (Rapide)', 'roi'), value: '15+10' },
-                    ]}
-                    onChange={(val: string) => setAttributes({ clockPreset: val })}
-                  />
-                  <ToggleControl
-                    label={__(
-                      "Afficher la barre d'évaluation",
-                      'roi'
-                    )}
-                    checked={!!attributes.showEvaluationBar}
-                    onChange={(val: boolean) =>
-                      setAttributes({ showEvaluationBar: val })
-                    }
-                  />
-                </>
-              )}
-            </>
-          )}
-        </PanelBody>
-      </InspectorControls>
+      <ChessboardInspector
+        attributes={attributes}
+        setAttributes={setAttributes}
+        selectedPiece={selectedPiece}
+        setSelectedPiece={setSelectedPiece}
+        activeColor={activeColor}
+        castling={castling}
+        gameMode={gameMode}
+        onFenInputChange={(val: string) => {
+          lastFenRef.current = val;
+          setAttributes({ fen: val });
+        }}
+        setFenPart={setFenPart}
+        updateCastling={updateCastling}
+        handleClearBoard={handleClearBoard}
+        handleResetBoard={handleResetBoard}
+        handleOrientationChange={handleOrientationChange}
+        handleGameModeChange={handleGameModeChange}
+      />
 
       <section className={wrapClasses}>
         <div
-          className="captured-clock-top captured-bar"
-          style={{ display: showTopBottomBars ? 'flex' : 'none' }}
+          className={`captured-clock-top captured-bar ${showTopBottomBars ? '' : 'hidden-bar'}`}
         >
           <div
-            className="material-wrapper opponent-material"
-            style={{ display: attributes.showMaterialIndicator !== false ? 'block' : 'none' }}
+            className={`material-wrapper opponent-material ${showMaterial ? '' : 'is-hidden'}`}
           ></div>
           <div className="player-info">{__('Adversaire', 'roi')}</div>
           <span className="captured-pieces-clock-opp captured-pieces"></span>
           <div
-            className="game-clock opponent-clock"
-            style={{
-              display:
-                attributes.clockPreset && attributes.clockPreset !== 'none'
-                  ? 'block'
-                  : 'none',
-            }}
+            className={`game-clock opponent-clock ${hasClock ? '' : 'is-hidden'}`}
           >
-            {attributes.clockPreset && attributes.clockPreset !== 'none' ? attributes.clockPreset : '--:--'}
+            {hasClock ? attributes.clockPreset : '--:--'}
           </div>
         </div>
 
@@ -725,37 +353,26 @@ export default function Edit({ attributes, setAttributes, clientId }: EditProps)
           {attributes.useStockfish && attributes.showEvaluationBar && (
             <div className="evaluation-bar">
               <div
-                className="evaluation-bar-fill"
-                style={{
-                  marginTop: attributes.orientation === 'white' ? 'auto' : '0',
-                  marginBottom:
-                    attributes.orientation === 'white' ? '0' : 'auto',
-                }}
+                className={`evaluation-bar-fill ${
+                  attributes.orientation === 'black' ? 'evaluation-bar-fill--flipped' : ''
+                }`}
               ></div>
             </div>
           )}
         </div>
 
         <div
-          className="captured-clock-bottom captured-bar"
-          style={{ display: showTopBottomBars ? 'flex' : 'none' }}
+          className={`captured-clock-bottom captured-bar ${showTopBottomBars ? '' : 'hidden-bar'}`}
         >
           <div
-            className="material-wrapper player-material"
-            style={{ display: attributes.showMaterialIndicator !== false ? 'block' : 'none' }}
+            className={`material-wrapper player-material ${showMaterial ? '' : 'is-hidden'}`}
           ></div>
           <div className="player-info">{__('Toi', 'roi')}</div>
           <span className="captured-pieces-clock-player captured-pieces"></span>
           <div
-            className="game-clock player-clock"
-            style={{
-              display:
-                attributes.clockPreset && attributes.clockPreset !== 'none'
-                  ? 'block'
-                  : 'none',
-            }}
+            className={`game-clock player-clock ${hasClock ? '' : 'is-hidden'}`}
           >
-            {attributes.clockPreset && attributes.clockPreset !== 'none' ? attributes.clockPreset : '--:--'}
+            {hasClock ? attributes.clockPreset : '--:--'}
           </div>
         </div>
 

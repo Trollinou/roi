@@ -273,29 +273,7 @@ class Importer {
 					$meta_v = $meta_pair['value'];
 
 					if ( in_array( $meta_k, array( '_roi_exercice_config', '_roi_cours_playlist' ), true ) ) {
-						$parsed_json = null;
-						if ( is_array( $meta_v ) || is_object( $meta_v ) ) {
-							$parsed_json = (array) $meta_v;
-						} elseif ( is_string( $meta_v ) && '' !== trim( $meta_v ) ) {
-							$unserialized = maybe_unserialize( $meta_v );
-							if ( is_array( $unserialized ) || is_object( $unserialized ) ) {
-								$parsed_json = (array) $unserialized;
-							} else {
-								$decoded = json_decode( $meta_v, true );
-								while ( is_string( $decoded ) ) {
-									$sub = json_decode( $decoded, true );
-									if ( json_last_error() === JSON_ERROR_NONE ) {
-										$decoded = $sub;
-									} else {
-										break;
-									}
-								}
-								if ( is_array( $decoded ) ) {
-									$parsed_json = $decoded;
-								}
-							}
-						}
-
+						$parsed_json = \ROI\DTO\Exercice_Config_DTO::parse_raw_config( $meta_v );
 						if ( is_array( $parsed_json ) ) {
 							$db_value = (string) wp_json_encode( $parsed_json, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
 						} else {
@@ -331,15 +309,15 @@ class Importer {
 
 		// 4. REALIGN AUTO_INCREMENT.
 		if ( $max_post_id > 0 ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
 			$wpdb->query( $wpdb->prepare( "ALTER TABLE {$wpdb->posts} AUTO_INCREMENT = %d", $max_post_id + 1 ) );
 		}
 		if ( $max_term_id > 0 ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
 			$wpdb->query( $wpdb->prepare( "ALTER TABLE {$wpdb->terms} AUTO_INCREMENT = %d", $max_term_id + 1 ) );
 		}
 		if ( $max_tt_id > 0 ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
 			$wpdb->query( $wpdb->prepare( "ALTER TABLE {$wpdb->term_taxonomy} AUTO_INCREMENT = %d", $max_tt_id + 1 ) );
 		}
 

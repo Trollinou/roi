@@ -46,14 +46,7 @@ export default function StudentDetailItemRow( {
 		if ( itemTimeSpent <= avgTimeSpent * 0.8 ) {
 			comparisonBadge = (
 				<span
-					style={ {
-						fontSize: '10px',
-						background: '#e6f6e6',
-						color: '#007017',
-						padding: '2px 6px',
-						borderRadius: '3px',
-						fontWeight: '600',
-					} }
+					className="roi-detail-item-row__badge roi-detail-item-row__badge--fast"
 					title="Temps inférieur à la moyenne du groupe"
 				>
 					⚡ Rapide
@@ -62,14 +55,7 @@ export default function StudentDetailItemRow( {
 		} else if ( itemTimeSpent >= avgTimeSpent * 1.3 ) {
 			comparisonBadge = (
 				<span
-					style={ {
-						fontSize: '10px',
-						background: '#fff3e0',
-						color: '#d94f00',
-						padding: '2px 6px',
-						borderRadius: '3px',
-						fontWeight: '600',
-					} }
+					className="roi-detail-item-row__badge roi-detail-item-row__badge--slow"
 					title="Temps supérieur à la moyenne du groupe"
 				>
 					⏱ Plus long
@@ -77,33 +63,21 @@ export default function StudentDetailItemRow( {
 			);
 		} else {
 			comparisonBadge = (
-				<span
-					style={ {
-						fontSize: '10px',
-						background: '#f0f6fc',
-						color: '#0073aa',
-						padding: '2px 6px',
-						borderRadius: '3px',
-						fontWeight: '500',
-					} }
-				>
+				<span className="roi-detail-item-row__badge roi-detail-item-row__badge--avg">
 					Moyenne
 				</span>
 			);
 		}
 	}
 
-	let typeBg = '#f4ebff';
-	let typeColor = '#8224e3';
+	let typeModifier = 'exercice';
 	let typeLabel = 'Exercice';
 
 	if ( item.type === 'roi_lecon' ) {
-		typeBg = '#e7f3ff';
-		typeColor = '#0073aa';
+		typeModifier = 'lecon';
 		typeLabel = 'Leçon';
 	} else if ( item.type === 'roi_video' ) {
-		typeBg = '#ffebee';
-		typeColor = '#c62828';
+		typeModifier = 'video';
 		typeLabel = 'Vidéo';
 	}
 
@@ -115,22 +89,14 @@ export default function StudentDetailItemRow( {
 			return (
 				<>
 					<span
-						style={ {
-							fontWeight: '600',
-							color: '#2c3338',
-							whiteSpace: 'nowrap',
-						} }
+						className="roi-detail-item-row__time-value"
 						title="Temps passé par l'élève"
 					>
 						⏱ { formatDuration( itemTimeSpent ) }
 					</span>
 					{ typeof avgTimeSpent === 'number' && avgTimeSpent > 0 && (
 						<span
-							style={ {
-								fontSize: '11px',
-								color: '#8c8f94',
-								whiteSpace: 'nowrap',
-							} }
+							className="roi-detail-item-row__time-avg"
 							title={ `Moyenne calculée sur ${ stat?.count || 1 } élève(s)` }
 						>
 							(Moy: { formatDuration( avgTimeSpent ) })
@@ -142,7 +108,7 @@ export default function StudentDetailItemRow( {
 		}
 		return (
 			<span
-				style={ { color: '#a7aaad', fontSize: '12px' } }
+				className="roi-detail-item-row__time-none"
 				title="Temps non enregistré"
 			>
 				-
@@ -152,49 +118,19 @@ export default function StudentDetailItemRow( {
 
 	return (
 		<div
-			style={ {
-				display: 'grid',
-				gridTemplateColumns: 'minmax(200px, 1fr) 130px 200px 95px',
-				alignItems: 'center',
-				padding: '8px 12px',
-				borderRadius: '4px',
-				background: isValidated ? '#fbfdfb' : '#fff',
-				border: isValidated ? '1px solid #d1eed1' : '1px solid #f0f0f1',
-				gap: '12px',
-			} }
+			className={ `roi-detail-item-row${
+				isValidated ? ' roi-detail-item-row--validated' : ''
+			}` }
 		>
 			{ /* Col 1: Type + Title */ }
-			<div
-				style={ {
-					display: 'flex',
-					alignItems: 'center',
-					gap: '8px',
-					overflow: 'hidden',
-				} }
-			>
+			<div className="roi-detail-item-row__col-title">
 				<span
-					style={ {
-						fontSize: '10px',
-						padding: '2px 6px',
-						borderRadius: '3px',
-						fontWeight: '600',
-						textTransform: 'uppercase',
-						flexShrink: 0,
-						background: typeBg,
-						color: typeColor,
-					} }
+					className={ `roi-detail-item-row__type-badge roi-detail-item-row__type-badge--${ typeModifier }` }
 				>
 					{ typeLabel }
 				</span>
 				<span
-					style={ {
-						fontSize: '13px',
-						fontWeight: '500',
-						color: '#1d2327',
-						whiteSpace: 'nowrap',
-						overflow: 'hidden',
-						textOverflow: 'ellipsis',
-					} }
+					className="roi-detail-item-row__title"
 					title={ decodeEntities(
 						item.titre || `Élément #${ item.id }`
 					) }
@@ -204,36 +140,14 @@ export default function StudentDetailItemRow( {
 			</div>
 
 			{ /* Col 2: Validation status & date */ }
-			<div
-				style={ {
-					display: 'flex',
-					flexDirection: 'column',
-					alignItems: 'flex-start',
-					fontSize: '12px',
-				} }
-			>
+			<div className="roi-detail-item-row__col-status">
 				{ isValidated ? (
 					<>
-						<span
-							style={ {
-								color: '#00a32a',
-								fontWeight: '600',
-								display: 'flex',
-								alignItems: 'center',
-								gap: '4px',
-							} }
-						>
+						<span className="roi-detail-item-row__status-valid">
 							✓ Validé
 							{ detail.source === 'club' && (
 								<span
-									style={ {
-										fontSize: '10px',
-										background: '#e6f6e6',
-										color: '#007017',
-										padding: '1px 5px',
-										borderRadius: '3px',
-										fontWeight: 'normal',
-									} }
+									className="roi-detail-item-row__club-badge"
 									title="Effectué lors de l'entraînement au club"
 								>
 									Club
@@ -241,36 +155,25 @@ export default function StudentDetailItemRow( {
 							) }
 						</span>
 						{ detail.date && (
-							<span
-								style={ { fontSize: '11px', color: '#8c8f94' } }
-							>
+							<span className="roi-detail-item-row__date">
 								{ formatDate( detail.date ) }
 							</span>
 						) }
 					</>
 				) : (
-					<span
-						style={ { color: '#8c8f94', fontStyle: 'italic' } }
-					>
+					<span className="roi-detail-item-row__status-pending">
 						⏳ Non complété
 					</span>
 				) }
 			</div>
 
 			{ /* Col 3: Time stats & comparison */ }
-			<div
-				style={ {
-					display: 'flex',
-					alignItems: 'center',
-					gap: '6px',
-					fontSize: '12px',
-				} }
-			>
+			<div className="roi-detail-item-row__col-time">
 				{ renderTimeStats() }
 			</div>
 
 			{ /* Col 4: Action Button */ }
-			<div style={ { display: 'flex', justifyContent: 'flex-end' } }>
+			<div className="roi-detail-item-row__col-action">
 				{ isValidated ? (
 					<button
 						type="button"
@@ -283,28 +186,7 @@ export default function StudentDetailItemRow( {
 						}
 						disabled={ isResettingItem }
 						title="Réinitialiser uniquement cet exercice pour forcer l'élève à le refaire"
-						style={ {
-							padding: '3px 8px',
-							fontSize: '11px',
-							color: '#d63638',
-							border: '1px solid #f0b8b8',
-							borderRadius: '3px',
-							background: '#fff',
-							cursor: 'pointer',
-							whiteSpace: 'nowrap',
-						} }
-						onMouseOver={ ( e ) => {
-							e.currentTarget.style.backgroundColor = '#fbeaea';
-						} }
-						onMouseOut={ ( e ) => {
-							e.currentTarget.style.backgroundColor = '#fff';
-						} }
-						onFocus={ ( e ) => {
-							e.currentTarget.style.backgroundColor = '#fbeaea';
-						} }
-						onBlur={ ( e ) => {
-							e.currentTarget.style.backgroundColor = '#fff';
-						} }
+						className="roi-detail-item-row__reset-btn"
 					>
 						{ isResettingItem ? '...' : '↺ Réinitialiser' }
 					</button>
@@ -320,29 +202,7 @@ export default function StudentDetailItemRow( {
 						}
 						disabled={ isValidatingItem || isResettingItem }
 						title="Noter la réalisation de cet exercice au club"
-						style={ {
-							padding: '3px 10px',
-							fontSize: '11px',
-							fontWeight: '600',
-							color: '#00a32a',
-							border: '1px solid #b8e6b8',
-							borderRadius: '3px',
-							background: '#f0fdf4',
-							cursor: 'pointer',
-							whiteSpace: 'nowrap',
-						} }
-						onMouseOver={ ( e ) => {
-							e.currentTarget.style.backgroundColor = '#dcfce7';
-						} }
-						onMouseOut={ ( e ) => {
-							e.currentTarget.style.backgroundColor = '#f0fdf4';
-						} }
-						onFocus={ ( e ) => {
-							e.currentTarget.style.backgroundColor = '#dcfce7';
-						} }
-						onBlur={ ( e ) => {
-							e.currentTarget.style.backgroundColor = '#f0fdf4';
-						} }
+						className="roi-detail-item-row__validate-btn"
 					>
 						{ isValidatingItem ? '...' : 'Effectuer' }
 					</button>

@@ -1,6 +1,5 @@
 const defaultConfig = require('@wordpress/scripts/config/webpack.config');
 const path = require('path');
-const fs = require('fs');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
@@ -88,27 +87,6 @@ module.exports = {
 				{
 					from: path.resolve(__dirname, 'src/blocks/pgn/block.json'),
 					to: path.resolve(__dirname, 'build/pgn/block.json'),
-				},
-				{
-					from: path.resolve(
-						__dirname,
-						'node_modules/eg-chessboard/dist/base.css'
-					),
-					to: path.resolve(
-						__dirname,
-						'build/chessboard/eg-chessboard.css'
-					),
-					transform(content) {
-						const piecesPath = path.resolve(
-							__dirname,
-							'node_modules/eg-chessboard/dist/pieces/cburnett.css'
-						);
-						const piecesContent = fs.readFileSync(
-							piecesPath,
-							'utf8'
-						);
-						return content.toString() + '\n' + piecesContent;
-					},
 				},
 			],
 		}),

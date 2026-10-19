@@ -23,7 +23,6 @@ class Audience {
 	 * Registers actions.
 	 */
 	public function __construct() {
-		add_action( 'init', array( $this, 'enregistrer_meta' ) );
 		add_action( 'add_meta_boxes', array( $this, 'ajouter_metabox' ) );
 		add_action( 'save_post_roi_cours', array( $this, 'sauvegarder_metabox' ) );
 	}
@@ -163,6 +162,7 @@ class Audience {
 					'post_type'      => 'adherent',
 					'post_status'    => 'publish',
 					'posts_per_page' => -1,
+					'no_found_rows'  => true,
 					'orderby'        => 'title',
 					'order'          => 'ASC',
 				)
