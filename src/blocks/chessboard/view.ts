@@ -1,5 +1,3 @@
-import type { StoreConfig } from '@wordpress/interactivity';
-
 const wpInteractivity = typeof window !== 'undefined' ? (window as any).wp?.interactivity : null;
 const store = wpInteractivity?.store || ((_namespace: string, config: any) => config || { state: {} });
 const getElement: () => { ref: HTMLElement | null } = wpInteractivity?.getElement || (() => ({ ref: null }));
@@ -262,7 +260,26 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
         boardAPI.drawMove(from, to, 'green');
       }
     }
+
+    if (customEventListeners[event]) {
+      customEventListeners[event].forEach((cb) => {
+        try {
+          cb(...args);
+        } catch (err) {
+          console.error(`Error in ${event} listener:`, err);
+        }
+      });
+    }
+
+    block.dispatchEvent(
+      new CustomEvent(event, {
+        detail: args.length > 1 ? args : args[0],
+        bubbles: true,
+      })
+    );
   };
+
+  const customEventListeners: Record<string, Array<(..._args: unknown[]) => void>> = {};
 
   const initialStockfishConfig: StockfishConfig =
     useStockfish || showEvaluationBar
@@ -277,6 +294,23 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
     boardConfig,
     initialStockfishConfig
   );
+
+  (boardAPI as any).on = (evt: string, callback: (..._args: unknown[]) => void) => {
+    if (!customEventListeners[evt]) {
+      customEventListeners[evt] = [];
+    }
+    customEventListeners[evt].push(callback);
+    return () => {
+      customEventListeners[evt] = customEventListeners[evt].filter((cb) => cb !== callback);
+    };
+  };
+
+  (boardAPI as any).off = (evt: string, callback: (..._args: unknown[]) => void) => {
+    if (customEventListeners[evt]) {
+      customEventListeners[evt] = customEventListeners[evt].filter((cb) => cb !== callback);
+    }
+  };
+
   (block as any).boardAPI = boardAPI;
 
   updateClockDisplays();
