@@ -204,7 +204,7 @@ class Partie {
 							data-clock-preset="none"
 							data-use-stockfish="true"
 							data-free-mode="false">
-							<section class="main-wrap piece-set-cburnett board-theme-brown">
+							<section class="main-wrap piece-set-cburnett board-theme-brown roi-board-frame">
 								<div class="main-board">
 									<div class="chessboard-mount-element"></div>
 								</div>
@@ -318,40 +318,12 @@ class Partie {
 				ROI_VERSION
 			);
 
-			$view_asset_file = $chess_dir . 'chessboard-view.asset.php';
-			$view_asset      = file_exists( $view_asset_file ) ? include $view_asset_file : array(
-				'dependencies' => array( 'wp-element' ),
-				'version'      => ROI_VERSION,
-			);
-			$view_deps       = array_values( array_filter( (array) $view_asset['dependencies'], fn( $dep ) => 'wp-interactivity' !== $dep ) );
-
-			wp_enqueue_script(
-				'roi-public-chessboard-view',
-				$chess_url . 'chessboard-view.js',
-				$view_deps,
-				$view_asset['version'],
-				array(
-					'strategy'  => 'defer',
-					'in_footer' => true,
-				)
-			);
-
-			wp_localize_script(
-				'roi-public-chessboard-view',
-				'roiChessConfig',
-				array(
-					'stockfishWorkerUrl' => \ROI\Chess\ChessEngine::get_stockfish_worker_url(),
-					'stockfishWasmUrl'   => \ROI\Chess\ChessEngine::get_stockfish_wasm_url(),
-				)
-			);
-
 			$viewer_asset_file = $chess_dir . 'admin-partie-viewer.asset.php';
 			$viewer_asset      = file_exists( $viewer_asset_file ) ? include $viewer_asset_file : array(
-				'dependencies' => array( 'roi-public-chessboard-view' ),
+				'dependencies' => array(),
 				'version'      => ROI_VERSION,
 			);
-			$viewer_deps       = array_values( array_unique( array_merge( array( 'roi-public-chessboard-view' ), (array) $viewer_asset['dependencies'] ) ) );
-			$viewer_deps       = array_values( array_filter( $viewer_deps, fn( $dep ) => 'wp-interactivity' !== $dep ) );
+			$viewer_deps       = array_values( array_filter( (array) $viewer_asset['dependencies'], fn( $dep ) => 'wp-interactivity' !== $dep ) );
 
 			wp_enqueue_script(
 				'roi-admin-partie-viewer',
@@ -361,6 +333,15 @@ class Partie {
 				array(
 					'strategy'  => 'defer',
 					'in_footer' => true,
+				)
+			);
+
+			wp_localize_script(
+				'roi-admin-partie-viewer',
+				'roiChessConfig',
+				array(
+					'stockfishWorkerUrl' => \ROI\Chess\ChessEngine::get_stockfish_worker_url(),
+					'stockfishWasmUrl'   => \ROI\Chess\ChessEngine::get_stockfish_wasm_url(),
 				)
 			);
 		}

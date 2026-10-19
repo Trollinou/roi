@@ -1,17 +1,14 @@
 import { computeEvalBarPercentage } from 'eg-chessboard';
 import type {
-	BoardCore,
 	StockfishEvaluation,
 	GameReviewReport,
 	MoveJudgement,
 	DrawShape,
 	EngineStatus,
 } from 'eg-chessboard';
+import { mountRoiBoard, type RoiBoardInstance } from './utils/board-factory';
 
-interface ExtendedBoardCore extends BoardCore {
-	on?: (_event: string, _callback: (..._args: any[]) => void) => () => void;
-	off?: (_event: string, _callback: (..._args: any[]) => void) => void;
-}
+interface ExtendedBoardCore extends RoiBoardInstance {}
 
 interface ChessboardBlockElement extends HTMLElement {
 	boardAPI?: ExtendedBoardCore;
@@ -112,7 +109,17 @@ onDomReady(() => {
 		return;
 	}
 
-	let boardAPI: ExtendedBoardCore;
+	const initialFen = block.getAttribute('data-fen') || undefined;
+	const orientation = (block.getAttribute('data-orientation') as any) || 'white';
+	const coordinates = block.getAttribute('data-coordinates') !== 'false';
+
+	const boardAPI: ExtendedBoardCore = mountRoiBoard(block, {
+		fen: initialFen,
+		orientation,
+		coordinates,
+		viewOnly: true,
+		useStockfish: true,
+	});
 
 	// State
 	let isLiveAnalysis = false;
@@ -1043,17 +1050,6 @@ onDomReady(() => {
 		});
 	}
 
-	// Poll for boardAPI initialization on the block element
-	let attempts = 0;
-	const checkInterval = setInterval(() => {
-		attempts++;
-		if (block.boardAPI) {
-			clearInterval(checkInterval);
-			boardAPI = block.boardAPI;
-			initViewer();
-		} else if (attempts > 200) {
-			clearInterval(checkInterval);
-		}
-	}, 50);
+	initViewer();
 });
 

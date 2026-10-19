@@ -1,4 +1,9 @@
 @use 'eg-chessboard/scss/base';
+@use '../../scss/abstracts/chessboard-layer' as *;
+
+.roi-board-frame {
+  @include roi-chessboard-layer;
+}
 
 @media (orientation: landscape) {
   .main-wrap {
@@ -16,18 +21,7 @@
 }
 
 .chessboard-mount-element {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-
-  cg-container svg,
-  .cg-shapes,
-  .cg-shapes-below,
-  .cg-custom-svgs,
-  .cg-custom-below {
-    pointer-events: none !important;
-  }
+  @include roi-chessboard-layer;
 }
 
 
@@ -581,17 +575,6 @@ cg-board.editor-palette-board {
   box-sizing: border-box !important;
 }
 
-.fen-editor-board-col .main-board,
-.pgn-editor-left-col .main-board {
-  width: 380px !important;
-  height: 380px !important;
-  max-width: 380px !important;
-  max-height: 380px !important;
-  padding-bottom: 0 !important;
-  aspect-ratio: 1 / 1 !important;
-  position: relative !important;
-}
-
 /* Interactivity API Blocks: Diagramme & PGN */
 .roi-bloc-diagramme,
 .roi-bloc-pgn {
@@ -603,9 +586,8 @@ cg-board.editor-palette-board {
 
 .roi-bloc-diagramme .main-wrap,
 .roi-bloc-pgn .main-wrap {
+  @include roi-chessboard-layer;
   width: 100%;
-  position: relative;
-  overflow: hidden;
 }
 
 .pgn-navigation-bar {

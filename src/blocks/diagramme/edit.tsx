@@ -7,11 +7,9 @@ import {
 	ToolbarGroup,
 	ToolbarButton,
 } from '@wordpress/components';
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import RoiFenEditor from '../../components/FenEditor';
-import { BoardCore as EgBoardCore } from 'eg-chessboard';
-import 'eg-chessboard/base.css';
-import 'eg-chessboard/pieces/cburnett.css';
+import RoiChessboard from '../../components/Chessboard';
 import type { Shape, Color } from '../../types';
 
 export interface DiagrammeBlockAttributes {
@@ -27,8 +25,6 @@ interface EditProps {
 
 export default function Edit({ attributes, setAttributes }: EditProps): React.ReactElement {
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const previewBoardRef = useRef<HTMLDivElement | null>(null);
-	const previewInstanceRef = useRef<any>(null);
 
 	const handleSave = (data: any) => {
 		if (typeof data === 'object' && data !== null) {
@@ -46,65 +42,6 @@ export default function Edit({ attributes, setAttributes }: EditProps): React.Re
 		}
 		setIsModalOpen(false);
 	};
-
-	// Preview Board Initialization
-	useEffect(() => {
-		if (previewBoardRef.current && EgBoardCore) {
-			if (previewInstanceRef.current) {
-				previewInstanceRef.current.destroy();
-				previewInstanceRef.current = null;
-			}
-
-			const config = {
-				mode: 'editor' as const,
-				fen: attributes.fen,
-				orientation: attributes.orientation || 'white',
-				coordinates: true,
-				viewOnly: true,
-				movable: {
-					free: false,
-				},
-				draggable: {
-					enabled: false,
-				},
-				drawable: {
-					enabled: false,
-				},
-			};
-
-			const boardState = {
-				mode: 'editor' as const,
-				showThreats: false,
-				promotionDialogState: { isEnabled: false },
-				historyViewerState: { isEnabled: false },
-			};
-
-			const boardAPI = new EgBoardCore(
-				previewBoardRef.current,
-				boardState,
-				() => {},
-				() => {},
-				config,
-				{
-					whiteMode: 'disabled',
-					blackMode: 'disabled',
-				}
-			);
-
-			previewInstanceRef.current = boardAPI;
-
-			if (attributes.shapes && attributes.shapes.length > 0) {
-				boardAPI.setShapes(attributes.shapes);
-			}
-		}
-
-		return () => {
-			if (previewInstanceRef.current) {
-				previewInstanceRef.current.destroy();
-				previewInstanceRef.current = null;
-			}
-		};
-	}, [attributes.fen, attributes.orientation, attributes.shapes]);
 
 	const blockProps = useBlockProps({
 		className: 'roi-bloc-diagramme-preview',
@@ -130,12 +67,10 @@ export default function Edit({ attributes, setAttributes }: EditProps): React.Re
 
 			<div {...blockProps}>
 				<div
-					className="main-wrap piece-set-cburnett board-theme-brown"
+					className="roi-diagramme-preview-wrap"
 					style={{
 						width: '320px',
-						height: '320px',
-						position: 'relative',
-						overflow: 'hidden',
+						maxWidth: '100%',
 						cursor: 'pointer',
 					}}
 					onClick={() => setIsModalOpen(true)}
@@ -148,12 +83,17 @@ export default function Edit({ attributes, setAttributes }: EditProps): React.Re
 						}
 					}}
 				>
-					<div
-						ref={previewBoardRef}
-						style={{
-							width: '100%',
-							height: '100%',
-							position: 'relative',
+					<RoiChessboard
+						fen={attributes.fen}
+						orientation={attributes.orientation || 'white'}
+						shapes={attributes.shapes}
+						coordinates={true}
+						viewOnly={true}
+						mode="editor"
+						boardConfig={{
+							draggable: { enabled: false },
+							movable: { free: false },
+							drawable: { enabled: false },
 						}}
 					/>
 				</div>

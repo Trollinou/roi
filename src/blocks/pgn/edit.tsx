@@ -7,12 +7,10 @@ import {
 	ToolbarGroup,
 	ToolbarButton,
 } from '@wordpress/components';
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useRef, useState } from '@wordpress/element';
 import RoiPgnEditor from '../../components/PgnEditor';
 import '../../components/PgnEditor/PgnEditor.scss';
-import { BoardCore as EgBoardCore } from 'eg-chessboard';
-import 'eg-chessboard/base.css';
-import 'eg-chessboard/pieces/cburnett.css';
+import RoiChessboard from '../../components/Chessboard';
 import type { PgnString } from '../../types';
 
 export interface PgnBlockAttributes {
@@ -26,76 +24,12 @@ interface EditProps {
 
 export default function Edit({ attributes, setAttributes }: EditProps): React.ReactElement {
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const previewBoardRef = useRef<HTMLDivElement | null>(null);
-	const previewInstanceRef = useRef<any>(null);
+	const boardRef = useRef<any>(null);
 
 	const handleSave = (newPgn: PgnString) => {
 		setAttributes({ pgn: newPgn });
 		setIsModalOpen(false);
 	};
-
-	// Preview Board Initialization
-	useEffect(() => {
-		if (previewBoardRef.current && EgBoardCore) {
-			if (previewInstanceRef.current) {
-				previewInstanceRef.current.destroy();
-				previewInstanceRef.current = null;
-			}
-
-			const config = {
-				mode: 'study' as const,
-				pgn: attributes.pgn,
-				orientation: 'white' as const,
-				coordinates: true,
-				viewOnly: true,
-				movable: {
-					free: false,
-				},
-				draggable: {
-					enabled: false,
-				},
-				drawable: {
-					enabled: false,
-				},
-			};
-
-			const boardState = {
-				mode: 'study' as const,
-				showThreats: false,
-				promotionDialogState: { isEnabled: false },
-				historyViewerState: { isEnabled: false },
-			};
-
-			const boardAPI = new EgBoardCore(
-				previewBoardRef.current,
-				boardState,
-				() => {},
-				() => {},
-				config,
-				{
-					whiteMode: 'disabled',
-					blackMode: 'disabled',
-				}
-			);
-
-			previewInstanceRef.current = boardAPI;
-
-			if (attributes.pgn) {
-				try {
-					boardAPI.loadPgn(attributes.pgn);
-				} catch (e) {
-					console.warn('Error loading PGN for preview:', e);
-				}
-			}
-		}
-
-		return () => {
-			if (previewInstanceRef.current) {
-				previewInstanceRef.current.destroy();
-				previewInstanceRef.current = null;
-			}
-		};
-	}, [attributes.pgn]);
 
 	const blockProps = useBlockProps({
 		className: 'roi-bloc-pgn-preview',
@@ -131,12 +65,10 @@ export default function Edit({ attributes, setAttributes }: EditProps): React.Re
 					{attributes.pgn ? (
 						<>
 							<div
-								className="main-wrap piece-set-cburnett board-theme-brown"
+								className="roi-pgn-preview-wrap"
 								style={{
 									width: '320px',
-									height: '320px',
-									position: 'relative',
-									overflow: 'hidden',
+									maxWidth: '100%',
 									cursor: 'pointer',
 								}}
 								onClick={() => setIsModalOpen(true)}
@@ -152,12 +84,18 @@ export default function Edit({ attributes, setAttributes }: EditProps): React.Re
 									}
 								}}
 							>
-								<div
-									ref={previewBoardRef}
-									style={{
-										width: '100%',
-										height: '100%',
-										position: 'relative',
+								<RoiChessboard
+									pgn={attributes.pgn}
+									coordinates={true}
+									viewOnly={true}
+									mode="study"
+									onBoardCreated={(api) => {
+										boardRef.current = api;
+									}}
+									boardConfig={{
+										draggable: { enabled: false },
+										movable: { free: false },
+										drawable: { enabled: false },
 									}}
 								/>
 							</div>
@@ -181,16 +119,7 @@ export default function Edit({ attributes, setAttributes }: EditProps): React.Re
 									title="Début"
 									onClick={(e) => {
 										e.stopPropagation();
-										previewInstanceRef.current?.viewStart();
-									}}
-									style={{
-										cursor: 'pointer',
-										color: '#495057',
-										borderColor: '#ced4da',
-										background: '#ffffff',
-										position: 'relative',
-										zIndex: 21,
-										pointerEvents: 'auto',
+										boardRef.current?.viewStart();
 									}}
 								>
 									|&lt;
@@ -201,16 +130,7 @@ export default function Edit({ attributes, setAttributes }: EditProps): React.Re
 									title="Précédent"
 									onClick={(e) => {
 										e.stopPropagation();
-										previewInstanceRef.current?.viewPrevious();
-									}}
-									style={{
-										cursor: 'pointer',
-										color: '#495057',
-										borderColor: '#ced4da',
-										background: '#ffffff',
-										position: 'relative',
-										zIndex: 21,
-										pointerEvents: 'auto',
+										boardRef.current?.viewPrevious();
 									}}
 								>
 									&lt;
@@ -221,16 +141,7 @@ export default function Edit({ attributes, setAttributes }: EditProps): React.Re
 									title="Suivant"
 									onClick={(e) => {
 										e.stopPropagation();
-										previewInstanceRef.current?.viewNext();
-									}}
-									style={{
-										cursor: 'pointer',
-										color: '#495057',
-										borderColor: '#ced4da',
-										background: '#ffffff',
-										position: 'relative',
-										zIndex: 21,
-										pointerEvents: 'auto',
+										boardRef.current?.viewNext();
 									}}
 								>
 									&gt;
@@ -241,16 +152,7 @@ export default function Edit({ attributes, setAttributes }: EditProps): React.Re
 									title="Fin"
 									onClick={(e) => {
 										e.stopPropagation();
-										previewInstanceRef.current?.stopViewingHistory();
-									}}
-									style={{
-										cursor: 'pointer',
-										color: '#495057',
-										borderColor: '#ced4da',
-										background: '#ffffff',
-										position: 'relative',
-										zIndex: 21,
-										pointerEvents: 'auto',
+										boardRef.current?.stopViewingHistory();
 									}}
 								>
 									&gt;|

@@ -19,6 +19,8 @@ try {
 	execSync( 'npm run typecheck', { stdio: 'inherit' } );
 	console.log( '  → ESLint...' );
 	execSync( 'npm run lint', { stdio: 'inherit' } );
+	console.log( '  → Unit Tests (Vitest)...' );
+	execSync( 'npm test', { stdio: 'inherit' } );
 	console.log( '  → PHPStan...' );
 	execSync( 'vendor/bin/phpstan analyze --debug --memory-limit=2G', { stdio: 'inherit' } );
 	console.log( '✅ QA Checks passed successfully.\n' );

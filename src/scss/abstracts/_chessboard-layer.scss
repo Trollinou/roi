@@ -1,0 +1,121 @@
+// ==========================================================================
+// ROI Chessboard Layer & Stacking Context Isolation
+// ==========================================================================
+// Fournit une isolation matérielle et un contexte d'empilement hermétique
+// pour Chessground / eg-chessboard afin de garantir que :
+// 1. Les coordonnées, pièces et SVG d'annotations s'affichent dans le bon ordre.
+// 2. Les SVG d'annotations n'interceptent jamais les clics souris/tactiles.
+// 3. Le conteneur conserve un ratio carré 1:1 sans effondrement en Flexbox/Grid.
+// 4. Aucun z-index interne ne fuit dans l'interface parente (admin WP, modales).
+// ==========================================================================
+
+@mixin roi-chessboard-layer {
+  isolation: isolate;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  box-sizing: border-box;
+
+  // Harmonisation des conteneurs Chessground / eg-chessboard
+  .main-wrap,
+  .main-board,
+  .cg-wrap,
+  .chessboard-mount-element {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    padding-bottom: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  // Conteneurs internes Chessground
+  cg-container,
+  cg-board {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+  }
+
+  // Échiquier (cases et fond)
+  cg-board {
+    z-index: 1;
+  }
+
+  // Coordonnées algébriques (lettres et chiffres)
+  coords {
+    z-index: 2;
+    pointer-events: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+  }
+
+  // Pièces d'échecs
+  piece {
+    z-index: 4;
+
+    &.fading {
+      z-index: 3;
+    }
+
+    &.anim {
+      z-index: 8;
+    }
+
+    &.dragging {
+      z-index: 9;
+    }
+  }
+
+  // Couches vectorielles SVG (flèches, cercles, annotations, menaces)
+  // IMPÉRATIF : pointer-events: none pour ne jamais bloquer l'interaction sur l'échiquier
+  svg,
+  svg.cg-shapes,
+  svg.cg-shapes-below,
+  svg.cg-custom-svgs,
+  svg.cg-custom-below,
+  cg-container svg,
+  .cg-shapes,
+  .cg-shapes-below,
+  .cg-custom-svgs,
+  .cg-custom-below,
+  cg-auto-pieces {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none !important;
+    z-index: 5;
+    transform: translateZ(0);
+    will-change: transform;
+
+    * {
+      pointer-events: none !important;
+    }
+  }
+
+  // Dialogue de sélection de promotion (doit être au-dessus et cliquable)
+  dialog.promotion-dialog,
+  .promotion-dialog {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000 !important;
+    pointer-events: auto !important;
+
+    * {
+      pointer-events: auto !important;
+    }
+  }
+}
+
