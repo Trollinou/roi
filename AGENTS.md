@@ -4,7 +4,7 @@
 - Interdiction d'utiliser `get_repository_content` sur la racine. Utiliser uniquement `search_code` ou `get_file_content` ciblés.
 - Ne JAMAIS réécrire un fichier complet pour une modification. Fournir des diffs ou des fonctions isolées. Pas de disclaimers ni commentaires verbeux.
 - **Consolidation des scripts** : Tous les scripts d'outillage Node.js / packaging / synchronisation résident obligatoirement dans `scripts/` (aucun dossier `script/`).
-- **Contrôle Qualité Pré-Packaging** : Le script de release (`scripts/package.cjs`) doit obligatoirement valider l'intégrité de la suite QA (`npm run typecheck`, `npm run lint`, `phpstan`) avant de générer l'archive de production.
+- **Contrôle Qualité Pré-Packaging** : Le script de release (`scripts/package.cjs`) doit obligatoirement valider l'intégrité de la suite QA (`npm run typecheck`, `npm run lint`, `npm test`, `phpstan`) avant de générer l'archive de production.
 
 ## 2. Stack Technique
 - **Plugin** : `ROI` | Slug: `roi` | Prefix: `roi_` | Namespace: `ROI\` | Table: `{$wpdb->prefix}roi_`
@@ -27,6 +27,11 @@
 - **Phase 0 Obligatoire** : Toute nouvelle fonctionnalité ou refonte doit débuter par la création d'une branche Git dédiée (`feat/*`) et la validation de la baseline QA (`npm run typecheck` sur `roi` et `dame-pwa`) avant toute écriture de code.
 - **Traçabilité & Documentation** : Renseigner systématiquement les nouveautés dans la section `[Unreleased]` du `CHANGELOG.md`.
 
+## 2.3. Intégration Échiquiers (`eg-chessboard` & Chessground)
+- **Éradication des Polling Timers** : Interdiction formelle des boucles d'attente active (`setInterval`) pour instancier ou manipuler un échiquier.
+- **Contexte React / Gutenberg** : Utiliser impérativement le composant unifié `<RoiChessboard />` (`src/components/Chessboard`). Ne jamais réinstancier `BoardCore` manuellement dans les blocs ou composants React.
+- **Contexte Vanilla DOM / TypeScript / Admin WP** : Utiliser impérativement la factory unifiée `mountRoiBoard(container, options)` (`src/utils/board-factory`). Elle prend en charge le scaffolding DOM, l'isolation, l'Event Bus (`on()`, `off()`, `CustomEvent`) et la destruction (`destroy()`).
+
 ## 3. Architecture & Structure
 - **PSR-4 / Namespaces** : Sous-dossiers dans `includes/` en PascalCase (`includes/Admin/`, `includes/CPT/`, `includes/DTO/`, `includes/Blocks/`, `includes/Chess/`, `includes/Services/`). Fichiers/classes en PascalCase.
 - **Cycle de Vie Événementiel & Lazy Loading** :
@@ -48,11 +53,16 @@
   - **Design Tokens WordPress & Adaptabilité Thèmes** : Utiliser impérativement les CSS Custom Properties standard de WordPress (`--wp--preset--color--*`, `--wp--preset--font-family--*`, `--wp--preset--spacing--*`, `--wp-admin-theme-color`, `--wp--style--block-gap`) avec des valeurs de repli (*fallbacks*) pour une adaptation transparente aux thèmes FSE (`theme.json`) et classiques.
   - **Spécificité & BEM** : Maintenir une spécificité faible (BEM plat sans imbrications profondes) pour permettre la personnalisation par l'éditeur de site WordPress, et bannir l'utilisation de `!important` (hors isolation géométrique critique d'échiquier).
 - **Shortcodes** : Capturer `wp_editor()` via `ob_start()` / `ob_get_clean()`.
+- **Isolation des Couches Échiquier (Stacking Context & Layers)** :
+  - **Conteneur Hermétique** : Tout échiquier doit être enveloppé dans un conteneur portant `.roi-board-frame` ou le mixin `roi-chessboard-layer` (`src/scss/abstracts/_chessboard-layer.scss`), imposant `isolation: isolate;` et `aspect-ratio: 1 / 1;` (bannir le hack `padding-bottom: 100%`).
+  - **Non-Obstruction des Pièces** : Tous les calques SVG Chessground (`.cg-shapes`, `.cg-custom-below`, `.cg-shapes-below`, `.cg-custom-svgs`) doivent avoir `pointer-events: none !important;` pour empêcher l'interception intempestive des clics.
+  - **Boîtes de Dialogue** : La boîte de dialogue de promotion doit avoir `z-index: 1000; pointer-events: auto !important;`.
 
 ## 5. QA, Tests & Conformité
 - **PHPStan** : `vendor/bin/phpstan analyze --debug --memory-limit=2G` (mode single-process `--debug` obligatoire et mémoire 2G).
 - **PHPCS & Style** : `vendor/bin/phpcbf` pour auto-fix WPCS, suivi de `vendor/bin/phpcs` pour la validation stricte.
 - **TypeScript & Build** : `npm run typecheck` (`tsc --noEmit`), `npm run build` (`wp-scripts build`).
+- **Tests Unitaires & Non-Régression** : `npm test` (Vitest / Happy-DOM via `scripts/test-unit.cjs`) pour valider l'isolation des calques, l'empilement CSS et la factory `mountRoiBoard`.
 - **Validation PWA conjointe** : `npm run type-check` (`vue-tsc`) et `npm run build` dans `dame-pwa`.
 - **Versionning Sémantique Synchronisé** : `roi.php`, constante `ROI_VERSION`, `package.json`, `CHANGELOG.md` et `block.json` (synchronisés via `scripts/version-sync.cjs`).
 
