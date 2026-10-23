@@ -12,7 +12,14 @@ dist-temp/
 *.log
 .phpunit.result.cache
 .phpcs.cache
-.vscode/
 .idea/
 .antigravityrules
 .deps/
+# Ignorer tout le dossier .vscode par défaut (sécurité)
+.vscode/*
+
+# Mais versionner la configuration standardisée du projet
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json

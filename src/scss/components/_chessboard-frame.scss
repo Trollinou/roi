@@ -1,0 +1,13 @@
+// ==========================================================================
+// ROI Chessboard Frame Component
+// ==========================================================================
+// Classe de conteneur standard pour tout échiquier dans le plugin ROI.
+// Applique le mixin d'isolation des couches et du contexte d'empilement.
+// ==========================================================================
+
+@use '../abstracts/chessboard-layer' as *;
+
+.roi-board-frame {
+  @include roi-chessboard-layer;
+}
+

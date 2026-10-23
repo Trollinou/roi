@@ -4,6 +4,7 @@
 
 import { extractFenOrientationAndShapes } from './controls';
 import { toFrenchNotation } from '../../utils/chessUtils';
+import { mountRoiBoard } from '../../utils/board-factory';
 import type { BoardShape, PgnString } from '../../types/chess';
 
 export interface PgnPreviewViewerOptions {
@@ -54,7 +55,7 @@ export function createPgnPreviewViewer(
 		<div class="roi-pgn-preview-viewer">
 			<!-- Échiquier (gauche) -->
 			<div class="roi-pgn-viewer-board-col" style="flex: 0 0 ${boardSize}px; width: ${boardSize}px; height: ${boardSize}px;">
-				<div class="main-wrap fit-container piece-set-cburnett board-theme-brown">
+				<div class="main-wrap fit-container piece-set-cburnett board-theme-brown roi-board-frame">
 					<div class="main-board roi-pgn-board-mount"></div>
 				</div>
 			</div>
@@ -414,67 +415,43 @@ export function createPgnPreviewViewer(
       return;
     }
 
-    const checkInterval = setInterval(function () {
-      if (window.EgBoardCore && boardMountEl) {
-        clearInterval(checkInterval);
+    if (!boardMountEl) {
+      return;
+    }
 
-        const boardConfig = {
-          mode: 'game',
-          fen,
-          orientation,
-          coordinates: true,
-          viewOnly: true,
-          movable: {
-            free: false,
-            color: 'none',
-          },
-          drawable: {
-            enabled: false,
-            visible: true,
-            shapes: shapes || [],
-          },
-        };
+    boardApi = mountRoiBoard(boardMountEl, {
+      fen,
+      pgn: trimmed,
+      orientation,
+      coordinates: true,
+      viewOnly: true,
+      shapes: shapes || [],
+      boardConfig: {
+        movable: {
+          free: false,
+          color: 'none',
+        },
+        drawable: {
+          enabled: false,
+          visible: true,
+          shapes: shapes || [],
+        },
+      },
+      onStateChange: () => {
+        syncDataFromBoard();
+        renderView();
+      },
+    });
 
-        const boardState = {
-          mode: 'game' as const,
-          pieceSet: 'cburnett',
-          boardTheme: 'brown',
-          showThreats: false,
-          promotionDialogState: { isEnabled: false },
-          historyViewerState: { isEnabled: false },
-        };
+    goToPly(0);
 
-        boardApi = new window.EgBoardCore(
-          boardMountEl,
-          boardState,
-          function () {
-            syncDataFromBoard();
-            renderView();
-          },
-          function () {},
-          boardConfig,
-          { workerUrl: '' }
-        );
-
-        try {
-          if (typeof boardApi.loadPgn === 'function') {
-            boardApi.loadPgn(trimmed);
-          }
-        } catch (err) {
-          console.warn('[PgnPreviewViewer] Erreur initial loadPgn:', err);
-        }
-
-        goToPly(0);
-
-        window.requestAnimationFrame(() => {
-          if (boardApi && typeof boardApi.redraw === 'function') {
-            boardApi.redraw(true);
-          }
-          syncDataFromBoard();
-          renderView();
-        });
+    window.requestAnimationFrame(() => {
+      if (boardApi && typeof boardApi.redraw === 'function') {
+        boardApi.redraw(true);
       }
-    }, 50);
+      syncDataFromBoard();
+      renderView();
+    });
   }
 
   load(currentPgn);

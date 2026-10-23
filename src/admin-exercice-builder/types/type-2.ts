@@ -3,6 +3,7 @@
  */
 
 import { setupFenControl, getActiveColorFromFen } from '../utils/controls';
+import { mountRoiBoard } from '../../utils/board-factory';
 import type { Shape } from '../../types';
 
 interface DiagrammeItem {
@@ -83,60 +84,19 @@ function renderPreviewBoard(index: number): void {
 		return;
 	}
 
-	const checkInterval = setInterval(function () {
-		if (window.EgBoardCore) {
-			clearInterval(checkInterval);
+	const api = mountRoiBoard(boardEl, {
+		fen,
+		orientation,
+		viewOnly: true,
+		coordinates: true,
+		shapes,
+		boardConfig: {
+			movable: { free: false, color: 'none' },
+			drawable: { enabled: false },
+		},
+	});
 
-			if (boardEl.parentElement) {
-				boardEl.parentElement.classList.add(
-					'main-wrap',
-					'fit-container',
-					'piece-set-cburnett',
-					'board-theme-brown'
-				);
-			}
-			boardEl.classList.add('main-board');
-
-			const boardConfig = {
-				mode: 'game' as const,
-				fen,
-				orientation,
-				coordinates: true,
-				viewOnly: true,
-				movable: {
-					free: false,
-					color: 'none',
-				},
-				drawable: {
-					enabled: false,
-				},
-			};
-
-			const boardState = {
-				mode: 'game' as const,
-				pieceSet: 'cburnett',
-				boardTheme: 'brown',
-				showThreats: false,
-				promotionDialogState: { isEnabled: false },
-				historyViewerState: { isEnabled: false },
-			};
-
-			const api = new window.EgBoardCore(
-				boardEl,
-				boardState,
-				function () {},
-				function () {},
-				boardConfig,
-				{ workerUrl: '' }
-			);
-
-			if (shapes && typeof api.setShapes === 'function') {
-				api.setShapes(shapes);
-			}
-
-			previewAPIs[index] = api;
-		}
-	}, 50);
+	previewAPIs[index] = api;
 }
 
 export function init(): void {

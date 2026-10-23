@@ -328,7 +328,7 @@ export const PgnEditor = forwardRef<PgnEditorRef, PgnEditorProps>(function PgnEd
       <div className="pgn-editor-main-layout">
         {/* Colonne de Gauche : Échiquier & Navigation */}
         <div className="pgn-editor-left-col">
-          <section className={`main-wrap piece-set-${pieceSet} board-theme-${boardTheme}`}>
+          <section className={`main-wrap piece-set-${pieceSet} board-theme-${boardTheme} roi-board-frame`}>
             <div className="main-board">
               <div ref={boardElRef} />
             </div>

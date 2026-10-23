@@ -433,7 +433,7 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
       {/* Colonne Gauche - L'échiquier */}
       <div className="fen-editor-board-col">
         <section
-          className={`main-wrap piece-set-${pieceSet} board-theme-${boardTheme} ${
+          className={`main-wrap piece-set-${pieceSet} board-theme-${boardTheme} roi-board-frame ${
             promotionState && promotionState.isEnabled ? 'disabledBoard' : ''
           }`}
         >

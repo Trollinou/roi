@@ -2,6 +2,8 @@
 // ROI FenEditor Component Styles
 // ==========================================================================
 
+@use '../abstracts/chessboard-layer' as *;
+
 .fen-editor-container {
   display: flex;
   flex-direction: row;
@@ -34,19 +36,11 @@
   flex-shrink: 0;
 
   .main-wrap {
-    width: 100% !important;
-    max-width: 380px !important;
-    margin: 0 !important;
-  }
-
-  .main-board {
-    width: 380px !important;
-    height: 380px !important;
-    max-width: 380px !important;
-    max-height: 380px !important;
-    padding-bottom: 0 !important;
-    aspect-ratio: 1 / 1 !important;
-    position: relative !important;
+    @include roi-chessboard-layer;
+    width: 380px;
+    height: 380px;
+    max-width: 100%;
+    margin: 0 auto;
   }
 
   @media (max-width: 768px) {
