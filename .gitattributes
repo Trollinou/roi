@@ -30,6 +30,9 @@
 .htaccess text eol=lf
 .browserlistrc text eol=lf
 .geminirc text eol=lf
+.prettierrc text eol=lf
+.prettierignore text eol=lf
+.npmignore text eol=lf
 *.env.* text eol=lf
 
 # Fichiers de templates/dist et locks
