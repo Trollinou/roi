@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.11.0] - 2026-10-26
+
 *   **Suite de Tests de Non-Régression Ciblés / Smoke Tests (Piste 4 — `tests/chessboard/ChessboardLayer.test.ts`, `vitest.config.mjs`, `scripts/test-unit.cjs`, `scripts/package.cjs`, `package.json`) :**
     *   **Automatisation de la Validation des Couches & Empilement (Stacking Context)** : Couverture automatisée validant la présence de `isolation: isolate;`, du ratio carré (`aspect-ratio: 1 / 1`), de `pointer-events: none !important;` sur les calques SVG d'annotations/flèches, et de `pointer-events: auto !important;` (`z-index: 1000`) sur le dialogue de promotion.
     *   **Tests de Non-Obstruction des Pièces & Clics** : Simulation d'événements de clic sur les pièces en présence de calques SVG superposés, vérifiant l'absence d'interception parasite.
