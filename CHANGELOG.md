@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.11.1] - 2026-10-29
+
 ## [1.11.0] - 2026-10-26
 
 *   **Suite de Tests de Non-Régression Ciblés / Smoke Tests (Piste 4 — `tests/chessboard/ChessboardLayer.test.ts`, `vitest.config.mjs`, `scripts/test-unit.cjs`, `scripts/package.cjs`, `package.json`) :**
