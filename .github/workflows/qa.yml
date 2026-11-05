@@ -56,10 +56,10 @@ jobs:
 
       - name: Run PHPUnit (if configured)
         run: |
-          if [ -f vendor/bin/phpunit ]; then
+          if [ -f phpunit.xml ] || [ -f phpunit.xml.dist ]; then
             vendor/bin/phpunit
           else
-            echo "ℹ️ PHPUnit n'est pas encore configuré (aucun fichier de test unitaire détecté)."
+            echo "ℹ️ PHPUnit n'est pas encore configuré (aucun fichier phpunit.xml détecté)."
           fi
 
   front-qa:
