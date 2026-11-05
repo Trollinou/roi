@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+*   **Correction CI/QA & Robustesse Multiplateforme (`.github/workflows/qa.yml`, `scripts/test-unit.cjs`, `tests/chessboard/ChessboardLayer.test.ts`, `includes/`) :**
+    *   **Ordonnancement du Workflow GitHub Actions** : Déplacement de l'étape `Production Build` avant `Unit Tests` dans `qa.yml` pour garantir la disponibilité des feuilles de style compilées (`build/chessboard/style-chessboard.css`) lors de l'exécution des tests d'intégrité CSS.
+    *   **Auto-Guérison des Tests Unitaires (`beforeAll`)** : Ajout d'un hook de compilation CSS automatique si les assets sous `build/` sont absents au lancement de Vitest.
+    *   **Compatibilité Windows de `scripts/test-unit.cjs`** : Prise en charge automatique de l'extension `.cmd` et de `shell: true` sur plateforme Win32 lors du spawn du binaire `vitest`.
+    *   **Normalisation PHPCS (PSR-2/PSR-12)** : Suppression des lignes vides surnuméraires en fin de fichier dans `Roster_Service.php`, `Partie.php`, les constructeurs d'exercices et `roi.php`.
+
 ## [1.11.1] - 2026-10-29
 
 ## [1.11.0] - 2026-10-26

@@ -115,4 +115,3 @@ function roi_load_textdomain(): void {
 	load_plugin_textdomain( 'roi', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
 add_action( 'plugins_loaded', 'roi_load_textdomain' );
-

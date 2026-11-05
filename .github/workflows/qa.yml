@@ -110,8 +110,8 @@ jobs:
       - name: ESLint
         run: npm run lint
 
-      - name: Unit Tests (if configured)
-        run: npm test --if-present
-
       - name: Production Build
         run: npm run build
+
+      - name: Unit Tests (if configured)
+        run: npm test --if-present

@@ -342,4 +342,3 @@ class Roster_Service {
 		return $groups;
 	}
 }
-

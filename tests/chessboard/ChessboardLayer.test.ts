@@ -1,11 +1,26 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, beforeAll } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
+import { execSync } from 'child_process';
 import { mountRoiBoard } from '../../src/utils/board-factory';
 
 describe('Chessboard Layer Isolation & DOM Factory (Piste 1 & 3 & 4)', () => {
 	let container: HTMLElement;
+
+	beforeAll(() => {
+		const cssPath = path.resolve(__dirname, '../../build/chessboard/style-chessboard.css');
+		if (!fs.existsSync(cssPath)) {
+			try {
+				execSync('node scripts/build-css.js', {
+					cwd: path.resolve(__dirname, '../..'),
+					stdio: 'ignore',
+				});
+			} catch {
+				// Ignored, assertions will report failure if file cannot be produced
+			}
+		}
+	});
 
 	beforeEach(() => {
 		container = document.createElement('div');

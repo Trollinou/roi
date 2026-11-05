@@ -110,4 +110,3 @@ class Type100Commandements implements TypeInterface {
 		<?php
 	}
 }
-
