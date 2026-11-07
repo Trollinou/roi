@@ -54,6 +54,10 @@ export interface ClockState {
   increment: number;
 }
 
+export type TacticalGlyph = 'pin' | 'undefended' | 'checkable' | 'trapped';
+export type AssessmentGlyph = '!' | '?' | '!!' | '??' | '!?' | '?!' | '✓' | '✗' | '□' | '⨀' | '=' | '+-' | '-+';
+export type BoardGlyph = TacticalGlyph | AssessmentGlyph;
+
 export type StockfishMode = 'disabled' | 'hint' | 'bot' | 'elo';
 
 export interface StockfishSearchLimit {

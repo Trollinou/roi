@@ -28,6 +28,7 @@
 - **Traçabilité & Documentation** : Renseigner systématiquement les nouveautés dans la section `[Unreleased]` du `CHANGELOG.md`.
 
 ## 2.3. Intégration Échiquiers (`eg-chessboard` & Chessground)
+- **Distribution & Package Local Privé** : `eg-chessboard` est un package monorepo/multi-dépôt privé localisé exclusivement sur ce disque dans le dossier voisin `../eg-chessboard` (non publié sur le registre public npm). Il doit impérativement être référencé via `"eg-chessboard": "file:../eg-chessboard"` dans `package.json`.
 - **Éradication des Polling Timers** : Interdiction formelle des boucles d'attente active (`setInterval`) pour instancier ou manipuler un échiquier.
 - **Contexte React / Gutenberg** : Utiliser impérativement le composant unifié `<RoiChessboard />` (`src/components/Chessboard`). Ne jamais réinstancier `BoardCore` manuellement dans les blocs ou composants React.
 - **Contexte Vanilla DOM / TypeScript / Admin WP** : Utiliser impérativement la factory unifiée `mountRoiBoard(container, options)` (`src/utils/board-factory`). Elle prend en charge le scaffolding DOM, l'isolation, l'Event Bus (`on()`, `off()`, `CustomEvent`) et la destruction (`destroy()`).

@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+*   **Mise à niveau `eg-chessboard` (v1.7.4+) et Intégration des Glyphes Tactiques & Revues (`package.json`, `src/types/chess.ts`, `src/components/Chessboard/RoiChessboard.tsx`, `src/utils/board-factory.ts`, `src/utils/tactics-helper.ts`, `src/admin-partie-viewer.ts`, `src/blocks/chessboard/view.ts`, `tests/chessboard/ChessboardGlyphs.test.ts`) :**
+    *   **Mise à jour Dépendance** : Alignement de `eg-chessboard` sur la version locale 1.7.4 (composant privé `file:../eg-chessboard`) embarquant `@lichess-org/chessground@^10.5.0` et validation stricte TypeScript.
+    *   **Badges Tactiques & Glyphes d'Évaluation** : Intégration des méthodes `setGlyph()`, `getGlyph()`, `getGlyphs()`, `clearGlyphs()` et des types `TacticalGlyph` (`trapped`, `undefended`, `pin`, `checkable`), `AssessmentGlyph` (`!!`, `??`, `!`, `?`, `?!`, etc.) et `BoardGlyph`.
+    *   **Moteur d'Analyse Tactique Dédié (`src/utils/tactics-helper.ts`)** : Détection algorithmique des pièces clouées devant le Roi (`pin`), des pièces piégées (`trapped`), des pièces sous attaque non protégées (`undefended`) et des cases de destination délivrant un échec (`checkable`).
+    *   **Affichage Automatique lors de la Revue de Partie** : Exploitation de l'affichage automatique des badges de jugement de coup sur la case d'arrivée lors de la navigation dans l'historique analysé (`viewHistory(ply)`, boutons suivant/précédent, clic dans la liste des coups) et nettoyage des glyphes en mode « Avant le coup ».
+    *   **Composants & Factory Réactifs** : Support de la prop `glyphs` dans `<RoiChessboard />` et des options `glyphs` dans `mountRoiBoard()`.
+    *   **Suite de Tests Automatisée** : Ajout de la suite `tests/chessboard/ChessboardGlyphs.test.ts` (9 tests unitaires) validant l'attribution des glyphes, la détection des motifs tactiques, l'intégration DOM et la compatibilité des protocoles URL du worker Stockfish.
+
 ## [1.11.1] - 2026-10-29
 
 ## [1.11.0] - 2026-10-26

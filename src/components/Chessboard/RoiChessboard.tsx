@@ -16,7 +16,9 @@ import type {
   EngineStatus,
   Move,
   PromotionDetail,
+  BoardGlyph,
 } from 'eg-chessboard';
+export type { BoardGlyph, TacticalGlyph, AssessmentGlyph } from 'eg-chessboard';
 import type { Color, Shape } from '../../types/chess';
 import PromotionDialog, { type PromotionState } from '../../blocks/chessboard/components/PromotionDialog';
 
@@ -41,6 +43,8 @@ export interface RoiChessboardProps {
   freeMode?: boolean;
   /** Flèches et cercles de surbrillance */
   shapes?: (DrawShape | Shape)[];
+  /** Badges visuels et glyphes tactiques (ex: 'trapped', 'pin', '!!', etc.) */
+  glyphs?: Record<string, BoardGlyph | null> | Map<string, BoardGlyph | null>;
   /** Affichage automatique des menaces */
   showThreats?: boolean;
   /** Jeu de pièces utilisé (défaut 'cburnett') */
@@ -98,6 +102,7 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
       playerColor = 'both',
       freeMode = false,
       shapes,
+      glyphs,
       showThreats = false,
       pieceSet = 'cburnett',
       boardTheme = 'brown',
@@ -250,6 +255,22 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
         boardInstance.setShapes(shapes as any);
       }
 
+      if (glyphs) {
+        if (glyphs instanceof Map) {
+          glyphs.forEach((glyph, square) => {
+            if (glyph) {
+              boardInstance.setGlyph(square, glyph);
+            }
+          });
+        } else {
+          Object.entries(glyphs).forEach(([square, glyph]) => {
+            if (glyph) {
+              boardInstance.setGlyph(square, glyph);
+            }
+          });
+        }
+      }
+
       if (showThreats) {
         boardInstance.drawThreats();
       }
@@ -378,6 +399,28 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
         boardApiRef.current.setShapes(shapes as any);
       }
     }, [shapes]);
+
+    // Synchronisation Glyphes & Badges tactiques
+    useEffect(() => {
+      if (boardApiRef.current) {
+        boardApiRef.current.clearGlyphs();
+        if (glyphs) {
+          if (glyphs instanceof Map) {
+            glyphs.forEach((glyph, square) => {
+              if (glyph) {
+                boardApiRef.current?.setGlyph(square, glyph);
+              }
+            });
+          } else {
+            Object.entries(glyphs).forEach(([square, glyph]) => {
+              if (glyph) {
+                boardApiRef.current?.setGlyph(square, glyph);
+              }
+            });
+          }
+        }
+      }
+    }, [glyphs]);
 
     // Synchronisation Menaces
     useEffect(() => {

@@ -9,6 +9,9 @@ import type {
   EngineStatus,
   Move,
   PromotionDetail,
+  BoardGlyph,
+  TacticalGlyph,
+  AssessmentGlyph,
 } from 'eg-chessboard';
 import type { Color, Shape } from '../types/chess';
 
@@ -34,6 +37,7 @@ export interface MountRoiBoardOptions extends RoiBoardEvents {
   playerColor?: 'white' | 'black' | 'both';
   freeMode?: boolean;
   shapes?: (DrawShape | Shape)[];
+  glyphs?: Record<string, BoardGlyph | null> | Map<string, BoardGlyph | null>;
   showThreats?: boolean;
   pieceSet?: PieceSet;
   boardTheme?: BoardTheme;
@@ -261,6 +265,22 @@ export function mountRoiBoard(
     instance.setShapes(shapes as any);
   }
 
+  if (options.glyphs) {
+    if (options.glyphs instanceof Map) {
+      options.glyphs.forEach((glyph, square) => {
+        if (glyph) {
+          instance.setGlyph(square, glyph);
+        }
+      });
+    } else {
+      Object.entries(options.glyphs).forEach(([square, glyph]) => {
+        if (glyph) {
+          instance.setGlyph(square, glyph);
+        }
+      });
+    }
+  }
+
   if (showThreats) {
     instance.drawThreats();
   }
@@ -333,5 +353,7 @@ export function mountRoiBoard(
 
   return instance;
 }
+
+export type { BoardGlyph, TacticalGlyph, AssessmentGlyph };
 
 export default mountRoiBoard;
