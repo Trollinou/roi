@@ -81,25 +81,21 @@ jobs:
           repository: Trollinou/eg-chessboard
           path: .deps/eg-chessboard
 
-      - name: Cache eg-chessboard build
+      - name: Cache eg-chessboard dependencies
         id: cache-eg-chessboard
         uses: actions/cache@v4
         with:
-          path: |
-            .deps/eg-chessboard/dist
-            .deps/eg-chessboard/node_modules
-          key: ${{ runner.os }}-eg-chessboard-${{ hashFiles('.deps/eg-chessboard/package-lock.json') }}
+          path: .deps/eg-chessboard/node_modules
+          key: ${{ runner.os }}-eg-chessboard-modules-${{ hashFiles('.deps/eg-chessboard/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-eg-chessboard-
+            ${{ runner.os }}-eg-chessboard-modules-
 
       - name: Prepare and build eg-chessboard
         run: |
           ln -s "${GITHUB_WORKSPACE}/.deps/eg-chessboard" "${GITHUB_WORKSPACE}/../eg-chessboard"
-          if [ ! -d "${GITHUB_WORKSPACE}/.deps/eg-chessboard/dist" ]; then
-            cd "${GITHUB_WORKSPACE}/../eg-chessboard"
-            npm install --prefer-offline --no-audit
-            npm run build
-          fi
+          cd "${GITHUB_WORKSPACE}/../eg-chessboard"
+          npm install --prefer-offline --no-audit
+          npm run build
 
       - name: Install ROI dependencies
         run: npm install --prefer-offline --no-audit
