@@ -74,6 +74,9 @@ class Games_Controller {
 							'type'              => 'integer',
 							'required'          => false,
 							'default'           => 1,
+							'validate_callback' => static function ( $param ): bool {
+								return is_numeric( $param ) && (int) $param >= 1 && (int) $param <= 8;
+							},
 							'sanitize_callback' => 'absint',
 						),
 						'hints_count'      => array(
@@ -81,6 +84,9 @@ class Games_Controller {
 							'type'              => 'integer',
 							'required'          => false,
 							'default'           => 0,
+							'validate_callback' => static function ( $param ): bool {
+								return is_numeric( $param ) && (int) $param >= 0;
+							},
 							'sanitize_callback' => 'absint',
 						),
 						'takebacks_count'  => array(
@@ -88,6 +94,9 @@ class Games_Controller {
 							'type'              => 'integer',
 							'required'          => false,
 							'default'           => 0,
+							'validate_callback' => static function ( $param ): bool {
+								return is_numeric( $param ) && (int) $param >= 0;
+							},
 							'sanitize_callback' => 'absint',
 						),
 						'pgn'              => array(
@@ -104,12 +113,18 @@ class Games_Controller {
 							'type'              => 'integer',
 							'required'          => false,
 							'default'           => 0,
+							'validate_callback' => static function ( $param ): bool {
+								return is_numeric( $param ) && (int) $param >= 0;
+							},
 							'sanitize_callback' => 'absint',
 						),
 						'game_date'        => array(
 							'description'       => __( 'Date ISO de la partie.', 'roi' ),
 							'type'              => 'string',
 							'required'          => false,
+							'validate_callback' => static function ( $param ): bool {
+								return is_string( $param ) && false !== strtotime( $param );
+							},
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 					),
@@ -123,18 +138,27 @@ class Games_Controller {
 							'description'       => __( 'ID du membre pour filtrer les parties.', 'roi' ),
 							'type'              => 'integer',
 							'required'          => false,
+							'validate_callback' => static function ( $param ): bool {
+								return is_numeric( $param ) && (int) $param >= 0;
+							},
 							'sanitize_callback' => 'absint',
 						),
 						'per_page'  => array(
 							'description'       => __( 'Nombre de parties par page.', 'roi' ),
 							'type'              => 'integer',
 							'default'           => 10,
+							'validate_callback' => static function ( $param ): bool {
+								return is_numeric( $param ) && (int) $param >= 1 && (int) $param <= 100;
+							},
 							'sanitize_callback' => 'absint',
 						),
 						'page'      => array(
 							'description'       => __( 'Numéro de la page.', 'roi' ),
 							'type'              => 'integer',
 							'default'           => 1,
+							'validate_callback' => static function ( $param ): bool {
+								return is_numeric( $param ) && (int) $param >= 1;
+							},
 							'sanitize_callback' => 'absint',
 						),
 					),

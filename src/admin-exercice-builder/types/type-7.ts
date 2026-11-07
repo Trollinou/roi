@@ -7,6 +7,7 @@ import {
 	extractFenOrientationAndShapes,
 } from '../utils/controls';
 import { createPgnPreviewViewer } from '../utils/pgn-viewer';
+import { escapeHtml } from '../../utils/escape';
 import type { Shape } from '../../types';
 
 interface SerieItem {
@@ -105,7 +106,7 @@ export function renderT7Series(): void {
 						rows="4" 
 						class="large-text code roi-control-textarea roi_t7_pgn" 
 						placeholder="Collez un PGN ou utilisez 'Éditer le PGN'..." 
-						data-index="${i}">${serie.pgn_data || ''}</textarea>
+						data-index="${i}">${escapeHtml(serie.pgn_data || '')}</textarea>
 
 					<div class="roi-control-actions">
 						<button type="button" 

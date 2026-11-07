@@ -258,6 +258,7 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
         const from = bestMove.slice(0, 2);
         const to = bestMove.slice(2, 4);
         boardAPI.drawMove(from, to, 'green');
+        boardAPI.setGlyph(to, '!');
       }
     }
 

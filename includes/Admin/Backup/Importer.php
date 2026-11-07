@@ -28,8 +28,18 @@ class Importer {
 			return new WP_Error( 'upload_error', __( 'Erreur lors du téléversement du fichier.', 'roi' ) );
 		}
 
+		$tmp_name = (string) ( $file['tmp_name'] ?? '' );
+		if ( '' === $tmp_name || ! is_uploaded_file( $tmp_name ) ) {
+			return new WP_Error( 'invalid_upload', __( 'Fichier téléversé non valide.', 'roi' ) );
+		}
+
+		$file_name = sanitize_file_name( (string) ( $file['name'] ?? '' ) );
+		if ( ! preg_match( '/\.(json|gz)$/i', $file_name ) ) {
+			return new WP_Error( 'invalid_extension', __( 'Seuls les fichiers .json ou .json.gz sont acceptés.', 'roi' ) );
+		}
+
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$raw_content = file_get_contents( (string) $file['tmp_name'] );
+		$raw_content = file_get_contents( $tmp_name );
 		if ( false === $raw_content || '' === $raw_content ) {
 			return new WP_Error( 'read_error', __( 'Erreur lors de la lecture du fichier temporaire.', 'roi' ) );
 		}
@@ -190,7 +200,13 @@ class Importer {
 
 		if ( is_array( $posts_to_restore ) ) {
 			foreach ( $posts_to_restore as $p ) {
-				$pid = (int) ( $p['ID'] ?? 0 );
+				$pid              = (int) ( $p['ID'] ?? 0 );
+				$target_post_type = (string) ( $p['post_type'] ?? 'roi_lecon' );
+
+				// Strict whitelist: only ROI Custom Post Types are allowed.
+				if ( ! in_array( $target_post_type, $post_types, true ) ) {
+					continue;
+				}
 
 				if ( $pid <= 0 ) {
 					$post_data = array(
@@ -198,7 +214,7 @@ class Importer {
 						'post_content' => (string) ( $p['post_content'] ?? '' ),
 						'post_excerpt' => (string) ( $p['post_excerpt'] ?? '' ),
 						'post_status'  => (string) ( $p['post_status'] ?? 'publish' ),
-						'post_type'    => (string) ( $p['post_type'] ?? 'roi_lecon' ),
+						'post_type'    => $target_post_type,
 						'post_name'    => (string) ( $p['post_name'] ?? '' ),
 					);
 					$new_pid   = wp_insert_post( $post_data, true );
@@ -227,7 +243,7 @@ class Importer {
 						'post_modified_gmt'     => $post_date_gmt,
 						'post_parent'           => (int) ( $p['post_parent'] ?? 0 ),
 						'menu_order'            => (int) ( $p['menu_order'] ?? 0 ),
-						'post_type'             => (string) ( $p['post_type'] ?? 'roi_lecon' ),
+						'post_type'             => $target_post_type,
 						'post_content_filtered' => '',
 						'to_ping'               => '',
 						'pinged'                => '',
@@ -323,8 +339,16 @@ class Importer {
 
 		// 5. RESTORE OPTIONS.
 		if ( ! empty( $import_data['options'] ) && is_array( $import_data['options'] ) ) {
-			if ( isset( $import_data['options']['roi_apprentissage_allowed_roles'] ) ) {
-				update_option( 'roi_apprentissage_allowed_roles', $import_data['options']['roi_apprentissage_allowed_roles'], false );
+			if ( isset( $import_data['options']['roi_apprentissage_allowed_roles'] ) && is_array( $import_data['options']['roi_apprentissage_allowed_roles'] ) ) {
+				$wp_roles    = wp_roles()->get_names();
+				$valid_roles = array();
+				foreach ( $import_data['options']['roi_apprentissage_allowed_roles'] as $role_raw ) {
+					$role_sanitized = sanitize_key( (string) $role_raw );
+					if ( isset( $wp_roles[ $role_sanitized ] ) ) {
+						$valid_roles[] = $role_sanitized;
+					}
+				}
+				update_option( 'roi_apprentissage_allowed_roles', $valid_roles, false );
 			}
 		}
 
@@ -351,8 +375,9 @@ class Importer {
 					}
 				}
 
-				if ( $target_user_id > 0 && ! empty( $prog['meta_key'] ) ) {
-					$existing       = get_user_meta( $target_user_id, (string) $prog['meta_key'], false );
+				$meta_key = (string) ( $prog['meta_key'] ?? '' );
+				if ( $target_user_id > 0 && '' !== $meta_key && str_starts_with( $meta_key, '_roi_element_valide' ) ) {
+					$existing       = get_user_meta( $target_user_id, $meta_key, false );
 					$already_exists = false;
 					if ( is_array( $existing ) ) {
 						foreach ( $existing as $ex ) {
@@ -363,7 +388,7 @@ class Importer {
 						}
 					}
 					if ( ! $already_exists ) {
-						add_user_meta( $target_user_id, (string) $prog['meta_key'], $prog['meta_value'], false );
+						add_user_meta( $target_user_id, $meta_key, $prog['meta_value'], false );
 					}
 				}
 			}

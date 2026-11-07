@@ -282,3 +282,39 @@
 .roi-playlist-item {
   cursor: move;
 }
+
+// Admin Columns Audience Badges & Admin Backup
+.roi-column-audience-students {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--roi-color-text, #2c3338);
+}
+
+.roi-column-student-pill {
+  display: inline-block;
+  background: var(--roi-color-success-bg, #edf7ed);
+  color: var(--roi-color-success-text, #1e4620);
+  border-radius: var(--roi-radius-sm, 3px);
+  padding: 1px 5px;
+  margin-right: 3px;
+  margin-bottom: 2px;
+
+  &--summary {
+    cursor: help;
+    font-weight: 600;
+  }
+}
+
+.roi-column-empty-target {
+  font-size: 10px;
+  color: var(--roi-color-text-muted, #8c8f94);
+  font-style: italic;
+}
+
+.roi-backup-section {
+  margin-bottom: var(--roi-spacing-lg, 2em);
+}
+
+.roi-warning-text {
+  color: var(--roi-color-error, #d63638);
+}

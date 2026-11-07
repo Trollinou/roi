@@ -339,7 +339,7 @@ onDomReady(() => {
 			item.addEventListener('click', () => {
 				const ply = parseInt(item.getAttribute('data-ply') || '0', 10);
 				if (gameReviewReport && !isReviewing) {
-					selectPlyForReview(ply);
+					selectPlyForReview(ply, false);
 				} else {
 					selectedReviewPly = null;
 					boardAPI.hideMoves();
@@ -374,6 +374,7 @@ onDomReady(() => {
 			} else {
 				boardAPI.viewHistory(ply - 1);
 			}
+			boardAPI.clearGlyphs();
 
 			if (analysis && analysis.uci && analysis.uci.length >= 4) {
 				const playedBrush = judgementConfig[analysis.judgement]?.brush || 'yellow';
@@ -413,9 +414,9 @@ onDomReady(() => {
 		renderReviewDashboard();
 	}
 
-	function selectPlyForReview(ply: number): void {
+	function selectPlyForReview(ply: number, beforeMove = false): void {
 		selectedReviewPly = ply;
-		isViewingBeforeMove = true;
+		isViewingBeforeMove = beforeMove;
 		hideFeedbackMessage();
 		updateReviewBoardDisplay();
 	}
@@ -730,6 +731,7 @@ onDomReady(() => {
 			const from = bestMove.substring(0, 2);
 			const to = bestMove.substring(2, 4);
 			boardAPI.drawMove(from, to, 'green');
+			boardAPI.setGlyph(to, '!');
 			showFeedbackMessage(
 				`Conseil Stockfish : ${from.toUpperCase()} ➔ ${to.toUpperCase()}`,
 				'info',
@@ -890,7 +892,7 @@ onDomReady(() => {
 			if (gameReviewReport && !isReviewing) {
 				const current = selectedReviewPly ?? boardAPI.getHistory(true).length;
 				if (current > 0) {
-					selectPlyForReview(current - 1);
+					selectPlyForReview(current - 1, false);
 				}
 			} else {
 				selectedReviewPly = null;
@@ -907,7 +909,7 @@ onDomReady(() => {
 			if (gameReviewReport && !isReviewing) {
 				const current = selectedReviewPly ?? 0;
 				if (current < total) {
-					selectPlyForReview(current + 1);
+					selectPlyForReview(current + 1, false);
 				}
 			} else {
 				selectedReviewPly = null;
@@ -922,7 +924,7 @@ onDomReady(() => {
 			hideFeedbackMessage();
 			const total = boardAPI.getHistory(true).length;
 			if (gameReviewReport && !isReviewing) {
-				selectPlyForReview(total);
+				selectPlyForReview(total, false);
 			} else {
 				selectedReviewPly = null;
 				boardAPI.hideMoves();

@@ -3,6 +3,7 @@
  */
 
 import type { QcmItem } from '../../types';
+import { escapeAttr } from '../../utils/escape';
 
 const textarea = document.getElementById('roi_config_json') as HTMLTextAreaElement | null;
 const t1ConsigneGlobale = document.getElementById('roi_t1_consigne') as HTMLInputElement | HTMLTextAreaElement | null;
@@ -92,18 +93,6 @@ function reindexQcms(): void {
 			removeBtn.style.display = items.length > 1 ? '' : 'none';
 		}
 	});
-}
-
-/**
- * Helper to escape attributes in dynamically generated HTML string.
- */
-function escapeAttr(str?: string | null): string {
-	return String(str || '')
-		.replace(/&/g, '&amp;')
-		.replace(/"/g, '&quot;')
-		.replace(/'/g, '&#39;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;');
 }
 
 /**

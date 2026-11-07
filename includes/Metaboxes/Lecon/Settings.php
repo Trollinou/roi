@@ -65,16 +65,27 @@ class Settings {
 			return;
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( 'roi_lecon' !== get_post_type( $post_id ) ) {
+			return;
+		}
+
 		if ( isset( $_POST['roi_lecon_niveau'] ) ) {
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$nonce_valid = ( isset( $_POST['_roi_lecon_settings_nonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_roi_lecon_settings_nonce'] ) ), 'roi_lecon_settings_action' ) )
+				|| ( isset( $_POST['_wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'update-post_' . $post_id ) );
+
+			if ( ! $nonce_valid ) {
+				return;
+			}
+
 			$niveau = (int) $_POST['roi_lecon_niveau'];
 			if ( $niveau >= 1 && $niveau <= 4 ) {
 				update_post_meta( $post_id, '_roi_lecon_niveau', $niveau );
 			}
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		} elseif ( isset( $_POST['meta']['_roi_lecon_niveau'] ) ) {
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing
+			if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'update-post_' . $post_id ) ) {
+				return;
+			}
+
 			$niveau = (int) $_POST['meta']['_roi_lecon_niveau'];
 			if ( $niveau >= 1 && $niveau <= 4 ) {
 				update_post_meta( $post_id, '_roi_lecon_niveau', $niveau );
