@@ -131,4 +131,3 @@ class TypeParcours implements TypeInterface {
 		<?php
 	}
 }
-

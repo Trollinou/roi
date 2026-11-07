@@ -257,5 +257,3 @@ class TypeCapOuPasCap implements TypeInterface {
 		<?php
 	}
 }
-
-

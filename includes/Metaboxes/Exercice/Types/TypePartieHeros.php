@@ -85,4 +85,3 @@ class TypePartieHeros implements TypeInterface {
 		<?php
 	}
 }
-

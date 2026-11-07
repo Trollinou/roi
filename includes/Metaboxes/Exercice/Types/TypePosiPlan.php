@@ -84,4 +84,3 @@ class TypePosiPlan implements TypeInterface {
 		<?php
 	}
 }
-
