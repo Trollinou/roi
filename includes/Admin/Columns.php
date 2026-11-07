@@ -192,22 +192,22 @@ class Columns {
 				}
 
 				$count = count( $names );
-				echo '<div style="margin-top:2px; font-size:11px; color:#2c3338;">';
+				echo '<div class="roi-column-audience-students">';
 				if ( $count <= 2 ) {
 					foreach ( $names as $n ) {
-						echo '<span style="display:inline-block; background:#edf7ed; color:#1e4620; border-radius:3px; padding:1px 5px; margin-right:3px; margin-bottom:2px;">👤 ' . esc_html( $n ) . '</span>';
+						echo '<span class="roi-column-student-pill">👤 ' . esc_html( $n ) . '</span>';
 					}
 				} else {
 					/* translators: %d: Number of students */
 					$summary = sprintf( esc_html__( '%d élèves', 'roi' ), $count );
 					$tooltip = implode( ', ', $names );
-					echo '<span title="' . esc_attr( $tooltip ) . '" style="display:inline-block; background:#edf7ed; color:#1e4620; border-radius:3px; padding:1px 5px; cursor:help; font-weight:600;">👤 ' . esc_html( $summary ) . ' ℹ️</span>';
+					echo '<span title="' . esc_attr( $tooltip ) . '" class="roi-column-student-pill roi-column-student-pill--summary">👤 ' . esc_html( $summary ) . ' ℹ️</span>';
 				}
 				echo '</div>';
 			}
 
 			if ( ( empty( $groups ) || ! is_array( $groups ) ) && ( empty( $members ) || ! is_array( $members ) ) ) {
-				echo '<div style="font-size:10px; color:#8c8f94; font-style:italic;">' . esc_html__( 'Aucune cible définie', 'roi' ) . '</div>';
+				echo '<div class="roi-column-empty-target">' . esc_html__( 'Aucune cible définie', 'roi' ) . '</div>';
 			}
 
 			echo '</div>';

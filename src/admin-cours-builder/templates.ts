@@ -1,3 +1,5 @@
+import { escapeHtml } from '../utils/escape';
+
 export interface CatalogItem {
   id: number | string;
   type: string;
@@ -28,7 +30,7 @@ export function createCatalogItemElement(
     typeLabel = 'Vidéo';
   }
   el.innerHTML = `
-		<span class="roi-cours-item-title">${item.titre}</span>
+		<span class="roi-cours-item-title">${escapeHtml(item.titre)}</span>
 		<div class="roi-cours-item-meta">
 			<span class="roi-cours-badge-level">
 				Niv.&nbsp;${item.niveau || 1}
@@ -83,7 +85,7 @@ export function createPlaylistItemElement(
     typeLabel = 'Vidéo';
   }
   el.innerHTML = `
-		<span class="roi-cours-item-title">${title}</span>
+		<span class="roi-cours-item-title">${escapeHtml(title)}</span>
 		<div class="roi-cours-item-meta">
 			<span class="roi-cours-badge-level">
 				Niv.&nbsp;${level || 1}

@@ -32,7 +32,14 @@ class Ajax_Handler {
 	 * @return void
 	 */
 	public function handle_search(): void {
-		check_ajax_referer( 'roi_search_cours_items_nonce', 'security', false );
+		if ( ! check_ajax_referer( 'roi_search_cours_items_nonce', 'security', false ) ) {
+			wp_send_json_error( array( 'message' => __( 'Jeton de sécurité invalide ou expiré.', 'roi' ) ), 403 );
+		}
+
+		// phpcs:ignore WordPress.WP.Capabilities.Unknown
+		if ( ! current_user_can( 'edit_cours' ) && ! current_user_can( 'edit_posts' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Accès non autorisé.', 'roi' ) ), 403 );
+		}
 
 		$search          = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : '';
 		$chapitre        = isset( $_GET['chapter'] ) ? absint( $_GET['chapter'] ) : 0;

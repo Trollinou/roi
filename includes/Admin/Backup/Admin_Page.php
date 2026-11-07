@@ -92,7 +92,7 @@ class Admin_Page {
 			<div class="roi-backup-restore-wrapper">
 
 				<!-- Backup Section -->
-				<div class="roi-backup-section" style="margin-bottom: 2em;">
+				<div class="roi-backup-section">
 					<h2><?php esc_html_e( 'Sauvegarder les données d\'apprentissage', 'roi' ); ?></h2>
 					<p><?php esc_html_e( 'Cliquez sur le bouton ci-dessous pour télécharger une sauvegarde complète (leçons, exercices, cours, vidéos, parties, chapitres, configurations et progressions).', 'roi' ); ?></p>
 					<form method="post" action="">
@@ -106,7 +106,7 @@ class Admin_Page {
 				<!-- Restore Section -->
 				<div class="roi-restore-section">
 					<h2><?php esc_html_e( 'Restaurer les données d\'apprentissage', 'roi' ); ?></h2>
-					<p><strong><span style="color: red;"><?php esc_html_e( 'Attention :', 'roi' ); ?></span></strong> <?php esc_html_e( "L'importation depuis un fichier de sauvegarde effacera et remplacera l'ensemble des données d'apprentissage existantes (leçons, exercices, cours, vidéos, parties et chapitres). Les identifiants (IDs) d'origine sont strictement préservés pour garantir la conformité ISO.", 'roi' ); ?></p>
+					<p><strong><span class="roi-warning-text"><?php esc_html_e( 'Attention :', 'roi' ); ?></span></strong> <?php esc_html_e( "L'importation depuis un fichier de sauvegarde effacera et remplacera l'ensemble des données d'apprentissage existantes (leçons, exercices, cours, vidéos, parties et chapitres). Les identifiants (IDs) d'origine sont strictement préservés pour garantir la conformité ISO.", 'roi' ); ?></p>
 					<form method="post" enctype="multipart/form-data" id="roi-restore-form" action="" data-confirm-message="<?php esc_attr_e( 'Êtes-vous sûr de vouloir restaurer cette sauvegarde ? Toutes les données existantes du module seront remplacées en conservant les identifiants d\'origine. Cette action est irréversible.', 'roi' ); ?>">
 						<?php wp_nonce_field( 'roi_restore_nonce_action', 'roi_restore_nonce' ); ?>
 						<p>

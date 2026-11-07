@@ -82,6 +82,9 @@ class Progression_Controller {
 		$positive_int_cb = static fn( $param ): bool => is_numeric( $param ) && (int) $param > 0;
 		$non_empty_str   = static fn( $param ): bool => is_string( $param ) && '' !== trim( $param );
 
+		$student_id_cb  = static fn( $param ): bool => is_string( $param ) && 1 === preg_match( '/^[a-zA-Z0-9_]+$/', $param );
+		$non_neg_int_cb = static fn( $param ): bool => is_numeric( $param ) && (int) $param >= 0;
+
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
@@ -94,33 +97,50 @@ class Progression_Controller {
 						'student_id'  => array(
 							'type'              => 'string',
 							'required'          => false,
+							'validate_callback' => $student_id_cb,
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 						'course_id'   => array(
 							'type'              => 'integer',
 							'required'          => false,
+							'validate_callback' => $positive_int_cb,
 							'sanitize_callback' => 'absint',
 						),
 						'element_id'  => array(
 							'type'              => 'integer',
 							'required'          => false,
+							'validate_callback' => $positive_int_cb,
 							'sanitize_callback' => 'absint',
 						),
 						'element_ids' => array(
-							'type'     => 'array',
-							'required' => false,
-							'items'    => array( 'type' => 'integer' ),
+							'type'              => 'array',
+							'required'          => false,
+							'items'             => array( 'type' => 'integer' ),
+							'validate_callback' => static function ( $param ): bool {
+								if ( ! is_array( $param ) || empty( $param ) ) {
+									return false;
+								}
+								foreach ( $param as $v ) {
+									if ( ! is_numeric( $v ) || (int) $v <= 0 ) {
+										return false;
+									}
+								}
+								return true;
+							},
+							'sanitize_callback' => static fn( $param ): array => array_map( 'absint', (array) $param ),
 						),
 						'time_spent'  => array(
 							'type'              => 'integer',
 							'required'          => false,
 							'default'           => 0,
+							'validate_callback' => $non_neg_int_cb,
 							'sanitize_callback' => 'absint',
 						),
 						'attempts'    => array(
 							'type'              => 'integer',
 							'required'          => false,
 							'default'           => 1,
+							'validate_callback' => $positive_int_cb,
 							'sanitize_callback' => 'absint',
 						),
 					),
@@ -165,16 +185,19 @@ class Progression_Controller {
 						'student_id' => array(
 							'type'              => 'string',
 							'required'          => true,
+							'validate_callback' => $student_id_cb,
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 						'course_id'  => array(
 							'type'              => 'integer',
 							'required'          => false,
+							'validate_callback' => $positive_int_cb,
 							'sanitize_callback' => 'absint',
 						),
 						'element_id' => array(
 							'type'              => 'integer',
 							'required'          => false,
+							'validate_callback' => $positive_int_cb,
 							'sanitize_callback' => 'absint',
 						),
 					),

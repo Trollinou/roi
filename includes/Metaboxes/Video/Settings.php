@@ -245,6 +245,10 @@ class Settings {
 			return;
 		}
 
+		if ( 'roi_video' !== get_post_type( $post_id ) ) {
+			return;
+		}
+
 		if ( isset( $_POST['roi_video_settings_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['roi_video_settings_nonce'] ) ), 'roi_video_settings_action' ) ) {
 			if ( isset( $_POST['roi_video_url'] ) ) {
 				$video_url = esc_url_raw( wp_unslash( $_POST['roi_video_url'] ) );
@@ -265,7 +269,7 @@ class Settings {
 					update_post_meta( $post_id, '_roi_video_niveau', $niveau );
 				}
 			}
-		} elseif ( isset( $_POST['meta'] ) && is_array( $_POST['meta'] ) ) {
+		} elseif ( isset( $_POST['meta'] ) && is_array( $_POST['meta'] ) && isset( $_POST['_wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ) ), 'update-post_' . $post_id ) ) {
 			// Fallback REST / Gutenberg meta save.
 			if ( isset( $_POST['meta']['_roi_video_url'] ) ) {
 				$video_url = esc_url_raw( wp_unslash( $_POST['meta']['_roi_video_url'] ) );
