@@ -32,6 +32,7 @@
 - **Éradication des Polling Timers** : Interdiction formelle des boucles d'attente active (`setInterval`) pour instancier ou manipuler un échiquier.
 - **Contexte React / Gutenberg** : Utiliser impérativement le composant unifié `<RoiChessboard />` (`src/components/Chessboard`). Ne jamais réinstancier `BoardCore` manuellement dans les blocs ou composants React.
 - **Contexte Vanilla DOM / TypeScript / Admin WP** : Utiliser impérativement la factory unifiée `mountRoiBoard(container, options)` (`src/utils/board-factory`). Elle prend en charge le scaffolding DOM, l'isolation, l'Event Bus (`on()`, `off()`, `CustomEvent`) et la destruction (`destroy()`).
+- **Mode Coach Bienveillant & Promotion PGN (`eg-chessboard` 1.8.2+)** : Activer via `coachMode: true` (`StockfishConfig` / props `<RoiChessboard />` / options `mountRoiBoard`). En cas d'alerte tactique (`onCoachAlert`), piloter via `coachUndo()` ou `coachProceed()` sans détruire le Web Worker Stockfish. Tout coup rejoué après `undoLastMove()` ou `coachUndo()` est automatiquement promu en ligne principale PGN (`children[0]`), tandis que le coup annulé est conservé en sous-variante `( ... )`.
 
 ## 3. Architecture & Structure
 - **PSR-4 / Namespaces** : Sous-dossiers dans `includes/` en PascalCase (`includes/Admin/`, `includes/CPT/`, `includes/DTO/`, `includes/Blocks/`, `includes/Chess/`, `includes/Services/`). Fichiers/classes en PascalCase.
@@ -56,7 +57,7 @@
 - **Shortcodes** : Capturer `wp_editor()` via `ob_start()` / `ob_get_clean()`.
 - **Isolation des Couches Échiquier (Stacking Context & Layers)** :
   - **Conteneur Hermétique** : Tout échiquier doit être enveloppé dans un conteneur portant `.roi-board-frame` ou le mixin `roi-chessboard-layer` (`src/scss/abstracts/_chessboard-layer.scss`), imposant `isolation: isolate;` et `aspect-ratio: 1 / 1;` (bannir le hack `padding-bottom: 100%`).
-  - **Non-Obstruction des Pièces** : Tous les calques SVG Chessground (`.cg-shapes`, `.cg-custom-below`, `.cg-shapes-below`, `.cg-custom-svgs`) doivent avoir `pointer-events: none !important;` pour empêcher l'interception intempestive des clics.
+  - **Non-Obstruction des Pièces** : Tous les calques SVG Chessground (`.cg-shapes`, `.cg-custom-below`, `.cg-shapes-below`, `.cg-custom-svgs`) doivent avoir `pointer-events: none !important;` pour empêcher l'interception intempestive des clics. Le calque `.cg-custom-svgs` est élevé à `z-index: 25; overflow: visible;` pour afficher les badges tactiques au-dessus des pièces animées/déplacées.
   - **Boîtes de Dialogue** : La boîte de dialogue de promotion doit avoir `z-index: 1000; pointer-events: auto !important;`.
 
 ## 5. QA, Tests & Conformité

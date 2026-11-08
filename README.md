@@ -1,6 +1,6 @@
 # ROI - Ressources et Organisation pour l’Initiation aux échecs
 
-**Version :** 1.8.1
+**Version :** 1.11.2
 **Auteur :** Etienne Gagnon
 **Licence :** GPL v2 ou ultérieure
 **WordPress Requis :** 7.1+
@@ -48,9 +48,10 @@ Ce plugin nécessite que le plugin **DAME** soit installé et activé. Le plugin
 ### Blocs Gutenberg
 
 *   **Échiquier Interactif (`roi/chessboard`) :**
-    *   **Modes Multiples :** Démonstration statique, Mode libre (Free Move), ou Partie vs IA Stockfish avec force ELO réglable, barre d'évaluation et pendule.
+    *   **Modes Multiples :** Démonstration statique, Mode libre (Free Move), ou Partie vs IA Stockfish 19 WebAssembly avec force ELO réglable, Mode Coach Bienveillant (`coachMode`, `coachUndo`, `coachProceed`), arbitrage de fin de partie (abandon, offre de nulle), barre d'évaluation et pendule.
+    *   **Badges Tactiques & Promotion PGN :** Affichage natif des glyphes tactiques (`pin`, `undefended`, `trapped`, `checkable`, `??`, `!!`, `!`) au premier plan (`.cg-custom-svgs` `z-index: 25`) et promotion automatique du coup rejoué en ligne principale PGN après une annulation (`undoLastMove()` / `coachUndo()`), en conservant le coup repris en sous-variante `( ... )`.
     *   **Éditeur Visuel :** Édition visuelle complète de la position avec validation FEN en temps réel.
-    *   **Moteur Robuste :** Propulsé par `chessops` pour la logique et `Chessground` pour le rendu tactile et réactif.
+    *   **Moteur Robuste :** Propulsé par `eg-chessboard` v1.8.2+, `chessops` pour la logique et `Chessground` 10.5+ pour le rendu tactile et réactif.
 *   **Diagramme FEN (`roi/diagramme`) :**
     *   Aperçu épuré et centré du diagramme avec orientation dynamique selon le trait.
     *   Éditeur visuel dédié ouvert en modale isolée (`RoiFenEditor`) permettant de poser/déplacer les pièces par glisser-déposer, vider l'échiquier, définir les roques et dessiner flèches et surbrillances sans perturbation de layout.

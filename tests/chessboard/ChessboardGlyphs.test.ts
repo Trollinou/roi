@@ -6,6 +6,8 @@ import {
   applyTacticalGlyphs,
   clearTacticalGlyphs,
   setSquareGlyph,
+  analyzeMoveTactics,
+  type CoachAlertDetail,
 } from '../../src/utils/tactics-helper';
 
 describe('Chessboard Glyphs & Tactical Annotations (eg-chessboard v1.7.4+)', () => {
@@ -153,6 +155,109 @@ describe('Chessboard Glyphs & Tactical Annotations (eg-chessboard v1.7.4+)', () 
       });
       expect(validBoard).toBeDefined();
       validBoard.destroy();
+    });
+  });
+
+  describe('4. Benevolent Coach Mode & Contextual Tactical Analyzer (eg-chessboard v1.8.2)', () => {
+    it('intercepts a hanging piece blunder in coachMode, emits coach-alert, and supports coachUndo() / coachProceed()', () => {
+      let receivedAlert: CoachAlertDetail | null = null;
+      const board = mountRoiBoard(container, {
+        fen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2',
+        playerColor: 'white',
+        coachMode: true,
+        onCoachAlert: (detail) => {
+          receivedAlert = detail;
+        },
+      });
+
+      // Play 2. Qh5? followed by 2... Nc6 3. Qxf7+ is not hanging, so let's play 2. Ba6?? (hanging bishop on a6)
+      board.move('Ba6');
+
+      expect(receivedAlert).not.toBeNull();
+      expect(receivedAlert?.reason).toBe('hanging_piece');
+      expect(receivedAlert?.glyph).toBe('??');
+      expect(board.getState().isCoachPaused).toBe(true);
+      expect(board.getGlyph('a6')).toBeDefined();
+
+      // Undo via coachUndo()
+      expect(board.coachUndo()).toBe(true);
+      expect(board.getState().isCoachPaused).toBe(false);
+      expect(board.getTurnColor()).toBe('white');
+      expect(board.getGlyphs().size).toBe(0);
+
+      // Replay blunder and proceed via coachProceed()
+      board.move('Ba6');
+      expect(board.getState().isCoachPaused).toBe(true);
+      board.coachProceed();
+      expect(board.getState().isCoachPaused).toBe(false);
+
+      board.destroy();
+    });
+
+    it('promotes replacement move to mainline in PGN after undoLastMove() / coachUndo() and keeps undone move as variation', () => {
+      const board = mountRoiBoard(container, {
+        playerColor: 'white',
+        coachMode: true,
+      });
+
+      board.move('e4');
+      board.move('e5');
+      // Blunder on move 2: Ba6??
+      board.move('Ba6');
+      expect(board.getState().isCoachPaused).toBe(true);
+
+      // Coach undo and play good move 2. Nf3, followed by 2... Nc6
+      board.coachUndo();
+      board.move('Nf3');
+      board.move('Nc6');
+
+      const pgn = board.getPgn();
+      // Mainline must contain 2. Nf3 and 2... Nc6, while 2. Ba6 is in a variation
+      expect(pgn).toContain('2. Nf3');
+      expect(pgn).toContain('( 2. Ba6 )');
+      expect(pgn).toContain('Nc6');
+
+      // Reloading the exported PGN into a viewer board must preserve the full 4-ply mainline
+      const viewerContainer = document.createElement('div');
+      document.body.appendChild(viewerContainer);
+      const viewerBoard = mountRoiBoard(viewerContainer, {
+        pgn,
+        viewOnly: true,
+      });
+
+      const history = viewerBoard.getHistory(false);
+      expect(history).toEqual(['e4', 'e5', 'Nf3', 'Nc6']);
+
+      viewerBoard.destroy();
+      viewerContainer.remove();
+      board.destroy();
+    });
+
+    it('exposes analyzeMoveTactics helper from eg-chessboard', () => {
+      expect(typeof analyzeMoveTactics).toBe('function');
+    });
+
+    it('promotes replacement move to mainline after standard undoLastMove() without coachMode', () => {
+      const board = mountRoiBoard(container, {
+        playerColor: 'both',
+      });
+
+      board.move('e4');
+      board.move('e5');
+      board.move('Qh5');
+
+      // Undo 2. Qh5 and play 2. Bc4 instead
+      board.undoLastMove();
+      board.move('Bc4');
+      board.move('Nf6');
+
+      const pgn = board.getPgn();
+      expect(pgn).toContain('2. Bc4');
+      expect(pgn).toContain('( 2. Qh5 )');
+      expect(pgn).toContain('Nf6');
+      expect(board.getHistory(false)).toEqual(['e4', 'e5', 'Bc4', 'Nf6']);
+
+      board.destroy();
     });
   });
 });

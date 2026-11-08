@@ -12,18 +12,36 @@ import type {
   BoardGlyph,
   TacticalGlyph,
   AssessmentGlyph,
+  CoachAlertDetail,
+  CoachAlertReason,
+  TacticalAnalysisResult,
+  GameTermination,
+  GameTerminationReason,
 } from 'eg-chessboard';
 import type { Color, Shape } from '../types/chess';
 
 export interface RoiBoardEvents {
   onMove?: (_move: Move) => void;
   onTurnChange?: (_color: Color, _ply: number) => void;
+  onCheck?: (_color: string) => void;
+  onCheckmate?: (_color: string) => void;
+  onStalemate?: () => void;
+  onDraw?: () => void;
   onSquareClick?: (_square: string) => void;
   onShapesChange?: (_shapes: DrawShape[]) => void;
   onPromotion?: (_detail: PromotionDetail) => void;
   onEvaluation?: (_evalData: StockfishEvaluation) => void;
   onStockfishHint?: (_hint: string) => void;
   onEngineStatus?: (_status: EngineStatus) => void;
+  onGameReviewProgress?: (_percent: number) => void;
+  onCoachAlert?: (_detail: CoachAlertDetail) => void;
+  onResign?: (_detail: { color: 'white' | 'black'; winner: 'white' | 'black' }) => void;
+  onDrawOffer?: (_fromColor: 'white' | 'black') => void;
+  onDrawDeclined?: (_detail: {
+    byColor: 'white' | 'black';
+    reason: 'too_early' | 'advantage';
+    score?: number;
+  }) => void;
   onStateChange?: () => void;
 }
 
@@ -44,6 +62,7 @@ export interface MountRoiBoardOptions extends RoiBoardEvents {
   boardConfig?: Record<string, any>;
   useStockfish?: boolean;
   stockfishElo?: number;
+  coachMode?: boolean;
   stockfishConfig?: StockfishConfig;
 }
 
@@ -82,6 +101,7 @@ export function mountRoiBoard(
     boardConfig = {},
     useStockfish = false,
     stockfishElo = 1500,
+    coachMode,
     stockfishConfig: explicitStockfishConfig,
     onStateChange,
   } = options;
@@ -142,14 +162,22 @@ export function mountRoiBoard(
   const workerUrl = explicitStockfishConfig?.workerUrl || globalConfig?.stockfishWorkerUrl || '';
   const wasmUrl = explicitStockfishConfig?.wasmUrl || globalConfig?.stockfishWasmUrl || '';
 
-  const initialStockfishConfig: StockfishConfig = explicitStockfishConfig || {
-    workerUrl,
-    wasmUrl,
-    whiteMode: useStockfish ? 'bot' : 'disabled',
-    blackMode: useStockfish ? 'bot' : 'disabled',
-    whiteElo: stockfishElo,
-    blackElo: stockfishElo,
-  };
+  const initialStockfishConfig: StockfishConfig = explicitStockfishConfig
+    ? {
+        workerUrl,
+        wasmUrl,
+        ...(coachMode !== undefined ? { coachMode } : {}),
+        ...explicitStockfishConfig,
+      }
+    : {
+        workerUrl,
+        wasmUrl,
+        whiteMode: useStockfish ? 'bot' : 'disabled',
+        blackMode: useStockfish ? 'bot' : 'disabled',
+        whiteElo: stockfishElo,
+        blackElo: stockfishElo,
+        ...(coachMode !== undefined ? { coachMode } : {}),
+      };
 
   // 3. Event Bus & Dispatcher
   const customListeners: Record<string, Array<(..._args: any[]) => void>> = {};
@@ -161,6 +189,18 @@ export function mountRoiBoard(
         break;
       case 'turn-change':
         options.onTurnChange?.(args[0] as Color, args[1] as number);
+        break;
+      case 'check':
+        options.onCheck?.(args[0] as string);
+        break;
+      case 'checkmate':
+        options.onCheckmate?.(args[0] as string);
+        break;
+      case 'stalemate':
+        options.onStalemate?.();
+        break;
+      case 'draw':
+        options.onDraw?.();
         break;
       case 'square-click':
         options.onSquareClick?.(args[0] as string);
@@ -179,6 +219,23 @@ export function mountRoiBoard(
         break;
       case 'engine-status':
         options.onEngineStatus?.(args[0] as EngineStatus);
+        break;
+      case 'game-review-progress':
+        options.onGameReviewProgress?.(args[0] as number);
+        break;
+      case 'coach-alert':
+        options.onCoachAlert?.(args[0] as CoachAlertDetail);
+        break;
+      case 'resign':
+        options.onResign?.(args[0] as { color: 'white' | 'black'; winner: 'white' | 'black' });
+        break;
+      case 'draw-offer':
+        options.onDrawOffer?.(args[0] as 'white' | 'black');
+        break;
+      case 'draw-declined':
+        options.onDrawDeclined?.(
+          args[0] as { byColor: 'white' | 'black'; reason: 'too_early' | 'advantage'; score?: number }
+        );
         break;
     }
 
@@ -215,6 +272,7 @@ export function mountRoiBoard(
 
   const initialBoardState = {
     mode,
+    playerColor,
     pieceSet,
     boardTheme,
     showThreats,
@@ -259,6 +317,8 @@ export function mountRoiBoard(
     } catch (e) {
       console.warn('[mountRoiBoard] Erreur chargement PGN:', e);
     }
+  } else if (fen) {
+    instance.setPosition(fen);
   }
 
   if (shapes && shapes.length > 0) {
@@ -354,6 +414,15 @@ export function mountRoiBoard(
   return instance;
 }
 
-export type { BoardGlyph, TacticalGlyph, AssessmentGlyph };
+export type {
+  BoardGlyph,
+  TacticalGlyph,
+  AssessmentGlyph,
+  CoachAlertDetail,
+  CoachAlertReason,
+  TacticalAnalysisResult,
+  GameTermination,
+  GameTerminationReason,
+};
 
 export default mountRoiBoard;

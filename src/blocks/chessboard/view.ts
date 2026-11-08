@@ -3,7 +3,12 @@ const store = wpInteractivity?.store || ((_namespace: string, config: any) => co
 const getElement: () => { ref: HTMLElement | null } = wpInteractivity?.getElement || (() => ({ ref: null }));
 const getContext = wpInteractivity?.getContext || (() => ({}));
 import { BoardCore } from 'eg-chessboard';
-import type { StockfishConfig, StockfishEvaluation, EngineStatus } from 'eg-chessboard';
+import type {
+  StockfishConfig,
+  StockfishEvaluation,
+  EngineStatus,
+  CoachAlertDetail,
+} from 'eg-chessboard';
 import 'eg-chessboard/base.css';
 import 'eg-chessboard/pieces/cburnett.css';
 import { ChessClock } from './classes/ChessClock';
@@ -54,6 +59,7 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
   const freeMode = contextData?.freeMode !== undefined ? contextData.freeMode : block.getAttribute('data-free-mode') === 'true';
   const showMaterialIndicator = contextData?.showMaterialIndicator !== undefined ? contextData.showMaterialIndicator : block.getAttribute('data-show-material-indicator') !== 'false';
   const showEvaluationBar = contextData?.showEvaluationBar !== undefined ? contextData.showEvaluationBar : block.getAttribute('data-show-evaluation-bar') === 'true';
+  const coachMode = contextData?.coachMode !== undefined ? Boolean(contextData.coachMode) : block.getAttribute('data-coach-mode') === 'true';
   const initialClockPreset = contextData?.clockPreset || block.getAttribute('data-clock-preset') || 'none';
 
   ensureCapturedBarsAndClocks(block, showMaterialIndicator, initialClockPreset);
@@ -141,7 +147,7 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
     whiteMode: 'disabled' | 'hint' | 'bot' | 'elo',
     blackMode: 'disabled' | 'hint' | 'bot' | 'elo',
     elo: number
-  ): StockfishConfig => buildStockfishEngineConfig(workerUrl, wasmUrl, whiteMode, blackMode, elo);
+  ): StockfishConfig => buildStockfishEngineConfig(workerUrl, wasmUrl, whiteMode, blackMode, elo, coachMode);
 
   const clock = new ChessClock();
   const clockSettings = {
@@ -241,11 +247,19 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
       activeClockColor = turnColor;
       clock.setActiveColor(turnColor);
       updateClockDisplays();
-    } else if (['check', 'checkmate', 'draw', 'stalemate'].includes(event)) {
-      if (['checkmate', 'draw', 'stalemate'].includes(event)) {
+    } else if (['check', 'checkmate', 'draw', 'stalemate', 'resign'].includes(event)) {
+      if (['checkmate', 'draw', 'stalemate', 'resign'].includes(event)) {
         stopTimer();
       }
       updateStatus();
+    } else if (event === 'coach-alert') {
+      const detail = args[0] as CoachAlertDetail | undefined;
+      if (statusElement) {
+        statusElement.textContent =
+          detail?.reason === 'bad_trade'
+            ? '⚠️ Oups ! Cet échange semble défavorable. Voulez-vous annuler ?'
+            : '⚠️ Oups ! Une pièce est laissée sans défense. Voulez-vous annuler ?';
+      }
     } else if (event === 'evaluation') {
       const evaluation = args[0] as StockfishEvaluation;
       updateEvaluationBar(evaluation);
@@ -426,12 +440,19 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
     const chosenColor = activeColorBtn ? activeColorBtn.getAttribute('data-color') : 'white';
     const playerChosenColor = (chosenColor === 'random' ? mockProps.playerColor : chosenColor) as Color;
 
-    if (useStockfish && currentStockfishColor) {
+    boardAPI.hideMoves();
+
+    const boardState = typeof boardAPI.getState === 'function' ? boardAPI.getState() : null;
+    if (boardState?.isCoachPaused && typeof boardAPI.coachUndo === 'function') {
+      boardAPI.coachUndo();
+    } else if (useStockfish && currentStockfishColor) {
+      boardAPI.clearGlyphs();
       boardAPI.undoLastMove();
       if (boardAPI.getTurnColor() !== playerChosenColor && boardAPI.getCurrentPlyNumber() > 0) {
         boardAPI.undoLastMove();
       }
     } else {
+      boardAPI.clearGlyphs();
       boardAPI.undoLastMove();
     }
     clock.setActiveColor(boardAPI.getTurnColor());
@@ -534,6 +555,22 @@ const { state: globalStoreState } = store('roi/chessboard', {
       const boardAPI = (block as any)?.boardAPI;
       if (boardAPI && typeof boardAPI.requestHint === 'function') {
         boardAPI.requestHint({ multiPv: 1, movetime: 1200 });
+      }
+    },
+    coachUndo(event: Event) {
+      const btn = event.target as HTMLElement;
+      const block = btn.closest<HTMLElement>('.chessboard-block');
+      const boardAPI = (block as any)?.boardAPI;
+      if (boardAPI && typeof boardAPI.coachUndo === 'function') {
+        boardAPI.coachUndo();
+      }
+    },
+    coachProceed(event: Event) {
+      const btn = event.target as HTMLElement;
+      const block = btn.closest<HTMLElement>('.chessboard-block');
+      const boardAPI = (block as any)?.boardAPI;
+      if (boardAPI && typeof boardAPI.coachProceed === 'function') {
+        boardAPI.coachProceed();
       }
     },
   },
