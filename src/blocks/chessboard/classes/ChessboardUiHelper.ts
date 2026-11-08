@@ -176,6 +176,10 @@ export function updateStatusDisplay(params: {
     return;
   }
 
+  if (boardState.isCoachPaused) {
+    return;
+  }
+
   if (isCheck) {
     const inCheckColor = turnColor === 'white' ? 'Blancs' : 'Noirs';
     statusElement.textContent = `Échec ! Au tour des ${inCheckColor}.`;
@@ -252,7 +256,8 @@ export function buildStockfishEngineConfig(
   wasmUrl: string,
   whiteMode: 'disabled' | 'hint' | 'bot' | 'elo',
   blackMode: 'disabled' | 'hint' | 'bot' | 'elo',
-  elo: number
+  elo: number,
+  coachMode?: boolean
 ): StockfishConfig {
   return {
     workerUrl,
@@ -267,6 +272,7 @@ export function buildStockfishEngineConfig(
     },
     showWdl: true,
     multiPv: 1,
+    ...(coachMode !== undefined ? { coachMode } : {}),
   };
 }
 

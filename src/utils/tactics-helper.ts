@@ -4,8 +4,17 @@
 
 import { Chess, makeSquare, between, opposite } from 'chessops';
 import { parseFen } from 'chessops/fen';
+import { analyzeMoveTactics } from 'eg-chessboard';
 import type { BoardCore, TacticalGlyph, BoardGlyph } from 'eg-chessboard';
-export type { AssessmentGlyph, TacticalGlyph, BoardGlyph } from 'eg-chessboard';
+export { analyzeMoveTactics };
+export type {
+  AssessmentGlyph,
+  TacticalGlyph,
+  BoardGlyph,
+  CoachAlertDetail,
+  CoachAlertReason,
+  TacticalAnalysisResult,
+} from 'eg-chessboard';
 
 export interface TacticalDetectionOptions {
   showPinned?: boolean;

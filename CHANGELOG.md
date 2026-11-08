@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [1.11.2] - 2026-11-08
+
+*   **Intégration `eg-chessboard` v1.8.2 — Mode Coach Bienveillant Natif, Arbitrage & Promotion PGN après Annulation (`src/types/chess.ts`, `src/utils/board-factory.ts`, `src/components/Chessboard/RoiChessboard.tsx`, `src/utils/tactics-helper.ts`, `src/blocks/chessboard/view.ts`, `src/blocks/chessboard/classes/ChessboardUiHelper.ts`, `src/scss/abstracts/_chessboard-layer.scss`, `tests/chessboard/`) :**
+    *   **Mode Coach Bienveillant (`coachMode`, `coachUndo`, `coachProceed`)** : Enrichissement de `StockfishConfig` (`coachMode`, `drawAcceptanceThresholdPawns`, `minDrawMoves`) et exposition des types partagés `CoachAlertDetail`, `CoachAlertReason`, `TacticalAnalysisResult`, `GameTermination` et `GameTerminationReason` dans la SSOT `src/types/chess.ts` (`roi-types`).
+    *   **Support Réactif dans `<RoiChessboard />` & `mountRoiBoard()`** : Prise en charge de la prop/option `coachMode`, synchronisation réactive de la position FEN initiale avec `session.pos`, et relais des nouveaux événements (`coach-alert`, `resign`, `draw-offer`, `draw-declined`, `check`, `checkmate`, `stalemate`, `draw`, `game-review-progress`).
+    *   **Promotion Automatique en Ligne Principale PGN après `undoLastMove()` / `coachUndo()`** : Lorsqu'un coup est annulé puis rejoué, le nouveau coup est promu en tête (`children[0]`) de la ligne principale PGN tandis que le coup repris est conservé en sous-variante `( ... )`, garantissant la restitution intégrale de la partie dans `getPgn()` et dans le visualiseur d'administration (`admin-partie-viewer.ts`).
+    *   **Moteur d'Analyse Tactique & Superposition CSS (`.cg-custom-svgs`)** : Ré-export de `analyzeMoveTactics` dans `src/utils/tactics-helper.ts` et élévation du calque `.cg-custom-svgs` à `z-index: 25` (`overflow: visible`) dans `_chessboard-layer.scss` pour afficher les badges tactiques au-dessus des pièces animées et déplacées.
+    *   **Suite de Tests Automatisée** : Ajout de tests unitaires dans `ChessboardGlyphs.test.ts` et `ChessboardLayer.test.ts` validant l'interception Coach (`onCoachAlert`, `coachUndo`, `coachProceed`), la promotion en ligne principale PGN après annulation et le `z-index: 25` du calque des glyphes.
+
 *   **Durcissement Sécurité & Conformité WPCS / PHP 8.4 / TypeScript (`includes/`, `src/`) :**
     *   **Contrôle CSRF & Autorisation AJAX (`includes/Metaboxes/Cours/Builder/Ajax_Handler.php`)** : Validation stricte de la valeur de retour de `check_ajax_referer` et ajout d'un contrôle de capabilité granulaire (`current_user_can('edit_cours') || current_user_can('edit_posts')`).
     *   **Vérification de Nonce & Métadonnées (`includes/Metaboxes/Lecon/Settings.php`, `includes/Metaboxes/Video/Settings.php`)** : Restriction de la sauvegarde par type de post (`roi_lecon`, `roi_video`) et vérification systématique de nonces valides sur les requêtes POST.

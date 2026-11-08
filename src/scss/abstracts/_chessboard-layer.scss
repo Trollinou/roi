@@ -103,6 +103,17 @@
     }
   }
 
+  // Calque des glyphes tactiques et badges de jugement (eg-chessboard 1.7.5+ / 1.8.2)
+  svg.cg-custom-svgs,
+  .cg-custom-svgs {
+    z-index: 25;
+    overflow: visible;
+
+    svg {
+      overflow: visible;
+    }
+  }
+
   // Dialogue de sélection de promotion (doit être au-dessus et cliquable)
   dialog.promotion-dialog,
   .promotion-dialog {

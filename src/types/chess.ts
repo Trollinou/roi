@@ -79,6 +79,47 @@ export interface StockfishConfig {
   searchLimit?: StockfishSearchLimit;
   threads?: number;
   hashSize?: number;
+  drawAcceptanceThresholdPawns?: number; // Seuil d'acceptation de nulle en pions (défaut: 0.30)
+  minDrawMoves?: number; // Nombre minimum de coups complets avant d'accepter une nulle (défaut: 20)
+  coachMode?: boolean; // Active le Mode Coach Bienveillant (analyse tactique, glyphes et pause sur gaffe)
+}
+
+export type GameTerminationReason =
+  | 'checkmate'
+  | 'stalemate'
+  | 'insufficient_material'
+  | 'threefold_repetition'
+  | 'fifty_moves'
+  | 'resignation'
+  | 'mutual_agreement';
+
+export interface GameTermination {
+  reason: GameTerminationReason;
+  winner?: Color | null;
+  resignedColor?: Color;
+}
+
+export type CoachAlertReason =
+  | 'hanging_piece'
+  | 'bad_trade'
+  | 'blunder'
+  | 'missed_win';
+
+export interface TacticalAnalysisResult {
+  undefendedSquares: Square[];
+  pinnedSquares: Square[];
+  isKingInCheck: boolean;
+  hasMajorThreat: boolean;
+}
+
+export interface CoachAlertDetail {
+  ply: number;
+  move: Move;
+  judgement: MoveJudgement;
+  glyph: BoardGlyph;
+  reason: CoachAlertReason;
+  undefendedSquares: Square[];
+  pinnedSquares: Square[];
 }
 
 export type EngineStatus = 'uninitialized' | 'loading' | 'ready' | 'searching' | 'stopping' | 'error';

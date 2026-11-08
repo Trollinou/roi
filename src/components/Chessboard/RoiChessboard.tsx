@@ -17,8 +17,18 @@ import type {
   Move,
   PromotionDetail,
   BoardGlyph,
+  CoachAlertDetail,
 } from 'eg-chessboard';
-export type { BoardGlyph, TacticalGlyph, AssessmentGlyph } from 'eg-chessboard';
+export type {
+  BoardGlyph,
+  TacticalGlyph,
+  AssessmentGlyph,
+  CoachAlertDetail,
+  CoachAlertReason,
+  TacticalAnalysisResult,
+  GameTermination,
+  GameTerminationReason,
+} from 'eg-chessboard';
 import type { Color, Shape } from '../../types/chess';
 import PromotionDialog, { type PromotionState } from '../../blocks/chessboard/components/PromotionDialog';
 
@@ -55,6 +65,8 @@ export interface RoiChessboardProps {
   boardConfig?: ChessboardConfig;
   /** Configuration Stockfish (WebAssembly / Worker) */
   stockfishConfig?: StockfishConfig;
+  /** Active le Mode Coach Bienveillant (analyse tactique, glyphes et pause sur gaffe) */
+  coachMode?: boolean;
   /** Classes CSS supplémentaires pour le conteneur racine */
   className?: string;
   /** Styles inline optionnels pour le conteneur racine */
@@ -67,6 +79,14 @@ export interface RoiChessboardProps {
   onMove?: (_move: Move) => void;
   /** Callback au changement de trait */
   onTurnChange?: (_color: Color, _ply: number) => void;
+  /** Callback lors d'un échec */
+  onCheck?: (_color: string) => void;
+  /** Callback lors d'un échec et mat */
+  onCheckmate?: (_color: string) => void;
+  /** Callback lors d'un pat */
+  onStalemate?: () => void;
+  /** Callback lors d'une nulle */
+  onDraw?: () => void;
   /** Callback lors d'un clic sur une case */
   onSquareClick?: (_square: string) => void;
   /** Callback lors d'un changement de flèches/dessins */
@@ -79,6 +99,20 @@ export interface RoiChessboardProps {
   onStockfishHint?: (_hint: string) => void;
   /** Callback de statut du moteur Stockfish */
   onEngineStatus?: (_status: EngineStatus) => void;
+  /** Callback de progression de la revue de partie */
+  onGameReviewProgress?: (_percent: number) => void;
+  /** Callback en Mode Coach lorsqu'une gaffe tactique est interceptée */
+  onCoachAlert?: (_detail: CoachAlertDetail) => void;
+  /** Callback lors d'un abandon */
+  onResign?: (_detail: { color: 'white' | 'black'; winner: 'white' | 'black' }) => void;
+  /** Callback lors d'une proposition de nulle */
+  onDrawOffer?: (_fromColor: 'white' | 'black') => void;
+  /** Callback lors d'un refus de nulle */
+  onDrawDeclined?: (_detail: {
+    byColor: 'white' | 'black';
+    reason: 'too_early' | 'advantage';
+    score?: number;
+  }) => void;
 }
 
 /**
@@ -108,18 +142,28 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
       boardTheme = 'brown',
       boardConfig = {},
       stockfishConfig,
+      coachMode,
       className = '',
       style,
       children,
       onBoardCreated,
       onMove,
       onTurnChange,
+      onCheck,
+      onCheckmate,
+      onStalemate,
+      onDraw,
       onSquareClick,
       onShapesChange,
       onPromotion,
       onEvaluation,
       onStockfishHint,
       onEngineStatus,
+      onGameReviewProgress,
+      onCoachAlert,
+      onResign,
+      onDrawOffer,
+      onDrawDeclined,
     },
     ref
   ) => {
@@ -134,12 +178,21 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
       onBoardCreated,
       onMove,
       onTurnChange,
+      onCheck,
+      onCheckmate,
+      onStalemate,
+      onDraw,
       onSquareClick,
       onShapesChange,
       onPromotion,
       onEvaluation,
       onStockfishHint,
       onEngineStatus,
+      onGameReviewProgress,
+      onCoachAlert,
+      onResign,
+      onDrawOffer,
+      onDrawDeclined,
     });
 
     useEffect(() => {
@@ -147,12 +200,21 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
         onBoardCreated,
         onMove,
         onTurnChange,
+        onCheck,
+        onCheckmate,
+        onStalemate,
+        onDraw,
         onSquareClick,
         onShapesChange,
         onPromotion,
         onEvaluation,
         onStockfishHint,
         onEngineStatus,
+        onGameReviewProgress,
+        onCoachAlert,
+        onResign,
+        onDrawOffer,
+        onDrawDeclined,
       };
     });
 
@@ -180,6 +242,7 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
 
       const initialBoardState = {
         mode,
+        playerColor,
         pieceSet,
         boardTheme,
         showThreats,
@@ -195,6 +258,18 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
             break;
           case 'turn-change':
             cbs.onTurnChange?.(args[0] as Color, args[1] as number);
+            break;
+          case 'check':
+            cbs.onCheck?.(args[0] as string);
+            break;
+          case 'checkmate':
+            cbs.onCheckmate?.(args[0] as string);
+            break;
+          case 'stalemate':
+            cbs.onStalemate?.();
+            break;
+          case 'draw':
+            cbs.onDraw?.();
             break;
           case 'square-click':
             cbs.onSquareClick?.(args[0] as string);
@@ -214,6 +289,23 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
           case 'engine-status':
             cbs.onEngineStatus?.(args[0] as EngineStatus);
             break;
+          case 'game-review-progress':
+            cbs.onGameReviewProgress?.(args[0] as number);
+            break;
+          case 'coach-alert':
+            cbs.onCoachAlert?.(args[0] as CoachAlertDetail);
+            break;
+          case 'resign':
+            cbs.onResign?.(args[0] as { color: 'white' | 'black'; winner: 'white' | 'black' });
+            break;
+          case 'draw-offer':
+            cbs.onDrawOffer?.(args[0] as 'white' | 'black');
+            break;
+          case 'draw-declined':
+            cbs.onDrawDeclined?.(
+              args[0] as { byColor: 'white' | 'black'; reason: 'too_early' | 'advantage'; score?: number }
+            );
+            break;
         }
       };
 
@@ -227,10 +319,16 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
         }
       };
 
-      const defaultStockfishConfig: StockfishConfig = stockfishConfig || {
-        whiteMode: 'disabled',
-        blackMode: 'disabled',
-      };
+      const defaultStockfishConfig: StockfishConfig = stockfishConfig
+        ? {
+            ...(coachMode !== undefined ? { coachMode } : {}),
+            ...stockfishConfig,
+          }
+        : {
+            whiteMode: 'disabled',
+            blackMode: 'disabled',
+            ...(coachMode !== undefined ? { coachMode } : {}),
+          };
 
       const boardInstance = new BoardCore(
         mountElRef.current,
@@ -249,6 +347,8 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
         } catch (e) {
           console.warn('[RoiChessboard] Erreur chargement PGN initial:', e);
         }
+      } else if (fen) {
+        boardInstance.setPosition(fen);
       }
 
       if (shapes && shapes.length > 0) {
@@ -440,6 +540,16 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
         boardApiRef.current.setBoardTheme(boardTheme);
       }
     }, [pieceSet, boardTheme]);
+
+    // Synchronisation Mode Coach
+    useEffect(() => {
+      if (boardApiRef.current && coachMode !== undefined) {
+        boardApiRef.current.updateStockfishConfig({ coachMode });
+        if (!coachMode) {
+          boardApiRef.current.clearGlyphs();
+        }
+      }
+    }, [coachMode]);
 
     return (
       <section

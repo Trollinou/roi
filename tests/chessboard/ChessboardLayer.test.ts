@@ -47,13 +47,14 @@ describe('Chessboard Layer Isolation & DOM Factory (Piste 1 & 3 & 4)', () => {
 			expect(cssContent).toMatch(/roi-board-frame[^{]*\{[^}]*aspect-ratio:\s*1\s*\/\s*1/i);
 		});
 
-		it('ensures compiled CSS strictly enforces pointer-events: none on SVG shapes overlays', () => {
+		it('ensures compiled CSS strictly enforces pointer-events: none on SVG shapes overlays and z-index: 25 on .cg-custom-svgs', () => {
 			const cssPath = path.resolve(__dirname, '../../build/chessboard/style-chessboard.css');
 			const cssContent = fs.readFileSync(cssPath, 'utf8');
 
 			// Check SVG rules
 			expect(cssContent).toMatch(/cg-shapes[^}]*pointer-events:\s*none\s*!important/i);
 			expect(cssContent).toMatch(/cg-custom-below[^}]*pointer-events:\s*none\s*!important/i);
+			expect(cssContent).toMatch(/cg-custom-svgs[^{]*\{[^}]*z-index:\s*25/i);
 		});
 
 		it('ensures compiled CSS sets promotion dialog pointer-events: auto and high z-index', () => {
