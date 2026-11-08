@@ -70,12 +70,12 @@ class Games_Controller {
 							'sanitize_callback' => 'absint',
 						),
 						'difficulty_level' => array(
-							'description'       => __( 'Niveau de difficulté (1 à 8).', 'roi' ),
+							'description'       => __( 'Niveau de difficulté (ELO ou 1 à 8).', 'roi' ),
 							'type'              => 'integer',
 							'required'          => false,
 							'default'           => 1,
 							'validate_callback' => static function ( $param ): bool {
-								return is_numeric( $param ) && (int) $param >= 1 && (int) $param <= 8;
+								return is_numeric( $param ) && (int) $param >= 1 && (int) $param <= 4000;
 							},
 							'sanitize_callback' => 'absint',
 						),

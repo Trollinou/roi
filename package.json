@@ -1,6 +1,6 @@
 {
   "name": "roi",
-  "version": "1.11.3",
+  "version": "1.11.4",
   "types": "./src/types/index.ts",
   "exports": {
     ".": {

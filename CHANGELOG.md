@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.11.4] - 2026-11-08
+
+*   **API REST & Enregistrement de Parties (`includes/API/REST/Games_Controller.php`) :**
+    *   **Validation Étendue de `difficulty_level` (ELO Stockfish)** : Élargissement de la plage de validation du paramètre `difficulty_level` sur la route `POST /wp-json/roi/v1/games` à `[1, 4000]`. Permet la réception sans rejet HTTP 400 (`rest_invalid_param`) des parties d'échecs jouées contre le moteur Stockfish dans la PWA (`dame-pwa`), qui transmet le niveau sous forme de classement ELO réel (ex: 1320 à 3190 ELO), tout en préservant la compatibilité avec les niveaux simplifiés (1 à 8).
+
 ## [1.11.3] - 2026-11-08
 
 *   **Intégration `eg-chessboard` — Support MultiPV, Tracé Délégé des Flèches & Immunité Coach Étendue (`src/types/chess.ts`, `src/utils/board-factory.ts`, `src/components/Chessboard/`, `src/blocks/chessboard/`, `src/admin-partie-viewer.ts`, `tests/chessboard/ChessboardGlyphs.test.ts`) :**
