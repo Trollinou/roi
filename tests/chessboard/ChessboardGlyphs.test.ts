@@ -259,5 +259,66 @@ describe('Chessboard Glyphs & Tactical Annotations (eg-chessboard v1.7.4+)', () 
 
       board.destroy();
     });
+
+    it('transmits both bestMove and hints tuple in onStockfishHint callback and CustomEvent', () => {
+      let receivedBestMove = '';
+      let receivedHints: any[] = [];
+      let customEventFired = false;
+
+      const board = mountRoiBoard(container, {
+        onStockfishHint: (bestMove, hints) => {
+          receivedBestMove = bestMove;
+          receivedHints = hints;
+        },
+      });
+
+      container.addEventListener('stockfish-hint', (e: Event) => {
+        const detail = (e as CustomEvent).detail;
+        expect(Array.isArray(detail)).toBe(true);
+        expect(detail[0]).toBe('e2e4');
+        expect(detail[1].length).toBe(2);
+        customEventFired = true;
+      });
+
+      const mockHints = [
+        {
+          uci: 'e2e4',
+          from: 'e2',
+          to: 'e4',
+          san: 'e4',
+          rank: 1,
+          scoreType: 'cp',
+          scoreValue: 35,
+          whiteScoreValue: 35,
+          winChancePercentage: 54,
+          pv: ['e2e4', 'e7e5'],
+          brush: 'green',
+        },
+        {
+          uci: 'd2d4',
+          from: 'd2',
+          to: 'd4',
+          san: 'd4',
+          rank: 2,
+          scoreType: 'cp',
+          scoreValue: 30,
+          whiteScoreValue: 30,
+          winChancePercentage: 53,
+          pv: ['d2d4', 'd7d5'],
+          brush: 'blue',
+        },
+      ];
+
+      // Simulate event emission through internal emitEvent callback passed to BoardCore
+      const emitEvent = (board as any).emitEvent;
+      expect(typeof emitEvent).toBe('function');
+      emitEvent('stockfish-hint', 'e2e4', mockHints);
+
+      expect(receivedBestMove).toBe('e2e4');
+      expect(receivedHints).toEqual(mockHints);
+      expect(customEventFired).toBe(true);
+
+      board.destroy();
+    });
   });
 });

@@ -60,6 +60,31 @@ export type BoardGlyph = TacticalGlyph | AssessmentGlyph;
 
 export type StockfishMode = 'disabled' | 'hint' | 'bot' | 'elo';
 
+export type HintBrush = 'green' | 'blue' | 'yellow' | 'red';
+
+export interface StockfishHint {
+  uci: string;
+  from: Square;
+  to: Square;
+  promotion?: string;
+  san: string;
+  rank: number;
+  scoreType: 'cp' | 'mate';
+  scoreValue: number;
+  whiteScoreValue: number;
+  winChancePercentage: number;
+  pv: string[];
+  brush: HintBrush;
+}
+
+export interface HintRequestOptions {
+  multiPv?: number;
+  depth?: number;
+  movetime?: number;
+  maxScoreDiffCp?: number;
+  drawArrows?: boolean;
+}
+
 export interface StockfishSearchLimit {
   movetime?: number;
   depth?: number;
@@ -75,6 +100,8 @@ export interface StockfishConfig {
   blackElo?: number; // 1320 à 3190
   stockfishMoveTime?: number; // Temps de réflexion en ms pour le bot (défaut: 1000)
   multiPv?: number; // Nombre de variantes (défaut: 1)
+  hintMaxScoreDiffCp?: number; // Écart maximal en centipions pour retenir les coups secondaires MultiPV (défaut: 50 en coachMode)
+  drawHintArrows?: boolean; // Trace automatiquement les flèches de suggestion en conservant les formes existantes
   showWdl?: boolean; // Probabilités Gain/Nulle/Perte (défaut: true)
   searchLimit?: StockfishSearchLimit;
   threads?: number;

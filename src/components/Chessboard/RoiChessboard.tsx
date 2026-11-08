@@ -13,6 +13,7 @@ import type {
   DrawShape,
   StockfishConfig,
   StockfishEvaluation,
+  StockfishHint,
   EngineStatus,
   Move,
   PromotionDetail,
@@ -28,6 +29,9 @@ export type {
   TacticalAnalysisResult,
   GameTermination,
   GameTerminationReason,
+  StockfishHint,
+  HintBrush,
+  HintRequestOptions,
 } from 'eg-chessboard';
 import type { Color, Shape } from '../../types/chess';
 import PromotionDialog, { type PromotionState } from '../../blocks/chessboard/components/PromotionDialog';
@@ -96,7 +100,7 @@ export interface RoiChessboardProps {
   /** Callback d'évaluation du moteur Stockfish */
   onEvaluation?: (_evalData: StockfishEvaluation) => void;
   /** Callback d'indice/conseil Stockfish */
-  onStockfishHint?: (_hint: string) => void;
+  onStockfishHint?: (_bestMove: string, _hints: StockfishHint[]) => void;
   /** Callback de statut du moteur Stockfish */
   onEngineStatus?: (_status: EngineStatus) => void;
   /** Callback de progression de la revue de partie */
@@ -284,7 +288,7 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
             cbs.onEvaluation?.(args[0] as StockfishEvaluation);
             break;
           case 'stockfish-hint':
-            cbs.onStockfishHint?.(args[0] as string);
+            cbs.onStockfishHint?.(args[0] as string, (args[1] as StockfishHint[]) ?? []);
             break;
           case 'engine-status':
             cbs.onEngineStatus?.(args[0] as EngineStatus);
