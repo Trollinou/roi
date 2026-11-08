@@ -272,6 +272,8 @@ export function buildStockfishEngineConfig(
     },
     showWdl: true,
     multiPv: 1,
+    drawHintArrows: true,
+    hintMaxScoreDiffCp: 50,
     ...(coachMode !== undefined ? { coachMode } : {}),
   };
 }

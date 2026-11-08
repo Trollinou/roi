@@ -8,6 +8,9 @@ export type {
   TacticalAnalysisResult,
   GameTermination,
   GameTerminationReason,
+  StockfishHint,
+  HintBrush,
+  HintRequestOptions,
 } from 'eg-chessboard';
 export { default } from './RoiChessboard';
 

@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [1.11.3] - 2026-11-08
+
+*   **Intégration `eg-chessboard` — Support MultiPV, Tracé Délégé des Flèches & Immunité Coach Étendue (`src/types/chess.ts`, `src/utils/board-factory.ts`, `src/components/Chessboard/`, `src/blocks/chessboard/`, `src/admin-partie-viewer.ts`, `tests/chessboard/ChessboardGlyphs.test.ts`) :**
+    *   **Contrats TypeScript Partagés (`roi-types`)** : Définition des types `HintBrush`, `StockfishHint` et `HintRequestOptions`, et enrichissement de `StockfishConfig` avec `hintMaxScoreDiffCp` et `drawHintArrows` dans la SSOT `src/types/chess.ts`.
+    *   **Signature d'Événement Échiquéen & Event Bus** : Mise à jour de `onStockfishHint?: (bestMove: string, hints: StockfishHint[]) => void` sur `<RoiChessboard />` et `mountRoiBoard()` avec transmission complète du tuple `[bestMove, hints]`.
+    *   **Délégation Native du Tracé des Flèches & Préservation au Clic** : Activation de `drawArrows: true` / `drawHintArrows: true` avec filtrage `maxScoreDiffCp: 50` dans le bloc Gutenberg `roi/chessboard` (`view.ts`, `ChessboardUiHelper.ts`) et dans la visionneuse de parties (`admin-partie-viewer.ts`). Grâce au correctif dans `eg-chessboard` distinguant formes programmatiques et dessins utilisateur, les flèches d'indice restent affichées lors de la sélection/désélection d'une pièce et ne s'effacent qu'au coup effectivement joué ou via `hideMoves()`.
+    *   **Conseil Multi-Variantes en Administration** : Amélioration du bouton d'indice de la visionneuse de parties (`admin-partie-viewer.ts`) passant à `multiPv: 3`, avec affichage détaillé des variantes retenues (notation SAN et cases) dans la bannière de statut et fiabilisation des écouteurs d'événements.
+    *   **Tests de Non-Régression** : Ajout d'un test unitaire dans `ChessboardGlyphs.test.ts` validant la propagation du tuple `(bestMove, hints)` et l'émission du `CustomEvent`.
+
 ## [1.11.2] - 2026-11-08
 
 *   **Intégration `eg-chessboard` v1.8.2 — Mode Coach Bienveillant Natif, Arbitrage & Promotion PGN après Annulation (`src/types/chess.ts`, `src/utils/board-factory.ts`, `src/components/Chessboard/RoiChessboard.tsx`, `src/utils/tactics-helper.ts`, `src/blocks/chessboard/view.ts`, `src/blocks/chessboard/classes/ChessboardUiHelper.ts`, `src/scss/abstracts/_chessboard-layer.scss`, `tests/chessboard/`) :**

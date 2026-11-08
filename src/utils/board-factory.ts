@@ -6,6 +6,9 @@ import type {
   DrawShape,
   StockfishConfig,
   StockfishEvaluation,
+  StockfishHint,
+  HintBrush,
+  HintRequestOptions,
   EngineStatus,
   Move,
   PromotionDetail,
@@ -31,7 +34,7 @@ export interface RoiBoardEvents {
   onShapesChange?: (_shapes: DrawShape[]) => void;
   onPromotion?: (_detail: PromotionDetail) => void;
   onEvaluation?: (_evalData: StockfishEvaluation) => void;
-  onStockfishHint?: (_hint: string) => void;
+  onStockfishHint?: (_bestMove: string, _hints: StockfishHint[]) => void;
   onEngineStatus?: (_status: EngineStatus) => void;
   onGameReviewProgress?: (_percent: number) => void;
   onCoachAlert?: (_detail: CoachAlertDetail) => void;
@@ -215,7 +218,7 @@ export function mountRoiBoard(
         options.onEvaluation?.(args[0] as StockfishEvaluation);
         break;
       case 'stockfish-hint':
-        options.onStockfishHint?.(args[0] as string);
+        options.onStockfishHint?.(args[0] as string, (args[1] as StockfishHint[]) ?? []);
         break;
       case 'engine-status':
         options.onEngineStatus?.(args[0] as EngineStatus);
@@ -423,6 +426,9 @@ export type {
   TacticalAnalysisResult,
   GameTermination,
   GameTerminationReason,
+  StockfishHint,
+  HintBrush,
+  HintRequestOptions,
 };
 
 export default mountRoiBoard;

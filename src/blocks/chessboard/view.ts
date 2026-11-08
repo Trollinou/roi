@@ -269,9 +269,7 @@ function initChessboardInstance(block: HTMLElement, mountElement: HTMLElement, c
     } else if (event === 'stockfish-hint') {
       const bestMove = args[0] as string;
       if (bestMove && bestMove.length >= 4) {
-        const from = bestMove.slice(0, 2);
         const to = bestMove.slice(2, 4);
-        boardAPI.drawMove(from, to, 'green');
         boardAPI.setGlyph(to, '!');
       }
     }
@@ -554,7 +552,7 @@ const { state: globalStoreState } = store('roi/chessboard', {
       const block = btn.closest<HTMLElement>('.chessboard-block');
       const boardAPI = (block as any)?.boardAPI;
       if (boardAPI && typeof boardAPI.requestHint === 'function') {
-        boardAPI.requestHint({ multiPv: 1, movetime: 1200 });
+        boardAPI.requestHint({ multiPv: 3, movetime: 1200, maxScoreDiffCp: 50, drawArrows: true });
       }
     },
     coachUndo(event: Event) {

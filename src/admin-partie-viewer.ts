@@ -1,6 +1,7 @@
 import { computeEvalBarPercentage } from 'eg-chessboard';
 import type {
 	StockfishEvaluation,
+	StockfishHint,
 	GameReviewReport,
 	MoveJudgement,
 	DrawShape,
@@ -718,25 +719,35 @@ onDomReady(() => {
 			);
 		}, 6000);
 
-		boardAPI.requestHint({ multiPv: 2, movetime: 1500 });
+		boardAPI.requestHint({ multiPv: 3, movetime: 1500, maxScoreDiffCp: 50, drawArrows: true });
 	}
 
-	function handleStockfishHint(bestMove: string): void {
+	function handleStockfishHint(bestMove: string, hints?: StockfishHint[]): void {
 		if (hintFeedbackTimer) {
 			clearTimeout(hintFeedbackTimer);
 			hintFeedbackTimer = null;
 		}
 
 		if (boardAPI && bestMove && bestMove.length >= 4) {
-			const from = bestMove.substring(0, 2);
 			const to = bestMove.substring(2, 4);
-			boardAPI.drawMove(from, to, 'green');
 			boardAPI.setGlyph(to, '!');
-			showFeedbackMessage(
-				`Conseil Stockfish : ${from.toUpperCase()} ➔ ${to.toUpperCase()}`,
-				'info',
-				5000
-			);
+
+			if (hints && hints.length > 0) {
+				const hintsText = hints
+					.map((h, idx) => {
+						const moveNotation = h.san || `${h.from.toUpperCase()} ➔ ${h.to.toUpperCase()}`;
+						return `${idx + 1}. ${moveNotation} (${h.from.toUpperCase()} ➔ ${h.to.toUpperCase()})`;
+					})
+					.join(' · ');
+				showFeedbackMessage(`Conseil Stockfish : ${hintsText}`, 'info', 6000);
+			} else {
+				const from = bestMove.substring(0, 2);
+				showFeedbackMessage(
+					`Conseil Stockfish : ${from.toUpperCase()} ➔ ${to.toUpperCase()}`,
+					'info',
+					5000
+				);
+			}
 		} else {
 			showFeedbackMessage('Aucun coup évident trouvé sur cette position.', 'warning', 3000);
 		}
@@ -995,27 +1006,29 @@ onDomReady(() => {
 			boardAPI.on('evaluation', handleEvaluation);
 			boardAPI.on('stockfish-hint', handleStockfishHint);
 			boardAPI.on('engine-status', handleEngineStatus);
+		} else {
+			// Also listen on DOM element as fallback if boardAPI.on is unavailable
+			block?.addEventListener('evaluation', (e: Event) => {
+				const detail = (e as CustomEvent).detail as StockfishEvaluation;
+				if (detail) {
+					handleEvaluation(detail);
+				}
+			});
+			block?.addEventListener('stockfish-hint', (e: Event) => {
+				const detail = (e as CustomEvent).detail;
+				if (Array.isArray(detail)) {
+					handleStockfishHint(detail[0] as string, detail[1] as StockfishHint[]);
+				} else if (typeof detail === 'string') {
+					handleStockfishHint(detail);
+				}
+			});
+			block?.addEventListener('engine-status', (e: Event) => {
+				const detail = (e as CustomEvent).detail as EngineStatus;
+				if (detail) {
+					handleEngineStatus(detail);
+				}
+			});
 		}
-
-		// Also listen on DOM element as fallback
-		block?.addEventListener('evaluation', (e: Event) => {
-			const detail = (e as CustomEvent).detail as StockfishEvaluation;
-			if (detail) {
-				handleEvaluation(detail);
-			}
-		});
-		block?.addEventListener('stockfish-hint', (e: Event) => {
-			const detail = (e as CustomEvent).detail as string;
-			if (detail) {
-				handleStockfishHint(detail);
-			}
-		});
-		block?.addEventListener('engine-status', (e: Event) => {
-			const detail = (e as CustomEvent).detail as EngineStatus;
-			if (detail) {
-				handleEngineStatus(detail);
-			}
-		});
 
 		// Listen for direct textarea changes to reload PGN
 		pgnTextarea?.addEventListener('input', () => {
