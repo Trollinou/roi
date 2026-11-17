@@ -1,4 +1,5 @@
 export { RoiChessboard, type RoiChessboardProps } from './RoiChessboard';
+export { normalizeCastlingUci } from 'eg-chessboard';
 export type {
   BoardGlyph,
   TacticalGlyph,

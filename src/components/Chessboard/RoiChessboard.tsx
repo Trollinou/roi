@@ -5,7 +5,8 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { BoardCore } from 'eg-chessboard';
+import { BoardCore, normalizeCastlingUci } from 'eg-chessboard';
+export { normalizeCastlingUci };
 import type {
   BoardMode,
   PieceSet,
@@ -174,6 +175,15 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
     const containerRef = useRef<HTMLElement | null>(null);
     const mountElRef = useRef<HTMLDivElement | null>(null);
     const boardApiRef = useRef<BoardCore | null>(null);
+    const isOrientationMountedRef = useRef(false);
+    const isCoordinatesMountedRef = useRef(false);
+    const isViewOnlyMountedRef = useRef(false);
+    const isShapesMountedRef = useRef(false);
+    const isGlyphsMountedRef = useRef(false);
+    const isThreatsMountedRef = useRef(false);
+    const isThemeMountedRef = useRef(false);
+    const isCoachMountedRef = useRef(false);
+    const isStockfishMountedRef = useRef(false);
 
     const [promotionState, setPromotionState] = useState<PromotionState>({ isEnabled: false });
 
@@ -450,6 +460,15 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
           boardInstance.destroy();
         }
         boardApiRef.current = null;
+        isOrientationMountedRef.current = false;
+        isCoordinatesMountedRef.current = false;
+        isViewOnlyMountedRef.current = false;
+        isShapesMountedRef.current = false;
+        isGlyphsMountedRef.current = false;
+        isThreatsMountedRef.current = false;
+        isThemeMountedRef.current = false;
+        isCoachMountedRef.current = false;
+        isStockfishMountedRef.current = false;
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -478,6 +497,10 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
 
     // Synchronisation Orientation
     useEffect(() => {
+      if (!isOrientationMountedRef.current) {
+        isOrientationMountedRef.current = true;
+        return;
+      }
       if (boardApiRef.current) {
         boardApiRef.current.setConfig({ orientation });
       }
@@ -485,6 +508,10 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
 
     // Synchronisation Coordonnées
     useEffect(() => {
+      if (!isCoordinatesMountedRef.current) {
+        isCoordinatesMountedRef.current = true;
+        return;
+      }
       if (boardApiRef.current) {
         boardApiRef.current.setConfig({ coordinates });
       }
@@ -492,6 +519,10 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
 
     // Synchronisation Lecture seule
     useEffect(() => {
+      if (!isViewOnlyMountedRef.current) {
+        isViewOnlyMountedRef.current = true;
+        return;
+      }
       if (boardApiRef.current) {
         boardApiRef.current.setConfig({ viewOnly });
       }
@@ -499,6 +530,10 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
 
     // Synchronisation Formes (Shapes)
     useEffect(() => {
+      if (!isShapesMountedRef.current) {
+        isShapesMountedRef.current = true;
+        return;
+      }
       if (boardApiRef.current && shapes) {
         boardApiRef.current.setShapes(shapes as any);
       }
@@ -506,6 +541,10 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
 
     // Synchronisation Glyphes & Badges tactiques
     useEffect(() => {
+      if (!isGlyphsMountedRef.current) {
+        isGlyphsMountedRef.current = true;
+        return;
+      }
       if (boardApiRef.current) {
         boardApiRef.current.clearGlyphs();
         if (glyphs) {
@@ -528,6 +567,10 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
 
     // Synchronisation Menaces
     useEffect(() => {
+      if (!isThreatsMountedRef.current) {
+        isThreatsMountedRef.current = true;
+        return;
+      }
       if (boardApiRef.current) {
         if (showThreats) {
           boardApiRef.current.drawThreats();
@@ -539,6 +582,10 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
 
     // Synchronisation Jeu de pièces & Thème
     useEffect(() => {
+      if (!isThemeMountedRef.current) {
+        isThemeMountedRef.current = true;
+        return;
+      }
       if (boardApiRef.current) {
         boardApiRef.current.setPieceSet(pieceSet);
         boardApiRef.current.setBoardTheme(boardTheme);
@@ -547,6 +594,10 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
 
     // Synchronisation Mode Coach
     useEffect(() => {
+      if (!isCoachMountedRef.current) {
+        isCoachMountedRef.current = true;
+        return;
+      }
       if (boardApiRef.current && coachMode !== undefined) {
         boardApiRef.current.updateStockfishConfig({ coachMode });
         if (!coachMode) {
@@ -554,6 +605,21 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
         }
       }
     }, [coachMode]);
+
+    // Synchronisation Stockfish
+    useEffect(() => {
+      if (!isStockfishMountedRef.current) {
+        isStockfishMountedRef.current = true;
+        return;
+      }
+      if (boardApiRef.current && stockfishConfig) {
+        boardApiRef.current.updateStockfishConfig({
+          ...(coachMode !== undefined ? { coachMode } : {}),
+          ...stockfishConfig,
+        });
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [stockfishConfig]);
 
     return (
       <section

@@ -1,4 +1,4 @@
-import { BoardCore } from 'eg-chessboard';
+import { BoardCore, normalizeCastlingUci } from 'eg-chessboard';
 import type {
   BoardMode,
   PieceSet,
@@ -165,6 +165,15 @@ export function mountRoiBoard(
   const workerUrl = explicitStockfishConfig?.workerUrl || globalConfig?.stockfishWorkerUrl || '';
   const wasmUrl = explicitStockfishConfig?.wasmUrl || globalConfig?.stockfishWasmUrl || '';
 
+  const resolvedWhiteMode =
+    useStockfish && !viewOnly && (playerColor === 'black' || playerColor === 'both')
+      ? 'bot'
+      : 'disabled';
+  const resolvedBlackMode =
+    useStockfish && !viewOnly && (playerColor === 'white' || playerColor === 'both')
+      ? 'bot'
+      : 'disabled';
+
   const initialStockfishConfig: StockfishConfig = explicitStockfishConfig
     ? {
         workerUrl,
@@ -175,8 +184,8 @@ export function mountRoiBoard(
     : {
         workerUrl,
         wasmUrl,
-        whiteMode: useStockfish ? 'bot' : 'disabled',
-        blackMode: useStockfish ? 'bot' : 'disabled',
+        whiteMode: resolvedWhiteMode,
+        blackMode: resolvedBlackMode,
         whiteElo: stockfishElo,
         blackElo: stockfishElo,
         ...(coachMode !== undefined ? { coachMode } : {}),
@@ -416,6 +425,8 @@ export function mountRoiBoard(
 
   return instance;
 }
+
+export { normalizeCastlingUci };
 
 export type {
   BoardGlyph,

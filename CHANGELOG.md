@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [1.11.5] - 2026-11-17
+
+*   **Mise à jour `eg-chessboard` v1.8.5 — Cycle de vie React 18, Stockfish Auto-Start, `normalizeCastlingUci` & Glyphes/Cercles (`src/components/Chessboard/`, `src/blocks/chessboard/edit.tsx`, `src/components/FenEditor/FenEditor.tsx`, `src/components/PgnEditor/PgnEditor.tsx`, `src/utils/board-factory.ts`, `src/admin-partie-viewer.ts`, `tests/chessboard/ChessboardGlyphs.test.ts`, `AGENTS.md`) :**
+    *   **Déduplication des `useEffect` au Montage React 18** : Ajout de gardes de montage initial réinitialisés au démontage (`StrictMode`-safe) dans `<RoiChessboard />` et `src/blocks/chessboard/edit.tsx`, et ajout d'un `useEffect` dédié sur `stockfishConfig`. Passage direct du `diagram` initial au constructeur `BoardCore` dans `FenEditor.tsx`.
+    *   **Démarrage Automatique Stockfish & Nettoyage `onBoardCreated`** : Passage direct de la configuration Stockfish désactivée au constructeur `BoardCore` dans `PgnEditor.tsx` (suppression de l'appel redondant `updateStockfishConfig` dans `onBoardCreated`) et résolution de `whiteMode`/`blackMode` selon `viewOnly` et `playerColor` dans `mountRoiBoard()`.
+    *   **Normalisation Standard des Roques (`normalizeCastlingUci`)** : Ré-export de `normalizeCastlingUci` depuis `src/components/Chessboard/` et `src/utils/board-factory.ts`, et délégation dans `normalizeCastlingMoves()` de `src/admin-partie-viewer.ts`.
+    *   **Tests de Non-Régression** : Ajout de tests unitaires dans `ChessboardGlyphs.test.ts` couvrant `normalizeCastlingUci` et la préservation des glyphes lors des appels à `drawCircle()`.
+
 ## [1.11.4] - 2026-11-08
 
 *   **API REST & Enregistrement de Parties (`includes/API/REST/Games_Controller.php`) :**
