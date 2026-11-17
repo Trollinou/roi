@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mountRoiBoard } from '../../src/utils/board-factory';
+import { mountRoiBoard, normalizeCastlingUci } from '../../src/utils/board-factory';
 import {
   detectTacticalGlyphs,
   applyTacticalGlyphs,
@@ -317,6 +317,43 @@ describe('Chessboard Glyphs & Tactical Annotations (eg-chessboard v1.7.4+)', () 
       expect(receivedBestMove).toBe('e2e4');
       expect(receivedHints).toEqual(mockHints);
       expect(customEventFired).toBe(true);
+
+      board.destroy();
+    });
+  });
+
+  describe('5. eg-chessboard v1.8.5 Integration (normalizeCastlingUci & drawCircle with active glyphs)', () => {
+    it('normalizes chessops/Chessground castling UCI moves and SAN notations via normalizeCastlingUci', () => {
+      expect(normalizeCastlingUci('e1h1')).toBe('e1g1');
+      expect(normalizeCastlingUci('e1a1')).toBe('e1c1');
+      expect(normalizeCastlingUci('e8h8')).toBe('e8g8');
+      expect(normalizeCastlingUci('e8a8')).toBe('e8c8');
+      expect(normalizeCastlingUci('e1h1', 'O-O', 'w')).toBe('e1g1');
+      expect(normalizeCastlingUci('e8a8', '0-0-0', 'black')).toBe('e8c8');
+      expect(normalizeCastlingUci('e2e4', 'e4', 'white')).toBe('e2e4');
+    });
+
+    it('preserves active glyphs and filters customSvg in getShapes() when calling drawCircle()', () => {
+      const board = mountRoiBoard(container, {
+        fen: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1',
+      });
+
+      board.setGlyph('e4', '!!');
+      board.setGlyph('d7', 'pin');
+
+      board.drawCircle('d5', 'green');
+      board.drawCircle('f6', 'blue');
+
+      expect(board.getGlyph('e4')).toBe('!!');
+      expect(board.getGlyph('d7')).toBe('pin');
+      expect(board.getGlyphs().size).toBe(2);
+
+      const shapes = board.getShapes();
+      expect(shapes.some((s) => Boolean((s as { customSvg?: unknown }).customSvg))).toBe(false);
+      expect(shapes).toEqual([
+        { orig: 'd5', brush: 'green' },
+        { orig: 'f6', brush: 'blue' },
+      ]);
 
       board.destroy();
     });

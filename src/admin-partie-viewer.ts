@@ -1,4 +1,4 @@
-import { computeEvalBarPercentage } from 'eg-chessboard';
+import { computeEvalBarPercentage, normalizeCastlingUci } from 'eg-chessboard';
 import type {
 	StockfishEvaluation,
 	StockfishHint,
@@ -76,16 +76,22 @@ function normalizeCastlingMoves(api: unknown): void {
 				if (!item || typeof item !== 'object') {
 					continue;
 				}
-				const move = item as { san?: string; color?: string; from?: string; to?: string };
+				const move = item as {
+					san?: string;
+					color?: 'w' | 'b' | 'white' | 'black';
+					from?: string;
+					to?: string;
+				};
 				if (!move.san) {
 					continue;
 				}
-				const san = move.san.trim();
-				const isWhite = move.color === 'w' || move.color === 'white' || move.from === 'e1';
-				if (san.startsWith('O-O-O') || san.startsWith('0-0-0')) {
-					move.to = isWhite ? 'c1' : 'c8';
-				} else if (san.startsWith('O-O') || san.startsWith('0-0')) {
-					move.to = isWhite ? 'g1' : 'g8';
+				const normalized = normalizeCastlingUci(
+					`${move.from ?? ''}${move.to ?? ''}`,
+					move.san,
+					move.color
+				);
+				if (normalized.length >= 4) {
+					move.to = normalized.slice(2, 4);
 				}
 			}
 		}

@@ -141,12 +141,6 @@ export const PgnEditor = forwardRef<PgnEditorRef, PgnEditorProps>(function PgnEd
       };
 
       const onBoardCreated = (api: BoardCore) => {
-        api.updateStockfishConfig({
-          workerUrl: '',
-          whiteMode: 'disabled',
-          blackMode: 'disabled',
-        });
-
         const pgnToLoad = ensurePgnFenHeader(initialPgn, initialFen);
         if (pgnToLoad && pgnToLoad.trim() !== '') {
           try {
@@ -176,6 +170,7 @@ export const PgnEditor = forwardRef<PgnEditorRef, PgnEditorProps>(function PgnEd
         emit,
         { ...config, onBoardCreated } as any,
         {
+          workerUrl: '',
           whiteMode: 'disabled',
           blackMode: 'disabled',
         }

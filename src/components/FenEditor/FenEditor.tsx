@@ -198,17 +198,9 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
         {
           whiteMode: 'disabled',
           blackMode: 'disabled',
-        }
+        },
+        { fen: currentFen, shapes: effectiveShapes as any }
       );
-
-      boardAPI.setPieceSet(selectedPieceSet);
-      boardAPI.setBoardTheme(selectedBoardTheme);
-
-      if (typeof (boardAPI as any).setDiagram === 'function') {
-        (boardAPI as any).setDiagram({ fen: currentFen, shapes: effectiveShapes });
-      } else if (effectiveShapes && effectiveShapes.length > 0) {
-        (boardAPI as any).setShapes(effectiveShapes);
-      }
 
       if (boardConfig.onBoardCreated) {
         boardConfig.onBoardCreated(boardAPI);

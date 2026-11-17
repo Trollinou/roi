@@ -38,6 +38,9 @@ export default function Edit({ attributes, setAttributes, clientId }: EditProps)
   });
   const boardRef = useRef<HTMLDivElement | null>(null);
   const boardApiRef = useRef<any>(null);
+  const isOrientationMountedRef = useRef(false);
+  const isCoordinatesMountedRef = useRef(false);
+  const isThreatsMountedRef = useRef(false);
   const [selectedPiece, setSelectedPiece] = useState<{ role: PieceRole; color: Color } | 'eraser' | null>(null);
 
   const selectedPieceRef = useRef(selectedPiece);
@@ -134,12 +137,20 @@ export default function Edit({ attributes, setAttributes, clientId }: EditProps)
 
     return () => {
       boardAPI?.destroy();
+      boardApiRef.current = null;
+      isOrientationMountedRef.current = false;
+      isCoordinatesMountedRef.current = false;
+      isThreatsMountedRef.current = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Sync orientation
   useEffect(() => {
+    if (!isOrientationMountedRef.current) {
+      isOrientationMountedRef.current = true;
+      return;
+    }
     if (boardApiRef.current) {
       boardApiRef.current.setConfig({ orientation: attributes.orientation || 'white' });
     }
@@ -147,6 +158,10 @@ export default function Edit({ attributes, setAttributes, clientId }: EditProps)
 
   // Sync coordinates
   useEffect(() => {
+    if (!isCoordinatesMountedRef.current) {
+      isCoordinatesMountedRef.current = true;
+      return;
+    }
     if (boardApiRef.current) {
       boardApiRef.current.setConfig({ coordinates: attributes.coordinates !== false });
     }
@@ -161,6 +176,10 @@ export default function Edit({ attributes, setAttributes, clientId }: EditProps)
   }, [attributes.fen]);
 
   useEffect(() => {
+    if (!isThreatsMountedRef.current) {
+      isThreatsMountedRef.current = true;
+      return;
+    }
     if (boardApiRef.current) {
       if (attributes.showThreats) {
         boardApiRef.current.drawThreats();
