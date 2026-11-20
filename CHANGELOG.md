@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.11.6] - 2026-11-20
+
 *   **`PgnEditor` & `eg-chessboard` — Correction « Copier la FEN actuelle » et Découpe PGN (`src/components/PgnEditor/PgnEditor.tsx`, `../eg-chessboard`) :**
     *   **Copie de la FEN affichée (`getViewingFen`)** : Remplacement de l'accès obsolète `api.game` / `api.board.state.fen` par `api.getViewingFen()`, garantissant la copie de la FEN complète correspondant exactement au coup affiché lors de la navigation dans l'historique.
     *   **Découpe PGN (« Couper avant » / « Couper après »)** : Ajout de `pruneBeforeCurrentPly()` et `pruneAfterCurrentPly()` dans `GameSession` / `BoardCore` et de deux boutons dédiés dans `PgnEditor`, permettant de tronquer un PGN avant ou après la position affichée tout en conservant les en-têtes `[SetUp "1"]` / `[FEN "..."]`, les variantes, les shapes (`[%cal]`, `[%csl]`) et les commentaires.
