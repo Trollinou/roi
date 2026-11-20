@@ -281,6 +281,25 @@ export const PgnEditor = forwardRef<PgnEditorRef, PgnEditorProps>(function PgnEd
     }
   };
 
+  // Découpe du PGN (pruning avant / après la position affichée)
+  const handlePruneBefore = () => {
+    const api = (boardApiRef.current || boardApiState) as any;
+    if (api && typeof api.pruneBeforeCurrentPly === 'function') {
+      if (api.pruneBeforeCurrentPly()) {
+        syncPositionData(api);
+      }
+    }
+  };
+
+  const handlePruneAfter = () => {
+    const api = (boardApiRef.current || boardApiState) as any;
+    if (api && typeof api.pruneAfterCurrentPly === 'function') {
+      if (api.pruneAfterCurrentPly()) {
+        syncPositionData(api);
+      }
+    }
+  };
+
   // Modification du texte du commentaire
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
@@ -337,6 +356,32 @@ export const PgnEditor = forwardRef<PgnEditorRef, PgnEditorProps>(function PgnEd
             <button type="button" className="pgn-nav-btn" onClick={handleViewNext} title="Suivant" style={{ position: 'relative', zIndex: 11, pointerEvents: 'auto' }}>&gt;</button>
             <button type="button" className="pgn-nav-btn" onClick={handleViewEnd} title="En direct" style={{ position: 'relative', zIndex: 11, pointerEvents: 'auto' }}>&gt;|</button>
           </div>
+
+          {/* Découpe du PGN autour de la position affichée */}
+          {!isReadOnly && (
+            <div className="pgn-navigation-bar" style={{ marginTop: '8px', gap: '8px' }}>
+              <button
+                type="button"
+                className="pgn-nav-btn"
+                onClick={handlePruneBefore}
+                disabled={plyViewing <= 0}
+                title="Définir la position affichée comme nouveau départ (supprime les coups précédents, conserve variantes, shapes et commentaires)"
+                style={{ flex: 1, fontSize: '12px', padding: '6px 8px' }}
+              >
+                ✂️ Couper avant
+              </button>
+              <button
+                type="button"
+                className="pgn-nav-btn"
+                onClick={handlePruneAfter}
+                disabled={plyViewing >= totalPlies}
+                title="Supprimer tous les coups après la position affichée"
+                style={{ flex: 1, fontSize: '12px', padding: '6px 8px' }}
+              >
+                ✂️ Couper après
+              </button>
+            </div>
+          )}
 
           {/* Aide au dessin */}
           <DrawingLegend className="pgn-editor-drawing-legend" />
@@ -455,11 +500,16 @@ export const PgnEditor = forwardRef<PgnEditorRef, PgnEditorProps>(function PgnEd
             style={{ fontSize: '12px', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
             onClick={() => {
               const api = (boardApiRef.current || boardApiState) as any;
-              if (api && api.game) {
-                const currentFen =
-                  api.board && api.board.state && api.board.state.fen
-                    ? api.board.state.fen
-                    : api.game.fen();
+              if (api) {
+                let currentFen = '';
+                if (typeof api.getViewingFen === 'function') {
+                  currentFen = api.getViewingFen();
+                } else if (typeof api.getFen === 'function') {
+                  currentFen = api.getFen();
+                }
+                if (!currentFen) {
+                  return;
+                }
                 const copyWithFallback = () => {
                   if (navigator.clipboard && navigator.clipboard.writeText) {
                     return navigator.clipboard.writeText(currentFen);
