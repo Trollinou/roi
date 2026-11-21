@@ -122,31 +122,107 @@ export function updateConfig(): void {
 	textarea.value = JSON.stringify(configData, null, 4);
 }
 
+export interface DeducedParcoursSquares {
+	caseDepart: string;
+	caseArrivee: string;
+	isLoop: boolean;
+}
+
+/**
+ * Déduit case_depart, case_arrivee et is_loop à partir de la variante et des formes.
+ */
+export function deduceParcoursSquares(
+	variante: string,
+	shapes: Shape[]
+): DeducedParcoursSquares {
+	const blueCircles: string[] = [];
+	const greenCircles: string[] = [];
+	const arrows: Array<{ orig: string; dest: string }> = [];
+
+	if (Array.isArray(shapes)) {
+		shapes.forEach((shape) => {
+			if (!shape || !shape.orig) {
+				return;
+			}
+			const isArrow = Boolean(shape.dest && shape.dest !== shape.orig);
+			if (isArrow) {
+				arrows.push({ orig: shape.orig, dest: shape.dest as string });
+				return;
+			}
+			if (shape.brush === 'blue' || shape.brush === 'b') {
+				blueCircles.push(shape.orig);
+			} else if (shape.brush === 'green' || shape.brush === 'g') {
+				greenCircles.push(shape.orig);
+			}
+		});
+	}
+
+	if (variante === 'developpement') {
+		const firstArrowOrig = arrows.length > 0 ? arrows[0].orig : '';
+
+		if (greenCircles.length > 0) {
+			const caseDep =
+				blueCircles.length > 0 ? blueCircles[0] : firstArrowOrig;
+			return {
+				caseDepart: caseDep,
+				caseArrivee: greenCircles[greenCircles.length - 1],
+				isLoop: false,
+			};
+		}
+
+		if (blueCircles.length >= 2) {
+			return {
+				caseDepart: blueCircles[0],
+				caseArrivee: blueCircles[blueCircles.length - 1],
+				isLoop: false,
+			};
+		}
+
+		if (blueCircles.length === 1) {
+			return {
+				caseDepart: firstArrowOrig,
+				caseArrivee: blueCircles[0],
+				isLoop: false,
+			};
+		}
+
+		return {
+			caseDepart: firstArrowOrig,
+			caseArrivee: '',
+			isLoop: false,
+		};
+	}
+
+	const caseDep =
+		blueCircles.length > 0 ? blueCircles[blueCircles.length - 1] : '';
+	const caseArr =
+		greenCircles.length > 0 ? greenCircles[greenCircles.length - 1] : '';
+
+	const isLoop =
+		!!caseDep &&
+		(!caseArr || caseDep.toLowerCase() === caseArr.toLowerCase());
+
+	return {
+		caseDepart: caseDep,
+		caseArrivee: isLoop ? caseDep : caseArr,
+		isLoop,
+	};
+}
+
 function updateSquareDeductions(index: number): void {
 	const current = t9Series[index];
 	if (!current) {
 		return;
 	}
 
-	let caseDep = '';
-	let caseArr = '';
-
-	if (Array.isArray(current.shapes)) {
-		current.shapes.forEach(function (shape) {
-			if (shape.brush === 'blue' || shape.brush === 'b') {
-				caseDep = shape.orig;
-			} else if (shape.brush === 'green' || shape.brush === 'g') {
-				caseArr = shape.orig;
-			}
-		});
-	}
-
-	const isLoop =
-		!!caseDep &&
-		(!caseArr || caseDep.toLowerCase() === caseArr.toLowerCase());
+	const {
+		caseDepart: caseDep,
+		caseArrivee: caseArr,
+		isLoop,
+	} = deduceParcoursSquares(current.variante || 'standard', current.shapes);
 
 	current.case_depart = caseDep;
-	current.case_arrivee = isLoop ? caseDep : caseArr;
+	current.case_arrivee = caseArr;
 	current.is_loop = isLoop;
 
 	const pieceRole = extractPieceRoleFromFen(current.fen_depart);
@@ -293,6 +369,7 @@ export function init(): void {
 			select.value = t9Series[index].variante || 'standard';
 			select.addEventListener('change', function () {
 				t9Series[index].variante = select.value;
+				updateSquareDeductions(index);
 				updateConfig();
 			});
 		}

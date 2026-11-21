@@ -2,7 +2,7 @@
  * Définitions et typage des 16 types d'exercices ROI.
  */
 
-import type { FenString, PgnString, Square } from './chess';
+import type { BoardShape, FenString, PgnString, Square } from './chess';
 
 export type ExerciceTypeId =
   | 1  // 100 Commandements
@@ -109,10 +109,30 @@ export interface ExerciceType8Config extends BaseExerciceConfig {
 }
 
 // Type 9: Parcours
+export type ParcoursVariante =
+  | 'standard'
+  | 'pacman'
+  | 'stealth'
+  | 'traces'
+  | 'developpement';
+
+export interface ParcoursItemConfig {
+  variante: ParcoursVariante | string;
+  description?: string;
+  fen_depart: FenString;
+  couleur_joueur: 'white' | 'black';
+  case_depart?: Square | string;
+  case_arrivee?: Square | string;
+  piece_attendue?: string;
+  is_loop?: boolean;
+  shapes?: BoardShape[];
+}
+
 export interface ExerciceType9Config extends BaseExerciceConfig {
   type: 9;
-  fen: FenString;
+  fen?: FenString;
   checkpoint_squares?: Square[];
+  series?: ParcoursItemConfig[];
 }
 
 // Type 10: Echec'éval
