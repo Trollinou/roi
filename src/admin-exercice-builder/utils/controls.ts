@@ -95,7 +95,7 @@ export interface SetupFenControlOptions {
   colorSelect?: string | HTMLElement | null;
   shapesInput?: string | HTMLInputElement | null;
   shapesSummary?: string | HTMLElement | null;
-  onChange?: (_fen: string, _color: Color, _shapes: BoardShape[]) => void;
+  onChange?: (_fen: string, _color: Color, _shapes: BoardShape[], _comment?: string) => void;
   getShapes?: () => BoardShape[];
 }
 
@@ -145,8 +145,14 @@ export function setupFenControl({
     );
   }
 
-  function syncFields(fenVal: string, shapesArray: BoardShape[], triggerCallback = true) {
-    const detectedColor = getActiveColorFromFen(fenVal);
+  function syncFields(
+    fenVal: string,
+    shapesArray: BoardShape[],
+    triggerCallback = true,
+    overrideColor?: Color,
+    extractedComment?: string
+  ) {
+    const detectedColor = overrideColor ?? getActiveColorFromFen(fenVal);
     updateOrientationDisplay(colorSelectEl || null, detectedColor);
 
     const shapes = Array.isArray(shapesArray) ? shapesArray : [];
@@ -165,7 +171,7 @@ export function setupFenControl({
     }
 
     if (triggerCallback && typeof onChange === 'function') {
-      onChange(fenVal, detectedColor, shapes);
+      onChange(fenVal, detectedColor, shapes, extractedComment);
     }
   }
 
@@ -205,7 +211,14 @@ export function setupFenControl({
         initialShapes = JSON.parse(shapesInputEl.value);
       } catch {}
     }
-    syncFields(initialFen, initialShapes, false);
+    let initialColor: Color | undefined;
+    if (colorSelectEl && colorSelectEl.dataset && colorSelectEl.dataset.color) {
+      const dsColor = colorSelectEl.dataset.color.toLowerCase();
+      if (dsColor === 'white' || dsColor === 'black') {
+        initialColor = dsColor;
+      }
+    }
+    syncFields(initialFen, initialShapes, false, initialColor);
 
     inputEl.addEventListener('paste', function (e: ClipboardEvent) {
       const pastedText = e.clipboardData?.getData('text');
@@ -223,7 +236,13 @@ export function setupFenControl({
           const extracted = extractFenOrientationAndShapes(trimmed);
           if (extracted && extracted.fen) {
             inputEl.value = extracted.fen;
-            syncFields(extracted.fen, extracted.shapes || [], true);
+            syncFields(
+              extracted.fen,
+              extracted.shapes || [],
+              true,
+              extracted.orientation,
+              extracted.comment || undefined
+            );
             flashFeedback(inputEl, shapesSummaryEl || null);
           }
         }
@@ -243,7 +262,13 @@ export function setupFenControl({
         const extracted = extractFenOrientationAndShapes(currentVal);
         if (extracted && extracted.fen) {
           inputEl.value = extracted.fen;
-          syncFields(extracted.fen, extracted.shapes || [], true);
+          syncFields(
+            extracted.fen,
+            extracted.shapes || [],
+            true,
+            extracted.orientation,
+            extracted.comment || undefined
+          );
           flashFeedback(inputEl, shapesSummaryEl || null);
           return;
         }
