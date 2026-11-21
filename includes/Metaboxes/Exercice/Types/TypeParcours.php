@@ -35,7 +35,8 @@ class TypeParcours implements TypeInterface {
 				<strong><?php esc_html_e( 'Règles visuelles & parcours :', 'roi' ); ?></strong><br>
 				• <strong><?php esc_html_e( 'Cercle bleu (obligatoire) :', 'roi' ); ?></strong> <?php esc_html_e( 'Case de départ du parcours.', 'roi' ); ?><br>
 				• <strong><?php esc_html_e( 'Cercle vert (optionnel si boucle) :', 'roi' ); ?></strong> <?php esc_html_e( "Case d'arrivée / cible. Si aucun cercle vert n'est tracé, le parcours est configuré en tour complet (boucle fermée avec arrivée = départ).", 'roi' ); ?><br>
-				• <strong><?php esc_html_e( 'Cercles rouges (optionnel) :', 'roi' ); ?></strong> <?php esc_html_e( 'Cases piégées / interdites.', 'roi' ); ?>
+				• <strong><?php esc_html_e( 'Cercles rouges (optionnel) :', 'roi' ); ?></strong> <?php esc_html_e( 'Cases piégées / interdites.', 'roi' ); ?><br>
+				• <strong><?php esc_html_e( 'Variante Développement :', 'roi' ); ?></strong> <?php esc_html_e( 'Cercle bleu (ou vert) sur la case cible et flèches bleues du cheminement (masqués au départ et révélés à la réussite).', 'roi' ); ?>
 			</p>
 
 			<div style="margin-bottom: 20px;">
@@ -72,6 +73,7 @@ class TypeParcours implements TypeInterface {
 									<option value="pacman" <?php selected( $serie_var, 'pacman' ); ?>><?php esc_html_e( 'pacman - Manger toutes les pièces', 'roi' ); ?></option>
 									<option value="stealth" <?php selected( $serie_var, 'stealth' ); ?>><?php esc_html_e( 'stealth - Pas vu, pas pris (cases non attaquées)', 'roi' ); ?></option>
 									<option value="traces" <?php selected( $serie_var, 'traces' ); ?>><?php esc_html_e( "traces - Retrouver la pièce d'après ses traces", 'roi' ); ?></option>
+									<option value="developpement" <?php selected( $serie_var, 'developpement' ); ?>><?php esc_html_e( 'developpement - Développement (Destination cachée)', 'roi' ); ?></option>
 								</select>
 							</div>
 

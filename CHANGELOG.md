@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [1.11.7] - 2026-11-21
+
+*   **Exercice Type 9 (Parcours) — Support de la variante `developpement` (`src/types/exercises.ts`, `src/admin-exercice-builder/types/type-9.ts`, `includes/Metaboxes/Exercice/Types/TypeParcours.php`) :**
+    *   **Contrats TypeScript (`roi-types`)** : Ajout de `ParcoursVariante` (incluant `'developpement'`) et `ParcoursItemConfig`, et enrichissement de `ExerciceType9Config` avec `series?: ParcoursItemConfig[]`.
+    *   **Éditeur Back-office Type 9** : Ajout de l'option `developpement - Développement (Destination cachée)` dans le sélecteur de variante de chaque parcours de la série.
+    *   **Déduction & Validation des Cases** : Extraction dédiée via `deduceParcoursSquares()` supportant le format standard (`[%csl Be1,Gc6]`) et le format alternatif (`[%csl Bc6][%cal Be1d3,...]` sans cercle vert), sans appliquer la logique « boucle fermée » sur `'developpement'`.
+
 ## [1.11.6] - 2026-11-20
 
 *   **`PgnEditor` & `eg-chessboard` — Correction « Copier la FEN actuelle » et Découpe PGN (`src/components/PgnEditor/PgnEditor.tsx`, `../eg-chessboard`) :**
