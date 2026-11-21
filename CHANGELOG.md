@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+*   **Exercice Type 11 (Class'échecs) — Commentaire explicatif par diagramme & Import PGN Lichess (`src/types/exercises.ts`, `src/admin-exercice-builder/types/type-11.ts`, `src/admin-exercice-builder/utils/pgn-status.ts`, `src/admin-exercice-builder/utils/controls.ts`, `includes/Metaboxes/Exercice/Types/TypeClassEchecs.php`, `includes/Metaboxes/Exercice/Components/FenInput.php`) :**
+    *   **Contrats TypeScript (`roi-types`)** : Définition de `ClassEchecsPositionItem` (`fen`, `couleur_joueur`, `shapes?`, `commentaire?`) et mise à jour de `ExerciceType11Config` (`consigne?`, `positions`).
+    *   **Éditeur Back-office Type 11** : Ajout d'un champ `textarea` « Commentaire explicatif (affiché après validation) » pour chacune des 5 positions.
+    *   **Extraction PGN Lichess** : Enrichissement de `extractFenOrientationAndShapes()` et `setupFenControl()` pour extraire le commentaire racine `{ ... }` ainsi que la balise `[Orientation "white"|"black"]` (prioritaire sur la couleur active du FEN) lors du collage d'un PGN complet dans le champ FEN.
+
 ## [1.11.7] - 2026-11-21
 
 *   **Exercice Type 9 (Parcours) — Support de la variante `developpement` (`src/types/exercises.ts`, `src/admin-exercice-builder/types/type-9.ts`, `includes/Metaboxes/Exercice/Types/TypeParcours.php`) :**

@@ -143,18 +143,17 @@ export interface ExerciceType10Config extends BaseExerciceConfig {
 }
 
 // Type 11: Class'échecs
+export interface ClassEchecsPositionItem {
+  fen: FenString;
+  couleur_joueur: 'white' | 'black';
+  shapes?: BoardShape[];
+  commentaire?: string;
+}
+
 export interface ExerciceType11Config extends BaseExerciceConfig {
   type: 11;
-  categories?: Array<{
-    id: string;
-    nom: string;
-  }>;
-  items?: Array<{
-    id: string;
-    label: string;
-    category_id: string;
-    fen?: FenString;
-  }>;
+  consigne?: string;
+  positions: ClassEchecsPositionItem[];
 }
 
 // Type 12: Qui-suis-je ?

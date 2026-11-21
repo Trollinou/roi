@@ -59,7 +59,9 @@ class FenInput {
 
 		// Calculate active color and orientation display.
 		$parts               = explode( ' ', trim( $value ) );
-		$active_color        = ( isset( $parts[1] ) && 'b' === strtolower( $parts[1] ) ) ? 'black' : 'white';
+		$fen_color           = ( isset( $parts[1] ) && 'b' === strtolower( $parts[1] ) ) ? 'black' : 'white';
+		$arg_color           = isset( $args['color'] ) && is_string( $args['color'] ) ? strtolower( trim( $args['color'] ) ) : '';
+		$active_color        = in_array( $arg_color, array( 'white', 'black' ), true ) ? $arg_color : $fen_color;
 		$orientation_display = ( 'black' === $active_color ) ? __( 'Noir', 'roi' ) : __( 'Blanc', 'roi' );
 
 		// Process initial shapes array & count circles and arrows.

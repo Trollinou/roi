@@ -153,11 +153,12 @@ export function extractFenOrientationAndShapes(pgnString: string | undefined): {
   fen: string;
   orientation: Color;
   shapes: BoardShape[];
+  comment: string;
 } {
   if (!pgnString || typeof pgnString !== 'string') {
     const defaultFen =
       'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-    return { fen: defaultFen, orientation: 'white', shapes: [] };
+    return { fen: defaultFen, orientation: 'white', shapes: [], comment: '' };
   }
 
   const trimmed = pgnString.trim();
@@ -183,8 +184,13 @@ export function extractFenOrientationAndShapes(pgnString: string | undefined): {
     fen = `${fenParts[0]} w - - 0 1`;
   }
 
-  const orientation = getActiveColorFromFen(fen);
+  // 2. Balise [Orientation "white"|"black"] (prioritaire sur la couleur active du FEN)
+  const orientationMatch = trimmed.match(/\[Orientation\s+"(white|black)"\]/i);
+  let orientation: Color = orientationMatch
+    ? (orientationMatch[1].toLowerCase() as Color)
+    : getActiveColorFromFen(fen);
   const shapes: BoardShape[] = [];
+  let comment = '';
 
   let rootComments: string[] = [];
   try {
@@ -195,6 +201,17 @@ export function extractFenOrientationAndShapes(pgnString: string | undefined): {
         const fenHeader = (game.headers as any).get('FEN');
         if (fenHeader) {
           fen = fenHeader.trim();
+          if (!orientationMatch) {
+            orientation = getActiveColorFromFen(fen);
+          }
+        }
+        const orientationHeader = (game.headers as any).get('Orientation');
+        if (
+          typeof orientationHeader === 'string' &&
+          (orientationHeader.trim().toLowerCase() === 'white' ||
+            orientationHeader.trim().toLowerCase() === 'black')
+        ) {
+          orientation = orientationHeader.trim().toLowerCase() as Color;
         }
       }
       if (Array.isArray(game.comments) && game.comments.length > 0) {
@@ -214,8 +231,9 @@ export function extractFenOrientationAndShapes(pgnString: string | undefined): {
   if (rootComments.length > 0) {
     const parsed = extractShapesFromComments(rootComments.join(' '));
     shapes.push(...parsed.shapes);
+    comment = parsed.cleanedText;
   }
 
-  return { fen, orientation, shapes };
+  return { fen, orientation, shapes, comment };
 }
 

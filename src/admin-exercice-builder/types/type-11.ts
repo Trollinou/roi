@@ -2,24 +2,25 @@
  * Handler for Type 11: Class'échecs.
  */
 
-import { setupFenControl } from '../utils/controls';
+import { setupFenControl, updateOrientationDisplay } from '../utils/controls';
 import type { Shape } from '../../types';
 
 interface PositionItem {
 	fen: string;
 	couleur_joueur: 'white' | 'black';
 	shapes: Shape[];
+	commentaire: string;
 }
 
 const textarea = document.getElementById('roi_config_json') as HTMLTextAreaElement | null;
 const consigneInput = document.getElementById('roi_t11_consigne') as HTMLInputElement | HTMLTextAreaElement | null;
 
 const t11Positions: PositionItem[] = [
-	{ fen: '', couleur_joueur: 'white', shapes: [] },
-	{ fen: '', couleur_joueur: 'white', shapes: [] },
-	{ fen: '', couleur_joueur: 'white', shapes: [] },
-	{ fen: '', couleur_joueur: 'white', shapes: [] },
-	{ fen: '', couleur_joueur: 'white', shapes: [] },
+	{ fen: '', couleur_joueur: 'white', shapes: [], commentaire: '' },
+	{ fen: '', couleur_joueur: 'white', shapes: [], commentaire: '' },
+	{ fen: '', couleur_joueur: 'white', shapes: [], commentaire: '' },
+	{ fen: '', couleur_joueur: 'white', shapes: [], commentaire: '' },
+	{ fen: '', couleur_joueur: 'white', shapes: [], commentaire: '' },
 ];
 
 export function updateConfig(): void {
@@ -33,7 +34,12 @@ export function updateConfig(): void {
 
 	const configData = {
 		consigne: consigneText,
-		positions: t11Positions,
+		positions: t11Positions.map((pos) => ({
+			fen: pos.fen,
+			couleur_joueur: pos.couleur_joueur,
+			shapes: pos.shapes,
+			commentaire: pos.commentaire.trim(),
+		})),
 	};
 
 	textarea.value = JSON.stringify(configData, null, 4);
@@ -61,6 +67,10 @@ export function init(): void {
 									parsed.positions[i].couleur_joueur ||
 									'white',
 								shapes: parsed.positions[i].shapes || [],
+								commentaire:
+									typeof parsed.positions[i].commentaire === 'string'
+										? parsed.positions[i].commentaire
+										: '',
 							};
 						}
 					}
@@ -71,9 +81,10 @@ export function init(): void {
 		}
 	}
 
-	// Mettre à jour les champs DOM (inputs FEN et selects couleur) d'après l'état en mémoire
+	// Mettre à jour les champs DOM (inputs FEN, orientation et commentaires) d'après l'état en mémoire
 	const fenInputs = document.querySelectorAll<HTMLInputElement>('.roi_t11_fen');
-	const couleurSelects = document.querySelectorAll<HTMLSelectElement>('.roi_t11_couleur');
+	const couleurSelects = document.querySelectorAll<HTMLElement>('.roi_t11_couleur');
+	const commentaireInputs = document.querySelectorAll<HTMLTextAreaElement>('.roi_t11_commentaire');
 
 	fenInputs.forEach((input) => {
 		const index = parseInt(input.getAttribute('data-index') || '', 10);
@@ -85,26 +96,45 @@ export function init(): void {
 	couleurSelects.forEach((select) => {
 		const index = parseInt(select.getAttribute('data-index') || '', 10);
 		if (!isNaN(index) && t11Positions[index]) {
-			select.value = t11Positions[index].couleur_joueur;
+			updateOrientationDisplay(select, t11Positions[index].couleur_joueur);
+		}
+	});
+
+	commentaireInputs.forEach((input) => {
+		const index = parseInt(input.getAttribute('data-index') || '', 10);
+		if (!isNaN(index) && t11Positions[index]) {
+			input.value = t11Positions[index].commentaire;
 		}
 	});
 
 	// Écouteur consigne
 	consigneInput.addEventListener('input', updateConfig);
 
-	// Configuration unifiée des 5 contrôles FEN
+	// Configuration unifiée des 5 contrôles FEN et commentaires associés
 	for (let i = 0; i < 5; i++) {
 		const inputFen =
 			document.querySelector<HTMLInputElement>(`.roi_t11_fen[data-index="${i}"]`) ||
 			document.getElementById(`roi_t11_fen_${i}`) as HTMLInputElement | null;
 		const selectColor =
-			document.querySelector<HTMLSelectElement>(`.roi_t11_couleur[data-index="${i}"]`) ||
-			document.getElementById(`roi_t11_couleur_${i}`) as HTMLSelectElement | null;
+			document.querySelector<HTMLElement>(`.roi_t11_couleur[data-index="${i}"]`) ||
+			document.getElementById(`roi_t11_couleur_${i}`);
 		const btnEditor =
 			document.getElementById(`btn_open_fen_editor_t11_${i}`) ||
 			document.querySelector<HTMLElement>(
 				`.btn_open_fen_editor_t11[data-index="${i}"]`
 			);
+		const commentaireInput =
+			document.querySelector<HTMLTextAreaElement>(`.roi_t11_commentaire[data-index="${i}"]`) ||
+			document.getElementById(`roi_t11_commentaire_${i}`) as HTMLTextAreaElement | null;
+
+		if (commentaireInput) {
+			commentaireInput.addEventListener('input', () => {
+				if (t11Positions[i]) {
+					t11Positions[i].commentaire = commentaireInput.value;
+					updateConfig();
+				}
+			});
+		}
 
 		setupFenControl({
 			input: inputFen,
@@ -113,12 +143,18 @@ export function init(): void {
 			getShapes() {
 				return t11Positions[i] ? t11Positions[i].shapes || [] : [];
 			},
-			onChange(fen, color, shapes) {
+			onChange(fen, color, shapes, comment) {
 				if (t11Positions[i]) {
 					t11Positions[i].fen = fen;
 					t11Positions[i].couleur_joueur = color as 'white' | 'black';
 					if (shapes) {
 						t11Positions[i].shapes = shapes;
+					}
+					if (typeof comment === 'string' && comment.trim() !== '') {
+						t11Positions[i].commentaire = comment.trim();
+						if (commentaireInput) {
+							commentaireInput.value = t11Positions[i].commentaire;
+						}
 					}
 					updateConfig();
 				}
