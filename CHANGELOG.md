@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.11.9] - 2026-11-22
+
 *   **Exercice Type 11 (Class'échecs) — Inversion de l'ordre de saisie (`includes/Metaboxes/Exercice/Types/TypeClassEchecs.php`, `src/admin-exercice-builder/types/type-11.ts`) :**
     *   Inversion de la consigne par défaut et des libellés de saisie dans le back-office WordPress : les positions sont désormais renseignées de **la plus faible (1)** à **la plus forte (5)** (`Classez ces positions de la plus faible (1) à la plus forte (5).`).
 
