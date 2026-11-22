@@ -26,6 +26,7 @@ declare module '@wordpress/components' {
   export const TextControl: React.ComponentType<any>;
   export const ToggleControl: React.ComponentType<any>;
   export const SelectControl: React.ComponentType<any>;
+  export const RadioControl: React.ComponentType<any>;
   export const Button: React.ComponentType<any>;
   export const RangeControl: React.ComponentType<any>;
   export const CheckboxControl: React.ComponentType<any>;
@@ -63,6 +64,15 @@ declare module '@wordpress/html-entities' {
 
 declare module '@wordpress/plugins' {
   export function registerPlugin(name: string, settings: { render: React.ComponentType<any>; [key: string]: unknown }): void;
+}
+
+declare module '@wordpress/hooks' {
+  export function addFilter(
+    hookName: string,
+    namespace: string,
+    callback: (...args: any[]) => any,
+    priority?: number
+  ): void;
 }
 
 declare module '@wordpress/interactivity' {

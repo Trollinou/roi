@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+*   **Éditeur Gutenberg Leçons (`roi_lecon`) — Visibilité du Niveau & Ordre des Chapitres (`src/admin-fen-editor.tsx`, `src/types/globals.d.ts`) :**
+    *   **Ouverture forcée des panneaux latéraux** : `LeconSettingsPanel` vérifie et ouvre automatiquement les panneaux `roi-lecon-settings/roi-lecon-settings-panel` (« Niveau de la Leçon ») et `taxonomy-panel-roi_chapitre` (« Chapitres ») via `isEditorPanelOpened` / `toggleEditorPanelOpened`, garantissant la visibilité du sélecteur `SelectControl` (`_roi_lecon_niveau`) malgré le verrouillage non-repliable CSS.
+    *   **Ordre canonique des Chapitres** : Remplacement du sélecteur hiérarchique natif de Gutenberg pour `roi_chapitre` via le filtre `editor.PostTaxonomyType` par un composant `RoiChapitreSelector` (`RadioControl`) qui préserve l'ordre strict (`Matérialité`, `Activité des Pièces`, `Sécurité du Roi`, `Structure de Pions`, `Combination`) sans remonter le chapitre coché en tête de liste.
+
 ## [1.11.9] - 2026-11-22
 
 *   **Exercice Type 11 (Class'échecs) — Inversion de l'ordre de saisie (`includes/Metaboxes/Exercice/Types/TypeClassEchecs.php`, `src/admin-exercice-builder/types/type-11.ts`) :**
