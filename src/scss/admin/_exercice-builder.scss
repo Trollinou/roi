@@ -107,3 +107,140 @@
     }
   }
 }
+
+// Type 15 : Jugement final
+.roi-t15-scenarios-block {
+  margin-top: 15px;
+}
+
+.roi-t15-section-label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.roi-t15-scenarios-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.roi-t15-scenario-card {
+  padding: 12px 14px;
+  border: 1px solid var(--roi-color-border-subtle, #ddd);
+  background: var(--roi-color-surface, #f9f9f9);
+  border-radius: var(--roi-radius-sm, 4px);
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+
+  &.is-correct {
+    border-color: var(--roi-color-success, #00a32a);
+    background: #f0f9f2;
+  }
+}
+
+.roi-t15-scenario-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.roi-t15-scenario-title {
+  margin: 0;
+  font-size: var(--roi-font-size-base, 14px);
+  font-weight: 600;
+  color: var(--roi-color-text, #1d2327);
+}
+
+.roi-t15-correct-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: var(--roi-font-size-md, 13px);
+  cursor: pointer;
+}
+
+.roi-t15-deduced-summary {
+  margin-top: 18px;
+  padding: 12px 14px;
+  border: 1px solid var(--roi-color-border-subtle, #e2e8f0);
+  background: var(--roi-color-surface, #f8fafc);
+  border-radius: var(--roi-radius-sm, 4px);
+}
+
+.roi-t15-deduced-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.roi-t15-deduced-fen {
+  flex: 1 1 360px;
+}
+
+.roi-t15-deduced-orientation {
+  flex: 0 0 160px;
+}
+
+.roi-t15-deduced-label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: var(--roi-font-size-sm, 12px);
+  font-weight: 600;
+  color: var(--roi-color-text-muted, #50575e);
+}
+
+.roi-t15-deduced-fen-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.roi-t15-fen-code {
+  display: inline-block;
+  padding: 4px 8px;
+  background: var(--roi-color-bg, #fff);
+  border: 1px solid var(--roi-color-border-subtle, #dcdcde);
+  border-radius: var(--roi-radius-xs, 2px);
+  font-size: var(--roi-font-size-sm, 12px);
+  word-break: break-all;
+}
+
+.roi-t15-orientation-select {
+  width: 100%;
+  height: 30px;
+}
+
+.roi-t15-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--roi-radius-full, 12px);
+  font-size: var(--roi-font-size-sm, 12px);
+  font-weight: 600;
+
+  &.is-ok {
+    background: #edfaef;
+    color: #007017;
+    border: 1px solid #a7e3b3;
+  }
+
+  &.is-warning {
+    background: #fcf9e8;
+    color: #8a6d00;
+    border: 1px solid #f0d77b;
+  }
+
+  &.is-error {
+    background: #fcf0f1;
+    color: #8a1f11;
+    border: 1px solid #f2b6b8;
+  }
+}
+
+.roi-t15-explication-status {
+  font-size: var(--roi-font-size-md, 13px);
+  color: var(--roi-color-text, #1d2327);
+}

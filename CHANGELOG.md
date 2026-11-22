@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.11.10] - 2026-11-22
+
+*   **Exercice Type 15 (Jugement final) — Saisie simplifiée par 3 PGN commentés (`includes/Metaboxes/Exercice/Types/TypeJugementFinal.php`, `src/admin-exercice-builder/types/type-15.ts`, `src/scss/admin/_exercice-builder.scss`) :**
+    *   **Déduction automatique de la FEN et du PGN résultat** : Suppression des champs redondants « Position de départ (FEN) » et « Explication Finale (PGN) ». La saisie se concentre désormais sur les 3 scénarios PGN commentés (avec `[FEN "..."]` et shapes) et le choix radio de la bonne réponse.
+    *   **Validation & Résumé en temps réel** : Vérification de la cohérence des balises `[FEN "..."]` entre les 3 scénarios, déduction automatique de `fen_depart`, `couleur_joueur` (modifiable manuellement si besoin) et `pgn_explication` (repris depuis le scénario sélectionné comme bonne réponse), avec rétrocompatibilité pour les exercices existants.
+
 *   **Éditeur Gutenberg Leçons (`roi_lecon`) — Visibilité du Niveau & Ordre des Chapitres (`src/admin-fen-editor.tsx`, `src/types/globals.d.ts`) :**
     *   **Ouverture forcée des panneaux latéraux** : `LeconSettingsPanel` vérifie et ouvre automatiquement les panneaux `roi-lecon-settings/roi-lecon-settings-panel` (« Niveau de la Leçon ») et `taxonomy-panel-roi_chapitre` (« Chapitres ») via `isEditorPanelOpened` / `toggleEditorPanelOpened`, garantissant la visibilité du sélecteur `SelectControl` (`_roi_lecon_niveau`) malgré le verrouillage non-repliable CSS.
     *   **Ordre canonique des Chapitres** : Remplacement du sélecteur hiérarchique natif de Gutenberg pour `roi_chapitre` via le filtre `editor.PostTaxonomyType` par un composant `RoiChapitreSelector` (`RadioControl`) qui préserve l'ordre strict (`Matérialité`, `Activité des Pièces`, `Sécurité du Roi`, `Structure de Pions`, `Combination`) sans remonter le chapitre coché en tête de liste.
