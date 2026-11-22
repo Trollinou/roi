@@ -30,7 +30,7 @@ export function updateConfig(): void {
 
 	const consigneText = consigneInput
 		? consigneInput.value.trim()
-		: 'Classez ces positions de la plus forte (1) à la moins forte (5).';
+		: 'Classez ces positions de la plus faible (1) à la plus forte (5).';
 
 	const configData = {
 		consigne: consigneText,

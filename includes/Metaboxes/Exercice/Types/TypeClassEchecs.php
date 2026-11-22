@@ -25,7 +25,7 @@ class TypeClassEchecs implements TypeInterface {
 	 * @return void
 	 */
 	public function render( \WP_Post $post, array $config_data ): void {
-		$consigne  = $config_data['consigne'] ?? 'Classez ces positions de la plus forte (1) à la moins forte (5).';
+		$consigne  = $config_data['consigne'] ?? 'Classez ces positions de la plus faible (1) à la plus forte (5).';
 		$positions = isset( $config_data['positions'] ) && is_array( $config_data['positions'] ) ? $config_data['positions'] : array();
 		?>
 		<div id="roi_builder_type_11" class="roi-builder-section" style="display:none; margin-top: 15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
@@ -53,7 +53,7 @@ class TypeClassEchecs implements TypeInterface {
 						$pos_couleur     = isset( $positions[ $i ]['couleur_joueur'] ) && is_string( $positions[ $i ]['couleur_joueur'] ) ? $positions[ $i ]['couleur_joueur'] : 'white';
 						$pos_shapes      = isset( $positions[ $i ]['shapes'] ) && is_array( $positions[ $i ]['shapes'] ) ? $positions[ $i ]['shapes'] : array();
 						$pos_commentaire = isset( $positions[ $i ]['commentaire'] ) && is_string( $positions[ $i ]['commentaire'] ) ? $positions[ $i ]['commentaire'] : '';
-						$suffix          = ( 0 === $i ) ? ' (La plus forte)' : ( ( 4 === $i ) ? ' (La moins forte)' : '' );
+						$suffix          = ( 0 === $i ) ? ' (La plus faible)' : ( ( 4 === $i ) ? ' (La plus forte)' : '' );
 						?>
 						<div style="border: 1px solid #e5e5e5; padding: 12px; border-radius: 4px; background: #f9f9f9;">
 							<h4 style="margin: 0 0 10px 0;">
