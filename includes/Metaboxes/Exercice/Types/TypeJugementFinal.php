@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace ROI\Metaboxes\Exercice\Types;
 
-use ROI\Metaboxes\Exercice\Components\FenInput;
 use ROI\Metaboxes\Exercice\Components\PgnInput;
 
 /**
@@ -40,41 +39,41 @@ class TypeJugementFinal implements TypeInterface {
 			}
 		}
 		?>
-		<div id="roi_builder_type_15" class="roi-builder-section" style="display:none; margin-top:15px; padding: 15px; border: 1px solid #ccd0d4; background: #fff; border-radius: 4px;">
-			<h4 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px;"><?php esc_html_e( "Constructeur d'exercice (Jugement final)", 'roi' ); ?></h4>
+		<div id="roi_builder_type_15" class="roi-builder-section" style="display:none;">
+			<h4 class="roi-builder-section-title"><?php esc_html_e( "Constructeur d'exercice (Jugement final)", 'roi' ); ?></h4>
+			<p class="roi-builder-description">
+				<strong><?php esc_html_e( 'Principe :', 'roi' ); ?></strong>
+				<?php esc_html_e( 'Collez les 3 PGN commentés (commençant par la même balise [FEN "..."]) et cochez la bonne réponse. La FEN de départ, l’orientation et le PGN résultat (explication finale avec commentaires et shapes) sont déduits automatiquement.', 'roi' ); ?>
+			</p>
 
-			<div style="margin-bottom: 15px;">
-				<label for="roi_t15_consigne"><strong><?php esc_html_e( 'Consigne :', 'roi' ); ?></strong></label><br>
-				<input type="text" id="roi_t15_consigne" value="<?php echo esc_attr( $consigne ); ?>" style="width:100%; height: 30px;" placeholder="<?php esc_attr_e( 'Observez ces 3 plans. Lequel est le plus prometteur ?', 'roi' ); ?>">
+			<div class="roi-form-row">
+				<label for="roi_t15_consigne"><?php esc_html_e( 'Consigne :', 'roi' ); ?></label>
+				<input type="text" id="roi_t15_consigne" class="large-text" value="<?php echo esc_attr( $consigne ); ?>" placeholder="<?php esc_attr_e( 'Observez ces 3 plans. Lequel est le plus prometteur ?', 'roi' ); ?>">
 			</div>
 
-			<?php
-			FenInput::render(
-				array(
-					'id'             => 'roi_t15_fen_depart',
-					'value'          => $fen_depart,
-					'color'          => $couleur_joueur,
-					'orientation_id' => 'roi_t15_couleur',
-					'button_id'      => 'btn_open_fen_editor_t15',
-					'label'          => __( 'Position de départ (FEN) :', 'roi' ),
-				)
-			);
-			?>
-
-			<hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
-
-			<div style="margin-top: 15px;">
-				<label><strong><?php esc_html_e( 'Les 3 Scénarios :', 'roi' ); ?></strong></label>
-				<div id="roi_t15_scenarios_container" style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+			<div class="roi-t15-scenarios-block">
+				<label class="roi-t15-section-label"><strong><?php esc_html_e( 'Les 3 Scénarios (PGN commentés) :', 'roi' ); ?></strong></label>
+				<div id="roi_t15_scenarios_container" class="roi-t15-scenarios-container">
 					<?php
 					for ( $i = 0; $i < 3; $i++ ) :
-						$sc_pgn = isset( $scenarios[ $i ]['pgn'] ) && is_string( $scenarios[ $i ]['pgn'] ) ? $scenarios[ $i ]['pgn'] : '';
+						$sc_pgn     = isset( $scenarios[ $i ]['pgn'] ) && is_string( $scenarios[ $i ]['pgn'] ) ? $scenarios[ $i ]['pgn'] : '';
+						$is_correct = ( $correct_index === $i );
+						$card_class = 'roi-t15-scenario-card' . ( $is_correct ? ' is-correct' : '' );
 						?>
-						<div class="t15-scenario-card" style="padding: 12px; border: 1px solid #ddd; background: #f9f9f9; border-radius: 4px;">
-							<h4 style="margin-top: 0; margin-bottom: 8px; font-size: 14px; font-weight: 600; color: #1d2327;">
-								<?php echo esc_html( 'Scénario ' . ( $i + 1 ) ); ?>
-							</h4>
-							<div style="margin-bottom: 8px;">
+						<div class="<?php echo esc_attr( $card_class ); ?>" data-index="<?php echo (int) $i; ?>">
+							<div class="roi-t15-scenario-header">
+								<h4 class="roi-t15-scenario-title">
+									<?php
+									/* translators: %d: scenario number (1 to 3) */
+									echo esc_html( sprintf( __( 'Scénario %d', 'roi' ), $i + 1 ) );
+									?>
+								</h4>
+								<label class="roi-t15-correct-label">
+									<input type="radio" name="roi_t15_correct" value="<?php echo (int) $i; ?>" <?php checked( $correct_index, $i ); ?>>
+									<span><?php esc_html_e( 'Bonne réponse', 'roi' ); ?></span>
+								</label>
+							</div>
+							<div class="roi-t15-scenario-pgn-wrap">
 								<?php
 								PgnInput::render(
 									array(
@@ -84,39 +83,49 @@ class TypeJugementFinal implements TypeInterface {
 										'input_class'     => 'roi_t15_scenario_pgn',
 										'button_class'    => 'button btn_open_pgn_editor_t15_scenario',
 										'label'           => '',
-										'rows'            => 3,
-										'placeholder'     => __( 'Saisir le PGN brut sans commentaires...', 'roi' ),
+										'rows'            => 4,
+										'placeholder'     => __( 'Coller le PGN commenté (avec [FEN "..."])...', 'roi' ),
 										'data_attributes' => array( 'index' => $i ),
 									)
 								);
 								?>
-							</div>
-							<div>
-								<label style="font-weight: 600; font-size: 13px;">
-									<input type="radio" name="roi_t15_correct" value="<?php echo (int) $i; ?>" <?php checked( $correct_index, $i ); ?>>
-									<?php esc_html_e( 'Bonne réponse', 'roi' ); ?>
-								</label>
 							</div>
 						</div>
 					<?php endfor; ?>
 				</div>
 			</div>
 
-			<hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0 15px;">
-
-			<div style="margin-top: 15px;">
-				<?php
-				PgnInput::render(
-					array(
-						'id'          => 'roi_t15_pgn_explication',
-						'value'       => $pgn_explication,
-						'button_id'   => 'btn_open_pgn_editor_t15_explication',
-						'label'       => __( 'Explication Finale (PGN)', 'roi' ),
-						'rows'        => 6,
-						'placeholder' => __( 'Saisir le PGN complet et commenté de la solution...', 'roi' ),
-					)
-				);
-				?>
+			<div class="roi-t15-deduced-summary">
+				<h4 class="roi-builder-section-title"><?php esc_html_e( 'Données déduites automatiquement', 'roi' ); ?></h4>
+				<div class="roi-t15-deduced-grid">
+					<div class="roi-t15-deduced-item roi-t15-deduced-fen">
+						<span class="roi-t15-deduced-label"><?php esc_html_e( 'Position de départ (FEN) :', 'roi' ); ?></span>
+						<div class="roi-t15-deduced-fen-row">
+							<code id="roi_t15_deduced_fen_display" class="roi-t15-fen-code"><?php echo esc_html( $fen_depart ); ?></code>
+							<span id="roi_t15_fen_consistency_badge" class="roi-t15-badge"></span>
+						</div>
+					</div>
+					<div class="roi-t15-deduced-item roi-t15-deduced-orientation">
+						<label for="roi_t15_couleur" class="roi-t15-deduced-label"><?php esc_html_e( 'Orientation :', 'roi' ); ?></label>
+						<select id="roi_t15_couleur" class="roi-t15-orientation-select">
+							<option value="white" <?php selected( $couleur_joueur, 'white' ); ?>><?php esc_html_e( 'Blancs', 'roi' ); ?></option>
+							<option value="black" <?php selected( $couleur_joueur, 'black' ); ?>><?php esc_html_e( 'Noirs', 'roi' ); ?></option>
+						</select>
+					</div>
+				</div>
+				<div class="roi-t15-deduced-item roi-t15-deduced-explication">
+					<span class="roi-t15-deduced-label"><?php esc_html_e( 'PGN résultat (Explication finale) :', 'roi' ); ?></span>
+					<span id="roi_t15_deduced_explication_status" class="roi-t15-explication-status">
+						<?php
+						if ( ! empty( $pgn_explication ) ) {
+							/* translators: %d: scenario number (1 to 3) */
+							echo esc_html( sprintf( __( 'Repris automatiquement depuis le Scénario %d.', 'roi' ), $correct_index + 1 ) );
+						} else {
+							esc_html_e( 'En attente du PGN de la bonne réponse...', 'roi' );
+						}
+						?>
+					</span>
+				</div>
 			</div>
 		</div>
 		<?php
