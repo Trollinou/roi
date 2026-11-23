@@ -10,7 +10,7 @@
 - **Plugin** : `ROI` | Slug: `roi` | Prefix: `roi_` | Namespace: `ROI\` | Table: `{$wpdb->prefix}roi_`
 - **WordPress** : 7.1 (Interactivity API avec `viewScriptModule`, Block Bindings API, `WP_HTML_Tag_Processor` via `ROI\Services\Html_Processor`, Transients).
 - **Options API & Autoload (WP 7.1)** : Spécifier impérativement le paramètre `'autoload' => false` lors de l'enregistrement (`add_option()`, `register_setting()`) de toute option volumineuse ou ponctuelle afin de préserver la mémoire du bootstrap WordPress.
-- **Blocs Gutenberg** : `apiVersion: 2` obligatoire pour les blocs Gutenberg (`roi/chessboard`, `roi/diagramme`, `roi/pgn`) pour la compatibilité avec Chessground/eg-chessboard (interdiction de passer en v3).
+- **Blocs Gutenberg** : `apiVersion: 3` pour les blocs Gutenberg (`roi/chessboard`, `roi/diagramme`, `roi/pgn`) avec support natif iframe / cross-document dans `eg-chessboard` 1.8.6+. Les styles de bloc sont déclarés via `style` / `editorStyle` dans `block.json` pour l'iframe `editor-canvas`, complétés par `enqueue_block_editor_assets` dans `ROI\Blocks\Manager` pour les modales et l'inspecteur du shell parent.
 - **PHP** : 8.4 avec `declare(strict_types=1);`.
   - Promoted properties, Enums typés, DTO `readonly`, strict return types.
   - Typage strict des paramètres : interdiction formelle des types implicites nullables (utiliser explicitement `?Type $param = null`).

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+*   **Blocs Gutenberg — Migration `apiVersion: 3` & Support Natif Iframe (`eg-chessboard` 1.8.6+) :**
+    *   **Passage en `apiVersion: 3`** (`src/blocks/chessboard/block.json`, `src/blocks/diagramme/block.json`, `src/blocks/pgn/block.json`) avec conservation de `style` / `editorStyle` dans `block.json` pour l'injection native dans l'iframe `editor-canvas` (et restriction de `style` sur `diagramme` et `pgn` à `file:./chessboard-style.css` côté public).
+    *   **Styles du shell parent éditeur** (`includes/Blocks/Manager.php`) : Enqueue de `roi-public-chessboard-style`, `diagramme/index.css` et `pgn/index.css` sur `enqueue_block_editor_assets` afin que les portails `<Modal>` (`FenEditor`, `PgnEditor`) et la palette `<InspectorControls>` restent stylés hors iframe.
+    *   **Harmonisation `Edit` & Nettoyage Iframe** (`src/blocks/*/edit.tsx`, `src/hooks/useChessBoard.ts`, `src/components/Chessboard/RoiChessboard.tsx`) : Racine unique `<div {...useBlockProps()}>` sur les trois blocs, remplacement de `window.wp.data` par `useDispatch('core/block-editor')`, suppression du relai manuel d'événements iframe dans `useChessBoard.ts` (désormais géré nativement par `BoardAdapter`), et résolution de `ownerDocument.defaultView` pour `ResizeObserver`, `requestAnimationFrame`, `scroll` et `resize`.
+    *   **Tests unitaires** (`tests/chessboard/GutenbergApiV3.test.ts`) : Couverture de `apiVersion: 3`, présence des règles CSS `eg-chessboard` + `cburnett` dans les bundles et non-régression du nettoyage de `useChessBoard.ts`.
+
 ## [1.11.10] - 2026-11-22
 
 *   **Exercice Type 15 (Jugement final) — Saisie simplifiée par 3 PGN commentés (`includes/Metaboxes/Exercice/Types/TypeJugementFinal.php`, `src/admin-exercice-builder/types/type-15.ts`, `src/scss/admin/_exercice-builder.scss`) :**

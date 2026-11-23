@@ -392,6 +392,9 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
       callbacksRef.current.onBoardCreated?.(boardInstance);
 
       // --- Mécanisme de Redimensionnement & Bounds (ResizeObserver) ---
+      const containerEl = containerRef.current;
+      const ownerDoc = containerEl?.ownerDocument ?? document;
+      const ownerWin = ownerDoc.defaultView ?? window;
       let resizeObserver: ResizeObserver | null = null;
       const triggerRedraw = () => {
         if (boardApiRef.current && typeof boardApiRef.current.redraw === 'function') {
@@ -399,13 +402,14 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
         }
       };
 
-      window.requestAnimationFrame(triggerRedraw);
+      ownerWin.requestAnimationFrame(triggerRedraw);
 
-      if (typeof window.ResizeObserver !== 'undefined' && containerRef.current) {
+      const ResizeObserverCtor = ownerWin.ResizeObserver ?? window.ResizeObserver;
+      if (typeof ResizeObserverCtor !== 'undefined' && containerEl) {
         let lastWidth = 0;
         let lastHeight = 0;
 
-        resizeObserver = new window.ResizeObserver((entries) => {
+        resizeObserver = new ResizeObserverCtor((entries) => {
           for (const entry of entries) {
             const width = Math.round(entry.contentRect.width);
             const height = Math.round(entry.contentRect.height);
@@ -420,12 +424,12 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
               ) {
                 lastWidth = width;
                 lastHeight = height;
-                window.requestAnimationFrame(triggerRedraw);
+                ownerWin.requestAnimationFrame(triggerRedraw);
               }
             }
           }
         });
-        resizeObserver.observe(containerRef.current);
+        resizeObserver.observe(containerEl);
       }
 
       const clearBounds = () => {
@@ -434,15 +438,15 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
         }
       };
 
-      const containerEl = containerRef.current;
       if (containerEl) {
         containerEl.addEventListener('pointerdown', clearBounds, true);
         containerEl.addEventListener('mousedown', clearBounds, true);
         containerEl.addEventListener('touchstart', clearBounds, true);
       }
 
-      window.addEventListener('scroll', clearBounds, { capture: true, passive: true });
-      window.addEventListener('resize', clearBounds, { passive: true });
+      ownerWin.addEventListener('scroll', clearBounds, { capture: true, passive: true });
+      ownerWin.addEventListener('resize', clearBounds, { passive: true });
+      ownerDoc.addEventListener('scroll', clearBounds, { capture: true, passive: true });
 
       return () => {
         if (containerEl) {
@@ -450,8 +454,9 @@ export const RoiChessboard = forwardRef<BoardCore | null, RoiChessboardProps>(
           containerEl.removeEventListener('mousedown', clearBounds, true);
           containerEl.removeEventListener('touchstart', clearBounds, true);
         }
-        window.removeEventListener('scroll', clearBounds, { capture: true });
-        window.removeEventListener('resize', clearBounds);
+        ownerWin.removeEventListener('scroll', clearBounds, { capture: true });
+        ownerWin.removeEventListener('resize', clearBounds);
+        ownerDoc.removeEventListener('scroll', clearBounds, { capture: true });
 
         if (resizeObserver) {
           resizeObserver.disconnect();

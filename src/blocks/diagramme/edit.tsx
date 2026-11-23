@@ -54,7 +54,7 @@ export default function Edit({ attributes, setAttributes }: EditProps): React.Re
 	});
 
 	return (
-		<>
+		<div {...blockProps}>
 			<BlockControls>
 				<ToolbarGroup>
 					<ToolbarButton
@@ -65,47 +65,45 @@ export default function Edit({ attributes, setAttributes }: EditProps): React.Re
 				</ToolbarGroup>
 			</BlockControls>
 
-			<div {...blockProps}>
-				<div
-					className="roi-diagramme-preview-wrap"
-					style={{
-						width: '320px',
-						maxWidth: '100%',
-						cursor: 'pointer',
+			<div
+				className="roi-diagramme-preview-wrap"
+				style={{
+					width: '320px',
+					maxWidth: '100%',
+					cursor: 'pointer',
+				}}
+				onClick={() => setIsModalOpen(true)}
+				title={__('Cliquer pour modifier le diagramme', 'roi')}
+				role="button"
+				tabIndex={0}
+				onKeyDown={(e: React.KeyboardEvent) => {
+					if (e.key === 'Enter' || e.key === ' ') {
+						setIsModalOpen(true);
+					}
+				}}
+			>
+				<RoiChessboard
+					fen={attributes.fen}
+					orientation={attributes.orientation || 'white'}
+					shapes={attributes.shapes}
+					coordinates={true}
+					viewOnly={true}
+					mode="editor"
+					boardConfig={{
+						draggable: { enabled: false },
+						movable: { free: false },
+						drawable: { enabled: false },
 					}}
-					onClick={() => setIsModalOpen(true)}
-					title={__('Cliquer pour modifier le diagramme', 'roi')}
-					role="button"
-					tabIndex={0}
-					onKeyDown={(e: React.KeyboardEvent) => {
-						if (e.key === 'Enter' || e.key === ' ') {
-							setIsModalOpen(true);
-						}
-					}}
-				>
-					<RoiChessboard
-						fen={attributes.fen}
-						orientation={attributes.orientation || 'white'}
-						shapes={attributes.shapes}
-						coordinates={true}
-						viewOnly={true}
-						mode="editor"
-						boardConfig={{
-							draggable: { enabled: false },
-							movable: { free: false },
-							drawable: { enabled: false },
-						}}
-					/>
-				</div>
-
-				<Button
-					variant="secondary"
-					onClick={() => setIsModalOpen(true)}
-					style={{ marginTop: '12px' }}
-				>
-					{__('✏️ Modifier le diagramme', 'roi')}
-				</Button>
+				/>
 			</div>
+
+			<Button
+				variant="secondary"
+				onClick={() => setIsModalOpen(true)}
+				style={{ marginTop: '12px' }}
+			>
+				{__('✏️ Modifier le diagramme', 'roi')}
+			</Button>
 
 			{isModalOpen && (
 				<Modal
@@ -121,6 +119,6 @@ export default function Edit({ attributes, setAttributes }: EditProps): React.Re
 					/>
 				</Modal>
 			)}
-		</>
+		</div>
 	);
 }
