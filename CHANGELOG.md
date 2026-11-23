@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+*   **Éditeur FEN (`FenEditor`) — Lecture directe de la position & synchronisation des formes (`src/components/FenEditor/FenEditor.tsx`) :**
+    *   **Position live à la validation** : Ajout de `getLivePlacementFen()` et factorisation de `buildDiagramData()` pour `getDiagram()` et `handleApply()`, garantissant la lecture directe de la position réelle sur `BoardCore` (`getPlacementFen()`) sans risque de repli sur la position de départ.
+    *   **Synchronisation des formes (`shapes`)** : `drawable.onChange` synchronise désormais les cercles et flèches avec `BoardCore.setShapes()` afin d'éviter leur effacement lors des manipulations ultérieures de pièces.
+
 *   **Blocs Gutenberg — Migration `apiVersion: 3` & Support Natif Iframe (`eg-chessboard` 1.8.6+) :**
     *   **Passage en `apiVersion: 3`** (`src/blocks/chessboard/block.json`, `src/blocks/diagramme/block.json`, `src/blocks/pgn/block.json`) avec conservation de `style` / `editorStyle` dans `block.json` pour l'injection native dans l'iframe `editor-canvas` (et restriction de `style` sur `diagramme` et `pgn` à `file:./chessboard-style.css` côté public).
     *   **Styles du shell parent éditeur** (`includes/Blocks/Manager.php`) : Enqueue de `roi-public-chessboard-style`, `diagramme/index.css` et `pgn/index.css` sur `enqueue_block_editor_assets` afin que les portails `<Modal>` (`FenEditor`, `PgnEditor`) et la palette `<InspectorControls>` restent stylés hors iframe.
