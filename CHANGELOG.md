@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.12.0] - 2026-11-23
+
 *   **Éditeur FEN (`FenEditor`) — Lecture directe de la position & synchronisation des formes (`src/components/FenEditor/FenEditor.tsx`) :**
     *   **Position live à la validation** : Ajout de `getLivePlacementFen()` et factorisation de `buildDiagramData()` pour `getDiagram()` et `handleApply()`, garantissant la lecture directe de la position réelle sur `BoardCore` (`getPlacementFen()`) sans risque de repli sur la position de départ.
     *   **Synchronisation des formes (`shapes`)** : `drawable.onChange` synchronise désormais les cercles et flèches avec `BoardCore.setShapes()` afin d'éviter leur effacement lors des manipulations ultérieures de pièces.
