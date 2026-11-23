@@ -1,12 +1,11 @@
 import React from 'react';
 import { useBlockProps } from '@wordpress/block-editor';
+import { useDispatch } from '@wordpress/data';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import PromotionDialog from './components/PromotionDialog';
 import ChessboardInspector from './components/ChessboardInspector';
 import { BoardCore } from 'eg-chessboard';
-import 'eg-chessboard/base.css';
-import 'eg-chessboard/pieces/cburnett.css';
 import type { PieceRole, Color } from '../../types';
 
 export interface ChessboardBlockAttributes {
@@ -36,6 +35,9 @@ export default function Edit({ attributes, setAttributes, clientId }: EditProps)
   const blockProps = useBlockProps({
     className: 'chessboard-block',
   });
+  const { selectBlock } = useDispatch('core/block-editor') as {
+    selectBlock?: (_id: string) => void;
+  };
   const boardRef = useRef<HTMLDivElement | null>(null);
   const boardApiRef = useRef<any>(null);
   const isOrientationMountedRef = useRef(false);
@@ -298,6 +300,9 @@ export default function Edit({ attributes, setAttributes, clientId }: EditProps)
 
   const wrapClasses = [
     'main-wrap',
+    'piece-set-cburnett',
+    'board-theme-brown',
+    'roi-board-frame',
     boardState.promotionDialogState.isEnabled ? 'disabledBoard' : '',
     boardState.historyViewerState.isEnabled ? 'viewingHistory' : '',
     attributes.useStockfish && attributes.showEvaluationBar
@@ -315,9 +320,7 @@ export default function Edit({ attributes, setAttributes, clientId }: EditProps)
     <div
       {...blockProps}
       onMouseDownCapture={() => {
-        if (window.wp?.data?.dispatch) {
-          window.wp.data.dispatch('core/block-editor')?.selectBlock?.(clientId);
-        }
+        selectBlock?.(clientId);
       }}
     >
       <ChessboardInspector
@@ -368,7 +371,7 @@ export default function Edit({ attributes, setAttributes, clientId }: EditProps)
               }}
             />
           )}
-          <div ref={boardRef}></div>
+          <div ref={boardRef} className="chessboard-mount-element"></div>
           {attributes.useStockfish && attributes.showEvaluationBar && (
             <div className="evaluation-bar">
               <div

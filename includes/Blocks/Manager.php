@@ -22,7 +22,33 @@ class Manager {
 	 */
 	public function init(): void {
 		add_action( 'init', array( $this, 'register_blocks' ) );
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_chrome_styles' ) );
 		( new Bindings_Manager() )->init();
+	}
+
+	/**
+	 * Enqueue chessboard and modal styles in the parent Gutenberg editor shell
+	 * so InspectorControls palettes and FenEditor/PgnEditor Modals stay styled
+	 * when apiVersion 3 isolates block editorStyles inside the editor-canvas iframe.
+	 *
+	 * @return void
+	 */
+	public function enqueue_editor_chrome_styles(): void {
+		wp_enqueue_style( 'roi-public-chessboard-style' );
+
+		wp_enqueue_style(
+			'roi-diagramme-editor-modal-style',
+			ROI_PLUGIN_URL . 'build/diagramme/index.css',
+			array( 'roi-public-chessboard-style' ),
+			ROI_VERSION
+		);
+
+		wp_enqueue_style(
+			'roi-pgn-editor-modal-style',
+			ROI_PLUGIN_URL . 'build/pgn/index.css',
+			array( 'roi-public-chessboard-style' ),
+			ROI_VERSION
+		);
 	}
 
 	/**

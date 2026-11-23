@@ -221,10 +221,10 @@ Pour les fonctionnalités à multiples facettes (ex: une page d'options à ongle
   - `save.js` (Composant Front - ou `render.php` pour les blocs dynamiques)
   - `style.scss` (Styles Front & Back)
   - `editor.scss` (Styles Éditeur uniquement)
-- **iFrame & Compatibilité (IMPORTANT)** : Pour tout bloc intégrant `Chessground` (ou `eg-chessboard`), il est **strictement obligatoire** d'utiliser `"apiVersion": 2` dans le `block.json`.
-  - L'API v3 enferme le bloc dans une iFrame Gutenberg (React Portal).
-  - Chessground attache certains événements (`mousemove`) au `document` global (fenêtre parente), tandis que les éléments du DOM vivent dans l'iFrame. Cela crée un décalage massif de coordonnées lors du glisser-déposer.
-  - Tant qu'une solution robuste pour l'API v3 n'est pas trouvée, rester en v2 pour ces blocs spécifiques.
+- **iFrame & Compatibilité (`apiVersion: 3`)** : Les blocs intégrant `eg-chessboard` (`roi/chessboard`, `roi/diagramme`, `roi/pgn`) utilisent `"apiVersion": 3` dans `block.json`, avec support natif cross-document dans `eg-chessboard` 1.8.6+ (`BoardAdapter` détecte `ownerDocument !== document`, relaie les événements souris/tactiles filtrés par instance active et active `trustAllEvents: true`).
+  - Chaque composant `Edit` utilise `<div {...useBlockProps()}>` comme élément racine unique dans l'iframe `editor-canvas`.
+  - Les styles d'échiquier (`style` / `editorStyle` dans `block.json`) sont injectés par WordPress dans l'iframe `editor-canvas`, tandis que `ROI\Blocks\Manager::enqueue_editor_chrome_styles()` les charge aussi via `enqueue_block_editor_assets` pour les modales (`FenEditor`, `PgnEditor`) et la palette `<InspectorControls>` rendues dans le document parent.
+  - Les hooks et composants React (`useChessBoard.ts`, `RoiChessboard.tsx`) résolvent `ownerDocument.defaultView` pour `ResizeObserver`, `requestAnimationFrame`, `scroll` et `resize`.
 
 ### JS & CSS : Compilation Obligatoire
 

@@ -155,6 +155,7 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
           onChange: (shapes: BoardShape[]) => {
             setCurrentShapes(shapes);
             currentShapesRef.current = shapes;
+            (boardApiRef.current as unknown as { setShapes?: (_s: BoardShape[]) => void } | null)?.setShapes?.(shapes);
           },
         },
         events: {
@@ -257,6 +258,35 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
     }
   }
 
+  const getLivePlacementFen = (): string => {
+    const livePlacement = (
+      boardApiRef.current as unknown as { getPlacementFen?: () => string } | null
+    )?.getPlacementFen?.();
+    return livePlacement || position;
+  };
+
+  const buildDiagramData = (): DiagramData => {
+    const finalFen = `${getLivePlacementFen()} ${turn} ${castling} - 0 1`;
+    let shapes: BoardShape[] = [];
+    if (currentShapesRef.current && Array.isArray(currentShapesRef.current)) {
+      shapes = currentShapesRef.current;
+    } else if (currentShapes && Array.isArray(currentShapes)) {
+      shapes = currentShapes;
+    }
+    if (
+      (!shapes || shapes.length === 0) &&
+      boardApiRef.current &&
+      typeof (boardApiRef.current as any).getShapes === 'function'
+    ) {
+      shapes = (boardApiRef.current as any).getShapes() || [];
+    }
+    return {
+      fen: finalFen,
+      orientation: (turn === 'b' ? 'black' : 'white') as Color,
+      shapes: shapes || [],
+    };
+  };
+
   // Exposer redrawBoard(), getDiagram() et setDiagram() au composant parent via ref
   useImperativeHandle(ref, () => ({
     clearDomBounds() {
@@ -266,25 +296,7 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
       (boardApiRef.current as any)?.clearDomBounds?.();
     },
     getDiagram(): DiagramData {
-      const finalFen = `${position} ${turn} ${castling} - 0 1`;
-      let shapes: BoardShape[] = [];
-      if (currentShapesRef.current && Array.isArray(currentShapesRef.current)) {
-        shapes = currentShapesRef.current;
-      } else if (currentShapes && Array.isArray(currentShapes)) {
-        shapes = currentShapes;
-      }
-      if (
-        (!shapes || shapes.length === 0) &&
-        boardApiRef.current &&
-        typeof (boardApiRef.current as any).getShapes === 'function'
-      ) {
-        shapes = (boardApiRef.current as any).getShapes() || [];
-      }
-      return {
-        fen: finalFen,
-        orientation: (turn === 'b' ? 'black' : 'white') as Color,
-        shapes: shapes || [],
-      };
+      return buildDiagramData();
     },
     setDiagram(newDiagram: DiagramData | string) {
       if (!newDiagram) {return;}
@@ -369,23 +381,13 @@ export const FenEditor = forwardRef<FenEditorRef, FenEditorProps>(function FenEd
   // Assemblage et sauvegarde de la FEN & du Diagramme
   const handleApply = () => {
     if (onSave) {
-      const finalFen = `${position} ${turn} ${castling} - 0 1`;
-      const currentOrientation: Color = turn === 'b' ? 'black' : 'white';
-      let shapes: BoardShape[] = [];
-      if (currentShapesRef.current && Array.isArray(currentShapesRef.current)) {
-        shapes = currentShapesRef.current;
-      } else if (currentShapes && Array.isArray(currentShapes)) {
-        shapes = currentShapes;
-      }
-      if (
-        (!shapes || shapes.length === 0) &&
-        boardApiRef.current &&
-        typeof (boardApiRef.current as any).getShapes === 'function'
-      ) {
-        shapes = (boardApiRef.current as any).getShapes() || [];
-      }
-      const diagramObj: DiagramData = { fen: finalFen, orientation: currentOrientation, shapes };
-      onSave({ fen: finalFen, orientation: currentOrientation, shapes, diagram: diagramObj });
+      const diagramObj = buildDiagramData();
+      onSave({
+        fen: diagramObj.fen,
+        orientation: diagramObj.orientation || 'white',
+        shapes: diagramObj.shapes || [],
+        diagram: diagramObj,
+      });
     }
   };
 

@@ -44,6 +44,9 @@ export function useChessBoard<T extends BoardApi = BoardApi>(
     boardApiRef.current = instance;
     setBoardApi(instance);
 
+    const containerEl = containerRef.current;
+    const ownerDoc = containerEl.ownerDocument ?? document;
+    const ownerWin = ownerDoc.defaultView ?? window;
     let resizeObserver: ResizeObserver | null = null;
 
     const triggerRedraw = () => {
@@ -53,13 +56,14 @@ export function useChessBoard<T extends BoardApi = BoardApi>(
     };
 
     // Synchronisation initiale après montage dans le frame d'animation suivant
-    window.requestAnimationFrame(triggerRedraw);
+    ownerWin.requestAnimationFrame(triggerRedraw);
 
-    if (typeof window.ResizeObserver !== 'undefined' && containerRef.current) {
+    const ResizeObserverCtor = ownerWin.ResizeObserver ?? window.ResizeObserver;
+    if (typeof ResizeObserverCtor !== 'undefined') {
       let lastWidth = 0;
       let lastHeight = 0;
 
-      resizeObserver = new window.ResizeObserver((entries) => {
+      resizeObserver = new ResizeObserverCtor((entries) => {
         for (const entry of entries) {
           const width = Math.round(entry.contentRect.width);
           const height = Math.round(entry.contentRect.height);
@@ -74,12 +78,12 @@ export function useChessBoard<T extends BoardApi = BoardApi>(
             ) {
               lastWidth = width;
               lastHeight = height;
-              window.requestAnimationFrame(triggerRedraw);
+              ownerWin.requestAnimationFrame(triggerRedraw);
             }
           }
         }
       });
-      resizeObserver.observe(containerRef.current);
+      resizeObserver.observe(containerEl);
     }
 
     // Synchronisation immédiate des coordonnées DOM lors de toute interaction ou redimensionnement
@@ -92,116 +96,29 @@ export function useChessBoard<T extends BoardApi = BoardApi>(
       }
     };
 
-    const containerEl = containerRef.current;
     containerEl.addEventListener('pointerdown', clearBounds, true);
     containerEl.addEventListener('mousedown', clearBounds, true);
     containerEl.addEventListener('touchstart', clearBounds, true);
 
-    window.addEventListener('scroll', clearBounds, {
+    ownerWin.addEventListener('scroll', clearBounds, {
       capture: true,
       passive: true,
     });
-    window.addEventListener('resize', clearBounds, { passive: true });
-    document.addEventListener('scroll', clearBounds, {
+    ownerWin.addEventListener('resize', clearBounds, { passive: true });
+    ownerDoc.addEventListener('scroll', clearBounds, {
       capture: true,
       passive: true,
     });
-
-    // Relai d'événements et synchronisation des coordonnées lorsque le plateau est dans une iFrame (ex: Gutenberg canvas)
-    const doc = containerRef.current.ownerDocument;
-    let forwardEvent: ((_e: MouseEvent | TouchEvent) => void) | null = null;
-    let win: Window | null = null;
-
-    if (doc && doc !== document) {
-      forwardEvent = (e: MouseEvent | TouchEvent) => {
-        if ((e as unknown as { __isForwarded?: boolean }).__isForwarded) {
-          return;
-        }
-        if (e.type.startsWith('touch')) {
-          try {
-            const touchEvent = e as TouchEvent;
-            const touch = touchEvent.touches[0] || touchEvent.changedTouches[0];
-            const eventCopy = new window.MouseEvent(
-              e.type === 'touchmove' ? 'mousemove' : 'mouseup',
-              {
-                bubbles: true,
-                cancelable: true,
-                view: window,
-                clientX: touch ? touch.clientX : 0,
-                clientY: touch ? touch.clientY : 0,
-                button: 0,
-                buttons: 1,
-              }
-            );
-            (eventCopy as unknown as { __isForwarded?: boolean }).__isForwarded = true;
-            document.dispatchEvent(eventCopy);
-          } catch {}
-          return;
-        }
-
-        const mouseEvent = e as MouseEvent;
-        const eventCopy = new window.MouseEvent(mouseEvent.type, {
-          bubbles: true,
-          cancelable: true,
-          view: window,
-          clientX: mouseEvent.clientX,
-          clientY: mouseEvent.clientY,
-          screenX: mouseEvent.screenX,
-          screenY: mouseEvent.screenY,
-          button: mouseEvent.button,
-          buttons: mouseEvent.buttons,
-          ctrlKey: mouseEvent.ctrlKey,
-          shiftKey: mouseEvent.shiftKey,
-          altKey: mouseEvent.altKey,
-          metaKey: mouseEvent.metaKey,
-        });
-        (eventCopy as unknown as { __isForwarded?: boolean }).__isForwarded = true;
-        document.dispatchEvent(eventCopy);
-      };
-
-      doc.addEventListener('mousemove', forwardEvent as EventListener, true);
-      doc.addEventListener('mouseup', forwardEvent as EventListener, true);
-      doc.addEventListener('touchmove', forwardEvent as EventListener, true);
-      doc.addEventListener('touchend', forwardEvent as EventListener, true);
-      doc.addEventListener('scroll', clearBounds, {
-        capture: true,
-        passive: true,
-      });
-
-      win = doc.defaultView;
-      if (win && win !== window) {
-        win.addEventListener('resize', clearBounds);
-      }
-    }
 
     return () => {
-      if (containerEl) {
-        containerEl.removeEventListener(
-          'pointerdown',
-          clearBounds,
-          true
-        );
-        containerEl.removeEventListener('mousedown', clearBounds, true);
-        containerEl.removeEventListener(
-          'touchstart',
-          clearBounds,
-          true
-        );
-      }
-      window.removeEventListener('scroll', clearBounds, { capture: true });
-      window.removeEventListener('resize', clearBounds);
-      document.removeEventListener('scroll', clearBounds, { capture: true });
+      containerEl.removeEventListener('pointerdown', clearBounds, true);
+      containerEl.removeEventListener('mousedown', clearBounds, true);
+      containerEl.removeEventListener('touchstart', clearBounds, true);
 
-      if (doc && forwardEvent) {
-        doc.removeEventListener('mousemove', forwardEvent as EventListener, true);
-        doc.removeEventListener('mouseup', forwardEvent as EventListener, true);
-        doc.removeEventListener('touchmove', forwardEvent as EventListener, true);
-        doc.removeEventListener('touchend', forwardEvent as EventListener, true);
-        doc.removeEventListener('scroll', clearBounds, { capture: true });
-      }
-      if (win && win !== window) {
-        win.removeEventListener('resize', clearBounds);
-      }
+      ownerWin.removeEventListener('scroll', clearBounds, { capture: true });
+      ownerWin.removeEventListener('resize', clearBounds);
+      ownerDoc.removeEventListener('scroll', clearBounds, { capture: true });
+
       if (resizeObserver) {
         resizeObserver.disconnect();
       }
